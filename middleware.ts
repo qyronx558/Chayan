@@ -1,17 +1,18 @@
 import { auth } from "@/lib/auth"
+import { isAdmin } from "@/lib/roles"
 import { NextResponse } from "next/server"
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
   const isLoggedIn = !!req.auth
-  const isAdmin = req.auth?.user?.role === "ADMIN"
+  const isAdminUser = isAdmin(req.auth?.user?.role)
 
   // Protected admin routes
   if (pathname.startsWith("/admin") && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.url))
   }
 
-  if (pathname.startsWith("/admin") && !isAdmin) {
+  if (pathname.startsWith("/admin") && !isAdminUser) {
     return NextResponse.redirect(new URL("/", req.url))
   }
 
