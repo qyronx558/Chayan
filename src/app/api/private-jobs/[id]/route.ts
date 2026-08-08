@@ -36,6 +36,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
+    const existing = await prisma.privateJob.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "Private job not found" }, { status: 404 })
+    }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     const { companyId, ...rest } = validation.data
     const job = await prisma.privateJob.update({
       where: { id },
@@ -62,6 +70,14 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     const { id } = await params
+    const existing = await prisma.privateJob.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "Private job not found" }, { status: 404 })
+    }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     await prisma.privateJob.delete({ where: { id } })
 
     return NextResponse.json({ success: true, data: null })

@@ -23,6 +23,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!existing) {
       return NextResponse.json({ success: false, error: "Blog post not found" }, { status: 404 })
     }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
 
     const slugPost = await prisma.blogPost.findFirst({
       where: { slug: postSlug, id: { not: slug } },
@@ -66,6 +69,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const existing = await prisma.blogPost.findUnique({ where: { id: slug } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Blog post not found" }, { status: 404 })
+    }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
     await prisma.blogPost.delete({ where: { id: slug } })

@@ -28,6 +28,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
+import { isAdmin } from "@/lib/roles"
 import { Plus, Pencil, Trash2, Search } from "lucide-react"
 
 interface Department { id: string; name: string }
@@ -49,7 +50,7 @@ export default function AdminSyllabus() {
 
   const { data: syllabusData, isLoading } = useQuery<{ success: boolean; data: SyllabusItem[]; pagination: { page: number; totalPages: number; total: number } }>({
     queryKey: ["admin-syllabus", page, search],
-    queryFn: () => fetcher(`/api/syllabus?page=${page}&limit=10&search=${search}`),
+    queryFn: () => fetcher(`/api/syllabus?page=${page}&limit=10&search=${search}&scope=mine`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({ queryKey: ["admin-departments"], queryFn: () => fetcher("/api/departments") })
@@ -79,7 +80,7 @@ export default function AdminSyllabus() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
 
   const syllabusList = syllabusData?.data || []
   const pagination = syllabusData?.pagination
@@ -134,7 +135,7 @@ export default function AdminSyllabus() {
                     <TableRow key={s.id}>
                       <TableCell className="max-w-[250px] truncate font-medium">{s.title}</TableCell>
                       <TableCell>{s.department.name}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-gray-500">{s.subjects || "—"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate text-gray-500">{s.subjects || "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â"}</TableCell>
                       <TableCell><Badge variant={s.status === "PUBLISHED" ? "default" : "secondary"}>{s.status || "Draft"}</Badge></TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">

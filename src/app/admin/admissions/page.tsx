@@ -28,6 +28,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
+import { isAdmin } from "@/lib/roles"
 import { Plus, Pencil, Trash2, Search } from "lucide-react"
 
 interface Department { id: string; name: string }
@@ -49,7 +50,7 @@ export default function AdminAdmissions() {
 
   const { data: admissionsData, isLoading } = useQuery<{ success: boolean; data: AdmissionItem[]; pagination: { page: number; totalPages: number; total: number } }>({
     queryKey: ["admin-admissions", page, search],
-    queryFn: () => fetcher(`/api/admissions?page=${page}&limit=10&search=${search}`),
+    queryFn: () => fetcher(`/api/admissions?page=${page}&limit=10&search=${search}&scope=mine`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({ queryKey: ["admin-departments"], queryFn: () => fetcher("/api/departments") })
@@ -79,7 +80,7 @@ export default function AdminAdmissions() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
 
   const admissions = admissionsData?.data || []
   const pagination = admissionsData?.pagination

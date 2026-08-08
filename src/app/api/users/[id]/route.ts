@@ -12,7 +12,7 @@ export async function GET(
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "ADMIN") {
+    if (session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
@@ -55,7 +55,7 @@ export async function PUT(
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "ADMIN") {
+    if (session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
@@ -63,6 +63,9 @@ export async function PUT(
     const existing = await prisma.user.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
+    }
+    if (existing.role === "SUPER_ADMIN") {
+      return NextResponse.json({ success: false, error: "Super admin cannot be modified" }, { status: 403 })
     }
 
     const body = await request.json()
@@ -104,6 +107,38 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to update user" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+    if (session.user.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
+    const { id } = await params
+    const existing = await prisma.user.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
+    }
+    if (existing.role === "SUPER_ADMIN") {
+      return NextResponse.json({ success: false, error: "Super admin cannot be deleted" }, { status: 403 })
+    }
+
+    await prisma.user.delete({ where: { id } })
+    return NextResponse.json({ success: true, message: "User deleted" })
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : "Failed to delete user" },
       { status: 500 }
     )
   }

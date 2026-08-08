@@ -26,6 +26,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
+import { isAdmin } from "@/lib/roles"
 import { ImageUpload } from "@/components/admin/ImageUpload"
 import { RichEditor } from "@/components/admin/RichEditor"
 import {
@@ -63,7 +64,7 @@ export default function AdminBlog() {
 
   const { data: postsData, isLoading } = useQuery<{ success: boolean; data: BlogItem[]; pagination: { page: number; totalPages: number; total: number } }>({
     queryKey: ["admin-blog", page, search],
-    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}`),
+    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}&scope=mine`),
   })
 
   const { data: categoriesData } = useQuery<{ success: boolean; data: BlogCategoryItem[] }>({
@@ -97,7 +98,7 @@ export default function AdminBlog() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
 
   const posts = postsData?.data || []
   const pagination = postsData?.pagination

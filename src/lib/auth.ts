@@ -6,7 +6,7 @@ import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
 import type { DefaultSession } from "next-auth"
 
-type Role = "USER" | "ADMIN"
+type Role = "USER" | "ADMIN" | "SUPER_ADMIN"
 
 declare module "next-auth" {
   interface User {

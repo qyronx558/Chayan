@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,6 +17,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Record<string, unknown> = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" as const } },
@@ -69,6 +75,7 @@ export async function POST(request: NextRequest) {
       data: {
         ...rest,
         company: { connect: { id: companyId } },
+        createdBy: { connect: { id: session.user.id } },
       },
     })
 

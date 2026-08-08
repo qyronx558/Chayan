@@ -241,7 +241,7 @@ export function Header() {
                         </span>
                       </div>
                     </DropdownMenuLabel>
-                    {session.user.role === "ADMIN" && (
+                    {(session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN") && (
                       <>
                         <DropdownMenuItem asChild>
                           <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer">

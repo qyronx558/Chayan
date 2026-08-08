@@ -28,6 +28,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, getStatusColor, slugify } from "@/lib/utils"
+import { isAdmin } from "@/lib/roles"
 import { Plus, Pencil, Trash2, Search } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -52,7 +53,7 @@ export default function AdminJobs() {
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: JobItem[]; pagination: { page: number; totalPages: number; total: number } }>({
     queryKey: ["admin-jobs", page, search, statusFilter],
-    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}`),
+    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}&scope=mine`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({
@@ -101,7 +102,7 @@ export default function AdminJobs() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
 
   const jobs = jobsData?.data || []
   const pagination = jobsData?.pagination

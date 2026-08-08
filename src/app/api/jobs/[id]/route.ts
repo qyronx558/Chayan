@@ -46,6 +46,9 @@ export async function PUT(
     if (!existing) {
       return NextResponse.json({ success: false, error: "Job not found" }, { status: 404 })
     }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
 
     const body = await request.json()
     const validation = jobSchema.safeParse(body)
@@ -138,6 +141,9 @@ export async function DELETE(
     const existing = await prisma.job.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Job not found" }, { status: 404 })
+    }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
     await prisma.job.delete({ where: { id } })

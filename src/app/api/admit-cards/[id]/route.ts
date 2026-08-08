@@ -46,6 +46,9 @@ export async function PUT(
     if (!existing) {
       return NextResponse.json({ success: false, error: "Admit card not found" }, { status: 404 })
     }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
 
     const body = await request.json()
     const validation = admitCardSchema.safeParse(body)
@@ -98,6 +101,9 @@ export async function DELETE(
     const existing = await prisma.admitCard.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Admit card not found" }, { status: 404 })
+    }
+    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
     await prisma.admitCard.delete({ where: { id } })

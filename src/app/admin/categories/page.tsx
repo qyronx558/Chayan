@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
+import { isAdmin } from "@/lib/roles"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 
 interface CategoryItem {
@@ -66,7 +67,7 @@ export default function AdminCategories() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
 
   const categories = catsData?.data || []
 
@@ -112,7 +113,7 @@ export default function AdminCategories() {
                   <TableRow key={cat.id}>
                     <TableCell className="font-medium">{cat.name}</TableCell>
                     <TableCell className="text-gray-500">{cat.slug}</TableCell>
-                    <TableCell className="max-w-[200px] truncate text-gray-500">{cat.description || "—"}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-gray-500">{cat.description || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}</TableCell>
                     <TableCell>{formatDate(cat.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">

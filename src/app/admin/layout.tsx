@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/AdminSidebar"
 import { AdminHeader } from "@/components/admin/AdminHeader"
 import { Skeleton } from "@/components/ui/skeleton"
+import { isAdmin } from "@/lib/roles"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
@@ -13,12 +14,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (status === "loading") return
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdmin(session.user.role)) {
       router.push("/login")
     }
   }, [session, status, router])
 
-  if (status === "loading" || !session || session.user.role !== "ADMIN") {
+  if (status === "loading" || !session || !isAdmin(session.user.role)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="space-y-4">

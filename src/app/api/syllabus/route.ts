@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +16,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Prisma.SyllabusWhereInput = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
 
     if (search) {
       where.OR = [
@@ -81,6 +87,7 @@ export async function POST(request: NextRequest) {
       ...(pdfUrl !== undefined && pdfUrl !== null ? { pdfUrl } : {}),
       ...(subjects !== undefined && subjects !== null ? { subjects } : {}),
       ...(status !== undefined && status !== null ? { status } : {}),
+      createdBy: { connect: { id: session.user.id } },
     }
 
     const syllabus = await prisma.syllabus.create({ data })

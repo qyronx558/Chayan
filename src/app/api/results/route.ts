@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { resultSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { notifyUsers } from "@/lib/notifications"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,6 +17,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Prisma.ResultWhereInput = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
 
     if (search) {
       where.OR = [
@@ -82,6 +88,7 @@ export async function POST(request: NextRequest) {
       ...(pdfUrl !== undefined && pdfUrl !== null ? { pdfUrl } : {}),
       ...(resultDate !== undefined && resultDate !== null ? { resultDate } : {}),
       ...(status !== undefined && status !== null ? { status } : {}),
+      createdBy: { connect: { id: session.user.id } },
     }
 
     const result = await prisma.result.create({ data })

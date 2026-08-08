@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { jobSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { notifyUsers } from "@/lib/notifications"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +22,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Prisma.JobWhereInput = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
 
     if (search) {
       where.OR = [
@@ -159,6 +165,7 @@ export async function POST(request: NextRequest) {
       ...(startDate !== undefined && startDate !== null ? { startDate } : {}),
       ...(lastDate !== undefined && lastDate !== null ? { lastDate } : {}),
       status: status || "ACTIVE",
+      createdBy: { connect: { id: session.user.id } },
     }
 
     const job = await prisma.job.create({ data })

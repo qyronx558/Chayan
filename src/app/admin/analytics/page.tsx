@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { fetcher } from "@/lib/api"
+import { isSuperAdmin } from "@/lib/roles"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,7 +41,7 @@ export default function AdminAnalytics() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isSuperAdmin(session.user.role)) { router.push("/login"); return null }
 
   const data = analyticsData?.data
   if (!data) return <p className="text-center text-gray-500">No analytics data available</p>

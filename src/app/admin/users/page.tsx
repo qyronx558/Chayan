@@ -21,6 +21,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate } from "@/lib/utils"
+import { isSuperAdmin } from "@/lib/roles"
 import { Search, Shield, ShieldOff, Trash2 } from "lucide-react"
 
 interface UserItem {
@@ -54,12 +55,16 @@ export default function AdminUsers() {
   })
 
   if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || session.user.role !== "ADMIN") { router.push("/login"); return null }
+  if (!session || !isSuperAdmin(session.user.role)) { router.push("/login"); return null }
 
   const users = usersData?.data || []
   const pagination = usersData?.pagination
 
   const toggleRole = (user: UserItem) => {
+    if (user.role === "SUPER_ADMIN") {
+      toast("Super admins cannot be demoted", "destructive")
+      return
+    }
     const newRole = user.role === "ADMIN" ? "USER" : "ADMIN"
     updateRoleMutation.mutate({ id: user.id, role: newRole })
   }
@@ -97,7 +102,11 @@ export default function AdminUsers() {
                       <TableCell className="font-medium">{user.name || "N/A"}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
+                        {user.role === "SUPER_ADMIN" ? (
+                          <Badge className="bg-violet-100 text-violet-700">SUPER_ADMIN</Badge>
+                        ) : (
+                          <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
+                        )}
                       </TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell className="text-gray-500">
@@ -109,16 +118,17 @@ export default function AdminUsers() {
                             variant="ghost"
                             size="icon"
                             onClick={() => toggleRole(user)}
-                            disabled={user.id === session.user.id}
-                            title={user.role === "ADMIN" ? "Remove admin" : "Make admin"}
+                            disabled={user.id === session.user.id || user.role === "SUPER_ADMIN"}
+                            title={user.role === "ADMIN" ? "Remove admin" : user.role === "SUPER_ADMIN" ? "Super admin cannot be changed" : "Make admin"}
                           >
-                            {user.role === "ADMIN" ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                            {user.role === "ADMIN" ? <ShieldOff className="h-4 w-4" /> : user.role === "SUPER_ADMIN" ? <Shield className="h-4 w-4 text-violet-500" /> : <Shield className="h-4 w-4" />}
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setDeleteId(user.id)}
-                            disabled={user.id === session.user.id}
+                            disabled={user.id === session.user.id || user.role === "SUPER_ADMIN"}
+                            title={user.role === "SUPER_ADMIN" ? "Super admin cannot be deleted" : "Delete user"}
                           >
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>

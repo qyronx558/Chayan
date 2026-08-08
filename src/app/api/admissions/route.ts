@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { admissionSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +16,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Prisma.AdmissionWhereInput = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
 
     if (search) {
       where.OR = [
@@ -83,6 +89,7 @@ export async function POST(request: NextRequest) {
       ...(applicationFee !== undefined && applicationFee !== null ? { applicationFee } : {}),
       ...(pdfUrl !== undefined && pdfUrl !== null ? { pdfUrl } : {}),
       ...(status !== undefined && status !== null ? { status } : {}),
+      createdBy: { connect: { id: session.user.id } },
     }
 
     const admission = await prisma.admission.create({ data })

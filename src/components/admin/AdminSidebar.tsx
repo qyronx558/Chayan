@@ -2,7 +2,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
+import { isSuperAdmin } from "@/lib/roles"
 import { Button } from "@/components/ui/button"
 import {
   LayoutDashboard,
@@ -24,6 +26,8 @@ import {
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
+const superAdminOnlyLinks = ["/admin/users", "/admin/analytics", "/admin/import-data"]
+
 const sidebarLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/jobs", label: "Jobs", icon: Briefcase },
@@ -34,12 +38,19 @@ const sidebarLinks = [
   { href: "/admin/admissions", label: "Admissions", icon: GraduationCap },
   { href: "/admin/syllabus", label: "Syllabus", icon: Book },
   { href: "/admin/categories", label: "Categories", icon: Folder },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/users", label: "Users", icon: Users, superOnly: true },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, superOnly: true },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
-  { href: "/admin/import-data", label: "Import Data", icon: Briefcase },
+  { href: "/admin/import-data", label: "Import Data", icon: Briefcase, superOnly: true },
   { href: "/admin/logs", label: "Logs", icon: List },
 ]
+
+interface SidebarLink {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  superOnly?: boolean
+}
 
 interface AdminSidebarProps {
   open: boolean
@@ -49,6 +60,10 @@ interface AdminSidebarProps {
 export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const { data: session } = useSession()
+  const visibleLinks = (sidebarLinks as SidebarLink[]).filter(
+    (link) => !link.superOnly || isSuperAdmin(session?.user?.role)
+  )
 
   return (
     <>
@@ -93,7 +108,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-          {sidebarLinks.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = link.icon
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/")
             return (

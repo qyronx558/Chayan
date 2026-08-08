@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { isSuperAdmin } from "@/lib/roles"
 import { Briefcase, IdCard, FileText, GraduationCap, Book, Key, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -35,9 +38,14 @@ const importers: ImportConfig[] = [
 const iconMap: Record<string, React.ElementType> = { Briefcase, IdCard, FileText, GraduationCap, Book, Key }
 
 export default function ImportDataPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [results, setResults] = useState<Record<string, FetchResult>>({})
   const [globalLoading, setGlobalLoading] = useState(false)
+
+  if (status === "loading") return null
+  if (!session || !isSuperAdmin(session.user.role)) { router.push("/login"); return null }
 
   async function handleImport(type: string) {
     setLoading(type)

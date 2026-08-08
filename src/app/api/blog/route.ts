@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { blogPostSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
+import { contentScope } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: Prisma.BlogPostWhereInput = {}
+
+    if (searchParams.get("scope") === "mine") {
+      const session = await auth()
+      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    }
 
     if (search) {
       where.OR = [
@@ -90,8 +96,9 @@ export async function POST(request: NextRequest) {
         ...(author !== undefined && author !== null ? { author } : {}),
         ...(image !== undefined && image !== null ? { image } : {}),
         ...(tags !== undefined && tags !== null ? { tags } : {}),
-        ...(categoryId !== undefined && categoryId !== null ? { categoryId } : {}),
+        ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
         published,
+        createdBy: { connect: { id: session.user.id } },
       },
     })
 

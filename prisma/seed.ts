@@ -91,8 +91,8 @@ async function main() {
   // ── Admin User ──
   if ((await prisma.user.count()) === 0) {
     const pw = await bcrypt.hash('Admin@123', 12);
-    await prisma.user.create({ data: { name: 'Admin', email: 'admin@chayan.com', password: pw, role: Role.ADMIN, emailVerified: new Date() } });
-    await prisma.adminUser.create({ data: { name: 'Super Admin', email: 'admin@chayan.com', password: pw, role: 'ADMIN' } });
+    await prisma.user.create({ data: { name: 'Admin', email: 'admin@chayan.com', password: pw, role: Role.SUPER_ADMIN, emailVerified: new Date() } });
+    await prisma.adminUser.create({ data: { name: 'Super Admin', email: 'admin@chayan.com', password: pw, role: 'SUPER_ADMIN' } });
     console.log('  admin user seeded');
   }
 
