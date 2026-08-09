@@ -24,7 +24,7 @@ export function LatestAdmitCards() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/admit-cards?limit=8")
+    fetch("/api/admit-cards?limit=6")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -56,8 +56,8 @@ export function LatestAdmitCards() {
         />
 
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
           </div>
@@ -66,7 +66,7 @@ export function LatestAdmitCards() {
             <p className="text-gray-500">No admit cards released yet.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {admitCards.map((card) => (
               <ContentCard
                 key={card.id}
@@ -78,13 +78,13 @@ export function LatestAdmitCards() {
                 meta={card.examDate ? [{ icon: Calendar, text: `Exam: ${formatDate(card.examDate)}` }] : []}
                 href={`/admit-card/${card.slug}`}
                 ctaLabel="Get Admit Card"
-                footer={
-                  <div className="flex items-center gap-1">
-                    <BookmarkButton admitCardId={card.id} />
-                    <Button size="sm" className="h-7 gap-1 px-2 text-[11px]" asChild>
+footer={
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <BookmarkButton admitCardId={card.id} className="h-8 w-8 border border-gray-200 bg-white text-gray-500 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600" />
+                    <Button size="sm" className="h-8 shrink-0 gap-1.5 px-3 text-xs font-semibold" asChild>
                       <a href={card.downloadUrl || `/admit-card/${card.slug}`} target={card.downloadUrl ? "_blank" : undefined} rel="noopener noreferrer">
                         <Download className="h-3.5 w-3.5" />
-                        Download
+                        Download Admit Card
                       </a>
                     </Button>
                   </div>

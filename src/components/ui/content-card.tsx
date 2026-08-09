@@ -99,10 +99,10 @@ export function ContentCard({
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3 p-5 pt-4">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 p-5 pt-4">
           <Link
             href={href}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#1e3a5f] hover:to-blue-700 hover:text-white group-hover:bg-gradient-to-r group-hover:from-[#1e3a5f] group-hover:to-blue-700 group-hover:text-white"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#1e3a5f] hover:to-blue-700 hover:text-white group-hover:bg-gradient-to-r group-hover:from-[#1e3a5f] group-hover:to-blue-700 group-hover:text-white"
           >
             {ctaLabel}
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
