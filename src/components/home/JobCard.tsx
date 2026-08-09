@@ -108,12 +108,15 @@ export function JobCard({
         href={`/apply/${slug}`}
         ctaLabel="Apply Now"
         footer={
-          <div className="flex items-center gap-1">
-            <BookmarkButton jobId={id} />
+          <div className="flex items-center gap-2">
+            <BookmarkButton
+              jobId={id}
+              className="h-8 w-8 border border-gray-200 bg-white text-gray-500 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+            />
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="h-7 w-7 text-gray-300 hover:text-blue-500"
+              className="h-8 w-8 border-gray-200 bg-white text-gray-500 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
               onClick={handleShare}
               disabled={isSharing}
               aria-label="Share"

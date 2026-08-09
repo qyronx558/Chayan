@@ -56,7 +56,7 @@ export function LatestAdmitCards() {
         />
 
         {loading ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
@@ -66,7 +66,7 @@ export function LatestAdmitCards() {
             <p className="text-gray-500">No admit cards released yet.</p>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {admitCards.map((card) => (
               <ContentCard
                 key={card.id}
