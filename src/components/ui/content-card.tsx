@@ -119,7 +119,6 @@ export function ContentCardSkeleton() {
     <Card className="border-gray-200 bg-white">
       <CardContent className="p-0">
         <div className="flex items-center gap-2.5 p-5 pb-3">
-          <div className="h-10 w-10 animate-pulse rounded-xl bg-gray-100" />
           <div className="h-5 w-20 animate-pulse rounded-full bg-gray-100" />
           <div className="h-5 w-14 animate-pulse rounded-full bg-gray-100" />
         </div>
