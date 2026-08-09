@@ -80,7 +80,6 @@ export function LatestPrivateJobs({ className }: { className?: string }) {
                 badge={<span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">{job.company.name}</span>}
                 statusBadge={<Badge variant="secondary" className="px-1.5 py-0.5 text-[10px]">{job.type.replace("_", " ")}</Badge>}
                 title={job.title}
-                description={job.description}
                 meta={[
                   ...(job.location ? [{ icon: MapPin, text: job.location }] : []),
                   ...(job.salary ? [{ icon: IndianRupee, text: job.salary }] : []),
