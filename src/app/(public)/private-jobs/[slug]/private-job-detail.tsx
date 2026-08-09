@@ -79,15 +79,6 @@ export function PrivateJobDetail({ job }: { job: PrivateJob }) {
         )}
       </div>
 
-      {job.description && (
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">Job Description</h2>
-            <div className="prose prose-gray max-w-none" dangerouslySetInnerHTML={{ __html: job.description }} />
-          </CardContent>
-        </Card>
-      )}
-
       {job.company.description && (
         <Card>
           <CardContent className="p-6">
