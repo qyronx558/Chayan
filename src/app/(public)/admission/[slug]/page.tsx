@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -65,10 +64,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
         ]}
         className="mb-6"
       />
-
-      <AdBanner format="horizontal" className="mb-8" />
-
-      <DocumentDetail
+<DocumentDetail
         kind="admission"
         title={admission.title}
         department={admission.department.name}
@@ -94,8 +90,6 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
           meta: ra.lastDate ? `Last Date: ${formatDate(ra.lastDate)}` : null,
         }))}
       />
-
-      <AdBanner format="horizontal" className="mt-8" />
-    </div>
+</div>
   )
 }

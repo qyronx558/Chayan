@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -65,10 +64,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
         ]}
         className="mb-6"
       />
-
-      <AdBanner format="horizontal" className="mb-8" />
-
-      <DocumentDetail
+<DocumentDetail
         kind="syllabus"
         title={syllabus.title}
         department={syllabus.department.name}
@@ -90,11 +86,9 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
           href: `/syllabus/${rs.slug}`,
           title: rs.title,
           department: rs.department.name,
-          meta: rs.subjects ? `${rs.subjects.split("\n")[0].slice(0, 80)}${rs.subjects.includes("\n") ? "…" : ""}` : null,
+          meta: rs.subjects ? `${rs.subjects.split("\n")[0].slice(0, 80)}${rs.subjects.includes("\n") ? "â€¦" : ""}` : null,
         }))}
       />
-
-      <AdBanner format="horizontal" className="mt-8" />
-    </div>
+</div>
   )
 }

@@ -7,7 +7,6 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Eye, Clock3, Tag, FileText } from "lucide-react"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { ShareButtons } from "@/components/blog/ShareButtons"
 import { ViewTracker } from "@/components/blog/ViewTracker"
 import { ReadingProgress } from "@/components/blog/ReadingProgress"
@@ -110,10 +109,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         ]}
         className="mb-6"
       />
-
-      <AdBanner slot="blogTop" format="horizontal" className="mb-8" />
-
-      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+<div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <aside className="order-2 lg:order-1">
           <div className="lg:sticky lg:top-24">
             <TableOfContents />
@@ -168,22 +164,16 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             {post.excerpt}
           </p>
         )}
-
-        <AdBanner slot="blogInArticle" format="horizontal" />
-
-        {post.content && (
+{post.content && (
           <div className={`${BLOG_PROSE_CLASSES} mt-6`}>
             <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
         )}
-
-        <AdBanner slot="blogBottom" format="horizontal" className="mt-8" />
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-6">
+<div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-6">
           <ShareButtons title={post.title} url={`${getBaseUrl()}/blog/${post.slug}`} />
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <Tag className="h-3.5 w-3.5" />
-            {tags.length > 0 ? tags.slice(0, 3).join(" · ") : "Career Guidance"}
+            {tags.length > 0 ? tags.slice(0, 3).join(" Â· ") : "Career Guidance"}
           </div>
         </div>
 
@@ -212,7 +202,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     {rp.excerpt && <p className="mb-3 text-sm text-gray-600 line-clamp-2">{rp.excerpt}</p>}
                     <p className="flex items-center gap-1.5 text-xs text-gray-500">
                       <Calendar className="h-3.5 w-3.5" /> {formatDate(rp.createdAt)}
-                      <span className="mx-1">•</span>
+                      <span className="mx-1">â€¢</span>
                       <Clock3 className="h-3.5 w-3.5" /> {Math.max(1, Math.round((rp.content ? rp.content.replace(/<[^>]+>/g, " ").trim().split(/\s+/).length : 0) / 200))} min read
                     </p>
                   </CardContent>

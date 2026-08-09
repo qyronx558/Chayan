@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -76,10 +75,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
         ]}
         className="mb-6"
       />
-
-      <AdBanner format="horizontal" className="mb-8" />
-
-      <DocumentDetail
+<DocumentDetail
         kind="result"
         title={result.title}
         department={result.department.name}
@@ -103,8 +99,6 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
           meta: rr.resultDate ? `Result Date: ${formatDate(rr.resultDate)}` : null,
         }))}
       />
-
-      <AdBanner format="horizontal" className="mt-8" />
-    </div>
+</div>
   )
 }

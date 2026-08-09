@@ -3,7 +3,6 @@ import { HeroSlider } from "@/components/home/HeroSlider"
 import { SearchBar } from "@/components/home/SearchBar"
 import { QuickLinks } from "@/components/home/QuickLinks"
 import { LatestJobs } from "@/components/home/LatestJobs"
-import { AdBanner } from "@/components/ads/AdBanner"
 
 const LatestResults = dynamic(() => import("@/components/home/LatestResults").then(m => ({ default: m.LatestResults })))
 const LatestAdmitCards = dynamic(() => import("@/components/home/LatestAdmitCards").then(m => ({ default: m.LatestAdmitCards })))
@@ -22,28 +21,22 @@ export default function HomePage() {
       <HeroSlider />
       <SearchBar />
       <QuickLinks />
-      <AdBanner slot="homeTop" format="horizontal" />
-      <LatestJobs />
-      <AdBanner slot="homeMid" format="horizontal" />
-      <div className="container mx-auto px-4">
+<LatestJobs />
+<div className="container mx-auto px-4">
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <div className="space-y-16">
             <LatestResults />
-            <AdBanner slot="homeMid" format="horizontal" />
-            <LatestAdmitCards />
+<LatestAdmitCards />
           </div>
           <div className="space-y-8">
             <TrendingNotifications />
-            <AdBanner slot="sidebar" format="rectangle" />
-          </div>
+</div>
         </div>
       </div>
       <JobsByQualification />
-      <AdBanner slot="homeBottom" format="horizontal" />
-      <JobsByState />
+<JobsByState />
       <LatestPrivateJobs />
-      <AdBanner slot="homeBottom" format="horizontal" />
-      <PopularExams />
+<PopularExams />
       <FAQ />
       <LatestBlog />
       <Newsletter />

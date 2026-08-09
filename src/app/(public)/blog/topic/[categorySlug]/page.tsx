@@ -4,7 +4,6 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { FileText, FolderOpen, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
@@ -54,10 +53,7 @@ export default async function BlogCategoryPage({ params }: PageProps) {
         ]}
         className="mb-6"
       />
-
-      <AdBanner slot="listInline" format="horizontal" className="mb-8" />
-
-      <header className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] via-blue-800 to-blue-700 p-6 text-white shadow-lg sm:p-8">
+<header className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] via-blue-800 to-blue-700 p-6 text-white shadow-lg sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-amber-400/10 blur-2xl" />
         <div className="relative flex flex-wrap items-center gap-5">
@@ -101,12 +97,9 @@ export default async function BlogCategoryPage({ params }: PageProps) {
           <p className="text-sm text-gray-500">New {category.name} articles are being written. Check back soon.</p>
         </div>
       )}
-
-      <AdBanner slot="listInline" format="horizontal" className="mt-10" />
-
-      <div className="mt-6 text-center">
+<div className="mt-6 text-center">
         <Link href="/blog" className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">
-          View all blog categories →
+          View all blog categories â†’
         </Link>
       </div>
     </div>

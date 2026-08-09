@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AdBanner } from "@/components/ads/AdBanner"
 
 interface BlogCategory {
   id: string
@@ -104,7 +103,7 @@ export function BlogClient() {
           icon={Newspaper}
           badge="Blog"
           title="Chayan Blog"
-          subtitle="Guides on careers, AI, money, learning and productivity — plus exam and job updates."
+          subtitle="Guides on careers, AI, money, learning and productivity â€” plus exam and job updates."
           count={pagination?.total}
         />
 
@@ -177,10 +176,7 @@ export function BlogClient() {
             </div>
           </section>
         )}
-
-        <AdBanner slot="listInline" format="horizontal" />
-
-        {loading ? (
+{loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i}>

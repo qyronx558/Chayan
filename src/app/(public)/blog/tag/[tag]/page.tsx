@@ -4,7 +4,6 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { Badge } from "@/components/ui/badge"
 import { Tag, Eye, FileText } from "lucide-react"
 
@@ -55,10 +54,7 @@ export default async function BlogTagPage({ params }: PageProps) {
         ]}
         className="mb-6"
       />
-
-      <AdBanner slot="listInline" format="horizontal" className="mb-8" />
-
-      <header className="mb-8 flex items-center gap-4">
+<header className="mb-8 flex items-center gap-4">
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900">
           <Tag className="h-6 w-6 text-blue-600 dark:text-blue-300" />
         </span>
@@ -85,8 +81,6 @@ export default async function BlogTagPage({ params }: PageProps) {
           </Link>
         ))}
       </div>
-
-      <AdBanner slot="listInline" format="horizontal" className="mt-10" />
-    </div>
+</div>
   )
 }
