@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Search, Loader2, AlertCircle, Filter, X } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { Search, AlertCircle, Filter, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -36,13 +37,14 @@ interface PaginationData {
 }
 
 export function JobsClient() {
+  const searchParams = useSearchParams()
   const [jobs, setJobs] = useState<JobData[]>([])
   const [pagination, setPagination] = useState<PaginationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [search, setSearch] = useState(searchParams.get("search") ?? "")
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") ?? "")
   const [page, setPage] = useState(1)
 
   const [categories, setCategories] = useState<FilterOption[]>([])
@@ -172,41 +174,28 @@ export function JobsClient() {
           )}
         </div>
 
-        <div className={`mb-6 flex-col gap-4 sm:flex-row ${showFilters ? "flex" : "hidden sm:flex"}`}>
-          <select
-            value={selectedCategory}
-            onChange={(e) => { setSelectedCategory(e.target.value); setPage(1) }}
-            className="h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <select
-            value={selectedDepartment}
-            onChange={(e) => { setSelectedDepartment(e.target.value); setPage(1) }}
-            className="h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-          <select
-            value={selectedState}
-            onChange={(e) => { setSelectedState(e.target.value); setPage(1) }}
-            className="h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="">All States</option>
-            {states.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
+        <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
+          {[
+            { value: selectedCategory, onChange: (v: string) => { setSelectedCategory(v); setPage(1) }, options: categories, placeholder: "All Categories", key: "category" },
+            { value: selectedDepartment, onChange: (v: string) => { setSelectedDepartment(v); setPage(1) }, options: departments, placeholder: "All Departments", key: "department" },
+            { value: selectedState, onChange: (v: string) => { setSelectedState(v); setPage(1) }, options: states, placeholder: "All States", key: "state" },
+          ].map((f) => (
+            <select
+              key={f.key}
+              value={f.value}
+              onChange={(e) => f.onChange(e.target.value)}
+              className="h-10 w-full min-w-0 truncate rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">{f.placeholder}</option>
+              {f.options.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+          ))}
           <select
             value={selectedStatus}
             onChange={(e) => { setSelectedStatus(e.target.value); setPage(1) }}
-            className="h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+            className="h-10 w-full min-w-0 truncate rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
           >
             <option value="">All Status</option>
             <option value="ACTIVE">Active</option>

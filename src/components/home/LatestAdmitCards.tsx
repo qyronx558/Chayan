@@ -24,7 +24,7 @@ export function LatestAdmitCards() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/admit-cards?limit=9")
+    fetch("/api/admit-cards?limit=8")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -56,8 +56,8 @@ export function LatestAdmitCards() {
         />
 
         {loading ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 9 }).map((_, i) => (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
           </div>
@@ -66,7 +66,7 @@ export function LatestAdmitCards() {
             <p className="text-gray-500">No admit cards released yet.</p>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {admitCards.map((card) => (
               <ContentCard
                 key={card.id}
