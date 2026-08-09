@@ -225,7 +225,6 @@ export function PrivateJobsClient() {
                   badge={<span className="inline-flex max-w-[60%] items-center truncate rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">{job.company.name}</span>}
                   statusBadge={<Badge variant="secondary" className="px-1.5 py-0.5 text-[10px]">{typeLabels[job.type] || job.type}</Badge>}
                   title={job.title}
-                  description={job.description}
                   meta={[
                     ...(job.location ? [{ icon: MapPin, text: job.location }] : []),
                     ...(job.salary ? [{ icon: IndianRupee, text: job.salary }] : []),
