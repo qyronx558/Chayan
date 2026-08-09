@@ -2,16 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import Link from "next/link"
-import { Search, AlertCircle, Download, FileText, Calendar, IndianRupee, X, GraduationCap } from "lucide-react"
+import { Search, AlertCircle, Download, Calendar, IndianRupee, X, GraduationCap } from "lucide-react"
 import { SectionHero } from "@/components/layout/SectionHero"
 import { formatDate } from "@/lib/utils"
+import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface AdmissionData {
   id: string
@@ -112,14 +111,7 @@ export function AdmissionsClient() {
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-5">
-                  <Skeleton className="mb-3 h-5 w-20 rounded-full" />
-                  <Skeleton className="mb-3 h-5 w-3/4" />
-                  <Skeleton className="mb-2 h-4 w-32" />
-                  <Skeleton className="h-10 w-36" />
-                </CardContent>
-              </Card>
+              <ContentCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -154,46 +146,31 @@ export function AdmissionsClient() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="h-full border-gray-200 transition-colors hover:border-teal-300 hover:shadow-md">
-                    <CardHeader>
-                      <Badge variant="secondary" className="mb-2 w-fit text-xs">
-                        {item.department.name}
-                      </Badge>
-                      <CardTitle className="text-base leading-snug">{item.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="mb-4 space-y-2 text-sm text-gray-600">
-                        {item.lastDate && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                            Last Date: {formatDate(item.lastDate)}
-                          </span>
-                        )}
-                        {item.applicationFee && (
-                          <span className="flex items-center gap-1">
-                            <IndianRupee className="h-3.5 w-3.5 text-gray-400" />
-                            Fee: {item.applicationFee}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button asChild variant="default" size="sm">
-                          <Link href={`/admission/${item.slug}`}>
-                            <FileText className="mr-1 h-4 w-4" />
-                            View Details
-                          </Link>
-                        </Button>
-                        {item.pdfUrl && (
-                          <Button asChild variant="outline" size="sm">
-                            <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
-                              <Download className="mr-1 h-4 w-4" />
-                              PDF
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ContentCard
+                  icon={GraduationCap}
+                  iconClassName="from-cyan-600 to-sky-800"
+                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{item.department.name}</Badge>}
+                  statusBadge={<span className="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-[11px] font-semibold text-cyan-700">Admission</span>}
+                  title={item.title}
+                  description={item.description}
+                  meta={[
+                    ...(item.lastDate ? [{ icon: Calendar, text: `Last: ${formatDate(item.lastDate)}`, highlight: true }] : []),
+                    ...(item.startDate ? [{ icon: Calendar, text: `Start: ${formatDate(item.startDate)}` }] : []),
+                    ...(item.applicationFee ? [{ icon: IndianRupee, text: `Fee: ${item.applicationFee}` }] : []),
+                  ]}
+                  href={`/admission/${item.slug}`}
+                  ctaLabel="View Details"
+                  footer={
+                    item.pdfUrl ? (
+                      <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
+                        <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
+                          <Download className="h-3.5 w-3.5" />
+                          PDF
+                        </a>
+                      </Button>
+                    ) : undefined
+                  }
+                />
                 </motion.div>
               ))}
             </div>

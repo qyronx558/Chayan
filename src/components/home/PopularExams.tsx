@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Calendar, ArrowRight, ExternalLink, BookOpen } from "lucide-react"
+import { ArrowRight, ExternalLink, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
+import { SectionHeader } from "@/components/ui/section-header"
 
 interface ExamItem {
   id: string
@@ -75,19 +75,14 @@ export function PopularExams({ className }: { className?: string }) {
   return (
     <section className={cn("py-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Popular Exams</h2>
-            <p className="mt-1 text-sm text-gray-600">Upcoming examination schedules</p>
-          </div>
-          <Link
-            href="/jobs"
-            className="group hidden items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 sm:flex"
-          >
-            View All
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
+        <SectionHeader
+          icon={BookOpen}
+          iconClassName="from-amber-500 to-orange-700"
+          title="Popular Exams"
+          subtitle="Upcoming examination schedules"
+          viewAllHref="/jobs"
+          viewAllLabel="Browse Exams"
+        />
 
         {loading ? (
           <div className="flex gap-5 overflow-x-auto pb-4">
@@ -108,30 +103,29 @@ export function PopularExams({ className }: { className?: string }) {
         ) : (
           <div className="overflow-x-auto pb-4">
             <div className="flex gap-5" style={{ minWidth: "max-content" }}>
-              {exams.map((exam, index) => (
-                <div
-                  key={exam.id}
-                  className="w-72 shrink-0"
-                >
+              {exams.map((exam) => (
+                <div key={exam.id} className="w-72 shrink-0">
                   <Link href={`/jobs?categoryId=${exam.categoryId}`} className="group block">
-                    <Card className="overflow-hidden border-gray-200 transition-all hover:-translate-y-1 hover:shadow-xl">
+                    <Card className="overflow-hidden border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/10">
                       <CardContent className="p-0">
-                        <div className={cn("bg-gradient-to-r p-5 text-white", getGradient(exam.category?.name || exam.name))}>
+                        <div className={cn("relative bg-gradient-to-r p-5 text-white", getGradient(exam.category?.name || exam.name))}>
+                          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                           <Badge variant="secondary" className="mb-2 bg-white/20 text-white hover:bg-white/30">
                             {exam.category?.name || "General"}
                           </Badge>
-                          <h3 className="text-lg font-bold leading-tight">{exam.name}</h3>
+                          <h3 className="line-clamp-2 text-lg font-bold leading-tight">{exam.name}</h3>
                           {exam.description && (
-                            <p className="mt-1 text-sm text-white/80">{exam.description}</p>
+                            <p className="mt-1 line-clamp-2 text-sm text-white/80">{exam.description}</p>
                           )}
                         </div>
-                        <div className="p-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-1 font-medium text-blue-600 group-hover:text-blue-700">
-                              View Jobs
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </span>
-                          </div>
+                        <div className="flex items-center justify-between p-4">
+                          <span className="text-sm font-semibold text-blue-600 transition-colors group-hover:text-blue-700">
+                            View Jobs
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-[#1e3a5f] group-hover:to-blue-700 group-hover:text-white">
+                            Explore
+                            <ExternalLink className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                          </span>
                         </div>
                       </CardContent>
                     </Card>

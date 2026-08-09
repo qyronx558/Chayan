@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowRight, ChevronDown, ChevronUp, Briefcase } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { SectionHeader } from "@/components/ui/section-header"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
 
 interface Job {
@@ -58,23 +59,13 @@ export function LatestJobs({ className }: LatestJobsProps) {
   return (
     <section className={cn("py-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Latest Government Jobs
-            </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Recent job notifications from central and state governments
-            </p>
-          </div>
-          <Link
-            href="/jobs"
-            className="group hidden items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 sm:flex"
-          >
-            View All
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
+        <SectionHeader
+          icon={Briefcase}
+          iconClassName="from-[#1e3a5f] via-blue-800 to-blue-700"
+          title="Latest Government Jobs"
+          subtitle="Recent job notifications from central and state governments"
+          viewAllHref="/jobs"
+        />
 
         {loading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

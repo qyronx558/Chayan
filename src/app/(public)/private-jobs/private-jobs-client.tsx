@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import Link from "next/link"
-import { Search, AlertCircle, Calendar, MapPin, IndianRupee, Briefcase, ExternalLink, X, Building2 } from "lucide-react"
+import { Search, AlertCircle, Calendar, MapPin, IndianRupee, Briefcase, X, Building2 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
-import { Skeleton } from "@/components/ui/skeleton"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { JobRecommendations } from "@/components/jobs/JobRecommendations"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -191,12 +190,7 @@ export function PrivateJobsClient() {
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}><CardContent className="p-5">
-                <Skeleton className="mb-3 h-5 w-24 rounded-full" />
-                <Skeleton className="mb-3 h-5 w-3/4" />
-                <Skeleton className="mb-1 h-4 w-32" />
-                <Skeleton className="h-4 w-24" />
-              </CardContent></Card>
+              <ContentCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -225,40 +219,23 @@ export function PrivateJobsClient() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
                 <motion.div key={job.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-                  <Card className="h-full border-gray-200 bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-2">
-                        <Badge variant="outline" className="text-xs">{typeLabels[job.type]}</Badge>
-                        <BookmarkButton privateJobId={job.id} variant="ghost" />
-                      </div>
-                      <CardTitle className="text-base leading-snug">{job.title}</CardTitle>
-                      <p className="text-sm font-medium text-blue-700">{job.company.name}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="mb-4 space-y-2 text-sm text-gray-600">
-                        {job.location && (
-                          <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-gray-400" />{job.location}</span>
-                        )}
-                        {job.salary && (
-                          <span className="flex items-center gap-1"><IndianRupee className="h-3.5 w-3.5 text-gray-400" />{job.salary}</span>
-                        )}
-                        {job.experience && (
-                          <span className="flex items-center gap-1"><Briefcase className="h-3.5 w-3.5 text-gray-400" />{job.experience}</span>
-                        )}
-                        {job.lastDate && (
-                          <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-gray-400" />Last: {formatDate(job.lastDate)}</span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button asChild variant="default" size="sm">
-                          <Link href={`/private-jobs/${job.slug}`}>
-                            <ExternalLink className="mr-1 h-4 w-4" />
-                            View Details
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ContentCard
+                  icon={Building2}
+                  iconClassName="from-sky-600 to-blue-800"
+                  badge={<span className="inline-flex max-w-[60%] items-center truncate rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">{job.company.name}</span>}
+                  statusBadge={<Badge variant="secondary" className="px-1.5 py-0.5 text-[10px]">{typeLabels[job.type] || job.type}</Badge>}
+                  title={job.title}
+                  description={job.description}
+                  meta={[
+                    ...(job.location ? [{ icon: MapPin, text: job.location }] : []),
+                    ...(job.salary ? [{ icon: IndianRupee, text: job.salary }] : []),
+                    ...(job.experience ? [{ icon: Briefcase, text: job.experience }] : []),
+                    ...(job.lastDate ? [{ icon: Calendar, text: formatDate(job.lastDate) }] : []),
+                  ]}
+                  href={`/private-jobs/${job.slug}`}
+                  ctaLabel="View Details"
+                  footer={<BookmarkButton privateJobId={job.id} />}
+                />
                 </motion.div>
               ))}
             </div>

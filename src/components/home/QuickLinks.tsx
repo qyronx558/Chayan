@@ -6,61 +6,75 @@ import {
   Key,
   BookOpen,
   GraduationCap,
-  ArrowRight,
+  ArrowUpRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Card, CardContent } from "@/components/ui/card"
+import { SectionHeader } from "@/components/ui/section-header"
 
 interface QuickLink {
   title: string
   description: string
   href: string
   icon: React.ReactNode
-  accent: string
+  gradient: string
+  tag: string
+  tagClassName: string
 }
 
 const links: QuickLink[] = [
   {
     title: "Active Jobs",
-    description: "Browse and apply to active government job vacancies",
+    description: "Live vacancies & applications",
     href: "/jobs",
-    icon: <Briefcase className="h-5 w-5" />,
-    accent: "border-l-blue-600",
+    icon: <Briefcase className="h-6 w-6" />,
+    gradient: "from-blue-600 to-indigo-800",
+    tag: "Hot",
+    tagClassName: "bg-amber-100 text-amber-700",
   },
   {
     title: "Admit Cards",
-    description: "Download hall tickets for upcoming examinations",
+    description: "Hall tickets & exam dates",
     href: "/admit-cards",
-    icon: <FileText className="h-5 w-5" />,
-    accent: "border-l-purple-500",
+    icon: <FileText className="h-6 w-6" />,
+    gradient: "from-violet-600 to-purple-800",
+    tag: "Released",
+    tagClassName: "bg-emerald-100 text-emerald-700",
   },
   {
     title: "Exam Results",
-    description: "View recently published exam results",
+    description: "Published result PDFs",
     href: "/results",
-    icon: <Award className="h-5 w-5" />,
-    accent: "border-l-emerald-500",
+    icon: <Award className="h-6 w-6" />,
+    gradient: "from-emerald-600 to-teal-800",
+    tag: "New",
+    tagClassName: "bg-sky-100 text-sky-700",
   },
   {
     title: "Answer Keys",
-    description: "Download answer keys for conducted exams",
+    description: "Key responses & solutions",
     href: "/answer-keys",
-    icon: <Key className="h-5 w-5" />,
-    accent: "border-l-amber-500",
+    icon: <Key className="h-6 w-6" />,
+    gradient: "from-amber-500 to-orange-700",
+    tag: "Updated",
+    tagClassName: "bg-rose-100 text-rose-700",
   },
   {
     title: "Syllabus",
-    description: "Get detailed syllabus for various exams",
+    description: "Exam patterns & courses",
     href: "/syllabus",
-    icon: <BookOpen className="h-5 w-5" />,
-    accent: "border-l-rose-500",
+    icon: <BookOpen className="h-6 w-6" />,
+    gradient: "from-rose-500 to-pink-700",
+    tag: "Guides",
+    tagClassName: "bg-violet-100 text-violet-700",
   },
   {
     title: "Admissions",
-    description: "Check latest admission notifications",
+    description: "University & college entry",
     href: "/admissions",
-    icon: <GraduationCap className="h-5 w-5" />,
-    accent: "border-l-cyan-600",
+    icon: <GraduationCap className="h-6 w-6" />,
+    gradient: "from-cyan-600 to-sky-800",
+    tag: "Open",
+    tagClassName: "bg-orange-100 text-orange-700",
   },
 ]
 
@@ -68,40 +82,53 @@ export function QuickLinks({ className }: { className?: string }) {
   return (
     <section className={cn("py-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            Quick Access
-          </h2>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Everything you need to track your government job applications
-          </p>
-        </div>
+        <SectionHeader
+          icon={Briefcase}
+          title="Quick Access"
+          subtitle="Everything you need to track your government job applications"
+        />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
           {links.map((link, i) => (
-            <div key={link.title} className="animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
-              <Link href={link.href} className="group block">
-                <Card className={cn(
-                  "border-l-[3px] border-gray-200 bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5",
-                  link.accent
-                )}>
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-600 group-hover:text-blue-600 transition-colors">
-                      {link.icon}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                        {link.title}
-                      </h3>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        {link.description}
-                      </p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-gray-300 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-blue-500" />
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
+            <Link
+              key={link.title}
+              href={link.href}
+              className={cn(
+                "group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10",
+                "animate-fade-in-up"
+              )}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-blue-600 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+              <div className="mb-3 flex items-start justify-between">
+                <span
+                  className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110",
+                    link.gradient
+                  )}
+                >
+                  {link.icon}
+                </span>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                    link.tagClassName
+                  )}
+                >
+                  {link.tag}
+                </span>
+              </div>
+
+              <h3 className="text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-700">
+                {link.title}
+              </h3>
+              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-gray-500">{link.description}</p>
+
+              <span className="mt-3 inline-flex items-center gap-0.5 text-[11px] font-semibold text-blue-600 opacity-70 transition-all duration-300 group-hover:gap-1.5 group-hover:opacity-100">
+                Explore <ArrowUpRight className="h-3 w-3" />
+              </span>
+            </Link>
           ))}
         </div>
       </div>

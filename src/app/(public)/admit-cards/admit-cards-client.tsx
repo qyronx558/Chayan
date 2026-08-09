@@ -2,17 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import Link from "next/link"
-import { Search, AlertCircle, Calendar, Download, FileText, X, Ticket } from "lucide-react"
+import { Search, AlertCircle, Calendar, Download, X, Ticket } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { SectionHero } from "@/components/layout/SectionHero"
+import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
 import { formatDate } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface AdmitCardData {
   id: string
@@ -109,14 +108,7 @@ export function AdmitCardsClient() {
 {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-5">
-                  <Skeleton className="mb-3 h-5 w-20 rounded-full" />
-                  <Skeleton className="mb-3 h-5 w-3/4" />
-                  <Skeleton className="mb-2 h-4 w-32" />
-                  <Skeleton className="h-10 w-36" />
-                </CardContent>
-              </Card>
+              <ContentCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -151,41 +143,29 @@ export function AdmitCardsClient() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="h-full border-gray-200 transition-colors hover:border-teal-300 hover:shadow-md">
-                    <CardHeader>
-                      <Badge variant="secondary" className="mb-2 w-fit text-xs">
-                        {item.department.name}
-                      </Badge>
-                      <CardTitle className="text-base leading-snug">{item.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="mb-4 space-y-2 text-sm text-gray-600">
-                        {item.examDate && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                            Exam Date: {formatDate(item.examDate)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <BookmarkButton admitCardId={item.id} variant="ghost" />
-                        <Button asChild variant="default" size="sm">
-                          <Link href={`/admit-card/${item.slug}`}>
-                            <FileText className="mr-1 h-4 w-4" />
-                            View Details
-                          </Link>
+                  <ContentCard
+                  icon={Ticket}
+                  iconClassName="from-violet-600 to-purple-800"
+                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{item.department.name}</Badge>}
+                  statusBadge={<span className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">Admit Card</span>}
+                  title={item.title}
+                  meta={item.examDate ? [{ icon: Calendar, text: `Exam: ${formatDate(item.examDate)}` }] : []}
+                  href={`/admit-card/${item.slug}`}
+                  ctaLabel="View Details"
+                  footer={
+                    <div className="flex items-center gap-1">
+                      <BookmarkButton admitCardId={item.id} />
+                      {item.downloadUrl && (
+                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
+                          <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5" />
+                            Download
+                          </a>
                         </Button>
-                        {item.downloadUrl && (
-                          <Button asChild variant="outline" size="sm">
-                            <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">
-                              <Download className="mr-1 h-4 w-4" />
-                              Download
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                      )}
+                    </div>
+                  }
+                />
                 </motion.div>
               ))}
             </div>

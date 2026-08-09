@@ -8,7 +8,6 @@ const LatestResults = dynamic(() => import("@/components/home/LatestResults").th
 const LatestAdmitCards = dynamic(() => import("@/components/home/LatestAdmitCards").then(m => ({ default: m.LatestAdmitCards })))
 const TrendingNotifications = dynamic(() => import("@/components/home/TrendingNotifications").then(m => ({ default: m.TrendingNotifications })))
 const JobsByQualification = dynamic(() => import("@/components/home/JobsByQualification").then(m => ({ default: m.JobsByQualification })))
-const JobsByState = dynamic(() => import("@/components/home/JobsByState").then(m => ({ default: m.JobsByState })))
 const LatestPrivateJobs = dynamic(() => import("@/components/home/LatestPrivateJobs").then(m => ({ default: m.LatestPrivateJobs })))
 const PopularExams = dynamic(() => import("@/components/home/PopularExams").then(m => ({ default: m.PopularExams })))
 const FAQ = dynamic(() => import("@/components/home/FAQ").then(m => ({ default: m.FAQ })))
@@ -34,11 +33,10 @@ export default function HomePage() {
         </div>
       </div>
       <JobsByQualification />
-<JobsByState />
+<LatestBlog />
       <LatestPrivateJobs />
 <PopularExams />
       <FAQ />
-      <LatestBlog />
       <Newsletter />
     </>
   )

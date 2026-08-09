@@ -240,17 +240,27 @@ export function DocumentDetail({
             const isUrgentStat = /last date|clos/i.test(s.label) && isUrgent
             return (
               <div key={s.label} className={cn(
-                "rounded-xl border p-4",
-                isUrgentStat ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+                "group rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5",
+                isUrgentStat
+                  ? "border-red-200 bg-red-50 hover:shadow-md hover:shadow-red-100 dark:border-red-900 dark:bg-red-950/40 dark:hover:shadow-none"
+                  : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700 dark:hover:shadow-none",
               )}>
-                <div className={cn(
-                  "mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide",
-                  isUrgentStat ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-gray-400",
+                <span className={cn(
+                  "mb-2.5 flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                  isUrgentStat
+                    ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
+                    : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-950 dark:text-blue-300 dark:group-hover:bg-blue-600 dark:group-hover:text-white",
                 )}>
-                  <Icon className="h-3.5 w-3.5" /> {s.label}
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div className={cn(
+                  "mb-0.5 text-[11px] font-medium uppercase tracking-wide",
+                  isUrgentStat ? "text-red-500 dark:text-red-400" : "text-gray-500 dark:text-gray-400",
+                )}>
+                  {s.label}
                 </div>
                 <div className={cn(
-                  "text-sm font-bold",
+                  "text-sm font-bold leading-snug",
                   isUrgentStat ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-gray-100",
                 )}>
                   {s.value}
