@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Calendar, MapPin, IndianRupee, Briefcase, ExternalLink, ArrowLeft, Mail, Building2 } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { formatDate } from "@/lib/utils"
+import { BLOG_PROSE_CLASSES } from "@/lib/blog-prose"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -79,11 +80,32 @@ export function PrivateJobDetail({ job }: { job: PrivateJob }) {
         )}
       </div>
 
-      {job.company.description && (
+      {job.description && (
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">Job Description</h2>
+            <div className={`${BLOG_PROSE_CLASSES}`}>
+              <div dangerouslySetInnerHTML={{ __html: job.description }} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {(job.company.description || job.company.website) && (
         <Card>
           <CardContent className="p-6">
             <h2 className="mb-4 text-xl font-semibold text-gray-900">About {job.company.name}</h2>
-            <p className="text-gray-600">{job.company.description}</p>
+            {job.company.description && <p className="text-gray-600">{job.company.description}</p>}
+            {job.company.website && (
+              <a
+                href={job.company.website.startsWith("http") ? job.company.website : `https://${job.company.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700"
+              >
+                <ExternalLink className="h-4 w-4" /> Visit {job.company.name} Website
+              </a>
+            )}
           </CardContent>
         </Card>
       )}
