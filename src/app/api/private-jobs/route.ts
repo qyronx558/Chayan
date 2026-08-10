@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
-import { contentScope } from "@/lib/roles"
+import { isAdmin, contentScope } from "@/lib/roles"
 import { findOrCreateCompany } from "@/lib/companies"
 
 export async function GET(request: NextRequest) {
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
