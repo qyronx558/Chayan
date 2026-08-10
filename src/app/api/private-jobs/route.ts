@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
 import { contentScope } from "@/lib/roles"
+import { findOrCreateCompany } from "@/lib/companies"
 
 export async function GET(request: NextRequest) {
   try {
@@ -70,11 +71,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const { companyId, ...rest } = validation.data
+    const { companyId, companyName, ...rest } = validation.data
+    const company = companyName ? await findOrCreateCompany(companyName) : null
     const job = await prisma.privateJob.create({
       data: {
         ...rest,
-        company: { connect: { id: companyId } },
+        company: { connect: { id: company ? company.id : companyId } },
         createdBy: { connect: { id: session.user.id } },
       },
     })

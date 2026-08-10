@@ -177,21 +177,27 @@ export const blogPostSchema = z.object({
 
 export type BlogPostInput = z.infer<typeof blogPostSchema>
 
-export const privateJobSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  companyId: z.string().min(1, "Company is required"),
-  type: z.enum(["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT"]),
-  category: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
-  salary: z.string().nullable().optional(),
-  experience: z.string().nullable().optional(),
-  applicationUrl: z.string().nullable().optional(),
-  applicationEmail: z.string().nullable().optional(),
-  lastDate: z.coerce.date().nullable().optional(),
-  status: z.enum(["ACTIVE", "EXPIRED"]).default("ACTIVE"),
-})
+export const privateJobSchema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    slug: z.string().min(1, "Slug is required"),
+    companyId: z.string().optional(),
+    companyName: z.string().trim().min(1, "Company name is required").optional(),
+    type: z.enum(["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT"]),
+    category: z.string().nullable().optional(),
+    description: z.string().nullable().optional(),
+    location: z.string().nullable().optional(),
+    salary: z.string().nullable().optional(),
+    experience: z.string().nullable().optional(),
+    applicationUrl: z.string().nullable().optional(),
+    applicationEmail: z.string().nullable().optional(),
+    lastDate: z.coerce.date().nullable().optional(),
+    status: z.enum(["ACTIVE", "EXPIRED"]).default("ACTIVE"),
+  })
+  .refine((data) => Boolean(data.companyId) !== Boolean(data.companyName), {
+    message: "Select an existing company or enter a new company name",
+    path: ["companyId"],
+  })
 
 export type PrivateJobInput = z.infer<typeof privateJobSchema>
 

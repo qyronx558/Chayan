@@ -45,9 +45,11 @@ export default function AdminPrivateJobs() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
-  const [dialogOpen, setDialogOpen] = useState(false)
+const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [newCompanyMode, setNewCompanyMode] = useState(false)
+  const [companyName, setCompanyName] = useState("")
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: PrivateJobItem[]; pagination: PaginationInfo }>({
     queryKey: ["admin-private-jobs", page, search, typeFilter],
@@ -69,15 +71,28 @@ export default function AdminPrivateJobs() {
     },
   })
 
-  const createMutation = useMutation({
+const createMutation = useMutation({
     mutationFn: (data: PrivateJobInput) => api.post("/api/private-jobs", data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-private-jobs"] }); setDialogOpen(false); form.reset(); toast("Private job created", "success") },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-private-jobs"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-companies"] })
+      setDialogOpen(false)
+      form.reset()
+      toast("Private job created", "success")
+    },
     onError: (err: Error) => toast(err.message, "destructive"),
   })
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: PrivateJobInput }) => api.put(`/api/private-jobs/${id}`, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-private-jobs"] }); setDialogOpen(false); setEditingId(null); form.reset(); toast("Private job updated", "success") },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-private-jobs"] })
+      queryClient.invalidateQueries({ queryKey: ["admin-companies"] })
+      setDialogOpen(false)
+      setEditingId(null)
+      form.reset()
+      toast("Private job updated", "success")
+    },
     onError: (err: Error) => toast(err.message, "destructive"),
   })
 
@@ -94,13 +109,23 @@ export default function AdminPrivateJobs() {
   const pagination = jobsData?.pagination
   const companies = companiesData?.data || []
 
-  const onSubmit = (data: PrivateJobInput) => {
-    if (editingId) updateMutation.mutate({ id: editingId, data })
-    else createMutation.mutate(data)
+const onSubmit = (data: PrivateJobInput) => {
+    if (newCompanyMode) {
+      const name = companyName.trim()
+      if (!name) { toast("Enter a company name", "destructive"); return }
+      const payload = { ...data, companyId: undefined, companyName: name }
+      if (editingId) updateMutation.mutate({ id: editingId, data: payload })
+      else createMutation.mutate(payload)
+    } else {
+      if (editingId) updateMutation.mutate({ id: editingId, data })
+      else createMutation.mutate(data)
+    }
   }
 
   const openEdit = (job: PrivateJobItem) => {
     setEditingId(job.id)
+    setNewCompanyMode(false)
+    setCompanyName("")
     form.reset({
       title: job.title, slug: job.slug, companyId: job.company.id,
       type: job.type as any, category: null, description: null,
@@ -112,8 +137,10 @@ export default function AdminPrivateJobs() {
     setDialogOpen(true)
   }
 
-  const openCreate = () => {
+const openCreate = () => {
     setEditingId(null)
+    setNewCompanyMode(false)
+    setCompanyName("")
     form.reset({ title: "", slug: "", companyId: "", type: "FULL_TIME", category: null, description: null, location: null, salary: null, experience: null, applicationUrl: null, applicationEmail: null, lastDate: null, status: "ACTIVE" })
     setDialogOpen(true)
   }
@@ -203,14 +230,30 @@ export default function AdminPrivateJobs() {
                   <FormItem><FormLabel>Slug</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+<div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="companyId" render={({ field }) => (
                   <FormItem><FormLabel>Company</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger></FormControl>
-                      <SelectContent>{companies.map((c: Company) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
+                    {newCompanyMode ? (
+                      <>
+                        <FormControl>
+                          <Input placeholder="Enter new company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="mb-2" />
+                        </FormControl>
+                        <Button type="button" variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => { setNewCompanyMode(false); field.onChange("") }}>
+                          Back to select existing company
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Select onValueChange={(v) => { if (v === "__new__") { setNewCompanyMode(true); field.onChange("") } else field.onChange(v) }} value={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {companies.map((c: Company) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                            <SelectItem value="__new__">+ Add New Company</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </>
+                    )}
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="type" render={({ field }) => (

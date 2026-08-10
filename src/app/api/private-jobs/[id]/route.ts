@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
+import { findOrCreateCompany } from "@/lib/companies"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -44,12 +45,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    const { companyId, ...rest } = validation.data
+    const { companyId, companyName, ...rest } = validation.data
+    const company = companyName ? await findOrCreateCompany(companyName) : null
     const job = await prisma.privateJob.update({
       where: { id },
       data: {
         ...rest,
-        company: { connect: { id: companyId } },
+        company: { connect: { id: company ? company.id : companyId } },
       },
     })
 
