@@ -49,7 +49,6 @@ const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [newCompanyMode, setNewCompanyMode] = useState(false)
-  const [companyName, setCompanyName] = useState("")
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: PrivateJobItem[]; pagination: PaginationInfo }>({
     queryKey: ["admin-private-jobs", page, search, typeFilter],
@@ -61,10 +60,10 @@ const [dialogOpen, setDialogOpen] = useState(false)
     queryFn: () => fetcher("/api/companies"),
   })
 
-  const form = useForm<PrivateJobInput>({
+const form = useForm<PrivateJobInput>({
     resolver: zodResolver(privateJobSchema) as any,
     defaultValues: {
-      title: "", slug: "", companyId: "", type: "FULL_TIME",
+      title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME",
       category: null, description: null, location: null, salary: null,
       experience: null, applicationUrl: null, applicationEmail: null,
       lastDate: null, status: "ACTIVE",
@@ -111,7 +110,7 @@ const createMutation = useMutation({
 
 const onSubmit = (data: PrivateJobInput) => {
     if (newCompanyMode) {
-      const name = companyName.trim()
+      const name = (data.companyName || "").trim()
       if (!name) { toast("Enter a company name", "destructive"); return }
       const payload = { ...data, companyId: undefined, companyName: name }
       if (editingId) updateMutation.mutate({ id: editingId, data: payload })
@@ -125,9 +124,8 @@ const onSubmit = (data: PrivateJobInput) => {
   const openEdit = (job: PrivateJobItem) => {
     setEditingId(job.id)
     setNewCompanyMode(false)
-    setCompanyName("")
     form.reset({
-      title: job.title, slug: job.slug, companyId: job.company.id,
+      title: job.title, slug: job.slug, companyId: job.company.id, companyName: "",
       type: job.type as any, category: null, description: null,
       location: null, salary: null, experience: null,
       applicationUrl: null, applicationEmail: null,
@@ -140,8 +138,7 @@ const onSubmit = (data: PrivateJobInput) => {
 const openCreate = () => {
     setEditingId(null)
     setNewCompanyMode(false)
-    setCompanyName("")
-    form.reset({ title: "", slug: "", companyId: "", type: "FULL_TIME", category: null, description: null, location: null, salary: null, experience: null, applicationUrl: null, applicationEmail: null, lastDate: null, status: "ACTIVE" })
+    form.reset({ title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME", category: null, description: null, location: null, salary: null, experience: null, applicationUrl: null, applicationEmail: null, lastDate: null, status: "ACTIVE" })
     setDialogOpen(true)
   }
 
@@ -235,12 +232,25 @@ const openCreate = () => {
                   <FormItem><FormLabel>Company</FormLabel>
                     {newCompanyMode ? (
                       <>
-                        <FormControl>
-                          <Input placeholder="Enter new company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="mb-2" />
-                        </FormControl>
-                        <Button type="button" variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => { setNewCompanyMode(false); field.onChange("") }}>
+                        <FormField control={form.control} name="companyName" render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter new company name"
+                                {...field}
+                                value={field.value || ""}
+                                className="mb-2"
+                              />
+                            </FormControl>
+                            <FormMessage className="mb-2" />
+                          </FormItem>
+                        )} />
+                        <Button type="button" variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => { setNewCompanyMode(false); form.setValue("companyId", ""); form.setValue("companyName", "") }}>
                           Back to select existing company
                         </Button>
+                        {form.formState.errors.companyId?.message && (
+                          <p className="mt-1 text-xs font-medium text-red-500">{form.formState.errors.companyId.message}</p>
+                        )}
                       </>
                     ) : (
                       <>
