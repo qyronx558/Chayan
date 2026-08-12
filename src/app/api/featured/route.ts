@@ -9,9 +9,11 @@ export async function GET() {
     const now = new Date()
     const items = await prisma.featuredItem.findMany({
       where: {
-        isActive: true,
-        OR: [{ startDate: null }, { startDate: { lte: now } }],
-        AND: [{ endDate: null }, { endDate: { gte: now } }],
+        AND: [
+          { isActive: true },
+          { OR: [{ startDate: null }, { startDate: { lte: now } }] },
+          { OR: [{ endDate: null }, { endDate: { gte: now } }] },
+        ],
       },
       orderBy: [{ isPinned: "desc" }, { sortOrder: "asc" }],
     })
