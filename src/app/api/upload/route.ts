@@ -26,11 +26,23 @@ export async function POST(request: NextRequest) {
     }
 
     const folder = (formData.get("folder") as string) || "chayan"
+    const transform = (formData.get("transform") as string) || ""
     const buffer = Buffer.from(await file.arrayBuffer())
+
+    const transformOptions = transform === "slide"
+      ? {
+          width: 1200,
+          height: 900,
+          crop: "fill",
+          gravity: "auto",
+          quality: "auto",
+          fetchFormat: "auto",
+        }
+      : {}
 
     const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder, resource_type: "image" },
+        { folder, resource_type: "image", transformation: transformOptions },
         (error, result) => {
           if (error) reject(error)
           else resolve(result as { secure_url: string; public_id: string })

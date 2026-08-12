@@ -31,7 +31,7 @@ import { toast } from "@/components/ui/toast"
 import { formatDate } from "@/lib/utils"
 import { FeaturedSlideView, type FeaturedSlideItem } from "@/components/featured/FeaturedSlideView"
 import {
-  Plus, Pencil, Trash2, Eye, Star, GripVertical, Upload, Image as ImageIcon, Replace,
+  Plus, Pencil, Trash2, Eye, Star, GripVertical, Upload, Replace,
 } from "lucide-react"
 
 interface Option {
@@ -150,6 +150,7 @@ export default function AdminFeaturedSlider() {
       const fd = new FormData()
       fd.append("file", file)
       fd.append("folder", "featured")
+      fd.append("transform", "slide")
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || "Upload failed")
@@ -392,7 +393,7 @@ export default function AdminFeaturedSlider() {
 
               <FormField control={form.control} name="image" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Slide Image (optional)</FormLabel>
+                  <FormLabel>Slide Image (optional) <span className="text-xs font-normal text-gray-400">— 1200×900 (4:3) recommended, auto-cropped on upload</span></FormLabel>
                   <div className="flex items-center gap-3">
                     <FormControl>
                       <Input type="file" accept="image/*" className="hidden" id="slide-image" disabled={uploading}
@@ -403,11 +404,15 @@ export default function AdminFeaturedSlider() {
                     </label>
                     <Input placeholder="Or paste image URL" {...field} value={field.value || ""} onChange={field.onChange} />
                   </div>
-                  {field.value && (
-                    <div className="mt-2 flex items-center gap-3">
-                      <span className="inline-flex items-center gap-1 text-xs"><ImageIcon className="h-3 w-3" /> Uploaded</span>
+                  {field.value ? (
+                    <div className="mt-3 flex items-center gap-4">
+                      <div className="relative aspect-[4/3] w-40 shrink-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+                        <img src={field.value} alt="Slide preview" className="h-full w-full object-cover object-center" />
+                      </div>
                       <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue("image", "")}>Remove</Button>
                     </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-gray-400">No image — the slide will show without a visual.</p>
                   )}
                   <FormMessage />
                 </FormItem>
