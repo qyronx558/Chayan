@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic"
-import { HeroSlider } from "@/components/home/HeroSlider"
+import { FeaturedSlider } from "@/components/home/FeaturedSlider"
 import { SearchBar } from "@/components/home/SearchBar"
 import { QuickLinks } from "@/components/home/QuickLinks"
 import { LatestJobs } from "@/components/home/LatestJobs"
@@ -17,7 +17,7 @@ const Newsletter = dynamic(() => import("@/components/layout/Newsletter").then(m
 export default function HomePage() {
   return (
     <>
-      <HeroSlider />
+      <FeaturedSlider />
       <SearchBar />
       <QuickLinks />
 <LatestJobs />

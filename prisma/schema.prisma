@@ -571,3 +571,28 @@ model JobView {
   @@index([jobId])
   @@index([date])
 }
+
+model FeaturedItem {
+  id           String    @id @default(cuid())
+  title        String
+  type         String    @default("OTHER")
+  badge        String?
+  organization String?
+  info         String?
+  dateText     String?
+  image        String?
+  ctaLabel     String    @default("View Details")
+  ctaUrl       String?
+  linkUrl      String
+  sortOrder    Int       @default(0)
+  isActive     Boolean   @default(true)
+  isPinned     Boolean   @default(false)
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isActive])
+  @@index([isPinned])
+  @@index([sortOrder])
+}

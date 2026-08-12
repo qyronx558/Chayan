@@ -23,6 +23,7 @@ import {
   X,
   Newspaper,
   Building2,
+  SlidersHorizontal,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -41,6 +42,7 @@ const sidebarLinks = [
   { href: "/admin/users", label: "Users", icon: Users, superOnly: true },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3, superOnly: true },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
+  { href: "/admin/featured-slider", label: "Featured Slider", icon: SlidersHorizontal, superOnly: true },
   { href: "/admin/import-data", label: "Import Data", icon: Briefcase, superOnly: true },
   { href: "/admin/logs", label: "Logs", icon: List },
 ]

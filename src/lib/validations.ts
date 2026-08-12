@@ -212,3 +212,43 @@ export const companySchema = z.object({
 export type CompanyInput = z.infer<typeof companySchema>
 
 export type SearchInput = z.infer<typeof searchSchema>
+
+export const featuredItemTypes = [
+  "JOB",
+  "PRIVATE_JOB",
+  "RESULT",
+  "ADMIT_CARD",
+  "ANSWER_KEY",
+  "NOTIFICATION",
+  "ADMISSION",
+  "EVENT",
+  "OTHER",
+] as const
+
+export const featuredCtaLabels = [
+  "Apply Online",
+  "View Result",
+  "Download",
+  "View Details",
+  "Enroll Now",
+  "Read More",
+] as const
+
+export const featuredItemSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  type: z.enum(featuredItemTypes),
+  badge: z.string().trim().optional(),
+  organization: z.string().trim().optional(),
+  info: z.string().trim().optional(),
+  dateText: z.string().trim().optional(),
+  image: z.string().trim().optional(),
+  ctaLabel: z.enum(featuredCtaLabels).default("View Details"),
+  ctaUrl: z.string().trim().optional(),
+  linkUrl: z.string().min(1, "Link URL is required"),
+  isActive: z.boolean().default(true),
+  isPinned: z.boolean().default(false),
+  startDate: z.coerce.date().nullable().optional(),
+  endDate: z.coerce.date().nullable().optional(),
+})
+
+export type FeaturedItemInput = z.infer<typeof featuredItemSchema>
