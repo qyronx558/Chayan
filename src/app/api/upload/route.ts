@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { v2 as cloudinary } from "cloudinary"
+import { isAdmin } from "@/lib/roles"
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,7 +12,7 @@ cloudinary.config({
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 

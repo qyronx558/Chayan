@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import {
   Briefcase, Building2, Calendar, Star, FileText, IdCard, KeyRound, Bell, GraduationCap, CalendarDays,
@@ -39,10 +38,20 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
   const icon = typeIcons[FEATURED_TYPE_ICONS[item.type]] || <Star className="h-3.5 w-3.5" />
   const href = item.linkUrl.startsWith("/") || item.linkUrl.startsWith("http") ? item.linkUrl : `https://${item.linkUrl}`
   const isExternal = href.startsWith("http")
+  const ctaHref = item.ctaUrl
+    ? item.ctaUrl.startsWith("/") || item.ctaUrl.startsWith("http") ? item.ctaUrl : `https://${item.ctaUrl}`
+    : href
+  const isCtaExternal = ctaHref.startsWith("http")
 
   return (
-    <div className="mx-auto grid min-h-[420px] max-w-7xl items-center gap-8 px-4 py-10 sm:min-h-[460px] sm:px-6 lg:grid-cols-[1fr_340px] lg:px-8">
-      <div>
+    <div className="mx-auto flex min-h-[420px] max-w-7xl flex-col items-center justify-center gap-7 px-4 py-10 sm:min-h-[460px] sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
+      <div className="w-full lg:flex-1">
+        {item.image && (
+          <div className="relative mb-5 aspect-[16/10] w-full max-w-xl overflow-hidden rounded-xl border border-white/10 shadow-lg sm:mx-auto sm:aspect-[4/3] lg:hidden">
+            <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" loading="lazy" />
+            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
+          </div>
+        )}
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
           {icon}
           {badge}
@@ -79,9 +88,9 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
+            href={ctaHref}
+            target={isCtaExternal ? "_blank" : undefined}
+            rel={isCtaExternal ? "noopener noreferrer" : undefined}
             className="inline-flex items-center rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-bold text-[#0a1628] shadow-lg shadow-amber-400/25 transition-all hover:bg-amber-300 hover:shadow-amber-400/40"
           >
             {item.ctaLabel}
@@ -98,9 +107,9 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
       </div>
 
       {item.image && (
-        <div className="relative hidden aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl lg:block">
-          <Image src={item.image} alt={item.title} fill className="object-cover" sizes="340px" />
-          <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
+        <div className="relative hidden aspect-[4/3] w-72 shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-lg lg:block xl:w-80">
+          <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" loading="lazy" />
+          <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
         </div>
       )}
     </div>
