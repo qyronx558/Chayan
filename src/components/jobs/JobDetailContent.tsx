@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { RichTextView } from "@/components/shared/RichTextView"
+import { containsHtml } from "@/lib/blog-prose"
 
 interface JobDetailContentProps {
   jobId: string
@@ -382,13 +384,15 @@ export function JobDetailContent({
               {ageRelaxation && (
                 <div>
                   <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Age Relaxation</p>
-                  <div className="whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">{ageRelaxation}</div>
+                  <RichTextView html={ageRelaxation} className="text-gray-600 dark:text-gray-400" />
                 </div>
               )}
               {selectionProcess && (
                 <div>
                   <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Selection Process</p>
-                  {stepify(selectionProcess).length > 1 ? (
+                  {containsHtml(selectionProcess) ? (
+                    <RichTextView html={selectionProcess} className="text-gray-600 dark:text-gray-400" />
+                  ) : stepify(selectionProcess).length > 1 ? (
                     <ol className="space-y-2">
                       {stepify(selectionProcess).map((step, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
@@ -419,7 +423,7 @@ export function JobDetailContent({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{applicationFee}</div>
+              <RichTextView html={applicationFee} />
             </CardContent>
           </Card>
         </section>
@@ -435,7 +439,9 @@ export function JobDetailContent({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stepify(documentsRequired).length > 1 ? (
+              {containsHtml(documentsRequired) ? (
+                <RichTextView html={documentsRequired} />
+              ) : stepify(documentsRequired).length > 1 ? (
                 <ul className="space-y-2">
                   {stepify(documentsRequired).map((doc, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
@@ -461,7 +467,9 @@ export function JobDetailContent({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stepify(howToApply).length > 1 ? (
+              {containsHtml(howToApply) ? (
+                <RichTextView html={howToApply} />
+              ) : stepify(howToApply).length > 1 ? (
                 <ol className="space-y-3">
                   {stepify(howToApply).map((step, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { RichTextView } from "@/components/shared/RichTextView"
 
 type DocumentKind = "result" | "admit-card" | "answer-key" | "syllabus" | "admission"
 
@@ -395,7 +396,7 @@ export function DocumentDetail({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="whitespace-pre-line text-sm leading-relaxed text-gray-700 dark:text-gray-300">{description}</div>
+              <RichTextView html={description} />
             </CardContent>
           </Card>
         </section>

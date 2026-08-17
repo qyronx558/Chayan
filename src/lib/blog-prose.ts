@@ -1,3 +1,6 @@
+export const containsHtml = (value: string | null | undefined): boolean =>
+  Boolean(value) && /<[a-z][\s\S]*>/i.test(value as string)
+
 export const BLOG_PROSE_CLASSES = [
   "prose",
   "prose-gray",
