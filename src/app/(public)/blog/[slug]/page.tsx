@@ -165,7 +165,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           </p>
         )}
 {post.content && (
-          <div className={`${BLOG_PROSE_CLASSES} mt-6`}>
+          <div className={`${BLOG_PROSE_CLASSES} mt-6 whitespace-pre-wrap`}>
             <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
         )}

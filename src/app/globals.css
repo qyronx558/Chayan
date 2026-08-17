@@ -94,6 +94,11 @@ body {
   pointer-events: none;
 }
 
+.ProseMirror p:empty::before,
+.rich-content p:empty::before {
+  content: "\00a0";
+}
+
 .ProseMirror ul[data-type="taskList"],
 .rich-content ul[data-type="taskList"] {
   list-style: none;
