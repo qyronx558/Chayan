@@ -36,7 +36,7 @@ import { Plus, Pencil, Trash2, Search, Eye, EyeOff, Image, Send } from "lucide-r
 import { motion, AnimatePresence } from "framer-motion"
 
 interface BlogItem {
-  id: string; title: string; slug: string; excerpt: string | null; author: string | null; image: string | null; tags: string | null; categoryId: string | null; category: { id: string; name: string; slug: string; color: string | null } | null; published: boolean; views: number; createdAt: string
+  id: string; title: string; slug: string; excerpt: string | null; content: string | null; author: string | null; image: string | null; tags: string | null; categoryId: string | null; category: { id: string; name: string; slug: string; color: string | null } | null; published: boolean; views: number; createdAt: string
 }
 
 interface BlogCategoryItem {
@@ -117,7 +117,7 @@ export default function AdminBlog() {
       title: post.title,
       slug: post.slug,
       excerpt: post.excerpt,
-      content: (post as any).content || null,
+      content: post.content,
       author: post.author,
       image: post.image,
       tags: post.tags,

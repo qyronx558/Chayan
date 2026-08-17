@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react"
 interface Department { id: string; name: string }
 interface Category { id: string; name: string }
 interface AnswerKeyItem {
-  id: string; title: string; slug: string; pdfUrl: string | null; status: string | null; createdAt: string
+  id: string; title: string; slug: string; description: string | null; jobId: string | null; pdfUrl: string | null; status: string | null; createdAt: string
   department: Department; category: Category
 }
 
@@ -94,7 +94,7 @@ export default function AdminAnswerKeys() {
 
   const openEdit = (k: AnswerKeyItem) => {
     setEditingId(k.id)
-    form.reset({ title: k.title, slug: k.slug, description: null, departmentId: k.department.id, categoryId: k.category.id, jobId: null, pdfUrl: k.pdfUrl, status: k.status })
+    form.reset({ title: k.title, slug: k.slug, description: k.description, departmentId: k.department.id, categoryId: k.category.id, jobId: k.jobId, pdfUrl: k.pdfUrl, status: k.status })
     setDialogOpen(true)
   }
 

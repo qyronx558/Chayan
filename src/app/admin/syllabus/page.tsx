@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react"
 interface Department { id: string; name: string }
 interface Category { id: string; name: string }
 interface SyllabusItem {
-  id: string; title: string; slug: string; pdfUrl: string | null; subjects: string | null; status: string | null; createdAt: string
+  id: string; title: string; slug: string; description: string | null; jobId: string | null; pdfUrl: string | null; subjects: string | null; status: string | null; createdAt: string
   department: Department; category: Category
 }
 
@@ -94,7 +94,7 @@ export default function AdminSyllabus() {
 
   const openEdit = (s: SyllabusItem) => {
     setEditingId(s.id)
-    form.reset({ title: s.title, slug: s.slug, description: null, departmentId: s.department.id, categoryId: s.category.id, jobId: null, pdfUrl: s.pdfUrl, subjects: s.subjects, status: s.status })
+    form.reset({ title: s.title, slug: s.slug, description: s.description, departmentId: s.department.id, categoryId: s.category.id, jobId: s.jobId, pdfUrl: s.pdfUrl, subjects: s.subjects, status: s.status })
     setDialogOpen(true)
   }
 

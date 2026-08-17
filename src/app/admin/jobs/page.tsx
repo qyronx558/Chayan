@@ -36,7 +36,7 @@ interface Department { id: string; name: string }
 interface Category { id: string; name: string }
 interface State { id: string; name: string }
 interface JobItem {
-  id: string; title: string; slug: string; status: string; totalVacancies: number | null; lastDate: string | null; createdAt: string
+  id: string; title: string; slug: string; status: string; advertisementNo: string | null; totalVacancies: number | null; salary: string | null; location: string | null; ageLimit: string | null; ageRelaxation: string | null; education: string | null; selectionProcess: string | null; applicationFee: string | null; importantDates: Record<string, string> | null; documentsRequired: string | null; howToApply: string | null; officialNotification: string | null; officialWebsite: string | null; applyLink: string | null; experience: string | null; startDate: string | null; lastDate: string | null; createdAt: string
   department: Department; category: Category; state: State | null
 }
 
@@ -120,30 +120,30 @@ export default function AdminJobs() {
 
   const openEdit = (job: JobItem) => {
     setEditingId(job.id)
-    form.reset({
+form.reset({
       title: job.title,
       slug: job.slug,
       departmentId: job.department.id,
       categoryId: job.category.id,
       stateId: job.state?.id || null,
-      advertisementNo: null,
+      advertisementNo: job.advertisementNo,
       totalVacancies: job.totalVacancies,
-      salary: null,
-      location: null,
-      ageLimit: null,
-      ageRelaxation: null,
-      education: null,
-      selectionProcess: null,
-      applicationFee: null,
-      importantDates: null,
-      documentsRequired: null,
-      howToApply: null,
-      officialNotification: null,
-      officialWebsite: null,
-      applyLink: null,
+      salary: job.salary,
+      location: job.location,
+      ageLimit: job.ageLimit,
+      ageRelaxation: job.ageRelaxation,
+      education: job.education,
+      selectionProcess: job.selectionProcess,
+      applicationFee: job.applicationFee,
+      importantDates: job.importantDates,
+      documentsRequired: job.documentsRequired,
+      howToApply: job.howToApply,
+      officialNotification: job.officialNotification,
+      officialWebsite: job.officialWebsite,
+      applyLink: job.applyLink,
       status: job.status as "ACTIVE" | "EXPIRED" | "UPCOMING",
-      experience: null,
-      startDate: null,
+      experience: job.experience,
+      startDate: job.startDate ? new Date(job.startDate) : null,
       lastDate: job.lastDate ? new Date(job.lastDate) : null,
     })
     setDialogOpen(true)

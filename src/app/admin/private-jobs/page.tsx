@@ -34,7 +34,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 interface Company { id: string; name: string }
 interface PrivateJobItem {
-  id: string; title: string; slug: string; type: string; status: string; company: Company; lastDate: string | null; createdAt: string
+  id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; experience: string | null; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
 }
 interface PaginationInfo { total: number; page: number; limit: number; totalPages: number }
 
@@ -124,11 +124,11 @@ const onSubmit = (data: PrivateJobInput) => {
   const openEdit = (job: PrivateJobItem) => {
     setEditingId(job.id)
     setNewCompanyMode(false)
-    form.reset({
+form.reset({
       title: job.title, slug: job.slug, companyId: job.company.id, companyName: "",
-      type: job.type as any, category: null, description: null,
-      location: null, salary: null, experience: null,
-      applicationUrl: null, applicationEmail: null,
+      type: job.type as any, category: job.category, description: job.description,
+      location: job.location, salary: job.salary, experience: job.experience,
+      applicationUrl: job.applicationUrl, applicationEmail: job.applicationEmail,
       lastDate: job.lastDate ? new Date(job.lastDate) : null,
       status: job.status as "ACTIVE" | "EXPIRED",
     })

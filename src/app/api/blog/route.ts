@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { blogPostSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
-import { contentScope } from "@/lib/roles"
+import { contentScope, isAdmin } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 

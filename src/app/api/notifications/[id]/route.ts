@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { notificationSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
+import { isAdmin } from "@/lib/roles"
 
 export async function GET(
   request: NextRequest,
@@ -37,7 +38,7 @@ export async function PUT(
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "ADMIN") {
+    if (!isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
@@ -87,7 +88,7 @@ export async function DELETE(
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "ADMIN") {
+    if (!isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 

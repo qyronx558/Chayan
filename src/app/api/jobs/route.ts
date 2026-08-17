@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { jobSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { notifyUsers } from "@/lib/notifications"
-import { contentScope } from "@/lib/roles"
+import { contentScope, isAdmin } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "ADMIN") {
+    if (!isAdmin(session.user.role)) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 

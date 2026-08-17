@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react"
 interface Department { id: string; name: string }
 interface Category { id: string; name: string }
 interface AdmitCardItem {
-  id: string; title: string; slug: string; examDate: string | null; downloadUrl: string | null; status: string | null; createdAt: string
+  id: string; title: string; slug: string; description: string | null; jobId: string | null; examDate: string | null; downloadUrl: string | null; status: string | null; createdAt: string
   department: Department; category: Category
 }
 
@@ -94,7 +94,7 @@ export default function AdminAdmitCards() {
 
   const openEdit = (c: AdmitCardItem) => {
     setEditingId(c.id)
-    form.reset({ title: c.title, slug: c.slug, description: null, departmentId: c.department.id, categoryId: c.category.id, jobId: null, examDate: c.examDate ? new Date(c.examDate) : null, downloadUrl: c.downloadUrl, status: c.status })
+    form.reset({ title: c.title, slug: c.slug, description: c.description, departmentId: c.department.id, categoryId: c.category.id, jobId: c.jobId, examDate: c.examDate ? new Date(c.examDate) : null, downloadUrl: c.downloadUrl, status: c.status })
     setDialogOpen(true)
   }
 

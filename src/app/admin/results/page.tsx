@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react"
 interface Department { id: string; name: string }
 interface Category { id: string; name: string }
 interface ResultItem {
-  id: string; title: string; slug: string; pdfUrl: string | null; resultDate: string | null; status: string | null; createdAt: string
+  id: string; title: string; slug: string; description: string | null; jobId: string | null; pdfUrl: string | null; resultDate: string | null; status: string | null; createdAt: string
   department: Department; category: Category
 }
 
@@ -94,7 +94,7 @@ export default function AdminResults() {
 
   const openEdit = (r: ResultItem) => {
     setEditingId(r.id)
-    form.reset({ title: r.title, slug: r.slug, description: null, departmentId: r.department.id, categoryId: r.category.id, jobId: null, pdfUrl: r.pdfUrl, resultDate: r.resultDate ? new Date(r.resultDate) : null, status: r.status })
+    form.reset({ title: r.title, slug: r.slug, description: r.description, departmentId: r.department.id, categoryId: r.category.id, jobId: r.jobId, pdfUrl: r.pdfUrl, resultDate: r.resultDate ? new Date(r.resultDate) : null, status: r.status })
     setDialogOpen(true)
   }
 
