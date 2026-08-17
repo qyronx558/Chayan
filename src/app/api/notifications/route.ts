@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { notificationSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
+import { notifyUsers } from "@/lib/notifications"
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,6 +77,8 @@ export async function POST(request: NextRequest) {
     }
 
     const notification = await prisma.notification.create({ data })
+
+    await notifyUsers("GENERAL", notification.title, notification.slug, notification.content || undefined)
 
     return NextResponse.json({ success: true, data: notification }, { status: 201 })
   } catch (error) {

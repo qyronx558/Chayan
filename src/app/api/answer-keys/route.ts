@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { answerKeySchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { contentScope, isAdmin } from "@/lib/roles"
+import { notifyUsers } from "@/lib/notifications"
 
 export async function GET(request: NextRequest) {
   try {
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest) {
     }
 
     const answerKey = await prisma.answerKey.create({ data })
+
+    await notifyUsers("ANSWER_KEY", answerKey.title, answerKey.slug, `New answer key released: ${answerKey.title}`)
 
     return NextResponse.json({ success: true, data: answerKey }, { status: 201 })
   } catch (error) {

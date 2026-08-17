@@ -36,20 +36,45 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { jobAlerts, resultAlerts, admitCardAlerts } = body
+    const {
+      jobAlerts,
+      resultAlerts,
+      admitCardAlerts,
+      privateJobAlerts,
+      admissionAlerts,
+      blogAlerts,
+      syllabusAlerts,
+      answerKeyAlerts,
+      generalAlerts,
+    } = body
+
+    const boolOrUndefined = (v: unknown): boolean | undefined =>
+      typeof v === "boolean" ? v : undefined
 
     const prefs = await prisma.notificationPreference.upsert({
       where: { userId: session.user.id },
       update: {
-        ...(typeof jobAlerts === "boolean" ? { jobAlerts } : {}),
-        ...(typeof resultAlerts === "boolean" ? { resultAlerts } : {}),
-        ...(typeof admitCardAlerts === "boolean" ? { admitCardAlerts } : {}),
+        ...(boolOrUndefined(jobAlerts) !== undefined ? { jobAlerts } : {}),
+        ...(boolOrUndefined(resultAlerts) !== undefined ? { resultAlerts } : {}),
+        ...(boolOrUndefined(admitCardAlerts) !== undefined ? { admitCardAlerts } : {}),
+        ...(boolOrUndefined(privateJobAlerts) !== undefined ? { privateJobAlerts } : {}),
+        ...(boolOrUndefined(admissionAlerts) !== undefined ? { admissionAlerts } : {}),
+        ...(boolOrUndefined(blogAlerts) !== undefined ? { blogAlerts } : {}),
+        ...(boolOrUndefined(syllabusAlerts) !== undefined ? { syllabusAlerts } : {}),
+        ...(boolOrUndefined(answerKeyAlerts) !== undefined ? { answerKeyAlerts } : {}),
+        ...(boolOrUndefined(generalAlerts) !== undefined ? { generalAlerts } : {}),
       },
       create: {
         userId: session.user.id,
-        jobAlerts: typeof jobAlerts === "boolean" ? jobAlerts : true,
-        resultAlerts: typeof resultAlerts === "boolean" ? resultAlerts : true,
-        admitCardAlerts: typeof admitCardAlerts === "boolean" ? admitCardAlerts : false,
+        jobAlerts: boolOrUndefined(jobAlerts) ?? true,
+        resultAlerts: boolOrUndefined(resultAlerts) ?? true,
+        admitCardAlerts: boolOrUndefined(admitCardAlerts) ?? false,
+        privateJobAlerts: boolOrUndefined(privateJobAlerts) ?? true,
+        admissionAlerts: boolOrUndefined(admissionAlerts) ?? true,
+        blogAlerts: boolOrUndefined(blogAlerts) ?? true,
+        syllabusAlerts: boolOrUndefined(syllabusAlerts) ?? true,
+        answerKeyAlerts: boolOrUndefined(answerKeyAlerts) ?? true,
+        generalAlerts: boolOrUndefined(generalAlerts) ?? true,
       },
     })
 

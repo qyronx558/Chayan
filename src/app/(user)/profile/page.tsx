@@ -50,6 +50,12 @@ interface NotificationPrefs {
   jobAlerts: boolean
   resultAlerts: boolean
   admitCardAlerts: boolean
+  privateJobAlerts: boolean
+  admissionAlerts: boolean
+  blogAlerts: boolean
+  syllabusAlerts: boolean
+  answerKeyAlerts: boolean
+  generalAlerts: boolean
 }
 
 export default function ProfilePage() {
@@ -66,6 +72,12 @@ export default function ProfilePage() {
     jobAlerts: true,
     resultAlerts: true,
     admitCardAlerts: false,
+    privateJobAlerts: true,
+    admissionAlerts: true,
+    blogAlerts: true,
+    syllabusAlerts: true,
+    answerKeyAlerts: true,
+    generalAlerts: true,
   })
   const [prefsLoaded, setPrefsLoaded] = useState(false)
 
@@ -117,6 +129,12 @@ export default function ProfilePage() {
             jobAlerts: json.data.jobAlerts,
             resultAlerts: json.data.resultAlerts,
             admitCardAlerts: json.data.admitCardAlerts,
+            privateJobAlerts: json.data.privateJobAlerts,
+            admissionAlerts: json.data.admissionAlerts,
+            blogAlerts: json.data.blogAlerts,
+            syllabusAlerts: json.data.syllabusAlerts,
+            answerKeyAlerts: json.data.answerKeyAlerts,
+            generalAlerts: json.data.generalAlerts,
           })
         }
       }
@@ -435,6 +453,19 @@ export default function ProfilePage() {
                   <Separator />
                   <div className="flex items-center justify-between">
                     <div>
+                      <Label className="text-base">Private Job Alerts</Label>
+                      <p className="text-sm text-gray-500">Get notified about new private company jobs</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.privateJobAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, privateJobAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
                       <Label className="text-base">Result Alerts</Label>
                       <p className="text-sm text-gray-500">Get notified when results are announced</p>
                     </div>
@@ -455,6 +486,71 @@ export default function ProfilePage() {
                       checked={notificationPrefs.admitCardAlerts}
                       onCheckedChange={(checked) =>
                         setNotificationPrefs((prev) => ({ ...prev, admitCardAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Admission Alerts</Label>
+                      <p className="text-sm text-gray-500">Get notified about new admission notifications</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.admissionAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, admissionAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Syllabus Alerts</Label>
+                      <p className="text-sm text-gray-500">Get notified when new syllabi are published</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.syllabusAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, syllabusAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Answer Key Alerts</Label>
+                      <p className="text-sm text-gray-500">Get notified when answer keys are released</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.answerKeyAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, answerKeyAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Blog Alerts</Label>
+                      <p className="text-sm text-gray-500">Get notified about new blog posts</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.blogAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, blogAlerts: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">General Announcements</Label>
+                      <p className="text-sm text-gray-500">Get notified about general site announcements</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.generalAlerts}
+                      onCheckedChange={(checked) =>
+                        setNotificationPrefs((prev) => ({ ...prev, generalAlerts: checked }))
                       }
                     />
                   </div>

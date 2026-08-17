@@ -118,12 +118,18 @@ model Resume {
 }
 
 model NotificationPreference {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  jobAlerts       Boolean @default(true)
-  resultAlerts    Boolean @default(true)
-  admitCardAlerts Boolean @default(false)
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  jobAlerts        Boolean @default(true)
+  resultAlerts     Boolean @default(true)
+  admitCardAlerts  Boolean @default(false)
+  privateJobAlerts Boolean @default(true)
+  admissionAlerts  Boolean @default(true)
+  blogAlerts       Boolean @default(true)
+  syllabusAlerts   Boolean @default(true)
+  answerKeyAlerts  Boolean @default(true)
+  generalAlerts    Boolean @default(true)
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserNotification {
@@ -132,6 +138,7 @@ model UserNotification {
   type      String
   title     String
   slug      String
+  message   String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -570,6 +577,7 @@ model JobView {
 
   @@index([jobId])
   @@index([date])
+  @@unique([jobId, date])
 }
 
 model FeaturedItem {

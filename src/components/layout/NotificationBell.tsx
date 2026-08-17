@@ -17,14 +17,33 @@ interface UserNotification {
   type: string
   title: string
   slug: string
+  message: string | null
   read: boolean
   createdAt: string
 }
 
 const typeHref: Record<string, string> = {
   JOB: "/apply",
+  PRIVATE_JOB: "/private-jobs",
   RESULT: "/result",
   ADMIT_CARD: "/admit-card",
+  ADMISSION: "/admission",
+  SYLLABUS: "/syllabus",
+  ANSWER_KEY: "/answer-key",
+  BLOG: "/blog",
+  GENERAL: "/notifications",
+}
+
+const typeLabel: Record<string, string> = {
+  JOB: "New Job",
+  PRIVATE_JOB: "New Private Job",
+  RESULT: "New Result",
+  ADMIT_CARD: "New Admit Card",
+  ADMISSION: "New Admission",
+  SYLLABUS: "New Syllabus",
+  ANSWER_KEY: "New Answer Key",
+  BLOG: "New Blog Post",
+  GENERAL: "Announcement",
 }
 
 export function NotificationBell() {
@@ -55,6 +74,50 @@ export function NotificationBell() {
   React.useEffect(() => {
     if (open) fetchNotifications()
   }, [open, fetchNotifications])
+
+  React.useEffect(() => {
+    if (!session?.user?.id) return
+
+    const pushNotification = (n: UserNotification) => {
+      setNotifications((prev) => {
+        if (prev.some((x) => x.id === n.id)) return prev
+        return [n, ...prev].slice(0, 10)
+      })
+      setUnreadCount((prev) => prev + 1)
+    }
+
+    let source: EventSource | null = null
+    try {
+      source = new EventSource("/api/notifications/stream")
+      source.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          if (data && data.type && data.title) pushNotification(data)
+        } catch {
+          /* ignore malformed events */
+        }
+      }
+    } catch {
+      source = null
+    }
+
+    const poll = setInterval(() => {
+      fetch("/api/user/notifications?limit=10")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (json && json.success) {
+            setNotifications(json.data)
+            setUnreadCount(json.unreadCount)
+          }
+        })
+        .catch(() => {})
+    }, 45000)
+
+    return () => {
+      source?.close()
+      clearInterval(poll)
+    }
+  }, [session?.user?.id])
 
   const markRead = async (id: string) => {
     try {
@@ -119,7 +182,7 @@ export function NotificationBell() {
                 )}
               >
                 <Link
-                  href={`${typeHref[n.type] || "#"}/${n.slug}`}
+                  href={n.type === "GENERAL" ? "/notifications" : `${typeHref[n.type] || "/notifications"}/${n.slug}`}
                   className="min-w-0 flex-1"
                   onClick={() => {
                     if (!n.read) markRead(n.id)
@@ -134,12 +197,11 @@ export function NotificationBell() {
                   >
                     {n.title}
                   </p>
+                  {n.message && (
+                    <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{n.message}</p>
+                  )}
                   <p className="mt-0.5 text-xs text-gray-400">
-                    {n.type === "JOB"
-                      ? "New Job"
-                      : n.type === "RESULT"
-                        ? "New Result"
-                        : "New Admit Card"}
+                    {typeLabel[n.type] || "Update"}
                   </p>
                 </Link>
                 <div className="flex shrink-0 items-center gap-1">
@@ -157,6 +219,12 @@ export function NotificationBell() {
             ))
           )}
         </div>
+        <Link
+          href="/profile"
+          className="block border-t px-4 py-2.5 text-center text-xs font-medium text-teal-600 hover:bg-gray-50 dark:hover:bg-gray-900"
+        >
+          Manage notification preferences
+        </Link>
       </PopoverContent>
     </Popover>
   )

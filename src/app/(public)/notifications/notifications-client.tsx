@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
+function recordView(id: string) {
+  fetch(`/api/notifications/${id}/view`, { method: "POST" }).catch(() => {})
+}
+
 interface Notification {
   id: string
   title: string
@@ -164,7 +168,10 @@ export function NotificationsClient({ notifications: initialNotifications, categ
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
               >
-                <Card className="border-gray-200 transition-colors hover:border-teal-200">
+                <Card
+                  className="cursor-pointer border-gray-200 transition-colors hover:border-teal-200"
+                  onClick={() => recordView(notification.id)}
+                >
                   <CardContent className="p-5">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
