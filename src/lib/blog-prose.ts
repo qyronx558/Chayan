@@ -25,4 +25,5 @@ export const BLOG_PROSE_CLASSES = [
   "prose-blockquote:my-8",
   "prose-pre:my-8",
   "dark:prose-invert",
+  "rich-content",
 ].join(" ")
