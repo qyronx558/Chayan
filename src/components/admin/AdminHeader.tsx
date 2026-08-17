@@ -21,7 +21,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const { data: session } = useSession()
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-gray-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-[env(safe-area-inset-top)] z-30 flex h-16 items-center gap-4 border-b border-gray-200 bg-white px-4 lg:px-6">
       <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
         <Menu className="h-5 w-5" />
       </Button>

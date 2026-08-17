@@ -155,7 +155,7 @@ export function Header() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full transition-shadow duration-200",
+          "sticky top-[env(safe-area-inset-top)] z-50 w-full transition-shadow duration-200",
           scrolled
             ? "shadow-md bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:bg-gray-950/95 dark:supports-[backdrop-filter]:bg-gray-950/80"
             : "bg-white dark:bg-gray-950"
@@ -164,10 +164,12 @@ export function Header() {
         <div className="bg-[#1e3a5f] dark:bg-[#0f1f3d] border-b border-[#2a4a75]">
           <div className="mx-auto max-w-7xl px-4 flex items-center justify-between h-9">
             <div className="w-[200px] hidden sm:block" />
-            <span className="text-xs text-blue-200/80 font-medium text-center">
+            <span className="flex-1 sm:flex-none text-xs text-blue-200/80 font-medium text-center">
               Welcome to Chayan{session?.user?.name ? `, ${session.user.name}` : ""}
             </span>
-            <DateTimeDisplay />
+            <div className="hidden md:block">
+              <DateTimeDisplay />
+            </div>
           </div>
         </div>
 

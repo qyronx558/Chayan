@@ -29,7 +29,7 @@ export function CookieConsent() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white px-4 pt-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-lg dark:border-gray-700 dark:bg-gray-900">
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <p className="text-sm text-gray-700 dark:text-gray-300">

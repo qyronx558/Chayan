@@ -328,7 +328,7 @@ export function DocumentDetail({
                     const Icon = iconFor(item.label)
                     return (
                       <TableRow key={item.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
-                        <TableCell className="w-56 font-medium text-gray-700 dark:text-gray-300">
+                        <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
                           <span className="flex items-center gap-2">
                             <Icon className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
                           </span>
@@ -339,7 +339,7 @@ export function DocumentDetail({
                   })}
                   {linkRows.map((item) => (
                     <TableRow key={item.label} className="bg-gray-50/70 dark:bg-gray-800/40">
-                      <TableCell className="w-56 font-medium text-gray-700 dark:text-gray-300">
+                      <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
                         <span className="flex items-center gap-2">
                           <Briefcase className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
                         </span>
@@ -463,7 +463,7 @@ export function DocumentDetail({
       )}
 
       {/* ── Sticky Mobile Bar ─────────────────────────── */}
-      <div className="sticky bottom-0 z-40 -mx-4 mt-4 border-t bg-white/95 px-4 py-3 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 lg:hidden">
+      <div className="sticky bottom-0 z-40 -mx-4 mt-4 border-t bg-white/95 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 lg:hidden">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</p>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Suspense } from "react"
@@ -39,6 +39,12 @@ export const metadata: Metadata = {
   verification: process.env.GOOGLE_SEARCH_CONSOLE_ID
     ? { google: process.env.GOOGLE_SEARCH_CONSOLE_ID }
     : undefined,
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 const organizationJsonLd = {
