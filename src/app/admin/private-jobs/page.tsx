@@ -116,8 +116,9 @@ const onSubmit = (data: PrivateJobInput) => {
       if (editingId) updateMutation.mutate({ id: editingId, data: payload })
       else createMutation.mutate(payload)
     } else {
-      if (editingId) updateMutation.mutate({ id: editingId, data })
-      else createMutation.mutate(data)
+      const payload = { ...data, companyName: undefined }
+      if (editingId) updateMutation.mutate({ id: editingId, data: payload })
+      else createMutation.mutate(payload)
     }
   }
 

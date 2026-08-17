@@ -182,7 +182,8 @@ export const privateJobSchema = z
     title: z.string().min(1, "Title is required"),
     slug: z.string().min(1, "Slug is required"),
     companyId: z.string().optional(),
-    companyName: z.string().trim().min(1, "Company name is required").optional(),
+    companyName: z
+      .preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), z.string().trim().min(1, "Company name is required").optional()),
     type: z.enum(["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT"]),
     category: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
