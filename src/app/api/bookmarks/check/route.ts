@@ -14,12 +14,14 @@ export async function GET(request: NextRequest) {
     const resultId = searchParams.get("resultId")
     const admitCardId = searchParams.get("admitCardId")
     const privateJobId = searchParams.get("privateJobId")
+    const syllabusId = searchParams.get("syllabusId")
 
     const where: Record<string, unknown> = { userId: session.user.id }
     if (jobId) where.jobId = jobId
     else if (resultId) where.resultId = resultId
     else if (admitCardId) where.admitCardId = admitCardId
     else if (privateJobId) where.privateJobId = privateJobId
+    else if (syllabusId) where.syllabusId = syllabusId
     else {
       return NextResponse.json({ bookmarked: false, id: null })
     }

@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
           result: { include: { department: true, category: true } },
           admitCard: { include: { department: true, category: true } },
           privateJob: { include: { company: true } },
+          syllabus: { include: { department: true, category: true } },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -60,11 +61,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { jobId, resultId, admitCardId, privateJobId } = validation.data
+    const { jobId, resultId, admitCardId, privateJobId, syllabusId } = validation.data
 
-    if (!jobId && !resultId && !admitCardId && !privateJobId) {
+    if (!jobId && !resultId && !admitCardId && !privateJobId && !syllabusId) {
       return NextResponse.json(
-        { success: false, error: "Must provide jobId, resultId, admitCardId, or privateJobId" },
+        { success: false, error: "Must provide jobId, resultId, admitCardId, privateJobId, or syllabusId" },
         { status: 400 }
       )
     }
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
         ...(resultId ? { resultId } : {}),
         ...(admitCardId ? { admitCardId } : {}),
         ...(privateJobId ? { privateJobId } : {}),
+        ...(syllabusId ? { syllabusId } : {}),
       },
     })
 
@@ -90,6 +92,7 @@ export async function POST(request: NextRequest) {
         ...(resultId ? { resultId } : {}),
         ...(admitCardId ? { admitCardId } : {}),
         ...(privateJobId ? { privateJobId } : {}),
+        ...(syllabusId ? { syllabusId } : {}),
       },
     })
 

@@ -19,6 +19,7 @@ import {
   User,
   LogOut,
   Bookmark,
+  ClipboardList,
   Menu,
   X,
 } from "lucide-react"
@@ -134,6 +135,15 @@ export function MobileNav() {
                     >
                       <User className="h-4 w-4" />
                       My Profile
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      href="/applications"
+                      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                      My Applications
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>

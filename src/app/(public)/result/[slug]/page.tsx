@@ -91,6 +91,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
         downloadUrl={result.pdfUrl}
         downloadLabel="Download Result PDF"
         bookmarkId={{ type: "result", id: result.id }}
+        followJob={result.job ? { jobId: result.job.id } : null}
         relatedTitle="Related Results"
         relatedItems={relatedResults.map((rr) => ({
           href: `/result/${rr.slug}`,

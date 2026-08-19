@@ -6,6 +6,7 @@ import { Search, AlertCircle, Download, Calendar, IndianRupee, X, GraduationCap 
 import { SectionHero } from "@/components/layout/SectionHero"
 import { formatDate } from "@/lib/utils"
 import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -161,14 +162,17 @@ export function AdmissionsClient() {
                   href={`/admission/${item.slug}`}
                   ctaLabel="View Details"
                   footer={
-                    item.pdfUrl ? (
-                      <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                        <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
-                          <Download className="h-3.5 w-3.5" />
-                          PDF
-                        </a>
-                      </Button>
-                    ) : undefined
+                    <div className="flex items-center gap-2">
+                      <ApplicationTracker jobId={item.id} type="admission" />
+                      {item.pdfUrl ? (
+                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
+                          <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5" />
+                            PDF
+                          </a>
+                        </Button>
+                      ) : null}
+                    </div>
                   }
                 />
                 </motion.div>

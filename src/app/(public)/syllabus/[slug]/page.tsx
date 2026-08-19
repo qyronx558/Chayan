@@ -81,6 +81,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
           : null}
         downloadUrl={syllabus.pdfUrl}
         downloadLabel="Download Syllabus PDF"
+        bookmarkSyllabusId={syllabus.id}
         relatedTitle="Related Syllabus"
         relatedItems={relatedSyllabus.map((rs) => ({
           href: `/syllabus/${rs.slug}`,

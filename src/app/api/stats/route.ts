@@ -12,6 +12,17 @@ export async function GET(request: NextRequest) {
       scopeWhere = contentScope(session?.user?.role, session?.user?.id)
     }
 
+    const session = await auth()
+    const userStats =
+      session?.user
+        ? {
+            totalBookmarks: await prisma.bookmark.count({ where: { userId: session.user.id } }),
+            savedJobs: await prisma.bookmark.count({ where: { userId: session.user.id, jobId: { not: null } } }),
+            totalComments: await prisma.comment.count({ where: { userId: session.user.id } }),
+            totalApplications: await prisma.application.count({ where: { userId: session.user.id } }),
+          }
+        : null
+
     const [
       totalJobs,
       activeJobs,
@@ -85,6 +96,7 @@ export async function GET(request: NextRequest) {
         totalSyllabus,
         recentJobs,
         jobsCreatedLast7Days,
+        userStats,
       },
     })
   } catch (error) {

@@ -82,6 +82,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
         countdownDate={admitCard.examDate ? admitCard.examDate.toISOString() : null}
         countdownLabel="Exam Date"
         bookmarkId={{ type: "admit-card", id: admitCard.id }}
+        followJob={admitCard.job ? { jobId: admitCard.job.id } : null}
         relatedTitle="Related Admit Cards"
         relatedItems={relatedCards.map((rc) => ({
           href: `/admit-card/${rc.slug}`,

@@ -140,6 +140,13 @@ export const bookmarkSchema = z.object({
   resultId: z.string().nullable().optional(),
   admitCardId: z.string().nullable().optional(),
   privateJobId: z.string().nullable().optional(),
+  syllabusId: z.string().nullable().optional(),
+})
+
+export const applicationSchema = z.object({
+  jobId: z.string().min(1, "jobId is required"),
+  type: z.enum(["job", "admission"]).default("job"),
+  status: z.enum(["interested", "applied", "admit_card", "exam_done", "result_out"]).default("interested"),
 })
 
 export const searchSchema = z.object({
@@ -167,6 +174,7 @@ export type NotificationInput = z.infer<typeof notificationSchema>
 export type CommentInput = z.infer<typeof commentSchema>
 export type ProfileInput = z.infer<typeof profileSchema>
 export type BookmarkInput = z.infer<typeof bookmarkSchema>
+export type ApplicationInput = z.infer<typeof applicationSchema>
 export const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),

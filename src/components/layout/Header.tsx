@@ -10,6 +10,7 @@ import {
   LogOut,
   Bookmark,
   LayoutDashboard,
+  ClipboardList,
   ChevronDown,
   Briefcase,
   Building2,
@@ -258,6 +259,12 @@ export function Header() {
                       <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
                         <User className="h-4 w-4" />
                         My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/applications" className="flex items-center gap-2 cursor-pointer">
+                        <ClipboardList className="h-4 w-4" />
+                        My Applications
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

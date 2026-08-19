@@ -52,6 +52,14 @@ interface BookmarkedPrivateJob {
   status: string
 }
 
+interface BookmarkedSyllabus {
+  id: string
+  title: string
+  slug: string
+  department: { name: string }
+  status: string | null
+}
+
 interface BookmarkItem {
   id: string
   createdAt: string
@@ -59,6 +67,7 @@ interface BookmarkItem {
   result: BookmarkedResult | null
   admitCard: BookmarkedAdmitCard | null
   privateJob: BookmarkedPrivateJob | null
+  syllabus: BookmarkedSyllabus | null
 }
 
 export default function BookmarksPage() {
@@ -114,6 +123,7 @@ export default function BookmarksPage() {
   const savedResults = bookmarks.filter((b) => b.result)
   const savedAdmitCards = bookmarks.filter((b) => b.admitCard)
   const savedPrivateJobs = bookmarks.filter((b) => b.privateJob)
+  const savedSyllabus = bookmarks.filter((b) => b.syllabus)
 
   if (status === "loading" || isLoading) {
     return (
@@ -152,6 +162,9 @@ export default function BookmarksPage() {
             </TabsTrigger>
             <TabsTrigger value="privateJobs">
               Private Jobs ({savedPrivateJobs.length})
+            </TabsTrigger>
+            <TabsTrigger value="syllabus">
+              Syllabus ({savedSyllabus.length})
             </TabsTrigger>
           </TabsList>
 
@@ -241,6 +254,29 @@ export default function BookmarksPage() {
                     date={null}
                     status={bookmark.privateJob!.status}
                     href={`/private-jobs/${bookmark.privateJob!.slug}`}
+                    onRemove={removeBookmark}
+                    isRemoving={removingId === bookmark.id}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="syllabus">
+            {savedSyllabus.length === 0 ? (
+              <EmptyState type="syllabus" />
+            ) : (
+              <div className="space-y-4">
+                {savedSyllabus.map((bookmark) => (
+                  <BookmarkCard
+                    key={bookmark.id}
+                    id={bookmark.id}
+                    title={bookmark.syllabus!.title}
+                    slug={bookmark.syllabus!.slug}
+                    department={bookmark.syllabus!.department.name}
+                    date={null}
+                    status={bookmark.syllabus!.status}
+                    href={`/syllabus/${bookmark.syllabus!.slug}`}
                     onRemove={removeBookmark}
                     isRemoving={removingId === bookmark.id}
                   />

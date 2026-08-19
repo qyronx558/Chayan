@@ -82,6 +82,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
         downloadLabel="Download Notification PDF"
         countdownDate={admission.lastDate ? admission.lastDate.toISOString() : null}
         countdownLabel="Last Date to Apply"
+        application={{ type: "admission", id: admission.id }}
         relatedTitle="Related Admissions"
         relatedItems={relatedAdmissions.map((ra) => ({
           href: `/admission/${ra.slug}`,

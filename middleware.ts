@@ -17,7 +17,7 @@ export default auth((req) => {
   }
 
   // Protected user routes
-  const userPaths = ["/profile", "/bookmarks"]
+  const userPaths = ["/profile", "/bookmarks", "/applications"]
   if (userPaths.some((p) => pathname.startsWith(p)) && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.url))
   }
@@ -32,5 +32,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ["/admin/:path*", "/profile/:path*", "/bookmarks/:path*", "/login", "/register"],
+  matcher: ["/admin/:path*", "/profile/:path*", "/bookmarks/:path*", "/applications/:path*", "/login", "/register"],
 }

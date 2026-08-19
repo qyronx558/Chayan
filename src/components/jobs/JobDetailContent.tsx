@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
 
@@ -182,6 +183,7 @@ export function JobDetailContent({
                 <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
               </a>
             </Button>
+            <ApplicationTracker jobId={jobId} variant="full" />
             <BookmarkButton jobId={jobId} size="default" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20" />
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/15" onClick={() => window.print()} title="Print">
               <Printer className="h-4 w-4" />

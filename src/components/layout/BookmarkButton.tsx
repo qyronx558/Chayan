@@ -11,6 +11,7 @@ interface BookmarkButtonProps {
   resultId?: string | null
   admitCardId?: string | null
   privateJobId?: string | null
+  syllabusId?: string | null
   size?: "sm" | "icon" | "default"
   variant?: "ghost" | "outline"
   className?: string
@@ -21,6 +22,7 @@ export function BookmarkButton({
   resultId,
   admitCardId,
   privateJobId,
+  syllabusId,
   size = "icon",
   variant = "ghost",
   className = "",
@@ -43,6 +45,7 @@ export function BookmarkButton({
         if (resultId) params.set("resultId", resultId)
         if (admitCardId) params.set("admitCardId", admitCardId)
         if (privateJobId) params.set("privateJobId", privateJobId)
+        if (syllabusId) params.set("syllabusId", syllabusId)
         const res = await fetch(`/api/bookmarks/check?${params}`)
         const json = await res.json()
         setIsBookmarked(json.bookmarked)
@@ -52,7 +55,7 @@ export function BookmarkButton({
       }
     }
     checkBookmark()
-  }, [session, jobId, resultId, admitCardId, privateJobId])
+  }, [session, jobId, resultId, admitCardId, privateJobId, syllabusId])
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -71,6 +74,7 @@ export function BookmarkButton({
         if (resultId) params.set("resultId", resultId)
         if (admitCardId) params.set("admitCardId", admitCardId)
         if (privateJobId) params.set("privateJobId", privateJobId)
+        if (syllabusId) params.set("syllabusId", syllabusId)
         const res = await fetch(`/api/bookmarks/check?${params}`)
         const json = await res.json()
         if (json.id) {
@@ -81,7 +85,7 @@ export function BookmarkButton({
         const res = await fetch("/api/bookmarks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jobId, resultId, admitCardId, privateJobId }),
+          body: JSON.stringify({ jobId, resultId, admitCardId, privateJobId, syllabusId }),
         })
         if (res.ok) setIsBookmarked(true)
       }

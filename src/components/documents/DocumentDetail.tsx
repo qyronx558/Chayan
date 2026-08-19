@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
+import { JobFollowBell } from "@/components/jobs/JobFollowBell"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
 
@@ -51,6 +53,9 @@ interface DocumentDetailProps {
   countdownDate?: string | null
   countdownLabel?: string
   bookmarkId?: { type: "result" | "admit-card"; id: string } | null
+  bookmarkSyllabusId?: string | null
+  application?: { type: "admission"; id: string } | null
+  followJob?: { jobId: string } | null
   relatedTitle: string
   relatedItems: RelatedItem[]
 }
@@ -92,6 +97,9 @@ export function DocumentDetail({
   countdownDate,
   countdownLabel,
   bookmarkId,
+  bookmarkSyllabusId,
+  application,
+  followJob,
   relatedTitle,
   relatedItems,
 }: DocumentDetailProps) {
@@ -182,6 +190,20 @@ export function DocumentDetail({
               <Button size="sm" className="bg-white/15 font-semibold text-white backdrop-blur" disabled>
                 <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
               </Button>
+            )}
+            {application && (
+              <ApplicationTracker jobId={application.id} type="admission" variant="full" />
+            )}
+            {followJob && (
+              <JobFollowBell jobId={followJob.jobId} />
+            )}
+            {bookmarkSyllabusId && (
+              <BookmarkButton
+                syllabusId={bookmarkSyllabusId}
+                size="default"
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+              />
             )}
             {bookmarkId && (
               <BookmarkButton
