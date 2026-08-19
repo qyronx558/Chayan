@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { notificationSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
-import { notifyUsers } from "@/lib/notifications"
+import { notifyUsers, existingNotificationHrefs } from "@/lib/notifications"
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,9 +33,12 @@ export async function GET(request: NextRequest) {
       prisma.notification.count({ where }),
     ])
 
+    const hrefs = await existingNotificationHrefs(notifications)
+    const data = notifications.map((n) => ({ ...n, href: hrefs.get(n.slug) || null }))
+
     return NextResponse.json({
       success: true,
-      data: notifications,
+      data,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     })
   } catch (error) {

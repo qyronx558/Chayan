@@ -85,6 +85,63 @@ export function notificationHref(
   }
 }
 
+export async function existingNotificationHrefs(
+  items: { type: string | null; slug: string }[]
+): Promise<Map<string, string>> {
+  const groups = new Map<string, string[]>()
+  for (const item of items) {
+    if (!item.type || !item.slug) continue
+    if (!notificationHref(item.type, item.slug)) continue
+    const arr = groups.get(item.type) || []
+    arr.push(item.slug)
+    groups.set(item.type, arr)
+  }
+
+  const result = new Map<string, string>()
+  await Promise.all(
+    Array.from(groups.entries()).map(async ([type, slugs]) => {
+      let found: { slug: string }[] = []
+      switch (type) {
+        case "JOB":
+          found = await prisma.job.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "PRIVATE_JOB":
+          found = await prisma.privateJob.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "RESULT":
+          found = await prisma.result.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "ADMIT_CARD":
+          found = await prisma.admitCard.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "ADMISSION":
+          found = await prisma.admission.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "SYLLABUS":
+          found = await prisma.syllabus.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "ANSWER_KEY":
+          found = await prisma.answerKey.findMany({ where: { slug: { in: slugs } }, select: { slug: true } })
+          break
+        case "BLOG":
+          found = await prisma.blogPost.findMany({
+            where: { slug: { in: slugs }, published: true },
+            select: { slug: true },
+          })
+          break
+      }
+      const existing = new Set(found.map((f) => f.slug))
+      for (const slug of slugs) {
+        if (existing.has(slug)) {
+          const href = notificationHref(type, slug)
+          if (href) result.set(slug, href)
+        }
+      }
+    })
+  )
+  return result
+}
+
 export async function notifyUsers(
   type: NotificationType,
   title: string,

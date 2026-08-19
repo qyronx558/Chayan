@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Flame, Eye, Calendar, ArrowRight } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
-import { notificationHref } from "@/lib/notifications"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,6 +17,7 @@ interface Notification {
   views: number
   slug: string
   type: string | null
+  href: string | null
 }
 
 function formatViews(views: number): string {
@@ -50,6 +50,7 @@ export function TrendingNotifications() {
               views: item.views as number,
               slug: item.slug as string,
               type: (item.type as string | null) || null,
+              href: (item.href as string | null) || null,
             }))
           )
         }
@@ -89,7 +90,7 @@ export function TrendingNotifications() {
           <div className="space-y-2.5">
             {notifications.slice(0, 5).map((item, index) => (
               <div key={item.id}>
-                <Link href={notificationHref(item.type, item.slug) || "/notifications"} className="block" onClick={() => {
+                <Link href={item.href || "/notifications"} className="block" onClick={() => {
                   fetch(`/api/notifications/${item.id}/view`, { method: "POST" }).catch(() => {})
                 }}>
                   <Card className="group border-gray-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md">

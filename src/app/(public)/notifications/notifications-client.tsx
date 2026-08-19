@@ -5,7 +5,6 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Search, Eye, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2, FileText, ExternalLink } from "lucide-react"
 import { formatDate, truncate } from "@/lib/utils"
-import { notificationHref } from "@/lib/notifications"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +22,7 @@ interface Notification {
   content: string | null
   type: string | null
   officialUrl: string | null
+  href: string | null
   isTrending: boolean
   views: number
   createdAt: string
@@ -199,9 +199,9 @@ export function NotificationsClient({ notifications: initialNotifications, categ
                           </a>
                         </Button>
                       )}
-                      {notificationHref(notification.type, notification.slug) && (
+                      {notification.href && (
                         <Button size="sm" asChild>
-                          <Link href={notificationHref(notification.type, notification.slug) as string}>
+                          <Link href={notification.href}>
                             <ExternalLink className="mr-1.5 h-4 w-4" /> View Details
                           </Link>
                         </Button>

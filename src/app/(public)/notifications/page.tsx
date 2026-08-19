@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
+import { existingNotificationHrefs } from "@/lib/notifications"
 import { NotificationsClient } from "./notifications-client"
 
 export const metadata: Metadata = {
@@ -21,5 +22,8 @@ export default async function NotificationsPage() {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ])
 
-  return <NotificationsClient notifications={JSON.parse(JSON.stringify(notifications))} categories={JSON.parse(JSON.stringify(categories))} />
+  const hrefs = await existingNotificationHrefs(notifications)
+  const items = notifications.map((n) => ({ ...n, href: hrefs.get(n.slug) || null }))
+
+  return <NotificationsClient notifications={JSON.parse(JSON.stringify(items))} categories={JSON.parse(JSON.stringify(categories))} />
 }
