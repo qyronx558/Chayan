@@ -59,6 +59,32 @@ export function notificationTypeLabel(type: NotificationType): string {
   }
 }
 
+export function notificationHref(
+  type: string | null | undefined,
+  slug: string
+): string | null {
+  switch (type) {
+    case "JOB":
+      return `/apply/${slug}`
+    case "PRIVATE_JOB":
+      return `/private-jobs/${slug}`
+    case "RESULT":
+      return `/result/${slug}`
+    case "ADMIT_CARD":
+      return `/admit-card/${slug}`
+    case "ADMISSION":
+      return `/admission/${slug}`
+    case "SYLLABUS":
+      return `/syllabus/${slug}`
+    case "ANSWER_KEY":
+      return `/answer-key/${slug}`
+    case "BLOG":
+      return `/blog/${slug}`
+    default:
+      return null
+  }
+}
+
 export async function notifyUsers(
   type: NotificationType,
   title: string,

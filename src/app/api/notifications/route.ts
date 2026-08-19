@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, slug, content, categoryId, type, isTrending } = validation.data
+    const { title, slug, content, categoryId, type, officialUrl, isTrending } = validation.data
 
     const data: Prisma.NotificationCreateInput = {
       title,
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       ...(content !== undefined && content !== null ? { content } : {}),
       category: { connect: { id: categoryId } },
       ...(type !== undefined && type !== null ? { type } : {}),
+      ...(officialUrl !== undefined && officialUrl !== null ? { officialUrl } : {}),
       isTrending: isTrending || false,
     }
 

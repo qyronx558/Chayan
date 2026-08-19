@@ -57,7 +57,7 @@ export async function PUT(
       )
     }
 
-    const { title, slug, content, categoryId, type, isTrending } = validation.data
+    const { title, slug, content, categoryId, type, officialUrl, isTrending } = validation.data
 
     const data: Prisma.NotificationUpdateInput = {
       title,
@@ -65,6 +65,7 @@ export async function PUT(
       ...(content !== undefined ? { content } : {}),
       category: { connect: { id: categoryId } },
       ...(type !== undefined ? { type } : {}),
+      ...(officialUrl !== undefined && officialUrl !== null ? { officialUrl } : {}),
       isTrending: isTrending || false,
     }
 

@@ -443,6 +443,7 @@ model Notification {
   content    String?
   categoryId String
   type       String?
+  officialUrl String?
   isTrending Boolean  @default(false)
   views      Int      @default(0)
   createdAt  DateTime @default(now())

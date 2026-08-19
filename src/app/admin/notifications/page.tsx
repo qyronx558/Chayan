@@ -30,11 +30,12 @@ import {
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
 import { isAdmin } from "@/lib/roles"
-import { Plus, Pencil, Trash2, TrendingUp } from "lucide-react"
+import { Plus, Pencil, Trash2, TrendingUp, ExternalLink } from "lucide-react"
 
 interface NotificationItem {
   id: string; title: string; slug: string; content: string | null
-  categoryId: string; type: string | null; isTrending: boolean; views: number
+  categoryId: string; type: string | null; officialUrl: string | null
+  isTrending: boolean; views: number
   createdAt: string
   category: { id: string; name: string; slug: string }
 }
@@ -75,7 +76,7 @@ export default function AdminNotifications() {
 
   const form = useForm<NotificationInput>({
     resolver: zodResolver(notificationSchema) as any,
-    defaultValues: { title: "", slug: "", content: null, categoryId: "", type: null, isTrending: false },
+    defaultValues: { title: "", slug: "", content: null, categoryId: "", type: null, officialUrl: null, isTrending: false },
   })
 
   const createMutation = useMutation({
@@ -109,13 +110,13 @@ export default function AdminNotifications() {
 
   const openEdit = (n: NotificationItem) => {
     setEditingId(n.id)
-    form.reset({ title: n.title, slug: n.slug, content: n.content, categoryId: n.categoryId, type: n.type, isTrending: n.isTrending })
+    form.reset({ title: n.title, slug: n.slug, content: n.content, categoryId: n.categoryId, type: n.type, officialUrl: n.officialUrl, isTrending: n.isTrending })
     setDialogOpen(true)
   }
 
   const openCreate = () => {
     setEditingId(null)
-    form.reset({ title: "", slug: "", content: null, categoryId: categories[0]?.id || "", type: null, isTrending: false })
+    form.reset({ title: "", slug: "", content: null, categoryId: categories[0]?.id || "", type: null, officialUrl: null, isTrending: false })
     setDialogOpen(true)
   }
 
@@ -138,6 +139,7 @@ export default function AdminNotifications() {
                   <TableHead>Title</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Link</TableHead>
                   <TableHead>Views</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -164,6 +166,15 @@ export default function AdminNotifications() {
                         <span className="text-gray-400">—</span>
                       )}
                     </TableCell>
+                    <TableCell>
+                      {n.officialUrl ? (
+                        <a href={n.officialUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline" title={n.officialUrl}>
+                          <ExternalLink className="h-3 w-3" /> Official
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-gray-500">{n.views}</TableCell>
                     <TableCell>{formatDate(n.createdAt)}</TableCell>
                     <TableCell className="text-right">
@@ -175,7 +186,7 @@ export default function AdminNotifications() {
                   </TableRow>
                 ))}
                 {notifications.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-gray-500">No notifications found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No notifications found</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -238,6 +249,16 @@ export default function AdminNotifications() {
                   <FormControl>
                     <Textarea {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} rows={4} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="officialUrl" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Official Link (PDF / Notification URL)</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="https://bpsc.bih.nic.in/notification.pdf" />
+                  </FormControl>
+                  <p className="text-xs text-gray-500">The "Official Link" button on the public notification card points here. Leave empty if not needed.</p>
                   <FormMessage />
                 </FormItem>
               )} />

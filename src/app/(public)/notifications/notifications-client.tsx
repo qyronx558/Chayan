@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
-import { Search, Eye, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { Search, Eye, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2, FileText, ExternalLink } from "lucide-react"
 import { formatDate, truncate } from "@/lib/utils"
+import { notificationHref } from "@/lib/notifications"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +22,7 @@ interface Notification {
   slug: string
   content: string | null
   type: string | null
+  officialUrl: string | null
   isTrending: boolean
   views: number
   createdAt: string
@@ -188,6 +191,22 @@ export function NotificationsClient({ notifications: initialNotifications, categ
                     {notification.content && (
                       <p className="mb-3 text-sm text-gray-600">{truncate(notification.content, 200)}</p>
                     )}
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      {notification.officialUrl && (
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={notification.officialUrl} target="_blank" rel="noopener noreferrer">
+                            <FileText className="mr-1.5 h-4 w-4" /> Official Link
+                          </a>
+                        </Button>
+                      )}
+                      {notificationHref(notification.type, notification.slug) && (
+                        <Button size="sm" asChild>
+                          <Link href={notificationHref(notification.type, notification.slug) as string}>
+                            <ExternalLink className="mr-1.5 h-4 w-4" /> View Details
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex items-center gap-4 text-xs text-gray-400">
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" />

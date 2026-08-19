@@ -116,6 +116,10 @@ export const notificationSchema = z.object({
   content: z.string().nullable().optional(),
   categoryId: z.string().min(1, "Category is required"),
   type: z.string().nullable().optional(),
+  officialUrl: z
+    .union([z.string().url("Enter a valid URL (https://...)"), z.string().min(1).regex(/^\/.*/, "URL must start with https:// or /")])
+    .nullable()
+    .optional(),
   isTrending: z.boolean().default(false),
 })
 

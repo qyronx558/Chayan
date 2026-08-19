@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { notificationHref } from "@/lib/notifications"
 
 interface UserNotification {
   id: string
@@ -20,18 +21,6 @@ interface UserNotification {
   message: string | null
   read: boolean
   createdAt: string
-}
-
-const typeHref: Record<string, string> = {
-  JOB: "/apply",
-  PRIVATE_JOB: "/private-jobs",
-  RESULT: "/result",
-  ADMIT_CARD: "/admit-card",
-  ADMISSION: "/admission",
-  SYLLABUS: "/syllabus",
-  ANSWER_KEY: "/answer-key",
-  BLOG: "/blog",
-  GENERAL: "/notifications",
 }
 
 const typeLabel: Record<string, string> = {
@@ -182,7 +171,7 @@ export function NotificationBell() {
                 )}
               >
                 <Link
-                  href={n.type === "GENERAL" ? "/notifications" : `${typeHref[n.type] || "/notifications"}/${n.slug}`}
+                  href={notificationHref(n.type, n.slug) || "/notifications"}
                   className="min-w-0 flex-1"
                   onClick={() => {
                     if (!n.read) markRead(n.id)
