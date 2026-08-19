@@ -277,15 +277,13 @@ export default function AdminNotifications() {
                 </FormItem>
               )} />
               {watchedType && watchedType !== "GENERAL" && TYPE_CONTENT_ENDPOINTS[watchedType] && (
-                <FormItem>
-                  <FormLabel>Link to Existing Content (optional)</FormLabel>
+                <div className="space-y-2">
+                  <Label>Link to Existing Content (optional)</Label>
                   <Select
                     value={matchedContent ? watchedSlug : undefined}
-                    onValueChange={(v) => form.setValue("slug", v, { shouldValidate: true })}
+                    onValueChange={(v) => { if (v) form.setValue("slug", v, { shouldValidate: true }) }}
                   >
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Select content — fills the slug automatically" /></SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger><SelectValue placeholder="Select content — fills the slug automatically" /></SelectTrigger>
                     <SelectContent>
                       {(contentData?.data || []).map((c) => (
                         <SelectItem key={c.id} value={c.slug}>{c.title}</SelectItem>
@@ -293,8 +291,7 @@ export default function AdminNotifications() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-gray-500">Choosing an item links this notification to the exact content so the "View Details" button works. You can also type the slug manually.</p>
-                  <FormMessage />
-                </FormItem>
+                </div>
               )}
               <FormField control={form.control} name="content" render={({ field }) => (
                 <FormItem>
