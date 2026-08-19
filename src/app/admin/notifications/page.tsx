@@ -56,6 +56,17 @@ const NOTIFICATION_TYPES = [
   { value: "GENERAL", label: "General" },
 ]
 
+const TYPE_CONTENT_ENDPOINTS: Record<string, string> = {
+  JOB: "/api/jobs?limit=200",
+  PRIVATE_JOB: "/api/private-jobs?limit=200",
+  RESULT: "/api/results?limit=200",
+  ADMIT_CARD: "/api/admit-cards?limit=200",
+  ADMISSION: "/api/admissions?limit=200",
+  SYLLABUS: "/api/syllabus?limit=200",
+  ANSWER_KEY: "/api/answer-keys?limit=200",
+  BLOG: "/api/blog?limit=200",
+}
+
 export default function AdminNotifications() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -77,6 +88,18 @@ export default function AdminNotifications() {
   const form = useForm<NotificationInput>({
     resolver: zodResolver(notificationSchema) as any,
     defaultValues: { title: "", slug: "", content: null, categoryId: "", type: null, officialUrl: null, isTrending: false },
+  })
+
+  const watchedType = form.watch("type")
+  const watchedSlug = form.watch("slug")
+
+  const { data: contentData } = useQuery<{
+    success: boolean
+    data: { id: string; title: string; slug: string }[]
+  }>({
+    queryKey: ["notification-content-options", watchedType],
+    queryFn: () => fetcher(TYPE_CONTENT_ENDPOINTS[watchedType as string]),
+    enabled: !!watchedType && watchedType !== "GENERAL" && !!TYPE_CONTENT_ENDPOINTS[watchedType as string],
   })
 
   const createMutation = useMutation({
@@ -102,6 +125,7 @@ export default function AdminNotifications() {
 
   const notifications = notifData?.data || []
   const categories = categoriesData?.data || []
+  const matchedContent = contentData?.data?.find((c) => c.slug === watchedSlug)
 
   const onSubmit = (data: NotificationInput) => {
     if (editingId) { updateMutation.mutate({ id: editingId, data }) }
@@ -209,7 +233,16 @@ export default function AdminNotifications() {
                 </FormItem>
               )} />
               <FormField control={form.control} name="slug" render={({ field }) => (
-                <FormItem><FormLabel>Slug</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  {matchedContent ? (
+                    <p className="text-xs text-emerald-600">View Details button will link to: {matchedContent.title}</p>
+                  ) : watchedSlug && contentData?.data?.length ? (
+                    <p className="text-xs text-amber-600">No content with this slug — the View Details button will be hidden.</p>
+                  ) : null}
+                  <FormMessage />
+                </FormItem>
               )} />
               <FormField control={form.control} name="categoryId" render={({ field }) => (
                 <FormItem>
@@ -243,6 +276,26 @@ export default function AdminNotifications() {
                   <FormMessage />
                 </FormItem>
               )} />
+              {watchedType && watchedType !== "GENERAL" && TYPE_CONTENT_ENDPOINTS[watchedType] && (
+                <FormItem>
+                  <FormLabel>Link to Existing Content (optional)</FormLabel>
+                  <Select
+                    value={matchedContent ? watchedSlug : undefined}
+                    onValueChange={(v) => form.setValue("slug", v, { shouldValidate: true })}
+                  >
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Select content — fills the slug automatically" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(contentData?.data || []).map((c) => (
+                        <SelectItem key={c.id} value={c.slug}>{c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">Choosing an item links this notification to the exact content so the "View Details" button works. You can also type the slug manually.</p>
+                  <FormMessage />
+                </FormItem>
+              )}
               <FormField control={form.control} name="content" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Content</FormLabel>
