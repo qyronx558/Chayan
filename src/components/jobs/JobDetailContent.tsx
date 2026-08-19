@@ -307,7 +307,13 @@ export function JobDetailContent({
                           <item.icon className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
                         </span>
                       </TableCell>
-                      <TableCell className="whitespace-pre-line">{item.value}</TableCell>
+                      <TableCell>
+                          {containsHtml(item.value) ? (
+                            <RichTextView html={item.value} />
+                          ) : (
+                            <span className="whitespace-pre-line">{item.value}</span>
+                          )}
+                        </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -365,7 +371,7 @@ export function JobDetailContent({
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="flex flex-wrap gap-2">
-                {education && (
+                {education && !containsHtml(education) && (
                   <Badge variant="secondary" className="bg-blue-50 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                     <GraduationCap className="mr-1 h-3 w-3" /> {education}
                   </Badge>
@@ -381,6 +387,14 @@ export function JobDetailContent({
                   </Badge>
                 )}
               </div>
+              {education && containsHtml(education) && (
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Education Qualification
+                  </p>
+                  <RichTextView html={education} />
+                </div>
+              )}
               {ageRelaxation && (
                 <div>
                   <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Age Relaxation</p>

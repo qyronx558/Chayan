@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { RichTextView } from "@/components/shared/RichTextView"
+import { containsHtml } from "@/lib/blog-prose"
 
 type DocumentKind = "result" | "admit-card" | "answer-key" | "syllabus" | "admission"
 
@@ -333,7 +334,13 @@ export function DocumentDetail({
                             <Icon className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
                           </span>
                         </TableCell>
-                        <TableCell className="whitespace-pre-line">{item.value}</TableCell>
+                        <TableCell>
+                          {containsHtml(item.value) ? (
+                            <RichTextView html={item.value} />
+                          ) : (
+                            <span className="whitespace-pre-line">{item.value}</span>
+                          )}
+                        </TableCell>
                       </TableRow>
                     )
                   })}

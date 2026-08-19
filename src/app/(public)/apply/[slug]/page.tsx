@@ -8,6 +8,7 @@ import { JobViewTracker } from "@/components/jobs/JobViewTracker"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, getBaseUrl } from "@/lib/utils"
+import { stripHtmlToText } from "@/lib/blog-prose"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -67,7 +68,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: job.title,
-    description: job.education || job.title,
+    description: `${job.title} - ${job.department.name}. ${stripHtmlToText(job.education).slice(0, 500)}`,
     datePosted: job.startDate || job.createdAt,
     validThrough: job.lastDate || undefined,
     hiringOrganization: {
