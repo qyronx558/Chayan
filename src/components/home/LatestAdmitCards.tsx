@@ -24,7 +24,7 @@ export function LatestAdmitCards() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/admit-cards?limit=6")
+    fetch("/api/admit-cards?limit=9")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -57,7 +57,7 @@ export function LatestAdmitCards() {
 
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 9 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
           </div>

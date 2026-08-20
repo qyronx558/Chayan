@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       prisma.result.findMany({
         where,
         include: { department: true, category: true, job: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ resultDate: "desc" }, { createdAt: "desc" }],
         skip,
         take: limit,
       }),

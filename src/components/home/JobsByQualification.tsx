@@ -23,20 +23,34 @@ interface JobItem {
 }
 
 const QUALIFICATION_KEYWORDS = [
-  "10th", "12th", "Graduate", "Post Graduate", "Diploma", "ITI", "Ph.D", "PhD", "Engineering",
+  "10th", "12th", "ITI", "Diploma", "Graduate", "Post Graduate",
+  "Engineering", "B.Tech", "B.Sc", "M.Sc", "B.Com", "M.Com",
+  "BA", "MA", "MBA", "B.Ed", "M.Ed", "LLB", "BCA", "MCA",
+  "Nursing", "MBBS", "BDS", "Pharmacy", "CA", "PhD", "Any Graduate",
+  "M.Phil", "Agriculture", "Journalism", "Hotel Management", "Data Entry",
 ]
+
+const compact = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "")
+
+function matchesQualification(education: string, keyword: string): boolean {
+  const kw = compact(keyword)
+  const parts = education.split(/[,\n;]/).map((p) => p.trim()).filter(Boolean)
+  for (const part of parts) {
+    const compactPart = compact(part)
+    if (!compactPart) continue
+    if (kw.length <= 3) {
+      const tokens = part.split(/\s+/).map(compact)
+      if (tokens.some((t) => t === kw)) return true
+    } else if (compactPart.includes(kw)) {
+      return true
+    }
+  }
+  return false
+}
 
 function extractQualifications(education?: string | null): string[] {
   if (!education) return []
-  const found: string[] = []
-  const normalized = education.replace(/\s*,\s*/g, ",").replace(/\s*;\s*/g, ",").replace(/\n/g, ",")
-  const parts = normalized.split(",").map((s) => s.trim()).filter(Boolean)
-  for (const keyword of QUALIFICATION_KEYWORDS) {
-    if (parts.some((p) => p.toLowerCase().includes(keyword.toLowerCase()))) {
-      found.push(keyword)
-    }
-  }
-  return found
+  return QUALIFICATION_KEYWORDS.filter((keyword) => matchesQualification(education, keyword))
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -62,7 +76,7 @@ export function JobsByQualification({ className }: { className?: string }) {
       try {
         setLoading(true)
         setError("")
-        const res = await fetch("/api/jobs?limit=10")
+        const res = await fetch("/api/jobs?limit=50")
         const json = await res.json()
         if (!json.success) throw new Error(json.error || "Failed to fetch jobs")
         const mapped: JobItem[] = json.data.map((j: any) => ({
@@ -88,13 +102,13 @@ export function JobsByQualification({ className }: { className?: string }) {
   }, [])
 
   const qualifications = useMemo(() => {
-    const set = new Set<string>()
+    const present = new Set<string>()
     for (const job of jobs) {
       for (const q of extractQualifications(job.education)) {
-        set.add(q)
+        present.add(q)
       }
     }
-    return Array.from(set)
+    return QUALIFICATION_KEYWORDS.filter((q) => present.has(q))
   }, [jobs])
 
   useEffect(() => {
@@ -180,7 +194,7 @@ export function JobsByQualification({ className }: { className?: string }) {
                           : "bg-white text-gray-600 hover:text-amber-600 hover:border-amber-300 border"
                       )}
                     >
-                      {qual === "Ph.D" ? "PhD" : qual}
+                      {qual}
                     </button>
                   ))}
                 </div>
@@ -238,7 +252,7 @@ export function JobsByQualification({ className }: { className?: string }) {
               <div className="mt-6 text-center">
                 <Link href={`/jobs?qualification=${selectedQual}`}>
                   <Button variant="outline" className="gap-2">
-                    View All {selectedQual === "Ph.D" ? "PhD" : selectedQual} Jobs
+                    View All {selectedQual} Jobs
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
