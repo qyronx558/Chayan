@@ -21,8 +21,9 @@ export async function LatestBlog() {
   if (posts.length === 0) return null
 
   return (
-    <section className="container mx-auto px-4 py-10">
-      <SectionHeader
+    <section className="py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHeader
         icon={Newspaper}
         iconClassName="from-amber-500 to-orange-700"
         title="From the Blog"
@@ -59,6 +60,7 @@ export async function LatestBlog() {
             ctaLabel="Read More"
           />
         ))}
+      </div>
       </div>
     </section>
   )
