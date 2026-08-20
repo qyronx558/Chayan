@@ -47,8 +47,9 @@ export default function ApplicationsPage() {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  const fetchApplications = useCallback(async () => {
+  const fetchApplications = useCallback(async (silent = false) => {
     try {
       const res = await fetch("/api/applications")
       if (res.ok) {
@@ -56,6 +57,7 @@ export default function ApplicationsPage() {
         if (json.success) {
           setItems(json.data)
           setCounts(json.counts || {})
+          setLastUpdated(new Date())
         }
       }
     } catch {
@@ -73,6 +75,26 @@ export default function ApplicationsPage() {
       fetchApplications()
     }
   }, [status, router, fetchApplications])
+
+  useEffect(() => {
+    if (status !== "authenticated") return
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchApplications(true)
+      }
+    }, 5000)
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchApplications(true)
+    }
+    const onFocus = () => fetchApplications(true)
+    document.addEventListener("visibilitychange", onVisible)
+    window.addEventListener("focus", onFocus)
+    return () => {
+      window.clearInterval(interval)
+      document.removeEventListener("visibilitychange", onVisible)
+      window.removeEventListener("focus", onFocus)
+    }
+  }, [status, fetchApplications])
 
   const removeApplication = async (id: string) => {
     setRemovingId(id)
@@ -117,6 +139,13 @@ export default function ApplicationsPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
             <p className="text-sm text-gray-500">Track every job and admission you care about — from interested to result.</p>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            Live{lastUpdated ? ` · ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}
           </div>
         </div>
 

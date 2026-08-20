@@ -13,7 +13,6 @@ import {
   User,
   Shield,
   Bell,
-  Camera,
   Eye,
   EyeOff,
   BadgeCheck,
@@ -27,6 +26,15 @@ import {
   ArrowRight,
   KeyRound,
   CheckCircle2,
+  Lock,
+  FileText,
+  Upload,
+  Award,
+  CheckCircle,
+  Circle,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
 } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -40,6 +48,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
 import { Badge } from "@/components/ui/badge"
+import { AvatarUpload } from "@/components/profile/AvatarUpload"
 
 const profileEditSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -68,6 +77,17 @@ interface UserStats {
   totalApplications: number
 }
 
+interface ResumeInfo {
+  fileName: string
+  fileType: string
+  fileSize: number
+  skills: string[]
+  education: string | null
+  experience: string | null
+  locations: string[]
+  updatedAt: string
+}
+
 interface NotificationPrefs {
   jobAlerts: boolean
   resultAlerts: boolean
@@ -92,6 +112,12 @@ const PREFS_META: { key: keyof NotificationPrefs; label: string; description: st
   { key: "generalAlerts", label: "General Announcements", description: "Get notified about general site announcements" },
 ]
 
+function roleLabelFor(role: string | null | undefined): string {
+  if (role === "SUPER_ADMIN") return "Administrator"
+  if (role === "ADMIN") return "Admin"
+  return "User"
+}
+
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
@@ -101,6 +127,7 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [stats, setStats] = useState<UserStats>({
     totalBookmarks: 0,
     totalComments: 0,
@@ -119,7 +146,16 @@ export default function ProfilePage() {
     generalAlerts: true,
   })
   const [prefsLoaded, setPrefsLoaded] = useState(false)
-  const [accountInfo, setAccountInfo] = useState<{ createdAt?: string; password: boolean; image: string | null } | null>(null)
+  const [accountInfo, setAccountInfo] = useState<{
+    role?: string
+    createdAt?: string
+    emailVerified?: string | null
+    password: boolean
+    image: string | null
+  } | null>(null)
+  const [resume, setResume] = useState<ResumeInfo | null>(null)
+  const [resumeLoading, setResumeLoading] = useState(true)
+  const [uploadingResume, setUploadingResume] = useState(false)
 
   const profileForm = useForm<ProfileEditInput>({
     resolver: zodResolver(profileEditSchema),
@@ -141,11 +177,13 @@ export default function ProfilePage() {
     }
     if (status === "authenticated") {
       setIsLoading(false)
+      setAvatarUrl(session?.user?.image || null)
       fetchStats()
       loadNotificationPrefs()
       fetchAccountInfo()
+      fetchResume()
     }
-  }, [status, router])
+  }, [status, router, session?.user?.image])
 
   async function fetchStats() {
     try {
@@ -171,6 +209,42 @@ export default function ProfilePage() {
         }
       }
     } catch {
+    }
+  }
+
+  async function fetchResume() {
+    try {
+      const res = await fetch("/api/user/resume")
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && json.data) {
+          setResume(json.data)
+        }
+      }
+    } catch {
+    } finally {
+      setResumeLoading(false)
+    }
+  }
+
+  async function onUploadResume(file: File | undefined) {
+    if (!file) return
+    setUploadingResume(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/user/resume", { method: "POST", body: formData })
+      const json = await res.json()
+      if (!res.ok) {
+        toast(json.error || "Failed to upload resume", "destructive")
+        return
+      }
+      setResume(json.data)
+      toast("Resume uploaded and analyzed", "success")
+    } catch {
+      toast("Failed to upload resume", "destructive")
+    } finally {
+      setUploadingResume(false)
     }
   }
 
@@ -263,6 +337,11 @@ export default function ProfilePage() {
     }
   }
 
+  async function onAvatarChange(url: string | null) {
+    setAvatarUrl(url)
+    await update({ image: url })
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto max-w-5xl px-4 py-8">
@@ -283,7 +362,51 @@ export default function ProfilePage() {
         .toUpperCase()
     : "U"
 
-  const roleLabel = session?.user?.role === "SUPER_ADMIN" ? "Administrator" : "Member"
+  const roleLabel = roleLabelFor(accountInfo?.role || session?.user?.role)
+
+  const completionChecks = [
+    { label: "Profile photo", done: !!avatarUrl },
+    { label: "Full name", done: !!session?.user?.name && session.user.name.trim().length >= 2 },
+    { label: "Phone number", done: !!profileForm.watch("phone") },
+    { label: "Email verified", done: !!accountInfo?.emailVerified },
+    { label: "Resume uploaded", done: !!resume },
+  ]
+  const completedCount = completionChecks.filter((c) => c.done).length
+  const completionPct = Math.round((completedCount / completionChecks.length) * 100)
+
+  const badges = [
+    {
+      label: "Verified Email",
+      done: !!accountInfo?.emailVerified,
+      icon: BadgeCheck,
+      color: "text-emerald-600",
+    },
+    {
+      label: "Career Tracker",
+      done: stats.totalApplications >= 1,
+      icon: TrendingUp,
+      color: "text-teal-600",
+    },
+    {
+      label: "Bookmarker",
+      done: stats.totalBookmarks >= 1,
+      icon: Bookmark,
+      color: "text-amber-600",
+    },
+    {
+      label: "Resume Ready",
+      done: !!resume,
+      icon: FileText,
+      color: "text-sky-600",
+    },
+    {
+      label: "Community Voice",
+      done: stats.totalComments >= 1,
+      icon: MessageSquare,
+      color: "text-violet-600",
+    },
+  ]
+  const unlockedBadges = badges.filter((b) => b.done).length
 
   const statCards = [
     {
@@ -327,20 +450,15 @@ export default function ProfilePage() {
               <div className="flex items-end gap-5">
                 <div className="relative -mb-14">
                   <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
-                    <AvatarImage src={session?.user?.image || undefined} />
+                    <AvatarImage src={avatarUrl || undefined} />
                     <AvatarFallback className="bg-teal-800 text-3xl text-white">{initials}</AvatarFallback>
                   </Avatar>
-                  <button
-                    className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-white text-teal-700 shadow-md transition-transform hover:scale-105 dark:bg-gray-900 dark:text-teal-300"
-                    title="Change avatar (coming soon)"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </button>
+                  <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
                 </div>
                 <div className="pb-1 text-white">
                   <div className="flex items-center gap-2">
                     <h1 className="text-2xl font-bold">{session?.user?.name}</h1>
-                    <BadgeCheck className="h-5 w-5 text-teal-200" />
+                    {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 text-teal-200" />}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-teal-100">
                     <span className="flex items-center gap-1.5">
@@ -387,6 +505,78 @@ export default function ProfilePage() {
             </Card>
 
             <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  Profile Strength
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold text-gray-900 dark:text-white">{completionPct}% complete</span>
+                  <span className="text-xs text-gray-500">{completedCount}/{completionChecks.length} steps</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                  <motion.div
+                    className={cn(
+                      "h-full rounded-full bg-gradient-to-r transition-all",
+                      completionPct === 100 ? "from-emerald-500 to-teal-500" : "from-amber-400 to-orange-500"
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionPct}%` }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </div>
+                <div className="space-y-2 pt-1">
+                  {completionChecks.map((check) => (
+                    <div key={check.label} className="flex items-center gap-2 text-sm">
+                      {check.done ? (
+                        <CheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
+                      ) : (
+                        <Circle className="h-4 w-4 shrink-0 text-gray-300 dark:text-gray-600" />
+                      )}
+                      <span className={cn(check.done ? "text-gray-700 dark:text-gray-300" : "text-gray-400")}>
+                        {check.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Award className="h-4 w-4 text-amber-500" />
+                  Achievements
+                </CardTitle>
+                <CardDescription>
+                  {unlockedBadges}/{badges.length} unlocked
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                {badges.map((badge) => (
+                  <div
+                    key={badge.label}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm",
+                      badge.done
+                        ? "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40"
+                        : "border-gray-100 bg-gray-50/50 opacity-60 dark:border-gray-800 dark:bg-gray-900/40"
+                    )}
+                  >
+                    <badge.icon className={cn("h-4 w-4 shrink-0", badge.done ? badge.color : "text-gray-400")} />
+                    <span className={cn("font-medium", badge.done ? "text-gray-900 dark:text-white" : "text-gray-400")}>
+                      {badge.label}
+                    </span>
+                    {badge.done && <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />}
+                    {!badge.done && <Lock className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300 dark:text-gray-600" />}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">Account Details</CardTitle>
               </CardHeader>
@@ -424,28 +614,6 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/60 dark:to-emerald-950/60">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white">
-                    <ClipboardList className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Track your applications</p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Stay on top of deadlines, admit cards and results for every job you apply to.
-                    </p>
-                    <Link href="/applications">
-                      <Button variant="outline" size="sm" className="mt-3 border-teal-600 text-teal-700 hover:bg-teal-600 hover:text-white dark:text-teal-300">
-                        My Applications
-                        <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
@@ -453,6 +621,10 @@ export default function ProfilePage() {
               <TabsTrigger value="profile">
                 <User className="mr-2 h-4 w-4" />
                 Profile
+              </TabsTrigger>
+              <TabsTrigger value="resume">
+                <FileText className="mr-2 h-4 w-4" />
+                Resume
               </TabsTrigger>
               <TabsTrigger value="security">
                 <Shield className="mr-2 h-4 w-4" />
@@ -518,6 +690,127 @@ export default function ProfilePage() {
                       )}
                     </Button>
                   </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="resume">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-teal-600" />
+                    My Resume
+                  </CardTitle>
+                  <CardDescription>
+                    Upload your resume and Chayan analyzes it to power job recommendations and application insights.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    className="hidden"
+                    id="resume-upload-input"
+                    onChange={(e) => {
+                      onUploadResume(e.target.files?.[0])
+                      e.target.value = ""
+                    }}
+                  />
+                  {resumeLoading ? (
+                    <Skeleton className="h-28 rounded-lg" />
+                  ) : resume ? (
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-900 dark:bg-teal-950/40">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-gray-900 dark:text-white">{resume.fileName}</p>
+                            <p className="text-xs text-gray-500">
+                              {(resume.fileSize / 1024).toFixed(1)} KB · updated{" "}
+                              {formatDate(new Date(resume.updatedAt), "dd MMM yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        <label htmlFor="resume-upload-input" className="cursor-pointer">
+                          <Button type="button" variant="outline" size="sm" asChild>
+                            <span className="flex items-center">
+                              <Upload className="mr-1.5 h-4 w-4" />
+                              Replace
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+
+                      {resume.skills.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Extracted Skills</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {resume.skills.slice(0, 12).map((skill) => (
+                              <Badge key={skill} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {resume.skills.length > 12 && (
+                              <Badge variant="secondary" className="text-xs text-gray-400">
+                                +{resume.skills.length - 12} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Experience</p>
+                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                            {resume.experience || "Not detected"}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Education</p>
+                          <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {resume.education || "Not detected"}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Locations</p>
+                          <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {resume.locations.length > 0 ? resume.locations.slice(0, 4).join(", ") : "Not detected"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center rounded-xl border border-dashed border-gray-300 py-10 text-center dark:border-gray-700">
+                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-950">
+                        <Upload className="h-6 w-6" />
+                      </div>
+                      <p className="font-semibold text-gray-900 dark:text-white">No resume uploaded yet</p>
+                      <p className="mt-1 max-w-sm text-sm text-gray-500">
+                        Upload a PDF, DOCX or TXT file (max 5MB). Your data stays private and is only used to personalize
+                        your experience.
+                      </p>
+                      <label htmlFor="resume-upload-input" className="mt-5 cursor-pointer">
+                        <Button type="button" disabled={uploadingResume} asChild>
+                          <span className="flex items-center">
+                            {uploadingResume ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Analyzing...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload Resume
+                              </>
+                            )}
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
