@@ -28,6 +28,9 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
+import { BLOG_PROSE_CLASSES, sanitizeHtmlDocument, containsHtml } from "@/lib/blog-prose"
+import { cn } from "@/lib/utils"
+import { PencilLine, Eye } from "lucide-react"
 import { isAdmin } from "@/lib/roles"
 import { Plus, Pencil, Trash2, Search } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -37,6 +40,49 @@ interface PrivateJobItem {
   id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; experience: string | null; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
 }
 interface PaginationInfo { total: number; page: number; limit: number; totalPages: number }
+
+function DescriptionField({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const [mode, setMode] = useState<"write" | "preview">("write")
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setMode("write")}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            mode === "write" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-100"
+          )}
+        >
+          <PencilLine className="h-3.5 w-3.5" /> Write
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("preview")}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            mode === "preview" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-100"
+          )}
+        >
+          <Eye className="h-3.5 w-3.5" /> Preview
+        </button>
+      </div>
+      {mode === "write" ? (
+        <Textarea value={value || ""} onChange={(e) => onChange(e.target.value || null)} rows={5} placeholder="Paste or type the job description HTML here..." />
+      ) : (
+        <div className={cn(BLOG_PROSE_CLASSES, "min-h-[120px] max-h-72 overflow-y-auto rounded-md border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900")}>
+          {containsHtml(value) ? (
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtmlDocument(value as string) }} />
+          ) : (
+            <p className="text-sm text-gray-500">
+              {value ? "This description has no HTML formatting — it will display as plain text on the job page." : "Nothing to preview yet."}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function AdminPrivateJobs() {
   const { data: session, status } = useSession()
@@ -296,8 +342,8 @@ const openCreate = () => {
                   </FormItem>
                 )} />
               </div>
-              <FormField control={form.control} name="description" render={({ field }) => (
-                <FormItem><FormLabel>Description (Rich Text / HTML)</FormLabel><FormControl><Textarea {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} rows={5} /></FormControl><FormMessage /></FormItem>
+<FormField control={form.control} name="description" render={({ field }) => (
+                <FormItem><FormLabel>Description (Rich Text / HTML)</FormLabel><FormControl><DescriptionField value={field.value ?? null} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
               )} />
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="location" render={({ field }) => (
