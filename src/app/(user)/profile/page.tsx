@@ -449,43 +449,41 @@ export default function ProfilePage() {
             className="absolute inset-0 opacity-[0.07]"
             style={{ backgroundImage: "repeating-linear-gradient(45deg, #fff 0 2px, transparent 2px 26px)" }}
           />
-          <div className="relative h-36 w-full" />
-          <div className="absolute right-4 top-4 sm:right-6 sm:top-5">
-            <Badge className="gap-1.5 border border-white/30 bg-white/15 px-3 py-1.5 text-white shadow-sm backdrop-blur hover:bg-white/25">
-              <Shield className="h-3.5 w-3.5" />
-              {roleLabel}
-            </Badge>
-          </div>
-        </div>
-
-        <div className="relative -mt-14 flex flex-wrap items-end justify-between gap-4 px-4 sm:px-6">
-          <div className="flex items-end gap-4 sm:gap-5">
-            <div className="relative h-28 w-28 shrink-0">
-              <Avatar className="h-28 w-28 border-4 border-white shadow-xl">
-                <AvatarImage src={avatarUrl || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-3xl font-semibold text-white">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
-            </div>
-            <div className="min-w-0 pb-1">
-              <div className="flex items-center gap-2">
-                <h1 className="truncate text-2xl font-bold text-gray-900 dark:text-white">{session?.user?.name}</h1>
-                {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 shrink-0 text-teal-600" />}
+          <div className="relative flex flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:gap-6 sm:px-6 sm:py-8">
+            <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
+              <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28">
+                <Avatar className="h-24 w-24 border-4 border-white shadow-lg sm:h-28 sm:w-28">
+                  <AvatarImage src={avatarUrl || undefined} />
+                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-3xl font-semibold text-white">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                <span className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5" />
-                  {session?.user?.email}
-                </span>
-                {profileForm.watch("phone") && (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h1 className="truncate text-xl font-bold text-white sm:text-2xl">{session?.user?.name}</h1>
+                  {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 shrink-0 text-teal-200" />}
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-teal-50">
                   <span className="flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5" />
-                    {profileForm.watch("phone")}
+                    <Mail className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{session?.user?.email}</span>
                   </span>
-                )}
+                  {profileForm.watch("phone") && (
+                    <span className="flex items-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5 shrink-0" />
+                      {profileForm.watch("phone")}
+                    </span>
+                  )}
+                </div>
               </div>
+            </div>
+            <div className="flex shrink-0 sm:ml-auto">
+              <Badge className="gap-1.5 border border-white/30 bg-white/15 px-3 py-1.5 text-white shadow-sm backdrop-blur hover:bg-white/25">
+                <Shield className="h-3.5 w-3.5" />
+                {roleLabel}
+              </Badge>
             </div>
           </div>
         </div>
