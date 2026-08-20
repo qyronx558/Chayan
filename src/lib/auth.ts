@@ -75,7 +75,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      if (trigger === "update" && session) {
+        token = { ...token, ...session }
+      }
       if (user) {
         if (user.id) {
           token.id = user.id
@@ -90,6 +93,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.role = dbUser.role
           }
         }
+        if (user.image) token.image = user.image
         if (account?.provider === "google" && !token.role) {
           token.role = "USER"
         }
@@ -100,6 +104,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = (token.role as Role) || "USER"
+        session.user.image =
+          token.image !== undefined ? (token.image as string | null) : ((token.picture as string | null) ?? null)
       }
       return session
     },

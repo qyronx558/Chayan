@@ -123,6 +123,15 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
 
   useEffect(() => {
     if (!modalOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !uploading) setModalOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [modalOpen, uploading])
+
+  useEffect(() => {
+    if (!modalOpen) return
     setOffset((o) => clampOffset(o.x, o.y))
   }, [scale, rotation, modalOpen, clampOffset])
 

@@ -442,50 +442,56 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="relative mb-14 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-900 via-teal-700 to-emerald-600">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-900 via-teal-700 to-emerald-600 shadow-md">
           <div className="absolute -left-10 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-20 right-10 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+          <div
+            className="absolute inset-0 opacity-[0.07]"
+            style={{ backgroundImage: "repeating-linear-gradient(45deg, #fff 0 2px, transparent 2px 26px)" }}
+          />
           <div className="relative h-36 w-full" />
-        </div>
-
-        <div className="relative -mt-14 px-4 sm:px-6">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex items-end gap-5">
-              <div className="relative h-28 w-28 shrink-0">
-                <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
-                  <AvatarImage src={avatarUrl || undefined} />
-                  <AvatarFallback className="bg-teal-800 text-3xl text-white">{initials}</AvatarFallback>
-                </Avatar>
-                <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
-              </div>
-              <div className="pb-1">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{session?.user?.name}</h1>
-                  {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 text-teal-600" />}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                  <span className="flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" />
-                    {session?.user?.email}
-                  </span>
-                  {profileForm.watch("phone") && (
-                    <span className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5" />
-                      {profileForm.watch("phone")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <Badge className="bg-teal-600 px-3 py-1.5 text-white hover:bg-teal-700">
-              <Shield className="mr-1.5 h-3.5 w-3.5" />
+          <div className="absolute right-4 top-4 sm:right-6 sm:top-5">
+            <Badge className="gap-1.5 border border-white/30 bg-white/15 px-3 py-1.5 text-white shadow-sm backdrop-blur hover:bg-white/25">
+              <Shield className="h-3.5 w-3.5" />
               {roleLabel}
             </Badge>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-8 md:grid-cols-[300px_1fr]">
-          <div className="space-y-6">
+        <div className="relative -mt-14 flex flex-wrap items-end justify-between gap-4 px-4 sm:px-6">
+          <div className="flex items-end gap-4 sm:gap-5">
+            <div className="relative h-28 w-28 shrink-0">
+              <Avatar className="h-28 w-28 border-4 border-white shadow-xl">
+                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-3xl font-semibold text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
+            </div>
+            <div className="min-w-0 pb-1">
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-2xl font-bold text-gray-900 dark:text-white">{session?.user?.name}</h1>
+                {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 shrink-0 text-teal-600" />}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5" />
+                  {session?.user?.email}
+                </span>
+                {profileForm.watch("phone") && (
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5" />
+                    {profileForm.watch("phone")}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr]">
+          <div className="min-w-0 space-y-6">
             <Card>
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-4">
