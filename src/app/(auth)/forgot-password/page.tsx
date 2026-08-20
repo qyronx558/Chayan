@@ -6,13 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { z } from "zod"
-import { Loader2, Mail, ArrowLeft, CheckCircle2 } from "lucide-react"
+import { Loader2, Mail, ArrowLeft, CheckCircle2, Shield, Bell, Bookmark, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
+import { AuthLayout, Divider, InputWithIcon } from "@/components/auth/AuthComponents"
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -54,85 +54,90 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  const benefits = [
+    { icon: <Shield className="h-5 w-5" />, title: "Secure Reset", description: "Password reset links are single-use and expire in 1 hour for security." },
+    { icon: <Mail className="h-5 w-5" />, title: "Instant Delivery", description: "Reset emails are sent immediately — check your inbox and spam folder." },
+    { icon: <Clock className="h-5 w-5" />, title: "Quick Recovery", description: "Get back to tracking your applications in minutes, not hours." },
+  ]
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 via-white to-teal-50 px-4 py-12 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="border-gray-200 shadow-xl dark:border-gray-800">
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-teal-100">
-              {isSuccess ? (
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-              ) : (
-                <Mail className="h-6 w-6 text-teal-600" />
-              )}
-            </div>
-            <CardTitle className="text-2xl font-bold">
-              {isSuccess ? "Check Your Email" : "Reset Password"}
-            </CardTitle>
-            <CardDescription>
-              {isSuccess
-                ? "We have sent a password reset link to your email address."
-                : "Enter your email address and we'll send you a reset link."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+    <AuthLayout
+      sideTitle={isSuccess ? "Check Your Email" : "Reset Password"}
+      sideDescription={isSuccess
+        ? "We have sent a password reset link to your email address. Please check your inbox."
+        : "Enter your email address and we'll send you a secure reset link."}
+      benefits={benefits}
+    >
+      <div className="space-y-6">
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-100 dark:bg-teal-900/30"
+          >
             {isSuccess ? (
-              <div className="space-y-4">
-                <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-                  If an account exists with that email, you will receive a password reset link shortly.
-                  Please check your spam folder if you don't see it.
-                </div>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/login">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Login
-                  </Link>
-                </Button>
-              </div>
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    {...register("email")}
-                    className={cn(errors.email && "border-red-500")}
-                  />
-                  {errors.email && (
-                    <p className="text-sm font-medium text-red-500">{errors.email.message}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Send Reset Link"
-                  )}
-                </Button>
-                <div className="text-center">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center text-sm font-medium text-teal-600 hover:text-teal-700"
-                  >
-                    <ArrowLeft className="mr-1 h-4 w-4" />
-                    Back to login
-                  </Link>
-                </div>
-              </form>
+              <Mail className="h-8 w-8 text-teal-600 dark:text-teal-400" />
             )}
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+          </motion.div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isSuccess ? "Check Your Email" : "Reset Password"}
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            {isSuccess
+              ? "If an account exists with that email, you will receive a password reset link shortly."
+              : "Enter your email address and we'll send you a reset link."}
+          </p>
+        </div>
+
+        {isSuccess ? (
+          <div className="space-y-4">
+            <div className="rounded-xl bg-green-50 p-4 text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300 border border-green-200 dark:border-green-800">
+              <p className="font-medium">Reset email sent!</p>
+              <p className="mt-1">Please check your inbox (and spam folder) for a link to reset your password. The link expires in 1 hour.</p>
+            </div>
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Login
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <InputWithIcon
+              icon={<Mail className="h-5 w-5" />}
+              label="Email Address"
+              type="email"
+              placeholder="name@example.com"
+              {...register("email")}
+              error={errors.email?.message}
+              autoComplete="email"
+              autoFocus
+            />
+
+            <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
+            </Button>
+
+            <div className="text-center">
+              <Link href="/login" className="inline-flex items-center text-sm font-medium text-teal-600 hover:text-teal-700">
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back to login
+              </Link>
+            </div>
+          </form>
+        )}
+      </div>
+    </AuthLayout>
   )
 }

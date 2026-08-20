@@ -7,12 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { z } from "zod"
-import { Loader2, Lock, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react"
+import { Loader2, Lock, CheckCircle2, AlertCircle, ArrowLeft, Shield, Bell, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
+import { AuthLayout, Divider, PasswordInput, StrengthMeter } from "@/components/auth/AuthComponents"
 
 const resetSchema = z
   .object({
@@ -31,6 +29,8 @@ export function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const token = searchParams?.get("token") || ""
 
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState("")
@@ -38,10 +38,14 @@ export function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ResetInput>({
     resolver: zodResolver(resetSchema),
   })
+
+  const password = watch("password", "")
+  const confirmPassword = watch("confirmPassword", "")
 
   useEffect(() => {
     if (!token) {
@@ -72,99 +76,125 @@ export function ResetPasswordForm() {
     }
   }
 
+  const benefits = [
+    { icon: <Shield className="h-5 w-5" />, title: "Secure Update", description: "Your new password is encrypted and never stored in plain text." },
+    { icon: <Bell className="h-5 w-5" />, title: "Instant Effect", description: "Changes take effect immediately across all your devices." },
+    { icon: <Clock className="h-5 w-5" />, title: "Session Refresh", description: "You will be logged out of other sessions for security." },
+  ]
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 via-white to-teal-50 px-4 py-12 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="border-gray-200 shadow-xl dark:border-gray-800">
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-teal-100">
-              {isSuccess ? (
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-              ) : (
-                <Lock className="h-6 w-6 text-teal-600" />
-              )}
-            </div>
-            <CardTitle className="text-2xl font-bold">
-              {isSuccess ? "Password Reset" : "Set New Password"}
-            </CardTitle>
-            <CardDescription>
-              {isSuccess
-                ? "Your password has been reset successfully."
-                : "Enter your new password below."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+    <AuthLayout
+      sideTitle={isSuccess ? "Password Reset" : "Set New Password"}
+      sideDescription={isSuccess
+        ? "Your password has been reset successfully. You can now sign in with your new password."
+        : "Enter your new password below. Make sure it's strong and unique."}
+      benefits={benefits}
+    >
+      <div className="space-y-6">
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-100 dark:bg-teal-900/30"
+          >
             {isSuccess ? (
-              <div className="space-y-4">
-                <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-                  Your password has been updated. You can now log in with your new password.
-                </div>
-                <Button className="w-full" asChild>
-                  <Link href="/login">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Go to Login
-                  </Link>
-                </Button>
-              </div>
-            ) : error && !token ? (
-              <div className="space-y-4">
-                <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
-                  <AlertCircle className="mr-2 inline h-4 w-4" />
-                  {error}
-                </div>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/forgot-password">Request New Reset Link</Link>
-                </Button>
-              </div>
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {error && (
-                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    {...register("password")}
-                  />
-                  {errors.password && (
-                    <p className="text-sm font-medium text-red-500">{errors.password.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    {...register("confirmPassword")}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-sm font-medium text-red-500">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Resetting...
-                    </>
-                  ) : (
-                    "Reset Password"
-                  )}
-                </Button>
-              </form>
+              <Lock className="h-8 w-8 text-teal-600 dark:text-teal-400" />
             )}
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+          </motion.div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isSuccess ? "Password Reset" : "Set New Password"}
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            {isSuccess
+              ? "Your password has been updated. You can now sign in with your new password."
+              : "Enter your new password below."}
+          </p>
+        </div>
+
+        {isSuccess ? (
+          <div className="space-y-4">
+            <div className="rounded-xl bg-green-50 p-4 text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300 border border-green-200 dark:border-green-800">
+              <p className="font-medium">Password updated successfully!</p>
+              <p className="mt-1">You will be logged out of other sessions. Please sign in again with your new password.</p>
+            </div>
+            <Button className="w-full py-3.5" asChild>
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go to Login
+              </Link>
+            </Button>
+          </div>
+        ) : error && !token ? (
+          <div className="space-y-4">
+            <div className="rounded-xl bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-300 border border-red-200 dark:border-red-800 flex items-start gap-3">
+              <AlertCircle className="mr-2 inline h-5 w-5 mt-0.5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+            <Button variant="outline" className="w-full py-3.5" asChild>
+              <Link href="/forgot-password">Request New Reset Link</Link>
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-300 border border-red-200 dark:border-red-800 flex items-center gap-2"
+              >
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            <PasswordInput
+              label="New Password"
+              value={password}
+              onChange={register("password").onChange}
+              onBlur={register("password").onBlur}
+              ref={register("password").ref}
+              name="password"
+              onToggle={() => setShowPassword(!showPassword)}
+              show={showPassword}
+              error={errors.password?.message}
+              placeholder="••••••••"
+              id="password"
+              autoComplete="new-password"
+            />
+
+            <StrengthMeter password={password} />
+
+            <PasswordInput
+              label="Confirm Password"
+              value={confirmPassword}
+              onChange={register("confirmPassword").onChange}
+              onBlur={register("confirmPassword").onBlur}
+              ref={register("confirmPassword").ref}
+              name="confirmPassword"
+              onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+              show={showConfirmPassword}
+              error={errors.confirmPassword?.message}
+              placeholder="••••••••"
+              id="confirmPassword"
+              autoComplete="new-password"
+            />
+
+            <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                "Reset Password"
+              )}
+            </Button>
+          </form>
+        )}
+      </div>
+    </AuthLayout>
   )
 }
