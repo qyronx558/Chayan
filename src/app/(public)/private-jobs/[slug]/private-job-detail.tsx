@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Calendar, MapPin, IndianRupee, Briefcase, ExternalLink, ArrowLeft, Mail, Building2 } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { formatDate } from "@/lib/utils"
-import { BLOG_PROSE_CLASSES, sanitizeHtmlDocument } from "@/lib/blog-prose"
+import { BLOG_PROSE_CLASSES, renderRichHtml } from "@/lib/blog-prose"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -85,7 +85,7 @@ export function PrivateJobDetail({ job }: { job: PrivateJob }) {
           <CardContent className="p-6">
             <h2 className="mb-4 text-xl font-semibold text-gray-900">Job Description</h2>
             <div className={`${BLOG_PROSE_CLASSES}`}>
-              <div dangerouslySetInnerHTML={{ __html: sanitizeHtmlDocument(job.description) }} />
+              <div dangerouslySetInnerHTML={{ __html: renderRichHtml(job.description) }} />
             </div>
           </CardContent>
         </Card>

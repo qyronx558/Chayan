@@ -28,7 +28,7 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
-import { BLOG_PROSE_CLASSES, sanitizeHtmlDocument, containsHtml } from "@/lib/blog-prose"
+import { BLOG_PROSE_CLASSES, renderRichHtml, containsHtml } from "@/lib/blog-prose"
 import { cn } from "@/lib/utils"
 import { PencilLine, Eye } from "lucide-react"
 import { isAdmin } from "@/lib/roles"
@@ -72,7 +72,7 @@ function DescriptionField({ value, onChange }: { value: string | null; onChange:
       ) : (
         <div className={cn(BLOG_PROSE_CLASSES, "min-h-[120px] max-h-72 overflow-y-auto rounded-md border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900")}>
           {containsHtml(value) ? (
-            <div dangerouslySetInnerHTML={{ __html: sanitizeHtmlDocument(value as string) }} />
+            <div dangerouslySetInnerHTML={{ __html: renderRichHtml(value as string) }} />
           ) : (
             <p className="text-sm text-gray-500">
               {value ? "This description has no HTML formatting — it will display as plain text on the job page." : "Nothing to preview yet."}

@@ -14,6 +14,26 @@ export const sanitizeHtmlDocument = (html: string): string => {
   return out.trim()
 }
 
+export const renderRichHtml = (html: string): string => {
+  const styles: string[] = []
+  let out = html
+    .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_m, css: string) => {
+      if (css && css.trim()) styles.push(css.trim())
+      return ""
+    })
+    .replace(/<!DOCTYPE[^>]*>/gi, "")
+    .replace(/<html[^>]*>/gi, "")
+    .replace(/<\/html>/gi, "")
+    .replace(/<head[\s\S]*?<\/head>/gi, "")
+    .replace(/<body[^>]*>/gi, "")
+    .replace(/<\/body>/gi, "")
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
+  out = out.trim()
+  if (styles.length === 0) return out
+  const scoped = `<style>@scope (.rich-content){${styles.join("\n")}}</style>`
+  return `${scoped}${out}`
+}
+
 export const stripHtmlToText = (value: string | null | undefined): string => {
   if (!value) return ""
   if (!containsHtml(value)) return value
