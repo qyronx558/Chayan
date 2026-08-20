@@ -14,6 +14,7 @@ import {
   BookOpen,
   GraduationCap,
   Bell,
+  CalendarDays,
   LogIn,
   UserPlus,
   User,
@@ -40,6 +41,7 @@ const navIconMap: Record<string, React.ElementType> = {
   "Answer Keys": FileText,
   Syllabus: BookOpen,
   Admissions: GraduationCap,
+  "Exam Calendar": CalendarDays,
   Notifications: Bell,
 }
 

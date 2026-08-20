@@ -3,6 +3,7 @@ import { FeaturedSlider } from "@/components/home/FeaturedSlider"
 import { SearchBar } from "@/components/home/SearchBar"
 import { QuickLinks } from "@/components/home/QuickLinks"
 import { LatestJobs } from "@/components/home/LatestJobs"
+import { UpcomingDeadlines } from "@/components/home/UpcomingDeadlines"
 
 const LatestResults = dynamic(() => import("@/components/home/LatestResults").then(m => ({ default: m.LatestResults })))
 const LatestAdmitCards = dynamic(() => import("@/components/home/LatestAdmitCards").then(m => ({ default: m.LatestAdmitCards })))
@@ -20,6 +21,7 @@ export default function HomePage() {
       <FeaturedSlider />
       <SearchBar />
       <QuickLinks />
+<UpcomingDeadlines />
 <LatestJobs />
 <div className="container mx-auto px-4">
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">

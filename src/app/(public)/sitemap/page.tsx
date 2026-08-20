@@ -26,7 +26,7 @@ export default async function SitemapPage() {
       <h1 className="mb-2 text-3xl font-bold text-gray-900">Sitemap</h1>
       <p className="mb-8 text-gray-600">Browse all pages and listings available on Chayan.</p>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
@@ -180,6 +180,49 @@ export default async function SitemapPage() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </CardContent>
+        </Card>
+      <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              <Link href="/exam-calendar" className="text-teal-600 hover:text-teal-700">Exam Calendar</Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/exam-calendar" className="text-sm text-gray-600 hover:text-teal-600">
+                  Upcoming Deadlines &amp; Exams
+                </Link>
+              </li>
+              <li>
+                <Link href="/jobs" className="text-sm text-gray-600 hover:text-teal-600">
+                  Browse Active Jobs
+                </Link>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              <Link href="/notifications" className="text-teal-600 hover:text-teal-700">Notifications</Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/notifications" className="text-sm text-gray-600 hover:text-teal-600">
+                  All Official Notifications
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="text-sm text-gray-600 hover:text-teal-600">
+                  Chayan Blog
+                </Link>
+              </li>
             </ul>
           </CardContent>
         </Card>

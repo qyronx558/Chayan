@@ -19,6 +19,7 @@ export const mainNav = [
   { title: "Answer Keys", href: "/answer-keys" },
   { title: "Admissions", href: "/admissions" },
   { title: "Syllabus", href: "/syllabus" },
+  { title: "Exam Calendar", href: "/exam-calendar" },
   { title: "Notifications", href: "/notifications" },
   { title: "Blog", href: "/blog" },
 ]
@@ -39,6 +40,7 @@ export const footerLinks = [
     title: "Resources",
     links: [
       { label: "Syllabus", href: "/syllabus" },
+      { label: "Exam Calendar", href: "/exam-calendar" },
       { label: "Notifications", href: "/notifications" },
       { label: "About Us", href: "/about" },
       { label: "Contact Us", href: "/contact" },

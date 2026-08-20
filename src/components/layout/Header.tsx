@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Bell,
   Newspaper,
+  CalendarDays,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -150,7 +151,7 @@ export function Header() {
   }, [])
 
   const jobsActive = pathname.startsWith("/jobs") || pathname.startsWith("/private-jobs")
-  const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog")
+  const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar")
 
   return (
     <>
@@ -196,6 +197,7 @@ export function Header() {
               <NavDropdown label="More" isActive={moreActive}>
                 <DropdownItem href="/syllabus" icon={BookOpen} label="Syllabus" />
                 <DropdownItem href="/admissions" icon={GraduationCap} label="Admissions" />
+                <DropdownItem href="/exam-calendar" icon={CalendarDays} label="Exam Calendar" />
                 <DropdownItem href="/blog" icon={Newspaper} label="Blog" />
                 <DropdownItem href="/notifications" icon={Bell} label="Notifications" />
               </NavDropdown>

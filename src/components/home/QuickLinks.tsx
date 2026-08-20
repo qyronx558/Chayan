@@ -6,6 +6,8 @@ import {
   Key,
   BookOpen,
   GraduationCap,
+  CalendarDays,
+  Bell,
   ArrowUpRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -76,6 +78,24 @@ const links: QuickLink[] = [
     tag: "Open",
     tagClassName: "bg-orange-100 text-orange-700",
   },
+  {
+    title: "Exam Calendar",
+    description: "Deadlines, exams & results",
+    href: "/exam-calendar",
+    icon: <CalendarDays className="h-6 w-6" />,
+    gradient: "from-teal-600 to-emerald-800",
+    tag: "Track",
+    tagClassName: "bg-teal-100 text-teal-700",
+  },
+  {
+    title: "Notifications",
+    description: "All official announcements",
+    href: "/notifications",
+    icon: <Bell className="h-6 w-6" />,
+    gradient: "from-slate-600 to-gray-800",
+    tag: "Live",
+    tagClassName: "bg-blue-100 text-blue-700",
+  },
 ]
 
 export function QuickLinks({ className }: { className?: string }) {
@@ -88,7 +108,7 @@ export function QuickLinks({ className }: { className?: string }) {
           subtitle="Everything you need to track your government job applications"
         />
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4 lg:gap-4">
           {links.map((link, i) => (
             <Link
               key={link.title}
