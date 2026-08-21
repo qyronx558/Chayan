@@ -5,6 +5,7 @@ import { Suspense } from "react"
 import { Providers } from "@/components/layout/Providers"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
+import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { siteConfig } from "@/lib/constants"
@@ -104,6 +105,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <WelcomeOnboarding />
           <CookieConsent />
           <Suspense fallback={null}>
             <GoogleAnalytics />
