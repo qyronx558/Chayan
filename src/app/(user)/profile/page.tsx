@@ -35,6 +35,7 @@ import {
   Sparkles,
   TrendingUp,
   UserCheck,
+  AlertCircle,
 } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -98,10 +99,20 @@ interface NotificationPrefs {
   syllabusAlerts: boolean
   answerKeyAlerts: boolean
   generalAlerts: boolean
+  smsJobAlerts: boolean
+  smsResultAlerts: boolean
+  smsAdmitCardAlerts: boolean
+  smsPrivateJobAlerts: boolean
+  smsAdmissionAlerts: boolean
+  smsBlogAlerts: boolean
+  smsSyllabusAlerts: boolean
+  smsAnswerKeyAlerts: boolean
+  smsGeneralAlerts: boolean
+  phoneVerified: boolean
 }
 
 const PREFS_META: { key: keyof NotificationPrefs; label: string; description: string }[] = [
-  { key: "jobAlerts", label: "Job Alerts", description: "Get notified about new job postings" },
+  { key: "jobAlerts", label: "Job Alerts", description: "Get notified about new government job postings" },
   { key: "privateJobAlerts", label: "Private Job Alerts", description: "Get notified about new private company jobs" },
   { key: "resultAlerts", label: "Result Alerts", description: "Get notified when results are announced" },
   { key: "admitCardAlerts", label: "Admit Card Alerts", description: "Get notified when admit cards are released" },
@@ -110,6 +121,18 @@ const PREFS_META: { key: keyof NotificationPrefs; label: string; description: st
   { key: "answerKeyAlerts", label: "Answer Key Alerts", description: "Get notified when answer keys are released" },
   { key: "blogAlerts", label: "Blog Alerts", description: "Get notified about new blog posts" },
   { key: "generalAlerts", label: "General Announcements", description: "Get notified about general site announcements" },
+]
+
+const SMS_PREFS_META: { key: keyof NotificationPrefs; label: string; description: string }[] = [
+  { key: "smsJobAlerts", label: "Job Alerts (SMS)", description: "Receive SMS for new government job postings" },
+  { key: "smsPrivateJobAlerts", label: "Private Job Alerts (SMS)", description: "Receive SMS for new private company jobs" },
+  { key: "smsResultAlerts", label: "Result Alerts (SMS)", description: "Receive SMS when results are announced" },
+  { key: "smsAdmitCardAlerts", label: "Admit Card Alerts (SMS)", description: "Receive SMS when admit cards are released" },
+  { key: "smsAdmissionAlerts", label: "Admission Alerts (SMS)", description: "Receive SMS for new admission notifications" },
+  { key: "smsSyllabusAlerts", label: "Syllabus Alerts (SMS)", description: "Receive SMS when new syllabi are published" },
+  { key: "smsAnswerKeyAlerts", label: "Answer Key Alerts (SMS)", description: "Receive SMS when answer keys are released" },
+  { key: "smsBlogAlerts", label: "Blog Alerts (SMS)", description: "Receive SMS for new blog posts" },
+  { key: "smsGeneralAlerts", label: "General Alerts (SMS)", description: "Receive SMS for general site announcements" },
 ]
 
 function roleLabelFor(role: string | null | undefined): string {
@@ -144,8 +167,23 @@ export default function ProfilePage() {
     syllabusAlerts: true,
     answerKeyAlerts: true,
     generalAlerts: true,
+    smsJobAlerts: false,
+    smsResultAlerts: false,
+    smsAdmitCardAlerts: false,
+    smsPrivateJobAlerts: false,
+    smsAdmissionAlerts: false,
+    smsBlogAlerts: false,
+    smsSyllabusAlerts: false,
+    smsAnswerKeyAlerts: false,
+    smsGeneralAlerts: false,
+    phoneVerified: false,
   })
   const [prefsLoaded, setPrefsLoaded] = useState(false)
+  const [phoneVerification, setPhoneVerification] = useState<{
+    status: "idle" | "sent" | "verifying"
+    otpSent: boolean
+    message: string
+  }>({ status: "idle", otpSent: false, message: "" })
   const [accountInfo, setAccountInfo] = useState<{
     role?: string
     createdAt?: string
@@ -264,6 +302,16 @@ export default function ProfilePage() {
             syllabusAlerts: json.data.syllabusAlerts,
             answerKeyAlerts: json.data.answerKeyAlerts,
             generalAlerts: json.data.generalAlerts,
+            smsJobAlerts: json.data.smsJobAlerts,
+            smsResultAlerts: json.data.smsResultAlerts,
+            smsAdmitCardAlerts: json.data.smsAdmitCardAlerts,
+            smsPrivateJobAlerts: json.data.smsPrivateJobAlerts,
+            smsAdmissionAlerts: json.data.smsAdmissionAlerts,
+            smsBlogAlerts: json.data.smsBlogAlerts,
+            smsSyllabusAlerts: json.data.smsSyllabusAlerts,
+            smsAnswerKeyAlerts: json.data.smsAnswerKeyAlerts,
+            smsGeneralAlerts: json.data.smsGeneralAlerts,
+            phoneVerified: json.data.phoneVerified,
           })
         }
       }
@@ -287,6 +335,63 @@ export default function ProfilePage() {
       }
     } catch {
       toast("Failed to save preferences", "destructive")
+    }
+  }
+
+  async function sendPhoneOTP() {
+    const phone = profileForm.getValues("phone")
+    if (!phone) {
+      toast("Please enter a phone number first", "destructive")
+      return
+    }
+
+    setPhoneVerification({ status: "sent", otpSent: true, message: "Sending OTP..." })
+    try {
+      const res = await fetch("/api/auth/phone-verify/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setPhoneVerification({ status: "idle", otpSent: false, message: json.error || "Failed to send OTP" })
+        toast(json.error || "Failed to send OTP", "destructive")
+        return
+      }
+      setPhoneVerification({ status: "sent", otpSent: true, message: "OTP sent! Enter the 6-digit code." })
+      toast("OTP sent successfully", "success")
+    } catch {
+      setPhoneVerification({ status: "idle", otpSent: false, message: "Failed to send OTP" })
+      toast("Failed to send OTP", "destructive")
+    }
+  }
+
+  async function verifyPhoneOTP(otp: string) {
+    if (!otp || otp.length !== 6) {
+      toast("Please enter a valid 6-digit OTP", "destructive")
+      return
+    }
+
+    setPhoneVerification((prev) => ({ ...prev, status: "verifying", message: "Verifying OTP..." }))
+    try {
+      const res = await fetch("/api/auth/phone-verify/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otp }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setPhoneVerification((prev) => ({ ...prev, status: "sent", message: json.error || "Invalid OTP" }))
+        toast(json.error || "Invalid OTP", "destructive")
+        return
+      }
+      setPhoneVerification({ status: "idle", otpSent: false, message: "Phone verified successfully!" })
+      toast("Phone number verified!", "success")
+      loadNotificationPrefs()
+      fetchAccountInfo()
+    } catch {
+      setPhoneVerification((prev) => ({ ...prev, status: "sent", message: "Verification failed" }))
+      toast("Verification failed", "destructive")
     }
   }
 
@@ -675,14 +780,60 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="profile-phone">Phone Number</Label>
-                      <Input
-                        id="profile-phone"
-                        type="tel"
-                        placeholder="+91 9876543210"
-                        {...profileForm.register("phone")}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="profile-phone"
+                          type="tel"
+                          placeholder="+91 9876543210"
+                          {...profileForm.register("phone")}
+                          className="flex-1"
+                          disabled={phoneVerification.status === "verifying"}
+                        />
+                        {phoneVerification.otpSent ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const otp = prompt("Enter the 6-digit OTP sent to your phone:")
+                              if (otp) verifyPhoneOTP(otp)
+                            }}
+                            disabled={phoneVerification.status === "verifying"}
+                          >
+                            {phoneVerification.status === "verifying" ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Verify
+                              </>
+                            ) : (
+                              "Verify OTP"
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={sendPhoneOTP}
+                            disabled={phoneVerification.status === "sent" || !profileForm.getValues("phone")}
+                          >
+                            {phoneVerification.status === "sent" ? "OTP Sent" : "Send OTP"}
+                          </Button>
+                        )}
+                      </div>
+                      {phoneVerification.message && (
+                        <p className={`text-xs ${phoneVerification.status === "verifying" ? "text-blue-600" : phoneVerification.otpSent ? "text-emerald-600" : "text-gray-400"}`}>
+                          {phoneVerification.message}
+                        </p>
+                      )}
+                      {notificationPrefs.phoneVerified && (
+                        <p className="text-xs text-emerald-600 flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Phone number verified
+                        </p>
+                      )}
                       <p className="text-xs text-gray-400">
-                        Used for SMS reminders on application deadlines
+                        Used for SMS alerts on job notifications, results, and admit cards
                       </p>
                     </div>
                     <Button type="submit" disabled={isSaving}>
@@ -936,26 +1087,76 @@ export default function ProfilePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Choose what notifications you want to receive</CardDescription>
+                  <CardDescription>Choose what notifications you want to receive via web and SMS</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {PREFS_META.map((pref, index) => (
-                    <div key={pref.key}>
-                      {index > 0 && <Separator className="mb-6" />}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="text-base">{pref.label}</Label>
-                          <p className="text-sm text-gray-500">{pref.description}</p>
+                  <div>
+                    <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">In-App Notifications</h3>
+                    <p className="mb-4 text-sm text-gray-500">Receive notifications in the bell icon on the website</p>
+                    {PREFS_META.map((pref, index) => (
+                      <div key={pref.key}>
+                        {index > 0 && <Separator className="mb-6" />}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-base">{pref.label}</Label>
+                            <p className="text-sm text-gray-500">{pref.description}</p>
+                          </div>
+                          <Switch
+                            checked={notificationPrefs[pref.key]}
+                            onCheckedChange={(checked) =>
+                              setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
+                            }
+                          />
                         </div>
-                        <Switch
-                          checked={notificationPrefs[pref.key]}
-                          onCheckedChange={(checked) =>
-                            setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
-                          }
-                        />
                       </div>
+                    ))}
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SMS Alerts</h3>
+                        <p className="text-sm text-gray-500">Receive SMS on your verified phone number</p>
+                      </div>
+                      {notificationPrefs.phoneVerified ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Phone Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          Verify phone to enable
+                        </span>
+                      )}
                     </div>
-                  ))}
+                    <p className="mb-4 text-sm text-gray-500">
+                      {notificationPrefs.phoneVerified
+                        ? "SMS alerts will be sent to your verified phone number based on these preferences."
+                        : "Verify your phone number in the Profile tab to enable SMS alerts."}
+                    </p>
+                    {SMS_PREFS_META.map((pref, index) => (
+                      <div key={pref.key}>
+                        {index > 0 && <Separator className="mb-6" />}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-base">{pref.label}</Label>
+                            <p className="text-sm text-gray-500">{pref.description}</p>
+                          </div>
+                          <Switch
+                            checked={notificationPrefs[pref.key]}
+                            onCheckedChange={(checked) =>
+                              setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
+                            }
+                            disabled={!notificationPrefs.phoneVerified}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   <Button onClick={saveNotificationPrefs} disabled={!prefsLoaded}>
                     Save Preferences
                   </Button>

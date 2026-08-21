@@ -5,6 +5,7 @@ import { blogPostSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { contentScope, isAdmin } from "@/lib/roles"
 import { notifyUsers } from "@/lib/notifications"
+import { sendNotificationSMS } from "@/lib/sms"
 
 export async function GET(request: NextRequest) {
   try {
@@ -105,6 +106,7 @@ export async function POST(request: NextRequest) {
 
     if (post.published) {
       await notifyUsers("BLOG", post.title, post.slug, `New blog post published: ${post.title}`)
+      sendNotificationSMS("BLOG", post.title, post.slug, `New blog post published: ${post.title}`).catch(console.error)
     }
 
     return NextResponse.json({ success: true, data: post }, { status: 201 })

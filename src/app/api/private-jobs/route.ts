@@ -5,6 +5,7 @@ import { privateJobSchema } from "@/lib/validations"
 import { isAdmin, contentScope } from "@/lib/roles"
 import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
+import { sendNotificationSMS } from "@/lib/sms"
 
 export async function GET(request: NextRequest) {
   try {
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
     })
 
     await notifyUsers("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`)
+    sendNotificationSMS("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`).catch(console.error)
 
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (error) {

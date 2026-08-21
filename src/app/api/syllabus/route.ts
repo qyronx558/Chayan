@@ -5,6 +5,7 @@ import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { contentScope, isAdmin } from "@/lib/roles"
 import { notifyUsers } from "@/lib/notifications"
+import { sendNotificationSMS } from "@/lib/sms"
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
     const syllabus = await prisma.syllabus.create({ data })
 
     await notifyUsers("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`)
+    sendNotificationSMS("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`).catch(console.error)
 
     return NextResponse.json({ success: true, data: syllabus }, { status: 201 })
   } catch (error) {

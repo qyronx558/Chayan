@@ -5,6 +5,7 @@ import { admissionSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { contentScope, isAdmin } from "@/lib/roles"
 import { notifyUsers } from "@/lib/notifications"
+import { sendNotificationSMS } from "@/lib/sms"
 
 export async function GET(request: NextRequest) {
   try {
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
     const admission = await prisma.admission.create({ data })
 
     await notifyUsers("ADMISSION", admission.title, admission.slug, `New admission notification: ${admission.title}`)
+    sendNotificationSMS("ADMISSION", admission.title, admission.slug, `New admission notification: ${admission.title}`).catch(console.error)
 
     return NextResponse.json({ success: true, data: admission }, { status: 201 })
   } catch (error) {

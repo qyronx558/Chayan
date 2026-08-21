@@ -131,6 +131,16 @@ model NotificationPreference {
   syllabusAlerts   Boolean @default(true)
   answerKeyAlerts  Boolean @default(true)
   generalAlerts    Boolean @default(true)
+  smsJobAlerts     Boolean @default(false)
+  smsResultAlerts  Boolean @default(false)
+  smsAdmitCardAlerts Boolean @default(false)
+  smsPrivateJobAlerts Boolean @default(false)
+  smsAdmissionAlerts Boolean @default(false)
+  smsBlogAlerts    Boolean @default(false)
+  smsSyllabusAlerts Boolean @default(false)
+  smsAnswerKeyAlerts Boolean @default(false)
+  smsGeneralAlerts Boolean @default(false)
+  phoneVerified    Boolean @default(false)
   user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

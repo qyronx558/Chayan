@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { admitCardSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { notifyUsers } from "@/lib/notifications"
+import { sendNotificationSMS } from "@/lib/sms"
 import { contentScope, isAdmin } from "@/lib/roles"
 
 export async function GET(request: NextRequest) {
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
     const admitCard = await prisma.admitCard.create({ data })
 
     await notifyUsers("ADMIT_CARD", admitCard.title, admitCard.slug)
+    sendNotificationSMS("ADMIT_CARD", admitCard.title, admitCard.slug).catch(console.error)
 
     return NextResponse.json({ success: true, data: admitCard }, { status: 201 })
   } catch (error) {
