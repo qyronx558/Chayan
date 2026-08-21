@@ -35,7 +35,17 @@ export async function GET(request: NextRequest) {
     if (state) (jobWhere as Record<string, unknown>).stateId = state
     if (status) (jobWhere as Record<string, unknown>).status = status
 
-    const [jobs, results, admitCards, answerKeys, privateJobs] = await Promise.all([
+    const blogWhere: Record<string, unknown> = { published: true }
+    if (q) {
+      blogWhere.OR = [
+        { title: { contains: q, mode: "insensitive" as const } },
+        { excerpt: { contains: q, mode: "insensitive" as const } },
+        { tags: { contains: q, mode: "insensitive" as const } },
+        { category: { name: { contains: q, mode: "insensitive" as const } } },
+      ]
+    }
+
+    const [jobs, results, admitCards, answerKeys, privateJobs, blogs] = await Promise.all([
       prisma.job.findMany({
         where: jobWhere,
         select: { ...searchSelect, department: { select: { name: true } } },
@@ -73,12 +83,18 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: limit,
       }),
+      prisma.blogPost.findMany({
+        where: blogWhere,
+        select: { id: true, title: true, slug: true, category: { select: { name: true } }, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      }),
     ])
 
     return NextResponse.json(
       {
         success: true,
-        data: { jobs, results, admitCards, answerKeys, privateJobs },
+        data: { jobs, results, admitCards, answerKeys, privateJobs, blogs },
       },
       {
         headers: {

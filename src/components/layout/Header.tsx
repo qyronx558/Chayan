@@ -33,7 +33,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ThemeToggle } from "./ThemeToggle"
 import { MobileNav } from "./MobileNav"
-import { SearchDialog, useSearchDialog } from "./SearchDialog"
+import { SearchDialog, useSearchDialog } from "@/components/layout/SearchDialog"
 import { LogoSmall } from "@/components/layout/LogoSmall"
 import { NotificationBell } from "./NotificationBell"
 
