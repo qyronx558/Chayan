@@ -780,47 +780,13 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="profile-phone">Phone Number</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="profile-phone"
-                          type="tel"
-                          placeholder="+91 9876543210"
-                          {...profileForm.register("phone")}
-                          className="flex-1"
-                          disabled={phoneVerification.status === "verifying"}
-                        />
-                        {phoneVerification.otpSent ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const otp = prompt("Enter the 6-digit OTP sent to your phone:")
-                              if (otp) verifyPhoneOTP(otp)
-                            }}
-                            disabled={phoneVerification.status === "verifying"}
-                          >
-                            {phoneVerification.status === "verifying" ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Verify
-                              </>
-                            ) : (
-                              "Verify OTP"
-                            )}
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={sendPhoneOTP}
-                            disabled={phoneVerification.status === "sent" || !profileForm.getValues("phone")}
-                          >
-                            {phoneVerification.status === "sent" ? "OTP Sent" : "Send OTP"}
-                          </Button>
-                        )}
-                      </div>
+                      <Input
+                        id="profile-phone"
+                        type="tel"
+                        placeholder="+91 9876543210"
+                        {...profileForm.register("phone")}
+                        className="flex-1"
+                      />
                       {phoneVerification.message && (
                         <p className={`text-xs ${phoneVerification.status === "verifying" ? "text-blue-600" : phoneVerification.otpSent ? "text-emerald-600" : "text-gray-400"}`}>
                           {phoneVerification.message}

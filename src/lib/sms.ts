@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-export type SMSProvider = "twilio" | "generic" | "console"
+export type SMSProvider = "twilio" | "msg91" | "generic" | "console"
 
 interface SMSConfig {
   provider: SMSProvider
@@ -8,6 +8,12 @@ interface SMSConfig {
     accountSid: string
     authToken: string
     fromNumber: string
+  }
+  msg91?: {
+    authKey: string
+    templateId?: string
+    senderId?: string
+    flowId?: string
   }
   generic?: {
     url: string
@@ -34,6 +40,17 @@ function getConfig(): SMSConfig {
         fromNumber: process.env.TWILIO_FROM_NUMBER || "",
       },
       fromNumber: process.env.TWILIO_FROM_NUMBER,
+    }
+  } else if (provider === "msg91") {
+    config = {
+      provider: "msg91",
+      msg91: {
+        authKey: process.env.MSG91_AUTH_KEY || "",
+        templateId: process.env.MSG91_TEMPLATE_ID || "",
+        senderId: process.env.MSG91_SENDER_ID || "CHAYAN",
+        flowId: process.env.MSG91_FLOW_ID || "",
+      },
+      fromNumber: process.env.MSG91_SENDER_ID || "CHAYAN",
     }
   } else if (provider === "generic") {
     config = {
@@ -69,6 +86,10 @@ export async function sendSMS(phone: string, message: string): Promise<{ success
     return sendViaTwilio(cfg.twilio!, phone, message)
   }
 
+  if (cfg.provider === "msg91") {
+    return sendViaMsg91(cfg.msg91!, phone, message)
+  }
+
   if (cfg.provider === "generic") {
     return sendViaGeneric(cfg.generic!, phone, message)
   }
@@ -96,6 +117,92 @@ async function sendViaTwilio(
   } catch (error) {
     console.error("Twilio SMS error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Twilio send failed" }
+  }
+}
+
+async function sendViaMsg91(
+  msg91: { authKey: string; templateId?: string; senderId?: string; flowId?: string },
+  phone: string,
+  message: string
+): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  try {
+    // Msg91 Flow API (recommended for transactional/promotional)
+    // Docs: https://msg91.com/docs/api/flow-api
+    const baseUrl = "https://api.msg91.com/api/v5/flow/"
+
+    // Remove +91 prefix for Msg91 (they expect 10-digit)
+    const cleanPhone = phone.replace(/^\+91/, "").replace(/^91/, "")
+
+    // If flowId is provided, use Flow API (template-based)
+    if (msg91.flowId) {
+      const url = `${baseUrl}${msg91.flowId}/send`
+      const body = {
+        mobiles: cleanPhone,
+        // Template variables - Msg91 expects these as key-value pairs
+        // You can customize based on your template variables
+        var1: message,
+        // var2, var3, etc. if your template has more variables
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "authkey": msg91.authKey,
+        },
+        body: JSON.stringify(body),
+      })
+
+      const result = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        return { success: false, error: `Msg91 Flow API HTTP ${response.status}: ${JSON.stringify(result)}` }
+      }
+
+      // Msg91 returns { type: "success", message: "Message sent", requestId: "..." }
+      if (result.type === "success" || result.requestId) {
+        return { success: true, messageId: result.requestId || "msg91-" + Date.now() }
+      }
+      return { success: false, error: `Msg91: ${result.message || "Unknown error"}` }
+    }
+
+    // Fallback: HTTP API (older, but works for simple sending)
+    // Docs: https://msg91.com/docs/api/http-api
+    const httpUrl = "https://api.msg91.com/api/v2/sendsms"
+    const httpBody = {
+      sender: msg91.senderId || "CHAYAN",
+      route: "4", // 4 = transactional, 1 = promotional
+      country: "91",
+      sms: [
+        {
+          message: message,
+          to: [cleanPhone],
+        },
+      ],
+    }
+
+    const response = await fetch(httpUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "authkey": msg91.authKey,
+      },
+      body: JSON.stringify(httpBody),
+    })
+
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      return { success: false, error: `Msg91 HTTP API HTTP ${response.status}: ${JSON.stringify(result)}` }
+    }
+
+    if (result.type === "success" || result.requestId) {
+      return { success: true, messageId: result.requestId || "msg91-" + Date.now() }
+    }
+    return { success: false, error: `Msg91: ${result.message || "Unknown error"}` }
+  } catch (error) {
+    console.error("Msg91 SMS error:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Msg91 send failed" }
   }
 }
 
