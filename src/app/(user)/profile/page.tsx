@@ -98,15 +98,6 @@ interface NotificationPrefs {
   syllabusAlerts: boolean
   answerKeyAlerts: boolean
   generalAlerts: boolean
-  smsJobAlerts: boolean
-  smsResultAlerts: boolean
-  smsAdmitCardAlerts: boolean
-  smsPrivateJobAlerts: boolean
-  smsAdmissionAlerts: boolean
-  smsBlogAlerts: boolean
-  smsSyllabusAlerts: boolean
-  smsAnswerKeyAlerts: boolean
-  smsGeneralAlerts: boolean
   phoneVerified: boolean
 }
 
@@ -154,15 +145,6 @@ export default function ProfilePage() {
     syllabusAlerts: true,
     answerKeyAlerts: true,
     generalAlerts: true,
-    smsJobAlerts: false,
-    smsResultAlerts: false,
-    smsAdmitCardAlerts: false,
-    smsPrivateJobAlerts: false,
-    smsAdmissionAlerts: false,
-    smsBlogAlerts: false,
-    smsSyllabusAlerts: false,
-    smsAnswerKeyAlerts: false,
-    smsGeneralAlerts: false,
     phoneVerified: false,
   })
   const [prefsLoaded, setPrefsLoaded] = useState(false)
@@ -289,15 +271,6 @@ export default function ProfilePage() {
             syllabusAlerts: json.data.syllabusAlerts,
             answerKeyAlerts: json.data.answerKeyAlerts,
             generalAlerts: json.data.generalAlerts,
-            smsJobAlerts: json.data.smsJobAlerts,
-            smsResultAlerts: json.data.smsResultAlerts,
-            smsAdmitCardAlerts: json.data.smsAdmitCardAlerts,
-            smsPrivateJobAlerts: json.data.smsPrivateJobAlerts,
-            smsAdmissionAlerts: json.data.smsAdmissionAlerts,
-            smsBlogAlerts: json.data.smsBlogAlerts,
-            smsSyllabusAlerts: json.data.smsSyllabusAlerts,
-            smsAnswerKeyAlerts: json.data.smsAnswerKeyAlerts,
-            smsGeneralAlerts: json.data.smsGeneralAlerts,
             phoneVerified: json.data.phoneVerified,
           })
         }
@@ -310,15 +283,27 @@ export default function ProfilePage() {
 
   async function saveNotificationPrefs() {
     try {
+      const prefsToSave = {
+        jobAlerts: notificationPrefs.jobAlerts,
+        resultAlerts: notificationPrefs.resultAlerts,
+        admitCardAlerts: notificationPrefs.admitCardAlerts,
+        privateJobAlerts: notificationPrefs.privateJobAlerts,
+        admissionAlerts: notificationPrefs.admissionAlerts,
+        blogAlerts: notificationPrefs.blogAlerts,
+        syllabusAlerts: notificationPrefs.syllabusAlerts,
+        answerKeyAlerts: notificationPrefs.answerKeyAlerts,
+        generalAlerts: notificationPrefs.generalAlerts,
+      }
       const res = await fetch("/api/user/notifications/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notificationPrefs),
+        body: JSON.stringify(prefsToSave),
       })
       if (res.ok) {
         toast("Notification preferences saved", "success")
       } else {
-        toast("Failed to save preferences", "destructive")
+        const err = await res.json().catch(() => ({}))
+        toast(err.error || "Failed to save preferences", "destructive")
       }
     } catch {
       toast("Failed to save preferences", "destructive")
