@@ -35,7 +35,6 @@ import {
   Sparkles,
   TrendingUp,
   UserCheck,
-  AlertCircle,
 } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -121,18 +120,6 @@ const PREFS_META: { key: keyof NotificationPrefs; label: string; description: st
   { key: "answerKeyAlerts", label: "Answer Key Alerts", description: "Get notified when answer keys are released" },
   { key: "blogAlerts", label: "Blog Alerts", description: "Get notified about new blog posts" },
   { key: "generalAlerts", label: "General Announcements", description: "Get notified about general site announcements" },
-]
-
-const SMS_PREFS_META: { key: keyof NotificationPrefs; label: string; description: string }[] = [
-  { key: "smsJobAlerts", label: "Job Alerts (SMS)", description: "Receive SMS for new government job postings" },
-  { key: "smsPrivateJobAlerts", label: "Private Job Alerts (SMS)", description: "Receive SMS for new private company jobs" },
-  { key: "smsResultAlerts", label: "Result Alerts (SMS)", description: "Receive SMS when results are announced" },
-  { key: "smsAdmitCardAlerts", label: "Admit Card Alerts (SMS)", description: "Receive SMS when admit cards are released" },
-  { key: "smsAdmissionAlerts", label: "Admission Alerts (SMS)", description: "Receive SMS for new admission notifications" },
-  { key: "smsSyllabusAlerts", label: "Syllabus Alerts (SMS)", description: "Receive SMS when new syllabi are published" },
-  { key: "smsAnswerKeyAlerts", label: "Answer Key Alerts (SMS)", description: "Receive SMS when answer keys are released" },
-  { key: "smsBlogAlerts", label: "Blog Alerts (SMS)", description: "Receive SMS for new blog posts" },
-  { key: "smsGeneralAlerts", label: "General Alerts (SMS)", description: "Receive SMS for general site announcements" },
 ]
 
 function roleLabelFor(role: string | null | undefined): string {
@@ -1053,7 +1040,7 @@ export default function ProfilePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Choose what notifications you want to receive via web and SMS</CardDescription>
+                  <CardDescription>Choose what notifications you want to receive in the app</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
@@ -1072,51 +1059,6 @@ export default function ProfilePage() {
                             onCheckedChange={(checked) =>
                               setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
                             }
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Separator className="my-6" />
-
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SMS Alerts</h3>
-                        <p className="text-sm text-gray-500">Receive SMS on your verified phone number</p>
-                      </div>
-                      {notificationPrefs.phoneVerified ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Phone Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600">
-                          <AlertCircle className="h-3.5 w-3.5" />
-                          Verify phone to enable
-                        </span>
-                      )}
-                    </div>
-                    <p className="mb-4 text-sm text-gray-500">
-                      {notificationPrefs.phoneVerified
-                        ? "SMS alerts will be sent to your verified phone number based on these preferences."
-                        : "Verify your phone number in the Profile tab to enable SMS alerts."}
-                    </p>
-                    {SMS_PREFS_META.map((pref, index) => (
-                      <div key={pref.key}>
-                        {index > 0 && <Separator className="mb-6" />}
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label className="text-base">{pref.label}</Label>
-                            <p className="text-sm text-gray-500">{pref.description}</p>
-                          </div>
-                          <Switch
-                            checked={notificationPrefs[pref.key]}
-                            onCheckedChange={(checked) =>
-                              setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
-                            }
-                            disabled={!notificationPrefs.phoneVerified}
                           />
                         </div>
                       </div>
