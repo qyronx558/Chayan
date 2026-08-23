@@ -140,6 +140,75 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
   return { success: true, id: data?.id }
 }
 
+export async function sendContactEmail(
+  name: string,
+  email: string,
+  subject: string,
+  message: string
+) {
+  if (!resend) {
+    console.log(`[Email Mock] Contact form from ${name} <${email}>: ${subject}`)
+    return { success: true, mocked: true }
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: `Chayan Contact <${fromEmail}>`,
+    to: "contact@chayanjobs.com",
+    replyTo: email,
+    subject: `[Chayan Contact] ${subject}`,
+    html: `
+      <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
+        <div style="background:linear-gradient(135deg,#1e3a5f,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
+          <div style="font-size:20px;font-weight:700;color:#fff">New Contact Message</div>
+          <div style="font-size:13px;color:#99f6e4;margin-top:4px">Received via Chayan website contact form</div>
+        </div>
+        <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px 28px">
+          <table style="width:100%;border-collapse:collapse">
+            <tr>
+              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">From</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0 24px 0;font-size:16px;font-weight:600;color:#111827">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Email</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">
+                <a href="mailto:${email}" style="color:#0d9488;text-decoration:none">${email}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Subject</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">${subject}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Message</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0;font-size:15px;color:#374151;line-height:1.7;white-space:pre-wrap">${message}</td>
+            </tr>
+          </table>
+          <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e5e7eb">
+            <div style="font-size:12px;color:#999">You can reply directly to this email to respond to ${name}.</div>
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+        <p style="color:#999;font-size:12px;text-align:center">Chayan - select right. serve right.</p>
+      </div>
+    `,
+  })
+
+  if (error) {
+    console.error("Failed to send contact email:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, id: data?.id }
+}
+
 export async function sendApplicationReminderSms(phone: string, message: string) {
   const accountSid = process.env.TWILIO_ACCOUNT_SID
   const authToken = process.env.TWILIO_AUTH_TOKEN
