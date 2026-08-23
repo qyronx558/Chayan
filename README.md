@@ -1,6 +1,6 @@
 # Chayan
 
-**India's most trusted government & private jobs portal — discover, track, and never miss an opportunity.**
+**India's most trusted government & private jobs portal - discover, track, and never miss an opportunity.**
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/officialamit558/Chayan/ci.yml?branch=main)
 ![Version](https://img.shields.io/github/package-json/v/officialamit558/Chayan)
@@ -13,7 +13,7 @@
 
 ## Overview
 
-Chayan is a production-ready job portal that aggregates government and private job notifications, exam results, admit cards, answer keys, syllabi, and admission updates from official sources across India. It solves the fragmentation problem where aspirants must check dozens of websites daily by providing a single, real-time, searchable platform with personalized alerts, application tracking, and an exam calendar — all in one place.
+Chayan is a production-ready job portal that aggregates government and private job notifications, exam results, admit cards, answer keys, syllabi, and admission updates from official sources across India. It solves the fragmentation problem where aspirants must check dozens of websites daily by providing a single, real-time, searchable platform with personalized alerts, application tracking, and an exam calendar - all in one place.
 
 Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirants preparing for UPSC, SSC, Banking, Railway, Defence, and State PSC exams.
 
@@ -30,30 +30,30 @@ Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirant
 ## Features
 
 ### For Job Seekers
-- **Unified Search** — Search across govt jobs, private jobs, results, admit cards, answer keys, syllabi, admissions, and blogs with category chips
-- **Personalized Alerts** — In-app notifications for new jobs matching qualifications, location, and category preferences
-- **Application Tracker** — Kanban-style board: Interested → Applied → Admit Card → Exam Done → Result
-- **Exam Calendar** — Month-view calendar with exam/admit/result dates, type filters, and upcoming deadlines teaser on home
-- **Qualification-based Discovery** — 32 qualification chips (10th, 12th, B.Tech, B.Sc, MBBS, MBA, Nursing, etc.) with token-level matching
-- **Bookmarks & History** — Save jobs, track viewed items, resume upload for AI-powered recommendations
+- **Unified Search** - Search across govt jobs, private jobs, results, admit cards, answer keys, syllabi, admissions, and blogs with category chips
+- **Personalized Alerts** - In-app notifications for new jobs matching qualifications, location, and category preferences
+- **Application Tracker** - Kanban-style board: Interested → Applied → Admit Card → Exam Done → Result
+- **Exam Calendar** - Month-view calendar with exam/admit/result dates, type filters, and upcoming deadlines teaser on home
+- **Qualification-based Discovery** - 32 qualification chips (10th, 12th, B.Tech, B.Sc, MBBS, MBA, Nursing, etc.) with token-level matching
+- **Bookmarks & History** - Save jobs, track viewed items, resume upload for AI-powered recommendations
 
 ### Content Coverage
-- **Government Jobs** — Central (UPSC, SSC, Banking, Railway, Defence) + State PSCs
-- **Private Jobs** — Company-wise listings with direct apply links
-- **Results** — Merit lists, cut-offs, scorecards with PDF links
-- **Admit Cards** — Hall tickets with exam centre, timing, download links
-- **Answer Keys** — Official keys with objection window tracking
-- **Syllabi** — Subject-wise breakdowns with PDF downloads
-- **Admissions** — University/college admissions with dates, fees, process
-- **Blogs & Notifications** — Preparation guides, exam analysis, policy updates
+- **Government Jobs** - Central (UPSC, SSC, Banking, Railway, Defence) + State PSCs
+- **Private Jobs** - Company-wise listings with direct apply links
+- **Results** - Merit lists, cut-offs, scorecards with PDF links
+- **Admit Cards** - Hall tickets with exam centre, timing, download links
+- **Answer Keys** - Official keys with objection window tracking
+- **Syllabi** - Subject-wise breakdowns with PDF downloads
+- **Admissions** - University/college admissions with dates, fees, process
+- **Blogs & Notifications** - Preparation guides, exam analysis, policy updates
 
 ### Technical
-- **Server-side Rendering** — Next.js 15 App Router with ISR for SEO
-- **Real-time Notifications** — SSE streaming + in-app bell icon with unread count
-- **Google OAuth + Credentials** — NextAuth v5 (Auth.js) with JWT sessions
-- **PWA Ready** — Installable, offline-capable (service worker)
-- **Dark/Light Mode** — System-aware with manual toggle
-- **Responsive** — Mobile-first, works on all devices
+- **Server-side Rendering** - Next.js 15 App Router with ISR for SEO
+- **Real-time Notifications** - SSE streaming + in-app bell icon with unread count
+- **Google OAuth + Credentials** - NextAuth v5 (Auth.js) with JWT sessions
+- **PWA Ready** - Installable, offline-capable (service worker)
+- **Dark/Light Mode** - System-aware with manual toggle
+- **Responsive** - Mobile-first, works on all devices
 
 ---
 
@@ -77,23 +77,18 @@ Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirant
 ## Installation
 
 ```bash
-# 1. Clone repository
 git clone https://github.com/officialamit558/Chayan.git
 cd Chayan
 
-# 2. Install dependencies
 npm install
 
-# 3. Configure environment
 cp .env.example .env
 # Edit .env with your DATABASE_URL, NEXTAUTH_SECRET, OAuth keys, etc.
 
-# 4. Set up database
 npx prisma generate
 npx prisma db push
 npx prisma db seed
 
-# 5. Start development server
 npm run dev
 # Open http://localhost:3000
 ```
@@ -113,32 +108,32 @@ docker-compose up -d
 
 ### Development
 ```bash
-npm run dev          # Start dev server with Turbopack
-npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run typecheck    # TypeScript type checking
+npm run dev          
+npm run build        
+npm run start        
+npm run lint         
+npm run typecheck    
 ```
 
 ### Database
 ```bash
-npx prisma studio    # Visual database browser
-npx prisma migrate dev --name <name>  # Create migration
-npx prisma db push   # Push schema changes (dev)
-npx prisma db seed   # Seed with sample data
+npx prisma studio    
+npx prisma migrate dev --name <name>  
+npx prisma db push   
+npx prisma db seed   
 ```
 
 ### Environment Variables
 Required keys (see `.env.example`):
 ```
-DATABASE_URL              # PostgreSQL connection string
-NEXTAUTH_SECRET           # 32-char secret (openssl rand -hex 32)
-NEXTAUTH_URL              # App URL (e.g., https://chayanjobs.com)
-GOOGLE_CLIENT_ID          # Google OAuth client ID
-GOOGLE_CLIENT_SECRET      # Google OAuth secret
-RESEND_API_KEY            # Resend API key for emails
-CLOUDINARY_*              # Cloudinary credentials for images
-NEXT_PUBLIC_APP_URL       # Public app URL for SEO/sitemap
+DATABASE_URL              
+NEXTAUTH_SECRET           
+NEXTAUTH_URL              
+GOOGLE_CLIENT_ID         
+GOOGLE_CLIENT_SECRET    
+RESEND_API_KEY         
+CLOUDINARY_*            
+NEXT_PUBLIC_APP_URL     
 ```
 
 ---
@@ -166,7 +161,7 @@ We welcome contributions! Please follow these steps:
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -191,4 +186,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-*Last updated: August 2025*
+*Last updated: August 2026*
