@@ -1,23 +1,9 @@
 import Link from "next/link"
-import {
-  Globe,
-  MessageCircle,
-  Camera,
-  Video,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react"
+import { Mail, MapPin } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { Newsletter } from "@/components/layout/Newsletter"
 import { siteConfig, footerLinks } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-
-const socialLinks = [
-  { label: "Facebook", icon: Globe, href: siteConfig.links.facebook },
-  { label: "Twitter", icon: MessageCircle, href: siteConfig.links.twitter },
-  { label: "Instagram", icon: Camera, href: "https://instagram.com" },
-  { label: "YouTube", icon: Video, href: siteConfig.links.youtube },
-]
 
 const importantLinks = [
   { label: "Privacy Policy", href: "/privacy" },
@@ -53,30 +39,10 @@ export function Footer({ className }: { className?: string }) {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />
-                <span>contact@chayan.in</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />
-                <span>+91-11-23456789</span>
+                <span>contact@chayanjobs.com</span>
               </div>
             </div>
-            <div className="flex gap-3">
-              {socialLinks.map((social) => {
-                const Icon = social.icon
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={social.label}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-teal-600 hover:text-white dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-teal-600 dark:hover:text-white"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                )
-              })}
-            </div>
+            <Newsletter className="mt-2" />
           </div>
 
           {footerLinks.map((section) => (

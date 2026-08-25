@@ -596,6 +596,16 @@ model Newsletter {
   @@index([email])
 }
 
+model NewsletterSend {
+  id        String   @id @default(cuid())
+  sentDate  DateTime @unique
+  sentAt    DateTime @default(now())
+  recipients Int     @default(0)
+  itemsSent  Int     @default(0)
+
+  @@index([sentDate])
+}
+
 model BlogPost {
   id          String        @id @default(cuid())
   title       String

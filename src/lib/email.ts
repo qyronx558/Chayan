@@ -69,6 +69,80 @@ export async function sendNewsletterWelcome(email: string) {
   return { success: true }
 }
 
+export interface NewsletterDigestItem {
+  type: string
+  title: string
+  detail: string
+  href: string
+}
+
+export async function sendNewsletterDigest(
+  email: string,
+  items: NewsletterDigestItem[],
+  unsubscribeToken?: string
+) {
+  const baseUrl = getBaseUrl()
+  const itemsHtml = items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding:14px 18px;border-bottom:1px solid #eee">
+          <div style="font-size:11px;color:#0d9488;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${item.type}</div>
+          <div style="font-size:15px;font-weight:600;color:#111827;margin-top:2px">${item.title}</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:4px">${item.detail}</div>
+          <div style="margin-top:8px">
+            <a href="${baseUrl}${item.href}" style="display:inline-block;padding:8px 16px;background:#0d9488;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600">View Details</a>
+          </div>
+        </td>
+      </tr>`
+    )
+    .join("")
+
+  const unsubscribeHtml = unsubscribeToken
+    ? `<a href="${baseUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}" style="color:#999">Unsubscribe</a>`
+    : "You are receiving this because you subscribed to Chayan job alerts."
+
+  const html = `
+    <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
+      <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
+        <div style="font-size:20px;font-weight:700;color:#fff">Your Chayan Job Alert Digest</div>
+        <div style="font-size:13px;color:#99f6e4;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} — ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+      </div>
+      <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        <table style="width:100%;border-collapse:collapse">
+          ${itemsHtml}
+          <tr>
+            <td style="padding:18px">
+              <a href="${baseUrl}" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600">Browse All Updates</a>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+      <p style="color:#999;font-size:12px;text-align:center">Chayan - select right. serve right. | ${unsubscribeHtml}</p>
+    </div>
+  `
+
+  if (!resend) {
+    console.log(`[Email Mock] Newsletter digest to ${email}: ${items.length} items`)
+    return { success: true, mocked: true }
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: `Chayan <${fromEmail}>`,
+    to: email,
+    subject: `${items.length} new government job update${items.length === 1 ? "" : "s"} — Chayan Digest`,
+    html,
+  })
+
+  if (error) {
+    console.error("Failed to send newsletter digest:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, id: data?.id }
+}
+
 export interface ApplicationReminderItem {
   type: string
   title: string

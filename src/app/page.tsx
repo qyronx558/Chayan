@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/home/SearchBar"
 import { QuickLinks } from "@/components/home/QuickLinks"
 import { LatestJobs } from "@/components/home/LatestJobs"
 import { UpcomingDeadlines } from "@/components/home/UpcomingDeadlines"
+import { TrustBadges } from "@/components/home/TrustBadges"
 
 const LatestResults = dynamic(() => import("@/components/home/LatestResults").then(m => ({ default: m.LatestResults })))
 const LatestAdmitCards = dynamic(() => import("@/components/home/LatestAdmitCards").then(m => ({ default: m.LatestAdmitCards })))
@@ -12,7 +13,6 @@ const LatestPrivateJobs = dynamic(() => import("@/components/home/LatestPrivateJ
 const PopularExams = dynamic(() => import("@/components/home/PopularExams").then(m => ({ default: m.PopularExams })))
 const FAQ = dynamic(() => import("@/components/home/FAQ").then(m => ({ default: m.FAQ })))
 const LatestBlog = dynamic(() => import("@/components/home/LatestBlog").then(m => ({ default: m.LatestBlog })))
-const Newsletter = dynamic(() => import("@/components/layout/Newsletter").then(m => ({ default: m.Newsletter })))
 
 export default function HomePage() {
   return (
@@ -29,11 +29,7 @@ export default function HomePage() {
       <LatestPrivateJobs />
       <PopularExams />
       <FAQ />
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Newsletter />
-        </div>
-      </section>
+      <TrustBadges />
     </>
   )
 }
