@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
+import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -87,6 +88,8 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
           meta: rk.status || null,
         }))}
       />
+
+      <DiscussionSection postType="ANSWER_KEY" postId={answerKey.id} path={`/answer-key/${answerKey.slug}`} />
 </div>
   )
 }

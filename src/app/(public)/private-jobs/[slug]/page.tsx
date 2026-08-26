@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { PrivateJobDetail } from "./private-job-detail"
+import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -33,5 +34,12 @@ export default async function PrivateJobPage({ params }: Props) {
 
   if (!job) notFound()
 
-  return <PrivateJobDetail job={JSON.parse(JSON.stringify(job))} />
+  return (
+    <>
+      <PrivateJobDetail job={JSON.parse(JSON.stringify(job))} />
+      <div className="container mx-auto max-w-4xl px-4">
+        <DiscussionSection postType="PRIVATE_JOB" postId={job.id} path={`/private-jobs/${job.slug}`} />
+      </div>
+    </>
+  )
 }

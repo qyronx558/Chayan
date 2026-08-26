@@ -58,7 +58,7 @@ export async function GET() {
       include: {
         department: true,
         category: true,
-        _count: { select: { jobView: true, bookmark: true, comment: true } },
+        _count: { select: { jobView: true, bookmark: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 10,

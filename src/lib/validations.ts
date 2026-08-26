@@ -123,10 +123,29 @@ export const notificationSchema = z.object({
   isTrending: z.boolean().default(false),
 })
 
-export const commentSchema = z.object({
-  content: z.string().min(1, "Comment cannot be empty"),
-  jobId: z.string().nullable().optional(),
-  resultId: z.string().nullable().optional(),
+export const POST_TYPES = [
+  "JOB",
+  "PRIVATE_JOB",
+  "RESULT",
+  "ADMIT_CARD",
+  "ANSWER_KEY",
+  "SYLLABUS",
+  "ADMISSION",
+  "BLOG",
+] as const
+
+export const postTypeSchema = z.enum(POST_TYPES)
+
+export const discussionCommentSchema = z.object({
+  content: z.string().min(1, "Comment cannot be empty").max(5000, "Comment is too long"),
+  postType: postTypeSchema,
+  postId: z.string().min(1, "postId is required"),
+  parentId: z.string().nullable().optional(),
+  kind: z.enum(["GENERAL", "QUESTION", "ANSWER"]).default("GENERAL"),
+  imageUrl: z.string().url().nullable().optional(),
+  captchaToken: z.string().optional(),
+  captchaAnswer: z.string().optional(),
+  path: z.string().max(500).optional(),
 })
 
 export const profileSchema = z.object({
@@ -171,7 +190,7 @@ export type AnswerKeyInput = z.infer<typeof answerKeySchema>
 export type AdmissionInput = z.infer<typeof admissionSchema>
 export type SyllabusInput = z.infer<typeof syllabusSchema>
 export type NotificationInput = z.infer<typeof notificationSchema>
-export type CommentInput = z.infer<typeof commentSchema>
+export type CommentInput = z.infer<typeof discussionCommentSchema>
 export type ProfileInput = z.infer<typeof profileSchema>
 export type BookmarkInput = z.infer<typeof bookmarkSchema>
 export type ApplicationInput = z.infer<typeof applicationSchema>

@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
-          _count: { select: { bookmark: true, comment: true } },
+          _count: { select: { bookmark: true, comments: true } },
         },
         orderBy: { createdAt: "desc" },
         skip,

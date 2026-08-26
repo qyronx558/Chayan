@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { JobDetailContent } from "@/components/jobs/JobDetailContent"
+import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { JobViewTracker } from "@/components/jobs/JobViewTracker"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -123,6 +124,8 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         slug={job.slug}
       />
 <JobViewTracker jobId={job.id} />
+
+      <DiscussionSection postType="JOB" postId={job.id} path={`/apply/${job.slug}`} />
 {relatedJobs.length > 0 && (
         <section className="mt-12">
           <h2 className="mb-6 text-xl font-bold text-gray-900">Related Jobs</h2>

@@ -29,7 +29,7 @@ export async function GET(
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
-        _count: { select: { bookmark: true, comment: true } },
+        _count: { select: { bookmark: true, comments: true } },
       },
     })
 

@@ -13,6 +13,7 @@ import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { TableOfContents } from "@/components/blog/TableOfContents"
 import { BLOG_PROSE_CLASSES } from "@/lib/blog-prose"
 import { AuthorCard } from "@/components/blog/AuthorCard"
+import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { NewsletterCTA } from "@/components/blog/NewsletterCTA"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -180,6 +181,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         <AuthorCard name={authorName} category={post.category?.name} />
       </article>
       </div>
+
+      <DiscussionSection postType="BLOG" postId={post.id} path={`/blog/${post.slug}`} />
 
       <NewsletterCTA topic={post.category?.name} />
 

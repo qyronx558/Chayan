@@ -8,6 +8,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PostType {
+  JOB
+  PRIVATE_JOB
+  RESULT
+  ADMIT_CARD
+  ANSWER_KEY
+  SYLLABUS
+  ADMISSION
+  BLOG
+}
+
+enum CommentStatus {
+  APPROVED
+  PENDING_REVIEW
+  DELETED
+}
+
+enum CommentKind {
+  GENERAL
+  QUESTION
+  ANSWER
+}
+
 enum Role {
   USER
   ADMIN
@@ -79,7 +102,10 @@ model User {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   bookmark               Bookmark[]
-  comment                Comment[]
+  comments               Comment[]
+  commentUpvotes         CommentUpvote[]
+  commentFollows         CommentFollow[]
+  helpfulCount           Int                     @default(0)
   log                    Log[]
   notificationPreference NotificationPreference?
   userNotification       UserNotification[]
@@ -261,7 +287,6 @@ model Job {
   answerKey            AnswerKey[]
   syllabus             Syllabus[]
   bookmark             Bookmark[]
-  comment              Comment[]
   jobView              JobView[]
 
   @@index([title])
@@ -334,8 +359,7 @@ model Result {
   category     Category   @relation(fields: [categoryId], references: [id])
   job          Job?       @relation(fields: [jobId], references: [id])
   createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  bookmark     Bookmark[]
-  comment      Comment[]
+   bookmark     Bookmark[]
 
   @@index([title])
   @@index([slug])
@@ -556,19 +580,75 @@ model ReminderLog {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  userId    String
-  jobId     String?
-  resultId  String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  job       Job?     @relation(fields: [jobId], references: [id])
-  result    Result?  @relation(fields: [resultId], references: [id])
+  id             String        @id @default(cuid())
+  content        String
+  imageUrl       String?
+  userId         String
+  postType       PostType
+  postId         String
+  parentId       String?
+  kind           CommentKind   @default(GENERAL)
+  status         CommentStatus @default(APPROVED)
+  isPinned       Boolean       @default(false)
+  isOfficial     Boolean       @default(false)
+  isBestAnswer   Boolean       @default(false)
+  reportCount    Int           @default(0)
+  upvoteCount    Int           @default(0)
+  replyCount     Int           @default(0)
+  flaggedReasons String[]      @default([])
+  editedAt       DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?        @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]       @relation("CommentThread")
+  upvotes CommentUpvote[]
+
+  @@index([postType, postId, createdAt])
+  @@index([parentId])
   @@index([userId])
-  @@index([jobId])
-  @@index([resultId])
+  @@index([status])
+}
+
+model CommentUpvote {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([userId])
+}
+
+model DiscussionThread {
+  id           String   @id @default(cuid())
+  postType     PostType
+  postId       String
+  locked       Boolean  @default(false)
+  commentCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  follows CommentFollow[]
+
+  @@unique([postType, postId])
+}
+
+model CommentFollow {
+  id        String   @id @default(cuid())
+  threadId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  thread DiscussionThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
 }
 
 model Log {

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
+import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -91,6 +92,8 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
           meta: ra.lastDate ? `Last Date: ${formatDate(ra.lastDate)}` : null,
         }))}
       />
+
+      <DiscussionSection postType="ADMISSION" postId={admission.id} path={`/admission/${admission.slug}`} />
 </div>
   )
 }
