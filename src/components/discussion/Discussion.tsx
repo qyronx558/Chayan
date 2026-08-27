@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Image as ImageIcon, Lock, MessageSquare, Search, ShieldCheck, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -67,6 +67,9 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   const [filter, setFilter] = useState<FilterKey>("all")
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
+  const [connected, setConnected] = useState(false)
+  const [reconnecting, setReconnecting] = useState(false)
+  const eventSourceRef = useRef<EventSource | null>(null)
 
   const [content, setContent] = useState("")
   const [kind, setKind] = useState<"GENERAL" | "QUESTION">("GENERAL")
@@ -79,6 +82,102 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
     token?: string
   }>({ required: false })
   const [captchaAnswer, setCaptchaAnswer] = useState("")
+
+  // SSE event handler - defined before useEffect
+  const handleSSEEvent = useCallback((data: any) => {
+    switch (data.type) {
+      case "new-comment":
+        if (data.comment.parentId) {
+          // Reply to existing comment - find and update at any depth
+          const updateReplyCount = (comments: CommentDTO[]): CommentDTO[] =>
+            comments.map((c) => {
+              if (c.id === data.comment.parentId) {
+                return {
+                  ...c,
+                  replyCount: c.replyCount + 1,
+                  replies: [...(c.replies || []), data.comment],
+                  visibleReplyCount: (c.visibleReplyCount || 0) + 1,
+                }
+              }
+              if (c.replies && c.replies.length > 0) {
+                return { ...c, replies: updateReplyCount(c.replies) }
+              }
+              return c
+            })
+
+          setComments((prev) => updateReplyCount(prev))
+        } else {
+          // New top-level comment
+          setComments((prev) => [
+            { ...data.comment, replies: [], visibleReplyCount: 0 },
+            ...prev.filter((c) => c.id !== data.comment.id),
+          ])
+          setMeta((m) => ({ ...m, total: m.total + 1 }))
+        }
+        break
+      case "upvote":
+        const updateUpvote = (comments: CommentDTO[]): CommentDTO[] =>
+          comments.map((c) =>
+            c.id === data.commentId
+              ? {
+                  ...c,
+                  hasUpvoted: data.hasUpvoted,
+                  upvoteCount: c.upvoteCount + (data.hasUpvoted ? 1 : -1),
+                }
+              : c.replies && c.replies.length > 0
+                ? { ...c, replies: updateUpvote(c.replies) }
+                : c
+          )
+        setComments((prev) => updateUpvote(prev))
+        break
+      case "best-answer":
+        const updateBestAnswer = (comments: CommentDTO[]): CommentDTO[] =>
+          comments.map((c) => ({
+            ...c,
+            replies: c.replies
+              ? updateBestAnswer(c.replies)
+              : undefined,
+            isBestAnswer: c.id === data.commentId ? data.isBestAnswer : c.isBestAnswer,
+          }))
+        setComments((prev) => updateBestAnswer(prev))
+        break
+      case "delete":
+        const removeComment = (comments: CommentDTO[]): CommentDTO[] => {
+          const filtered = comments.filter((c) => c.id !== data.commentId)
+          return filtered.map((c) =>
+            c.replies && c.replies.length > 0
+              ? { ...c, replies: removeComment(c.replies), replyCount: Math.max(0, c.replyCount - 1) }
+              : c
+          )
+        }
+        setComments((prev) => removeComment(prev))
+        setMeta((m) => ({ ...m, total: Math.max(0, m.total - 1) }))
+        break
+      case "edit":
+        const updateEdit = (comments: CommentDTO[]): CommentDTO[] =>
+          comments.map((c) =>
+            c.id === data.commentId
+              ? { ...c, content: data.content, editedAt: new Date().toISOString() }
+              : c.replies && c.replies.length > 0
+                ? { ...c, replies: updateEdit(c.replies) }
+                : c
+          )
+        setComments((prev) => updateEdit(prev))
+        break
+    }
+  }, [])
+
+  async function loadReplies(parentId: string, cursor?: string) {
+    const params = new URLSearchParams({
+      postType,
+      postId,
+      parentId,
+    })
+    if (cursor) params.set("cursor", cursor)
+    const res = await fetch(`/api/comments?${params}`)
+    const json = await res.json()
+    return json.success ? { comments: json.data.comments, nextCursor: json.data.nextCursor } : { comments: [], nextCursor: null }
+  }
 
   const fetchComments = useCallback(
     async (opts?: { cursor?: string; append?: boolean }) => {
@@ -118,6 +217,56 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
     const t = setTimeout(() => setSearch(searchInput), 300)
     return () => clearTimeout(t)
   }, [searchInput])
+
+  // SSE Connection for real-time updates
+  useEffect(() => {
+    const connect = () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+      }
+
+      const es = new EventSource(`/api/comments/stream?postType=${postType}&postId=${postId}`)
+      eventSourceRef.current = es
+
+      es.onopen = () => {
+        setConnected(true)
+        setReconnecting(false)
+      }
+
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          handleSSEEvent(data)
+        } catch {
+          // ignore parse errors
+        }
+      }
+
+      es.addEventListener("thread-update", (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          setMeta((m) => ({ ...m, total: data.commentCount }))
+        } catch {
+          // ignore
+        }
+      })
+
+      es.onerror = () => {
+        setConnected(false)
+        setReconnecting(true)
+        es.close()
+        setTimeout(connect, 5000)
+      }
+    }
+
+    connect()
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+      }
+    }
+  }, [postType, postId, handleSSEEvent])
 
   async function uploadImage(file: File) {
     setUploading(true)
@@ -308,14 +457,6 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
       })
   }
 
-  async function loadReplies(parentId: string): Promise<CommentDTO[]> {
-    const res = await fetch(
-      `/api/comments?postType=${postType}&postId=${postId}&parentId=${parentId}`
-    )
-    const json = await res.json()
-    return json.success ? json.data.comments : []
-  }
-
   function handleBestAnswer(id: string) {
     fetch(`/api/comments/${id}/best-answer`, { method: "POST" })
       .then((r) => r.json())
@@ -422,6 +563,12 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
                 </Button>
               </>
             )}
+            <div className="flex items-center gap-1.5">
+              <span className={cn("h-2 w-2 rounded-full", connected ? "bg-green-500" : "bg-red-500")} />
+              <span className="text-xs text-gray-500">
+                {connected ? "Live" : reconnecting ? "Reconnecting…" : "Offline"}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -464,6 +611,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
           <div className="border-b border-l-4 border-b-gray-100 border-l-blue-600 bg-blue-50/60 px-4 py-4 sm:px-6">
             <CommentItem
               comment={{ ...meta.pinnedComment, replies: [], visibleReplyCount: 0 }}
+              depth={0}
               postType={postType}
               postId={postId}
               currentUserId={currentUserId}
@@ -583,6 +731,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
               <CommentItem
                 key={comment.id}
                 comment={comment}
+                depth={0}
                 postType={postType}
                 postId={postId}
                 currentUserId={currentUserId}

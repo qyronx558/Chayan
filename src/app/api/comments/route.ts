@@ -14,17 +14,25 @@ import {
 } from "@/lib/discussion"
 
 const PAGE_SIZE = 10
-const REPLIES_PREVIEW = 2
+const REPLIES_PAGE_SIZE = 5
 
 type SortKey = "top" | "newest" | "controversial"
 
-function decodeCursor(cursor: string | null): number {
-  if (!cursor) return 0
-  return Number(Buffer.from(cursor, "base64url").toString("utf8")) || 0
+function decodeCursor(cursor: string | null): { offset: number; parentId?: string } {
+  if (!cursor) return { offset: 0 }
+  try {
+    return JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"))
+  } catch {
+    return { offset: Number(Buffer.from(cursor, "base64url").toString("utf8")) || 0 }
+  }
 }
 
-function encodeCursor(offset: number): string {
-  return Buffer.from(String(offset)).toString("base64url")
+function encodeCursor(offset: number, parentId?: string): string {
+  return Buffer.from(JSON.stringify({ offset, parentId })).toString("base64url")
+}
+
+function encodeTopCursor(offset: number): string {
+  return Buffer.from(JSON.stringify({ offset })).toString("base64url")
 }
 
 export async function GET(request: NextRequest) {
@@ -48,11 +56,16 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     const admin = isAdmin(session?.user?.role)
 
-    // Replies listing for a specific parent
+    // Replies listing for a specific parent with cursor pagination
     if (parentId) {
+      const cursorData = decodeCursor(cursor)
+      const replyOffset = cursorData.offset || 0
+
       const replies = await prisma.comment.findMany({
         where: { parentId, status: "APPROVED", ...(admin ? {} : {}) },
         orderBy: [{ isBestAnswer: "desc" }, { createdAt: "asc" }],
+        skip: replyOffset,
+        take: REPLIES_PAGE_SIZE + 1,
         include: {
           user: { select: { id: true, name: true, image: true, helpfulCount: true } },
           upvotes: session?.user?.id
@@ -60,11 +73,16 @@ export async function GET(request: NextRequest) {
             : false,
         },
       })
+
+      const hasMore = replies.length > REPLIES_PAGE_SIZE
+      const pageReplies = hasMore ? replies.slice(0, REPLIES_PAGE_SIZE) : replies
+      const nextCursor = hasMore ? encodeCursor(replyOffset + REPLIES_PAGE_SIZE, parentId) : null
+
       return NextResponse.json({
         success: true,
         data: {
-          comments: replies.map((r) => serialize(r, session?.user?.id)),
-          nextCursor: null,
+          comments: pageReplies.map((r) => serialize(r, session?.user?.id)),
+          nextCursor,
         },
       })
     }
@@ -124,7 +142,8 @@ export async function GET(request: NextRequest) {
       orderedIds = rows.map((r) => r.id)
     }
 
-    const offset = decodeCursor(cursor)
+    const cursorData = decodeCursor(cursor)
+    const offset = typeof cursorData === 'number' ? cursorData : (cursorData?.offset || 0)
     const pageIds = orderedIds.slice(offset, offset + PAGE_SIZE)
     const hasNext = offset + PAGE_SIZE < orderedIds.length
 
@@ -166,7 +185,7 @@ export async function GET(request: NextRequest) {
       if (!r.parentId) continue
       hiddenByParent.set(r.parentId, (hiddenByParent.get(r.parentId) || 0) + 1)
       const list = repliesByParent.get(r.parentId) || []
-      if ((list.length < REPLIES_PREVIEW && !r.isBestAnswer) || r.isBestAnswer) {
+      if ((list.length < REPLIES_PAGE_SIZE && !r.isBestAnswer) || r.isBestAnswer) {
         list.push(serialize(r, session?.user?.id))
         repliesByParent.set(r.parentId, list)
       }
@@ -180,7 +199,7 @@ export async function GET(request: NextRequest) {
           replies: repliesByParent.get(c.id) || [],
           visibleReplyCount: repliesByParent.get(c.id)?.length || 0,
         })),
-        nextCursor: hasNext ? encodeCursor(offset + PAGE_SIZE) : null,
+        nextCursor: hasNext ? encodeTopCursor(offset + PAGE_SIZE) : null,
         meta: {
           total: thread?.commentCount ?? 0,
           locked: thread?.locked ?? false,

@@ -39,6 +39,7 @@ export interface CommentDTO {
   canEdit?: boolean
   replies?: CommentDTO[]
   visibleReplyCount?: number
+  replyNextCursor?: string | null
 }
 
 export interface ThreadMeta {
@@ -47,6 +48,11 @@ export interface ThreadMeta {
   following: boolean
   isAdmin: boolean
   pinnedComment: CommentDTO | null
+}
+
+export interface ReplyPageData {
+  comments: CommentDTO[]
+  nextCursor: string | null
 }
 
 export type SortKey = "top" | "newest" | "controversial"
