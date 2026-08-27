@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
     let parentAuthorId: string | null = null
     if (parentId) {
       const parent = await prisma.comment.findUnique({ where: { id: parentId } })
-      if (!parent || parent.postId !== postId || parent.postType !== postType || parent.parentId) {
+      if (!parent || parent.postId !== postId || parent.postType !== postType) {
         return NextResponse.json({ success: false, error: "Invalid parent comment" }, { status: 400 })
       }
       parentAuthorId = parent.userId
