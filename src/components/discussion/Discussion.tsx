@@ -85,86 +85,8 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
 
   // SSE event handler - defined before useEffect
   const handleSSEEvent = useCallback((data: any) => {
-    switch (data.type) {
-      case "new-comment":
-        if (data.comment.parentId) {
-          // Reply to existing comment - find and update at any depth
-          const updateReplyCount = (comments: CommentDTO[]): CommentDTO[] =>
-            comments.map((c) => {
-              if (c.id === data.comment.parentId) {
-                return {
-                  ...c,
-                  replyCount: c.replyCount + 1,
-                  replies: [...(c.replies || []), data.comment],
-                  visibleReplyCount: (c.visibleReplyCount || 0) + 1,
-                }
-              }
-              if (c.replies && c.replies.length > 0) {
-                return { ...c, replies: updateReplyCount(c.replies) }
-              }
-              return c
-            })
-
-          setComments((prev) => updateReplyCount(prev))
-        } else {
-          // New top-level comment
-          setComments((prev) => [
-            { ...data.comment, replies: [], visibleReplyCount: 0 },
-            ...prev.filter((c) => c.id !== data.comment.id),
-          ])
-          setMeta((m) => ({ ...m, total: m.total + 1 }))
-        }
-        break
-      case "upvote":
-        const updateUpvote = (comments: CommentDTO[]): CommentDTO[] =>
-          comments.map((c) =>
-            c.id === data.commentId
-              ? {
-                  ...c,
-                  hasUpvoted: data.hasUpvoted,
-                  upvoteCount: c.upvoteCount + (data.hasUpvoted ? 1 : -1),
-                }
-              : c.replies && c.replies.length > 0
-                ? { ...c, replies: updateUpvote(c.replies) }
-                : c
-          )
-        setComments((prev) => updateUpvote(prev))
-        break
-      case "best-answer":
-        const updateBestAnswer = (comments: CommentDTO[]): CommentDTO[] =>
-          comments.map((c) => ({
-            ...c,
-            replies: c.replies
-              ? updateBestAnswer(c.replies)
-              : undefined,
-            isBestAnswer: c.id === data.commentId ? data.isBestAnswer : c.isBestAnswer,
-          }))
-        setComments((prev) => updateBestAnswer(prev))
-        break
-      case "delete":
-        const removeComment = (comments: CommentDTO[]): CommentDTO[] => {
-          const filtered = comments.filter((c) => c.id !== data.commentId)
-          return filtered.map((c) =>
-            c.replies && c.replies.length > 0
-              ? { ...c, replies: removeComment(c.replies), replyCount: Math.max(0, c.replyCount - 1) }
-              : c
-          )
-        }
-        setComments((prev) => removeComment(prev))
-        setMeta((m) => ({ ...m, total: Math.max(0, m.total - 1) }))
-        break
-      case "edit":
-        const updateEdit = (comments: CommentDTO[]): CommentDTO[] =>
-          comments.map((c) =>
-            c.id === data.commentId
-              ? { ...c, content: data.content, editedAt: new Date().toISOString() }
-              : c.replies && c.replies.length > 0
-                ? { ...c, replies: updateEdit(c.replies) }
-                : c
-          )
-        setComments((prev) => updateEdit(prev))
-        break
-    }
+    // Kept for future granular events, but we now refetch on thread-update
+    console.debug("SSE event:", data.type)
   }, [])
 
   async function loadReplies(parentId: string, cursor?: string) {
@@ -246,6 +168,8 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
         try {
           const data = JSON.parse(event.data)
           setMeta((m) => ({ ...m, total: data.commentCount }))
+          // Refetch comments to get latest nested replies
+          fetchComments()
         } catch {
           // ignore
         }

@@ -15,6 +15,7 @@ import {
 
 const PAGE_SIZE = 10
 const REPLIES_PAGE_SIZE = 5
+const MAX_NESTED_DEPTH = 3
 
 type SortKey = "top" | "newest" | "controversial"
 
@@ -33,6 +34,48 @@ function encodeCursor(offset: number, parentId?: string): string {
 
 function encodeTopCursor(offset: number): string {
   return Buffer.from(JSON.stringify({ offset })).toString("base64url")
+}
+
+async function fetchNestedReplies(
+  prisma: any,
+  parentIds: string[],
+  sessionUserId: string | undefined,
+  depth: number,
+  admin: boolean
+): Promise<Map<string, any[]>> {
+  if (depth >= MAX_NESTED_DEPTH || parentIds.length === 0) return new Map()
+
+  const replies = await prisma.comment.findMany({
+    where: { parentId: { in: parentIds }, status: "APPROVED" },
+    orderBy: [{ isBestAnswer: "desc" }, { createdAt: "asc" }],
+    include: {
+      user: { select: { id: true, name: true, image: true, helpfulCount: true } },
+      upvotes: sessionUserId
+        ? { where: { userId: sessionUserId }, select: { id: true } }
+        : false,
+    },
+  })
+
+  const repliesByParent = new Map<string, any[]>()
+  const childIds: string[] = []
+
+  for (const r of replies) {
+    if (!r.parentId) continue
+    childIds.push(r.id)
+    const list = repliesByParent.get(r.parentId) || []
+    list.push(serialize(r, sessionUserId))
+    repliesByParent.set(r.parentId, list)
+  }
+
+  // Recursively fetch deeper replies
+  const deeperReplies = await fetchNestedReplies(prisma, childIds, sessionUserId, depth + 1, admin)
+  // Merge deeper replies
+  for (const [parentId, replies] of deeperReplies) {
+    const existing = repliesByParent.get(parentId) || []
+    repliesByParent.set(parentId, [...existing, ...replies])
+  }
+
+  return repliesByParent
 }
 
 export async function GET(request: NextRequest) {
@@ -160,35 +203,25 @@ export async function GET(request: NextRequest) {
     const byId = new Map(comments.map((c) => [c.id, c]))
     const ordered = pageIds.map((id) => byId.get(id)!).filter(Boolean)
 
-    // Preview replies (best answer floats to top of its thread)
-    const previewReplies =
-      ordered.length > 0
-        ? await prisma.comment.findMany({
-            where: {
-              parentId: { in: ordered.map((c) => c.id) },
-              status: "APPROVED",
-              ...(filter === "answers" ? { OR: [{ kind: "ANSWER" as const }, { isBestAnswer: true }] } : {}),
-            },
-            orderBy: [{ isBestAnswer: "desc" }, { createdAt: "asc" }],
-            include: {
-              user: { select: { id: true, name: true, image: true, helpfulCount: true } },
-              upvotes: session?.user?.id
-                ? { where: { userId: session.user.id }, select: { id: true } }
-                : false,
-            },
-          })
-        : []
+    // Fetch nested replies recursively up to MAX_NESTED_DEPTH
+    const topLevelIds = ordered.map((c) => c.id)
+    const repliesByParent = await fetchNestedReplies(
+      prisma,
+      topLevelIds,
+      session?.user?.id,
+      0,
+      admin
+    )
 
-    const repliesByParent = new Map<string, ReturnType<typeof serialize>[]>()
-    const hiddenByParent = new Map<string, number>()
-    for (const r of previewReplies) {
-      if (!r.parentId) continue
-      hiddenByParent.set(r.parentId, (hiddenByParent.get(r.parentId) || 0) + 1)
-      const list = repliesByParent.get(r.parentId) || []
-      if ((list.length < REPLIES_PAGE_SIZE && !r.isBestAnswer) || r.isBestAnswer) {
-        list.push(serialize(r, session?.user?.id))
-        repliesByParent.set(r.parentId, list)
+    // Calculate visible counts for "View more" buttons
+    const visibleReplyCountMap = new Map<string, number>()
+    for (const [parentId, replies] of repliesByParent) {
+      // Count only first REPLIES_PAGE_SIZE per parent for initial view
+      let count = 0
+      for (const r of replies) {
+        if (r.parentId === parentId) count++
       }
+      visibleReplyCountMap.set(parentId, count)
     }
 
     return NextResponse.json({
@@ -197,7 +230,7 @@ export async function GET(request: NextRequest) {
         comments: ordered.map((c) => ({
           ...serialize(c, session?.user?.id),
           replies: repliesByParent.get(c.id) || [],
-          visibleReplyCount: repliesByParent.get(c.id)?.length || 0,
+          visibleReplyCount: visibleReplyCountMap.get(c.id) || 0,
         })),
         nextCursor: hasNext ? encodeTopCursor(offset + PAGE_SIZE) : null,
         meta: {
