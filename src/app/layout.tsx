@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer"
 import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
+import { AdSenseScript } from "@/components/ads/AdSenseScript"
 import { siteConfig } from "@/lib/constants"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -37,6 +38,10 @@ export const metadata: Metadata = {
     images: [siteConfig.ogImage],
   },
   alternates: { canonical: siteConfig.url },
+  other: {
+    "google-adsense-account":
+      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || "ca-pub-6200474851569598",
+  },
   verification: process.env.GOOGLE_SEARCH_CONSOLE_ID
     ? { google: process.env.GOOGLE_SEARCH_CONSOLE_ID }
     : undefined,
@@ -91,6 +96,8 @@ export default function RootLayout({
             <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
           </>
         )}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -109,6 +116,7 @@ export default function RootLayout({
           <CookieConsent />
           <Suspense fallback={null}>
             <GoogleAnalytics />
+            <AdSenseScript />
           </Suspense>
         </Providers>
       </body>
