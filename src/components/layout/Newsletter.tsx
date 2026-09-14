@@ -10,11 +10,18 @@ import { cn } from "@/lib/utils"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export function Newsletter({ className }: { className?: string }) {
+export function Newsletter({
+  className,
+  variant = "default",
+}: {
+  className?: string
+  variant?: "default" | "footer"
+}) {
   const [email, setEmail] = React.useState("")
   const [loading, setLoading] = React.useState(false)
   const [subscribed, setSubscribed] = React.useState(false)
   const [error, setError] = React.useState("")
+  const isFooter = variant === "footer"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,6 +64,19 @@ export function Newsletter({ className }: { className?: string }) {
   }
 
   if (subscribed) {
+    if (isFooter) {
+      return (
+        <div className={cn("rounded-lg border border-teal-400/30 bg-teal-500/10 p-3 text-center", className)}>
+          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-teal-500/20">
+            <CheckCircle className="h-4 w-4 text-teal-300" />
+          </div>
+          <p className="mt-1.5 text-xs font-semibold text-white">You&apos;re subscribed!</p>
+          <p className="mt-0.5 text-[11px] text-slate-300">
+            Welcome aboard - your job alerts are on the way.
+          </p>
+        </div>
+      )
+    }
     return (
       <Card className={cn("overflow-hidden border-teal-200 dark:border-teal-900", className)}>
         <div className="bg-gradient-to-r from-teal-900 to-teal-600 px-3 py-3 text-center">
@@ -74,6 +94,68 @@ export function Newsletter({ className }: { className?: string }) {
           </p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (isFooter) {
+    return (
+      <div className={cn("", className)}>
+        <div className="flex items-center gap-2">
+          <BellRing className="h-3.5 w-3.5 shrink-0 text-teal-400" />
+          <h3 className="text-xs font-bold tracking-tight text-white">
+            Get Free Job Alerts in Your Inbox
+          </h3>
+        </div>
+        <form onSubmit={handleSubmit} className="mt-2.5 flex items-center gap-1.5">
+          <div className="relative flex-1">
+            <Mail className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                if (error) setError("")
+              }}
+              aria-label="Email address"
+              className={cn(
+                "h-8 border-white/15 bg-white/10 pl-6 text-xs text-white placeholder:text-slate-400",
+                error && "border-red-400 focus-visible:ring-red-400"
+              )}
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-8 shrink-0 bg-teal-500 px-3 text-xs text-white hover:bg-teal-400"
+          >
+            {loading ? (
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <span className="flex items-center gap-1">
+                <Send className="h-3 w-3" />
+                Subscribe
+              </span>
+            )}
+          </Button>
+        </form>
+        {error && (
+          <p className="mt-1 flex items-center gap-1 text-[11px] text-red-400">
+            <AlertCircle className="h-3 w-3" />
+            {error}
+          </p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-400">
+          <span className="flex items-center gap-1">
+            <ShieldCheck className="h-2.5 w-2.5 text-teal-400" />
+            No spam
+          </span>
+          <span className="flex items-center gap-1">
+            <CheckCircle className="h-2.5 w-2.5 text-teal-400" />
+            Unsubscribe anytime
+          </span>
+        </div>
+      </div>
     )
   }
 

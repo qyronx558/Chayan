@@ -1,8 +1,8 @@
 import Link from "next/link"
-import { Mail, MapPin } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
+import { Mail, MapPin, ChevronRight } from "lucide-react"
 import { Newsletter } from "@/components/layout/Newsletter"
-import { siteConfig, footerLinks } from "@/lib/constants"
+import { BackToTop } from "@/components/layout/BackToTop"
+import { siteConfig, footerLinks, trendingTags } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
 const importantLinks = [
@@ -20,81 +20,120 @@ const importantLinks = [
   { label: "RSS Feed", href: "/rss" },
 ]
 
+function FooterHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
+      {children}
+      <span className="mt-2 block h-0.5 w-8 rounded-full bg-teal-400" aria-hidden="true" />
+    </h3>
+  )
+}
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="group inline-flex items-center gap-1 text-sm text-slate-300/90 transition-all duration-200 hover:translate-x-0.5 hover:text-teal-300"
+      >
+        <ChevronRight className="h-3.5 w-3.5 -ml-1 text-teal-400/0 transition-all duration-200 group-hover:ml-0 group-hover:text-teal-400/100" />
+        {label}
+      </Link>
+    </li>
+  )
+}
+
 export function Footer({ className }: { className?: string }) {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className={cn("border-t border-gray-200 bg-white text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400", className)}>
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="mb-4 text-sm leading-relaxed">
-              {siteConfig.description}. We provide the latest government job notifications, exam
-              results, admit cards, answer keys, and more.
-            </p>
-            <div className="mb-4 space-y-2 text-sm">
-              <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />
-                <span>New Delhi, India</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />
-                <span>contact@chayanjobs.com</span>
-              </div>
-            </div>
-            <Newsletter className="mt-2" />
-          </div>
+    <footer className={cn("bg-[#0b1e33] text-slate-300", className)}>
+      <div className="h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-amber-400" aria-hidden="true" />
 
-          {footerLinks.map((section) => (
-            <div key={section.title}>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                {section.title}
-              </h3>
+      <div className="bg-gradient-to-b from-[#142f4d] to-[#0b1e33]">
+        <div className="mx-auto max-w-7xl px-4 py-12">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
+            <div className="sm:col-span-2 lg:col-span-4">
+              <Link href="/" className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-500">
+                  <svg viewBox="0 0 80 80" className="h-6 w-6">
+                    <path d="M20 48 L30 58 L55 28" fill="none" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="leading-tight">
+                  <div className="text-2xl font-bold text-white">Chayan</div>
+                  <div className="-mt-0.5 text-xs font-medium tracking-wider text-slate-400">select right. serve right.</div>
+                </div>
+              </Link>
+              <p className="mt-4 text-sm leading-relaxed text-slate-300/80">
+                Your trusted government job portal. Latest notifications, results,
+                admit cards, answer keys and more — all in one place.
+              </p>
+              <div className="mt-4 space-y-2 text-sm text-slate-300/80">
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
+                  <span>New Delhi, India</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 shrink-0 text-teal-400" />
+                  <span>contact@chayanjobs.com</span>
+                </div>
+              </div>
+              <Newsletter className="mt-4" variant="footer" />
+            </div>
+
+            {footerLinks.map((section) => (
+              <div key={section.title} className="lg:col-span-2">
+                <FooterHeading>{section.title}</FooterHeading>
+                <ul className="space-y-2.5">
+                  {section.links.map((link) => (
+                    <FooterLink key={link.label} href={link.href} label={link.label} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            <div className="lg:col-span-2">
+              <FooterHeading>Trending Searches</FooterHeading>
               <ul className="space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm transition-colors hover:text-teal-600 dark:hover:text-teal-400"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
+                {trendingTags.map((tag) => (
+                  <FooterLink key={tag.label} href={tag.href} label={tag.label} />
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <Separator className="my-8 bg-gray-200 dark:bg-gray-800" />
+          <div className="flex items-center justify-center py-10">
+            <div className="text-7xl font-bold tracking-[0.15em] text-white/95 sm:text-8xl md:text-9xl">Chayan</div>
+          </div>
 
-        <div className="flex items-center justify-center py-10">
-          <div className="text-7xl font-bold tracking-[0.15em] text-gray-900 dark:text-white sm:text-8xl md:text-9xl">Chayan</div>
-        </div>
+          <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
+            {importantLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-xs text-slate-400 transition-colors hover:text-teal-300"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
-        <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
-          {importantLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="text-xs transition-colors hover:text-teal-600 dark:hover:text-teal-400"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        <Separator className="my-6 bg-gray-200 dark:bg-gray-800" />
-
-        <div className="text-center text-xs">
-          <p>&copy; {currentYear} {siteConfig.name}. All rights reserved.</p>
-          <p className="mt-1">
-            Powered by Chayan | Last updated: {new Date().toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+          <div className="border-t border-white/10 pt-6">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="text-xs text-slate-400">
+                <p>&copy; {currentYear} {siteConfig.name}. All rights reserved.</p>
+                <p className="mt-1">
+                  Made in India | Last updated: {new Date().toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              <BackToTop />
+            </div>
+          </div>
         </div>
       </div>
     </footer>

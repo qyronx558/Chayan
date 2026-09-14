@@ -55,8 +55,18 @@ export const footerLinks = [
       { label: "Bank Jobs", href: "/category/bank" },
       { label: "Railway Jobs", href: "/category/railway" },
       { label: "Defence Jobs", href: "/category/defence" },
+      { label: "Teaching Jobs", href: "/category/teaching" },
     ],
   },
+]
+
+export const trendingTags = [
+  { label: "Railway Jobs", href: "/category/railway" },
+  { label: "Bank Jobs", href: "/category/bank" },
+  { label: "SSC Exams", href: "/jobs" },
+  { label: "UPSC Updates", href: "/notifications" },
+  { label: "Latest Results", href: "/results" },
+  { label: "Admit Cards", href: "/admit-cards" },
 ]
 
 export const qualificationOptions = [
