@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Send, Mail, Phone, MapPin, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { Send, Mail, MapPin, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -104,13 +104,6 @@ export default function ContactPage() {
       value: "contact@chayanjobs.com",
       href: "mailto:contact@chayanjobs.com",
       description: "We typically respond within 24 hours",
-    },
-    {
-      icon: Phone,
-      title: "Phone",
-      value: "+91-11-23456789",
-      href: "tel:+911123456789",
-      description: "Mon-Fri, 10:00 AM - 6:00 PM IST",
     },
     {
       icon: MapPin,
