@@ -23,6 +23,7 @@ import {
   ClipboardList,
   Menu,
   X,
+  Wrench,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -39,6 +40,7 @@ const navIconMap: Record<string, React.ElementType> = {
   Results: Award,
   "Admit Cards": CreditCard,
   "Answer Keys": FileText,
+  "Free Tools": Wrench,
   Syllabus: BookOpen,
   Admissions: GraduationCap,
   "Exam Calendar": CalendarDays,

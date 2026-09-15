@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { JobQuickSummary } from "@/components/jobs/JobQuickSummary"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
@@ -65,6 +66,7 @@ export function JobDetailContent({
   experience,
   startDate,
   lastDate,
+  slug,
 }: JobDetailContentProps) {
   const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(() => Date.now())
@@ -200,6 +202,18 @@ export function JobDetailContent({
           </div>
         </div>
       </header>
+
+      {/* ── 2-min TL;DR summary + viral share ─────── */}
+      <JobQuickSummary
+        title={title}
+        department={department}
+        slug={slug}
+        totalVacancies={totalVacancies}
+        lastDate={lastDate}
+        applicationFee={applicationFee}
+        ageLimit={ageLimit}
+        education={education}
+      />
 
       {/* ── Live Countdown ────────────────────────────── */}
       {lastDateMs && !isClosed && (

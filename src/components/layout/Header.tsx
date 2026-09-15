@@ -19,6 +19,7 @@ import {
   Bell,
   Newspaper,
   CalendarDays,
+  Wrench,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -151,6 +152,7 @@ export function Header() {
   }, [])
 
   const jobsActive = pathname.startsWith("/jobs") || pathname.startsWith("/private-jobs")
+  const toolsActive = pathname.startsWith("/tools")
   const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar")
 
   return (
@@ -193,6 +195,14 @@ export function Header() {
               <NavLink href="/results">Results</NavLink>
               <NavLink href="/admit-cards">Admit Cards</NavLink>
               <NavLink href="/answer-keys">Answer Keys</NavLink>
+
+              <NavDropdown label="Tools" isActive={toolsActive}>
+                <DropdownItem href="/tools" icon={Wrench} label="All Free Tools" />
+                <DropdownItem href="/tools/age-calculator" icon={CalendarDays} label="Age Calculator" />
+                <DropdownItem href="/tools/salary-calculator" icon={Briefcase} label="Salary Explorer" />
+                <DropdownItem href="/tools/photo-resizer" icon={Newspaper} label="Photo Resizer" />
+                <DropdownItem href="/tools/eligibility-checker" icon={Bell} label="Eligibility Checker" />
+              </NavDropdown>
 
               <NavDropdown label="More" isActive={moreActive}>
                 <DropdownItem href="/syllabus" icon={BookOpen} label="Syllabus" />

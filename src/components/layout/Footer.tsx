@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Mail, MapPin, ChevronRight } from "lucide-react"
 import { Newsletter } from "@/components/layout/Newsletter"
 import { BackToTop } from "@/components/layout/BackToTop"
-import { siteConfig, footerLinks, trendingTags } from "@/lib/constants"
+import { siteConfig, footerLinks, trendingTags, exploreFooterLinks } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
 const importantLinks = [
@@ -92,14 +92,29 @@ export function Footer({ className }: { className?: string }) {
                 </ul>
               </div>
             ))}
+          </div>
 
-            <div className="lg:col-span-2">
-              <FooterHeading>Trending Searches</FooterHeading>
-              <ul className="space-y-2.5">
-                {trendingTags.map((tag) => (
-                  <FooterLink key={tag.label} href={tag.href} label={tag.label} />
-                ))}
-              </ul>
+          <div className="mt-12 border-t border-white/10 pt-10">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <FooterHeading>Trending Searches</FooterHeading>
+                <ul className="space-y-2.5">
+                  {trendingTags.map((tag) => (
+                    <FooterLink key={tag.label} href={tag.href} label={tag.label} />
+                  ))}
+                </ul>
+              </div>
+
+              {exploreFooterLinks.map((section) => (
+                <div key={section.title}>
+                  <FooterHeading>{section.title}</FooterHeading>
+                  <ul className="space-y-2.5">
+                    {section.links.map((link) => (
+                      <FooterLink key={link.label} href={link.href} label={link.label} />
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
 

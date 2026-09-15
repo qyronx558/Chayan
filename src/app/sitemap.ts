@@ -37,6 +37,11 @@ export default async function sitemap() {
 
   const staticPages = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "hourly" as const, priority: 1 },
+    { url: `${baseUrl}/tools`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.9 },
+    { url: `${baseUrl}/tools/age-calculator`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${baseUrl}/tools/salary-calculator`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${baseUrl}/tools/photo-resizer`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${baseUrl}/tools/eligibility-checker`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${baseUrl}/notifications`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
     { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
     { url: `${baseUrl}/sitemap`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.3 },

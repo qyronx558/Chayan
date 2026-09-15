@@ -20,6 +20,7 @@ export const mainNav = [
   { title: "Admissions", href: "/admissions" },
   { title: "Syllabus", href: "/syllabus" },
   { title: "Exam Calendar", href: "/exam-calendar" },
+  { title: "Free Tools", href: "/tools" },
   { title: "Notifications", href: "/notifications" },
   { title: "Blog", href: "/blog" },
 ]
@@ -48,6 +49,16 @@ export const footerLinks = [
     ],
   },
   {
+    title: "Free Tools",
+    links: [
+      { label: "All Free Tools", href: "/tools" },
+      { label: "Age Calculator", href: "/tools/age-calculator" },
+      { label: "Salary Explorer", href: "/tools/salary-calculator" },
+      { label: "Photo Resizer", href: "/tools/photo-resizer" },
+      { label: "Eligibility Checker", href: "/tools/eligibility-checker" },
+    ],
+  },
+  {
     title: "Categories",
     links: [
       { label: "Central Govt Jobs", href: "/category/central" },
@@ -60,7 +71,8 @@ export const footerLinks = [
   },
 ]
 
-export const trendingTags = [
+export const trendingTags = [  { label: "Age Calculator", href: "/tools/age-calculator" },
+  { label: "Salary Calculator", href: "/tools/salary-calculator" },
   { label: "Railway Jobs", href: "/category/railway" },
   { label: "Bank Jobs", href: "/category/bank" },
   { label: "SSC Exams", href: "/jobs" },
@@ -162,4 +174,55 @@ export const sortOptions = [
   { label: "Most Viewed", value: "most_viewed" },
   { label: "A-Z", value: "name_asc" },
   { label: "Z-A", value: "name_desc" },
+]
+
+// Explore band (footer row 2): high-interest discovery links.
+// Phase 1 hrefs reuse existing routes only (category pages + /jobs search
+// deep-links supported by JobsClient). Phase 2 will repoint these to
+// dedicated /exams, /qualification and /state landing pages.
+export const exploreFooterLinks = [
+  {
+    title: "Top Exams",
+    links: [
+      { label: "UPSC CSE", href: "/jobs?search=UPSC" },
+      { label: "SSC CGL", href: "/jobs?search=SSC+CGL" },
+      { label: "SSC CHSL", href: "/jobs?search=SSC+CHSL" },
+      { label: "SSC GD Constable", href: "/jobs?search=SSC+GD" },
+      { label: "IBPS PO", href: "/jobs?search=IBPS" },
+      { label: "RRB NTPC", href: "/jobs?search=RRB" },
+    ],
+  },
+  {
+    title: "Jobs by Qualification",
+    links: [
+      { label: "10th Pass Jobs", href: "/jobs?search=10th" },
+      { label: "12th Pass Jobs", href: "/jobs?search=12th" },
+      { label: "ITI Jobs", href: "/jobs?search=ITI" },
+      { label: "Diploma Jobs", href: "/jobs?search=Diploma" },
+      { label: "Graduate Jobs", href: "/jobs?search=Graduate" },
+      { label: "Post Graduate Jobs", href: "/jobs?search=Post+Graduate" },
+    ],
+  },
+  {
+    title: "Jobs by State",
+    links: [
+      { label: "UP Jobs", href: "/jobs?search=Uttar+Pradesh" },
+      { label: "Bihar Jobs", href: "/jobs?search=Bihar" },
+      { label: "MP Jobs", href: "/jobs?search=Madhya+Pradesh" },
+      { label: "Rajasthan Jobs", href: "/jobs?search=Rajasthan" },
+      { label: "Delhi Jobs", href: "/jobs?search=Delhi" },
+      { label: "Maharashtra Jobs", href: "/jobs?search=Maharashtra" },
+    ],
+  },
+  {
+    title: "Top Departments",
+    links: [
+      { label: "UPSC", href: "/jobs?search=UPSC" },
+      { label: "SSC", href: "/jobs?search=SSC" },
+      { label: "Bank Jobs", href: "/category/bank" },
+      { label: "Railway Jobs", href: "/category/railway" },
+      { label: "Defence Jobs", href: "/category/defence" },
+      { label: "Teaching Jobs", href: "/category/teaching" },
+    ],
+  },
 ]
