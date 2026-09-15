@@ -451,3 +451,72 @@ body {
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out both;
 }
+
+/* ── Blog premium print sheet: article only, arranged for PDF ── */
+@media print {
+  @page {
+    margin: 13mm 12mm 15mm;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    background: #fff !important;
+    color: #1c1a15 !important;
+  }
+
+  /* Hide site chrome (layout header is sticky; hero header is not) + floating UI */
+  header.sticky,
+  footer,
+  [data-nextjs-toast],
+  .fixed {
+    display: none !important;
+  }
+
+  /* Blog article sheet */
+  #blog-print-area {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #1c1a15 !important;
+  }
+
+  #blog-print-header {
+    border: 1px solid #e5dcc8 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #blog-print-area a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  #blog-print-area img {
+    break-inside: avoid;
+    max-height: 90mm;
+    object-fit: contain !important;
+  }
+
+  #blog-print-area h2,
+  #blog-print-area h3 {
+    break-after: avoid;
+  }
+
+  #blog-print-area p,
+  #blog-print-area li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  #blog-print-area pre,
+  #blog-print-area blockquote,
+  #blog-print-area table {
+    break-inside: avoid;
+  }
+}

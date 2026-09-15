@@ -45,7 +45,7 @@ export function NewsletterCTA({ topic }: NewsletterCTAProps) {
   }
 
   return (
-    <div className="mt-10 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] via-blue-800 to-blue-700 p-6 text-white shadow-lg">
+    <div className="mt-10 overflow-hidden rounded-2xl border-t-2 border-[#B08D57] bg-[#101E33] p-6 text-white shadow-lg print:hidden">
       {subscribed ? (
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
@@ -58,11 +58,11 @@ export function NewsletterCTA({ topic }: NewsletterCTAProps) {
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="min-w-0 flex-1">
             <h3 className="flex items-center gap-2 text-lg font-bold">
-              <Mail className="h-5 w-5 text-amber-300" />
+              <Mail className="h-5 w-5 text-[#E8C87A]" />
               {topic ? `Get more ${topic} insights` : "Get fresh insights weekly"}
             </h3>
-            <p className="mt-1 text-sm text-blue-100">
-              Join readers learning careers, AI, money and study skills — one useful email a week.
+            <p className="mt-1 text-sm text-slate-300">
+              Join readers learning careers, AI, money and study skills - one useful email a week.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="flex w-full max-w-sm gap-2">
@@ -72,15 +72,15 @@ export function NewsletterCTA({ topic }: NewsletterCTAProps) {
                 placeholder="Your email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); if (error) setError("") }}
-                className="border-white/30 bg-white/10 text-white placeholder:text-blue-200 focus-visible:ring-amber-400"
+                className="border-white/20 bg-white/10 text-white placeholder:text-slate-400 focus-visible:ring-[#B08D57]"
               />
               {error && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-amber-300">
+                <p className="mt-1 flex items-center gap-1 text-xs text-[#E8C87A]">
                   <AlertCircle className="h-3 w-3" /> {error}
                 </p>
               )}
             </div>
-            <Button type="submit" disabled={loading} className="shrink-0 bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300">
+            <Button type="submit" disabled={loading} className="shrink-0 bg-[#B08D57] font-semibold text-[#1A1408] hover:bg-[#C2A066]">
               {loading ? "Subscribing…" : <span className="flex items-center gap-1"><Send className="h-4 w-4" /> Subscribe</span>}
             </Button>
           </form>

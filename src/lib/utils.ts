@@ -105,3 +105,41 @@ export function absoluteUrl(path: string): string {
 export function createJsonLD<T>(data: T): string {
   return JSON.stringify(data)
 }
+
+/** Compact human count: 982 -> "982", 12400 -> "12.4k", 2300000 -> "2.3M". Feels real in view counts. */
+export function formatCompact(n: number | null | undefined): string {
+  const v = typeof n === "number" && isFinite(n) ? Math.max(0, Math.floor(n)) : 0
+  if (v < 1000) return v.toLocaleString("en-IN")
+  if (v < 100000) {
+    const k = v / 1000
+    return `${k >= 100 ? Math.round(k) : Math.round(k * 10) / 10}k`
+  }
+  if (v < 10000000) {
+    const l = v / 100000
+    return `${Math.round(l * 10) / 10}L`
+  }
+  const c = v / 10000000
+  return `${Math.round(c * 10) / 10}Cr`
+}
+
+/** "1 view" / "12.4k views" - real-feel label for article meta rows. */
+export function formatViews(n: number | null | undefined): string {
+  const v = typeof n === "number" && isFinite(n) ? Math.max(0, Math.floor(n)) : 0
+  return `${formatCompact(v)} ${v === 1 ? "view" : "views"}`
+}
+
+/** Relative day label: "Today" / "Yesterday" / "4d ago", falls back to formatted date. */
+export function timeAgo(date: Date | string | null | undefined): string {
+  if (!date) return ""
+  const d = typeof date === "string" ? new Date(date) : date
+  if (isNaN(d.getTime())) return ""
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000)
+  if (days <= 0) return "Today"
+  if (days === 1) return "Yesterday"
+  if (days < 7) return `${days}d ago`
+  if (days < 30) {
+    const w = Math.floor(days / 7)
+    return w === 1 ? "1wk ago" : `${w}w ago`
+  }
+  return formatDate(d)
+}

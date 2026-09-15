@@ -1,11 +1,15 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { getBaseUrl } from "@/lib/utils"
+import { formatCompact, formatDate, getBaseUrl } from "@/lib/utils"
+import { getReadingTimeMinutes } from "@/lib/blog-prose"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Badge } from "@/components/ui/badge"
-import { Tag, Eye, FileText } from "lucide-react"
+import { Tag, Eye, Clock3, Calendar } from "lucide-react"
+
+export const revalidate = 1800
 
 interface PageProps {
   params: Promise<{ tag: string }>
@@ -54,9 +58,9 @@ export default async function BlogTagPage({ params }: PageProps) {
         ]}
         className="mb-6"
       />
-<header className="mb-8 flex items-center gap-4">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900">
-          <Tag className="h-6 w-6 text-blue-600 dark:text-blue-300" />
+<header className="mb-8 flex items-center gap-4 border-b-2 border-[#B08D57] pb-6">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#101E33]">
+          <Tag className="h-6 w-6 text-[#E8C87A]" />
         </span>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 capitalize dark:text-gray-100">{label}</h1>
@@ -69,15 +73,25 @@ export default async function BlogTagPage({ params }: PageProps) {
           <Link
             key={p.id}
             href={`/blog/${p.slug}`}
-            className="group rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700 dark:hover:shadow-none"
+            className="group overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:-translate-y-0.5 hover:border-[#B08D57]/60 hover:shadow-lg hover:shadow-[#E5DCC8]/50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700 dark:hover:shadow-none"
           >
-            {p.category && <Badge variant="secondary" className="mb-2 text-xs">{p.category.name}</Badge>}
-            <h2 className="line-clamp-2 text-base font-semibold leading-snug text-gray-900 group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">
-              {p.title}
-            </h2>
-            <p className="mt-3 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {p.views} views</span>
-            </p>
+            {p.image && (
+              <span className="relative block aspect-video w-full overflow-hidden bg-gray-100">
+                <Image src={p.image} alt={p.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+              </span>
+            )}
+            <span className="block p-5">
+              {p.category && <Badge variant="secondary" className="mb-2 text-xs">{p.category.name}</Badge>}
+              <span className="line-clamp-2 block text-base font-semibold leading-snug text-gray-900 group-hover:text-[#1B3A5C] dark:text-gray-100 dark:group-hover:text-blue-300">
+                {p.title}
+              </span>
+              {p.excerpt && <span className="mt-2 line-clamp-2 block text-sm text-gray-600 dark:text-gray-400">{p.excerpt}</span>}
+              <span className="mt-3 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDate(p.createdAt)}</span>
+                <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {getReadingTimeMinutes(p.content)} min</span>
+                <span className="flex items-center gap-1" title={`${p.views.toLocaleString("en-IN")} views`}><Eye className="h-3.5 w-3.5" /> {formatCompact(p.views)}</span>
+              </span>
+            </span>
           </Link>
         ))}
       </div>

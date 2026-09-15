@@ -28,7 +28,7 @@ export async function GET() {
   <channel>
     <title>Chayan Blog - Guides on Careers, AI, Money & Learning</title>
     <link>${baseUrl}/blog</link>
-    <description>Practical guides on careers, skills, AI, personal finance, study techniques and productivity — plus government job and exam updates.</description>
+    <description>Practical guides on careers, skills, AI, personal finance, study techniques and productivity - plus government job and exam updates.</description>
     <language>en-in</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${baseUrl}/rss/blog" rel="self" type="application/rss+xml"/>
