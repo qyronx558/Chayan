@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Upload, FileText, CheckCircle, X, Loader2, Briefcase, GraduationCap, MapPin } from "lucide-react"
+import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { Upload, FileText, CheckCircle, Loader2, Briefcase, GraduationCap, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,6 +21,7 @@ interface ResumeData {
 }
 
 export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }) {
+  const { status } = useSession()
   const [uploading, setUploading] = useState(false)
   const [resume, setResume] = useState<ResumeData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,6 +29,8 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    if (status !== "authenticated") return
+
     let cancelled = false
     fetch("/api/user/resume")
       .then(r => r.json())
@@ -33,7 +38,7 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [])
+  }, [status])
 
   const handleFile = async (file: File) => {
     const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"]
@@ -70,6 +75,19 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
     setDragOver(false)
     const file = e.dataTransfer.files[0]
     if (file) handleFile(file)
+  }
+
+  if (status !== "authenticated") {
+    return (
+      <Card>
+        <CardContent className="py-6 text-center">
+          <p className="text-sm text-gray-600">Sign in to upload a resume and receive personalized matches.</p>
+          <Button asChild size="sm" className="mt-3">
+            <Link href="/login">Sign in to continue</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (loading) {

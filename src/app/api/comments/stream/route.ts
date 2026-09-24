@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 const encoder = new TextEncoder()
+const postTypes = new Set([
+  "JOB",
+  "PRIVATE_JOB",
+  "RESULT",
+  "ADMIT_CARD",
+  "ANSWER_KEY",
+  "SYLLABUS",
+  "ADMISSION",
+  "BLOG",
+])
 
 function sseEvent(data: unknown, event?: string): Uint8Array {
   const lines = []
@@ -18,18 +27,13 @@ function createHeartbeat(): Uint8Array {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const postType = searchParams.get("postType")
     const postId = searchParams.get("postId")
 
-    if (!postType || !postId) {
+    if (!postType || !postId || !postTypes.has(postType)) {
       return NextResponse.json(
-        { success: false, error: "postType and postId are required" },
+        { success: false, error: "A valid postType and postId are required" },
         { status: 400 }
       )
     }

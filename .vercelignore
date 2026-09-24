@@ -1,0 +1,11 @@
+# Local secrets and developer-only configuration must never be uploaded.
+.env
+.env.*
+!.env.example
+
+# Local build and diagnostic output
+.next
+node_modules
+*.log
+report.json
+lighthouse-perf.json

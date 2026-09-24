@@ -1,6 +1,6 @@
 "use client"
 
-import Script from "next/script"
+import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 
 const ADSENSE_CLIENT_ID =
@@ -31,15 +31,19 @@ function isExcluded(pathname: string | null): boolean {
 export function AdSenseScript() {
   const pathname = usePathname()
 
-  if (isExcluded(pathname)) return null
+  useEffect(() => {
+    if (isExcluded(pathname)) return
 
-  return (
-    <Script
-      id="adsbygoogle"
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-      crossOrigin="anonymous"
-      strategy="afterInteractive"
-    />
-  )
+    const selector = `script[data-adsense-client="${ADSENSE_CLIENT_ID}"]`
+    if (document.head.querySelector(selector)) return
+
+    const script = document.createElement("script")
+    script.async = true
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`
+    script.crossOrigin = "anonymous"
+    script.dataset.adsenseClient = ADSENSE_CLIENT_ID
+    document.head.appendChild(script)
+  }, [pathname])
+
+  return null
 }

@@ -129,6 +129,13 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
     [postType, postId, sort, filter, search]
   )
 
+  // Keep the live stream listener in sync with the active filters without
+  // reconnecting the stream whenever a user changes sort or search.
+  const fetchCommentsRef = useRef(fetchComments)
+  useEffect(() => {
+    fetchCommentsRef.current = fetchComments
+  }, [fetchComments])
+
   useEffect(() => {
     const t = setTimeout(fetchComments, 0)
     return () => clearTimeout(t)
@@ -142,7 +149,11 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
 
   // SSE Connection for real-time updates
   useEffect(() => {
+    let disposed = false
+    let reconnectTimer: ReturnType<typeof setTimeout> | undefined
+
     const connect = () => {
+      if (disposed) return
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
       }
@@ -169,23 +180,26 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
           const data = JSON.parse(event.data)
           setMeta((m) => ({ ...m, total: data.commentCount }))
           // Refetch comments to get latest nested replies
-          fetchComments()
+          fetchCommentsRef.current()
         } catch {
           // ignore
         }
       })
 
       es.onerror = () => {
+        if (disposed) return
         setConnected(false)
         setReconnecting(true)
         es.close()
-        setTimeout(connect, 5000)
+        reconnectTimer = setTimeout(connect, 5000)
       }
     }
 
     connect()
 
     return () => {
+      disposed = true
+      if (reconnectTimer) clearTimeout(reconnectTimer)
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
       }
