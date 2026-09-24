@@ -1,0 +1,40 @@
+name: database-migrate
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_existing_schema:
+        description: "Mark the current baseline as applied (only for an existing populated database)"
+        required: true
+        default: false
+        type: boolean
+
+# A database migration must have exactly one writer. Builds never run it.
+concurrency:
+  group: production-database-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Baseline an existing schema
+        if: ${{ inputs.baseline_existing_schema }}
+        run: npx prisma migrate resolve --applied 20260924000000_baseline
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Apply pending migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

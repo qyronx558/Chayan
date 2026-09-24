@@ -4,7 +4,7 @@ This release makes public catalogue responses CDN-cacheable for one minute (with
 
 ## 1. Safely introduce Prisma migrations
 
-`vercel.json` now baselines the existing production schema once and then runs `prisma migrate deploy`; it no longer runs `db push --accept-data-loss`. `migrate resolve --applied` writes only Prisma's migration-history metadata. It does not create, alter, truncate, or delete application tables or data.
+Vercel builds only generate Prisma Client and build the app. They never run migrations, because concurrent build workers can contend for PostgreSQL's migration lock. The manually triggered `database-migrate` GitHub Actions workflow is the only production migration runner. It has a single-concurrency lock and never runs `db push --accept-data-loss`.
 
 Create the baseline locally from `prisma/schema.prisma`:
 
@@ -19,7 +19,7 @@ Review and commit the generated SQL. For an existing production database that al
 cmd /c "npx prisma migrate resolve --applied 20260924000000_baseline"
 ```
 
-The Vercel build performs this safe one-time baseline step automatically. On later deployments it is already recorded and the command is ignored; `prisma migrate deploy` then applies only newly committed migrations.
+In GitHub, add the production connection string as the `DATABASE_URL` Actions secret. Run **database-migrate** manually with **baseline_existing_schema** checked exactly once for this populated database. `migrate resolve --applied` writes only Prisma's migration-history metadata; it does not create, alter, truncate, or delete application tables or data. Future runs must leave that checkbox off; they apply only newly committed migrations.
 
 For a fresh database, deploy it normally:
 
