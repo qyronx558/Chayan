@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Admit Cards | Chayan", description: "Download admit cards for upcoming government exams." },
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 export default function AdmitCardsPage() {
   return <AdmitCardsClient />

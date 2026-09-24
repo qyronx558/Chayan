@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client"
 import { contentScope, isAdmin } from "@/lib/roles"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,11 +46,12 @@ export async function GET(request: NextRequest) {
       prisma.admission.count({ where }),
     ])
 
-    return NextResponse.json({
+    const payload = {
       success: true,
       data: admissions,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
+    }
+    return searchParams.get("scope") === "mine" ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch admissions" },
@@ -95,6 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     const admission = await prisma.admission.create({ data })
+    revalidatePublicContent("admission", admission.slug)
 
     await notifyUsers("ADMISSION", admission.title, admission.slug, `New admission notification: ${admission.title}`)
     sendNotificationSMS("ADMISSION", admission.title, admission.slug, `New admission notification: ${admission.title}`).catch(console.error)

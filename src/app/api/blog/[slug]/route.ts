@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { blogPostSchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
+import { revalidatePublicContent } from "@/lib/cache"
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -49,6 +50,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         published,
       },
     })
+    revalidatePublicContent("blog", existing.slug)
+    if (post.slug !== existing.slug) revalidatePublicContent("blog", post.slug)
 
     return NextResponse.json({ success: true, data: post })
   } catch (error) {
@@ -76,6 +79,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     await prisma.blogPost.delete({ where: { id: slug } })
+    revalidatePublicContent("blog", existing.slug)
     return NextResponse.json({ success: true, message: "Blog post deleted" })
   } catch (error) {
     return NextResponse.json(

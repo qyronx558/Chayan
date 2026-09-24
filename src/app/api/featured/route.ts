@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { featuredItemSchema } from "@/lib/validations"
 import { isSuperAdmin } from "@/lib/roles"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function GET() {
       },
       orderBy: [{ isPinned: "desc" }, { sortOrder: "asc" }],
     })
-    return NextResponse.json({ success: true, data: items })
+    return publicApiResponse({ success: true, data: items }, 60)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch featured items" },
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
         endDate: endDate || null,
       },
     })
+    revalidatePublicContent("featured")
 
     return NextResponse.json({ success: true, data: item }, { status: 201 })
   } catch (error) {

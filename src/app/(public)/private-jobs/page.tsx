@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Private Jobs | Chayan", description: "Browse private job vacancies across top companies." },
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 export default function PrivateJobsPage() {
   return <PrivateJobsClient />

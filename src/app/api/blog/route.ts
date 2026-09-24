@@ -21,9 +21,16 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.BlogPostWhereInput = {}
 
-    if (searchParams.get("scope") === "mine") {
+    const isOwnerScope = searchParams.get("scope") === "mine"
+    if (isOwnerScope) {
       const session = await auth()
+      if (!session?.user || !isAdmin(session.user.role)) {
+        return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+      }
       Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    } else {
+      // Unpublished posts are CMS-only and must never be exposed by a public query.
+      where.published = true
     }
 
     if (search) {
@@ -34,8 +41,8 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    if (published === "true") where.published = true
-    if (published === "false") where.published = false
+    if (isOwnerScope && published === "true") where.published = true
+    if (isOwnerScope && published === "false") where.published = false
 
     if (category) {
       where.category = { slug: category }

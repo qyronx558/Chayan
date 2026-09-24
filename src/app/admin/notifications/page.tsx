@@ -64,7 +64,7 @@ const TYPE_CONTENT_ENDPOINTS: Record<string, string> = {
   ADMISSION: "/api/admissions?limit=200",
   SYLLABUS: "/api/syllabus?limit=200",
   ANSWER_KEY: "/api/answer-keys?limit=200",
-  BLOG: "/api/blog?limit=200",
+  BLOG: "/api/blog?limit=200&scope=mine",
 }
 
 export default function AdminNotifications() {

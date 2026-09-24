@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Latest Government Jobs | Chayan", description: "Browse latest government job notifications across India." },
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 export default function JobsPage() {
   return <JobsClient />

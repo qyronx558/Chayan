@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { contentScope, isAdmin } from "@/lib/roles"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,11 +46,12 @@ export async function GET(request: NextRequest) {
       prisma.admitCard.count({ where }),
     ])
 
-    return NextResponse.json({
+    const payload = {
       success: true,
       data: admitCards,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
+    }
+    return searchParams.get("scope") === "mine" ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch admit cards" },
@@ -93,6 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     const admitCard = await prisma.admitCard.create({ data })
+    revalidatePublicContent("admit-card", admitCard.slug)
 
     await notifyUsers("ADMIT_CARD", admitCard.title, admitCard.slug)
     sendNotificationSMS("ADMIT_CARD", admitCard.title, admitCard.slug).catch(console.error)

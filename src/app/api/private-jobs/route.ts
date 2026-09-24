@@ -6,6 +6,7 @@ import { isAdmin, contentScope } from "@/lib/roles"
 import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,11 +48,12 @@ export async function GET(request: NextRequest) {
       prisma.privateJob.count({ where }),
     ])
 
-    return NextResponse.json({
+    const payload = {
       success: true,
       data: items,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
+    }
+    return searchParams.get("scope") === "mine" ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch private jobs" },
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
         createdBy: { connect: { id: session.user.id } },
       },
     })
+    revalidatePublicContent("private-job", job.slug)
 
     await notifyUsers("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`)
     sendNotificationSMS("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`).catch(console.error)

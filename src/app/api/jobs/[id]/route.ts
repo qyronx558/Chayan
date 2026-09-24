@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { jobSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
+import { revalidatePublicContent } from "@/lib/cache"
 
 export async function GET(
   request: NextRequest,
@@ -115,6 +116,7 @@ export async function PUT(
     }
 
     const job = await prisma.job.update({ where: { id }, data })
+    revalidatePublicContent("job", job.slug)
 
     return NextResponse.json({ success: true, data: job })
   } catch (error) {
@@ -148,6 +150,7 @@ export async function DELETE(
     }
 
     await prisma.job.delete({ where: { id } })
+    revalidatePublicContent("job", existing.slug)
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

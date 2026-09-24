@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { featuredItemSchema } from "@/lib/validations"
 import { isSuperAdmin } from "@/lib/roles"
 import { z } from "zod"
+import { revalidatePublicContent } from "@/lib/cache"
 
 const patchSchema = z
   .object({
@@ -26,6 +27,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const patch = patchSchema.safeParse(body)
     if (patch.success) {
       const item = await prisma.featuredItem.update({ where: { id }, data: patch.data })
+      revalidatePublicContent("featured")
       return NextResponse.json({ success: true, data: item })
     }
 
@@ -48,6 +50,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         endDate: endDate || null,
       },
     })
+    revalidatePublicContent("featured")
 
     return NextResponse.json({ success: true, data: item })
   } catch (error) {
@@ -67,6 +70,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     const { id } = await params
     await prisma.featuredItem.delete({ where: { id } })
+    revalidatePublicContent("featured")
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
