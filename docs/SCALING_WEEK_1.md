@@ -4,7 +4,7 @@ This release makes public catalogue responses CDN-cacheable for one minute (with
 
 ## 1. Safely introduce Prisma migrations
 
-`vercel.json` now runs `prisma migrate deploy`; it no longer runs `db push --accept-data-loss`. Do not deploy this change until the current schema has a baseline migration.
+`vercel.json` now baselines the existing production schema once and then runs `prisma migrate deploy`; it no longer runs `db push --accept-data-loss`. `migrate resolve --applied` writes only Prisma's migration-history metadata. It does not create, alter, truncate, or delete application tables or data.
 
 Create the baseline locally from `prisma/schema.prisma`:
 
@@ -18,6 +18,8 @@ Review and commit the generated SQL. For an existing production database that al
 ```powershell
 cmd /c "npx prisma migrate resolve --applied 20260924000000_baseline"
 ```
+
+The Vercel build performs this safe one-time baseline step automatically. On later deployments it is already recorded and the command is ignored; `prisma migrate deploy` then applies only newly committed migrations.
 
 For a fresh database, deploy it normally:
 
