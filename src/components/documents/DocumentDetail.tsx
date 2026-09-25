@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { AshokaChakra } from "@/components/layout/AshokaChakra"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { JobFollowBell } from "@/components/jobs/JobFollowBell"
 import { RichTextView } from "@/components/shared/RichTextView"
@@ -149,45 +150,62 @@ export function DocumentDetail({
 
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
-      {/* ── Header / Hero ─────────────────────────────── */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] via-blue-800 to-blue-700 p-6 text-white shadow-lg sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-amber-400/10 blur-2xl" />
+      {/* ── Header / Hero — Tricolour ─────────────────── */}
+      <header className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50 via-white to-green-50 shadow-lg dark:border-gray-700 dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]">
+        {/* top tricolour strip with slow flow */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]"
+        >
+          <div className="animate-flag-sheen absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+        </div>
+        {/* light Ashoka Chakra watermark + flowing-air sheen */}
+        <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 flex h-56 w-56 items-center justify-center">
+          <AshokaChakra className="h-48 w-48 text-[#06038D]/10 dark:text-white/10" />
+        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/10" />
+        </div>
+        {/* bottom tricolour strip */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-[3px] bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]"
+        />
 
-        <div className="relative">
+        <div className="relative p-6 pt-8 sm:p-8 sm:pt-9">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <Badge className={cn("font-semibold", config.badgeClass)}>
               <config.icon className="mr-1 h-3 w-3" /> {config.badge}
             </Badge>
-            {category && <Badge className="bg-white/15 text-white backdrop-blur">{category}</Badge>}
+            {category && <Badge className="border border-gray-200 bg-white/80 text-gray-700 shadow-sm backdrop-blur dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">{category}</Badge>}
             {isUrgent && (
-              <Badge className="bg-amber-400 text-amber-950">
-                <AlarmClock className="mr-1 h-3 w-3" /> Closing Soon
+              <Badge className="bg-amber-400 font-bold text-amber-950 shadow-md ring-2 ring-amber-500/50">
+                <AlarmClock className="mr-1 h-3.5 w-3.5" /> Closing Soon
               </Badge>
             )}
             {countdownMs !== null && !isCountdownActive && diff !== null && (
-              <Badge className="bg-red-500 text-white">
-                <Clock className="mr-1 h-3 w-3" /> Closed / Expired
+              <Badge className="bg-red-600 font-bold text-white shadow-md ring-2 ring-red-500/40">
+                <Clock className="mr-1 h-3.5 w-3.5" /> Closed / Expired
               </Badge>
             )}
           </div>
 
-          <h1 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{title}</h1>
-          <p className="mt-2 flex items-center gap-2 text-blue-100">
-            <span className="font-medium text-white">{department}</span>
-            <span className="text-blue-300">•</span>
-            <span className="text-blue-100">{config.subtitle}</span>
+          <h1 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-3xl">{title}</h1>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-semibold text-[#1e3a5f] dark:text-gray-100">{department}</span>
+            <span className="text-orange-500">•</span>
+            <span className="text-gray-600 dark:text-gray-300">{config.subtitle}</span>
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {downloadUrl ? (
-              <Button size="sm" className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+              <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
                 <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
                   <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
                 </a>
               </Button>
             ) : (
-              <Button size="sm" className="bg-white/15 font-semibold text-white backdrop-blur" disabled>
+              <Button size="sm" variant="outline" className="border-gray-300 bg-white/70 font-semibold text-gray-500" disabled>
                 <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
               </Button>
             )}
@@ -202,7 +220,7 @@ export function DocumentDetail({
                 syllabusId={bookmarkSyllabusId}
                 size="default"
                 variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                className="border-orange-300 bg-white/80 text-gray-700 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
               />
             )}
             {bookmarkId && (
@@ -211,27 +229,33 @@ export function DocumentDetail({
                 admitCardId={bookmarkId.type === "admit-card" ? bookmarkId.id : undefined}
                 size="default"
                 variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                className="border-orange-300 bg-white/80 text-gray-700 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
               />
             )}
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/15" onClick={() => window.print()} title="Print">
+            <Button variant="outline" size="icon" className="border-gray-300 bg-white/80 text-gray-600 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300" onClick={() => window.print()} title="Print">
               <Printer className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      {/* ── Live Countdown ────────────────────────────── */}
+      {/* ── Live Countdown / Application Status — always clearly visible ── */}
       {countdownMs !== null && !(diff !== null && diff <= 0) && (
-        <div className={cn(
-          "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border p-4",
-          isUrgent ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/50" : "border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50",
-        )}>
+        <div
+          role="status"
+          aria-live="polite"
+          className={cn(
+            "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border-2 border-l-8 p-4 shadow-md",
+            isUrgent
+              ? "border-red-300 border-l-red-600 bg-red-50 dark:border-red-800 dark:border-l-red-500 dark:bg-red-950/60"
+              : "border-orange-300 border-l-[#FF9933] bg-gradient-to-r from-orange-50 via-white to-green-50 dark:border-gray-600 dark:from-[#231303] dark:via-gray-900 dark:to-[#071a0e]",
+          )}
+        >
           <span className={cn(
-            "flex items-center gap-2 text-sm font-semibold",
-            isUrgent ? "text-red-700 dark:text-red-400" : "text-blue-700 dark:text-blue-400",
+            "flex items-center gap-2 text-base font-bold",
+            isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white",
           )}>
-            <AlarmClock className="h-5 w-5" /> Time Left — {countdownLabel}
+            <AlarmClock className="h-6 w-6" /> Time Left — {countdownLabel}
           </span>
           <div className="flex items-center gap-2">
             {[
@@ -240,18 +264,18 @@ export function DocumentDetail({
               { value: minsLeft, unit: "Min" },
             ].map((t) => (
               <div key={t.unit} className={cn(
-                "rounded-lg px-3 py-1.5 text-center",
-                isUrgent ? "bg-red-100 dark:bg-red-900" : "bg-blue-100 dark:bg-blue-900",
+                "rounded-lg px-3.5 py-2 text-center shadow-sm ring-1",
+                isUrgent ? "bg-white ring-red-300 dark:bg-red-900 dark:ring-red-700" : "bg-white ring-orange-200 dark:bg-gray-800 dark:ring-gray-600",
               )}>
-                <div className={cn("text-lg font-bold leading-none", isUrgent ? "text-red-700 dark:text-red-400" : "text-blue-800 dark:text-blue-300")}>
+                <div className={cn("text-xl font-extrabold leading-none tabular-nums", isUrgent ? "text-red-700 dark:text-red-300" : "text-green-800 dark:text-green-300")}>
                   {t.value !== null ? t.value : 0}
                 </div>
-                <div className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t.unit}</div>
+                <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.unit}</div>
               </div>
             ))}
           </div>
-          <p className="ml-auto text-sm text-gray-600 dark:text-gray-400">
-            {countdownLabel}: <span className="font-semibold">{formatDate(countdownDate!)}</span>
+          <p className="ml-auto text-sm font-medium text-gray-700 dark:text-gray-200">
+            {countdownLabel}: <span className="font-bold">{formatDate(countdownDate!)}</span>
           </p>
         </div>
       )}
@@ -267,13 +291,13 @@ export function DocumentDetail({
                 "group rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5",
                 isUrgentStat
                   ? "border-red-200 bg-red-50 hover:shadow-md hover:shadow-red-100 dark:border-red-900 dark:bg-red-950/40 dark:hover:shadow-none"
-                  : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700 dark:hover:shadow-none",
+                  : "border-gray-200 bg-white hover:border-orange-300 hover:shadow-md hover:shadow-orange-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-orange-700 dark:hover:shadow-none",
               )}>
                 <span className={cn(
                   "mb-2.5 flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
                   isUrgentStat
                     ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
-                    : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-950 dark:text-blue-300 dark:group-hover:bg-blue-600 dark:group-hover:text-white",
+                    : "bg-orange-50 text-orange-600 group-hover:bg-gradient-to-r group-hover:from-[#FF9933] group-hover:to-[#138808] group-hover:text-white dark:bg-orange-950 dark:text-orange-300",
                 )}>
                   <Icon className="h-4 w-4" />
                 </span>
@@ -303,7 +327,7 @@ export function DocumentDetail({
               key={s.id}
               type="button"
               onClick={() => scrollTo(s.id)}
-              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-700 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-700 dark:hover:bg-orange-950 dark:hover:text-orange-300"
             >
               <s.icon className="h-3.5 w-3.5" /> {s.label}
             </button>
@@ -341,7 +365,7 @@ export function DocumentDetail({
           <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <ListChecks className="h-5 w-5 text-blue-600" /> {config.badge} Details
+                <ListChecks className="h-5 w-5 text-orange-600" /> {config.badge} Details
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -353,7 +377,7 @@ export function DocumentDetail({
                       <TableRow key={item.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
                         <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
                           <span className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
+                            <Icon className="h-4 w-4 shrink-0 text-orange-500" /> {item.label}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -370,13 +394,13 @@ export function DocumentDetail({
                     <TableRow key={item.label} className="bg-gray-50/70 dark:bg-gray-800/40">
                       <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
                         <span className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
+                          <Briefcase className="h-4 w-4 shrink-0 text-orange-500" /> {item.label}
                         </span>
                       </TableCell>
                       <TableCell>
                         <a
                           href={item.href}
-                          className="inline-flex items-center gap-1 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="inline-flex items-center gap-1 font-medium text-green-700 hover:text-orange-600 dark:text-green-400 dark:hover:text-orange-300"
                         >
                           {item.value} <ExternalLink className="h-3.5 w-3.5" />
                         </a>
@@ -396,14 +420,14 @@ export function DocumentDetail({
           <Card className="border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="h-5 w-5 text-blue-600" /> {list.label}
+                <BookOpen className="h-5 w-5 text-green-700" /> {list.label}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 {list.items.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-[11px] font-bold text-white">
                       {i + 1}
                     </span>
                     {item}
@@ -421,7 +445,7 @@ export function DocumentDetail({
           <Card className="border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <FileText className="h-5 w-5 text-blue-600" /> About this {config.badge}
+                <FileText className="h-5 w-5 text-orange-600" /> About this {config.badge}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -443,7 +467,7 @@ export function DocumentDetail({
             </p>
           </div>
           {downloadUrl ? (
-            <Button size="lg" className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+            <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
               <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
                 <FileText className="mr-2 h-5 w-5" /> {downloadLabel}
               </a>
@@ -478,10 +502,10 @@ export function DocumentDetail({
               <a
                 key={item.href}
                 href={item.href}
-                className="group rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700 dark:hover:shadow-none"
+                className="group rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-orange-700 dark:hover:shadow-none"
               >
                 <Badge variant="secondary" className="mb-2 text-xs">{item.department}</Badge>
-                <h3 className="text-sm font-semibold leading-snug text-gray-900 group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">
+                <h3 className="text-sm font-semibold leading-snug text-gray-900 group-hover:text-orange-700 dark:text-gray-100 dark:group-hover:text-orange-300">
                   {item.title}
                 </h3>
                 {item.meta && <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{item.meta}</p>}
@@ -497,10 +521,10 @@ export function DocumentDetail({
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</p>
             <p className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              isUrgent ? "text-red-500" : "text-green-600",
+              "flex items-center gap-1.5 text-sm font-bold",
+              isUrgent ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400",
             )}>
-              {isUrgent ? <AlarmClock className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+              {isUrgent ? <AlarmClock className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
               {isCountdownActive && daysLeft !== null
                 ? isUrgent
                   ? `${daysLeft} days left`
@@ -511,7 +535,7 @@ export function DocumentDetail({
             </p>
           </div>
           {downloadUrl ? (
-            <Button className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+            <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
               <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
                 <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
               </a>

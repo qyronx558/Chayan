@@ -163,10 +163,10 @@ export function ApplicationTracker({
           size="sm"
           disabled={loading}
           className={cn(
-            "gap-2",
+            "gap-2 shadow-sm",
             tracked
-              ? cn("border-transparent font-semibold text-white shadow-sm", info?.active || "bg-teal-600 text-white")
-              : "border-white/30 bg-white/10 font-semibold text-white backdrop-blur hover:bg-white/20",
+              ? cn("border-transparent font-semibold text-white", info?.active || "bg-teal-600 text-white")
+              : "border-orange-300 bg-white/90 font-semibold text-gray-800 backdrop-blur hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white",
             className
           )}
         >

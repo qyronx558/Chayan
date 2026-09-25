@@ -452,6 +452,39 @@ body {
   animation: fadeInUp 0.6s ease-out both;
 }
 
+/* ── Indian flag flowing-air sheen (slow, subtle) ── */
+@keyframes flag-sheen {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(320%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+.animate-flag-sheen {
+  animation: flag-sheen 6.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flag-sheen {
+    animation: none !important;
+  }
+}
+
 /* ── Blog premium print sheet: article only, arranged for PDF ── */
 @media print {
   @page {

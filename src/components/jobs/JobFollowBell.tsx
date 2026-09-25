@@ -64,7 +64,7 @@ export function JobFollowBell({ jobId, className = "" }: JobFollowBellProps) {
   }
 
   if (checking) {
-    return <div className={cn("inline-block h-8 w-8 animate-pulse rounded-md bg-white/10", className)} />
+    return <div className={cn("inline-block h-8 w-8 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700", className)} />
   }
 
   if (!tracked) {
@@ -75,7 +75,7 @@ export function JobFollowBell({ jobId, className = "" }: JobFollowBellProps) {
         disabled={loading}
         onClick={subscribe}
         className={cn(
-          "gap-2 border-white/30 bg-white/10 font-semibold text-white backdrop-blur hover:bg-white/20",
+          "gap-2 border-orange-300 bg-white/90 font-semibold text-gray-800 shadow-sm backdrop-blur hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white",
           className
         )}
         title="Get reminders for this job's admit card, exam and result updates"
@@ -88,7 +88,7 @@ export function JobFollowBell({ jobId, className = "" }: JobFollowBellProps) {
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className="hidden items-center gap-1.5 text-xs font-semibold text-amber-300 sm:flex">
+      <span className="hidden items-center gap-1.5 rounded-full border border-green-300 bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700 shadow-sm sm:flex dark:border-green-800 dark:bg-green-950 dark:text-green-300">
         <BellRing className="h-3.5 w-3.5" /> Following
       </span>
       <ApplicationTracker jobId={jobId} type="job" variant="full" />

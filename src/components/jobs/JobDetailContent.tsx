@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { AshokaChakra } from "@/components/layout/AshokaChakra"
 import { JobQuickSummary } from "@/components/jobs/JobQuickSummary"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { RichTextView } from "@/components/shared/RichTextView"
@@ -152,51 +153,65 @@ export function JobDetailContent({
 
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
-      {/* ── Header / Hero ─────────────────────────────── */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] via-blue-800 to-blue-700 p-6 text-white shadow-lg sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-amber-400/10 blur-2xl" />
+      {/* ── Header / Hero — Tricolour ─────────────────── */}
+      <header className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50 via-white to-green-50 shadow-lg dark:border-gray-700 dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]"
+        >
+          <div className="animate-flag-sheen absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 flex h-56 w-56 items-center justify-center">
+          <AshokaChakra className="h-48 w-48 text-[#06038D]/10 dark:text-white/10" />
+        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/10" />
+        </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-[3px] bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]"
+        />
 
-        <div className="relative">
+        <div className="relative p-6 pt-8 sm:p-8 sm:pt-9">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {advertisementNo && (
-              <Badge className="bg-white/15 text-white backdrop-blur">Advt No: {advertisementNo}</Badge>
+              <Badge className="border border-gray-200 bg-white/80 text-gray-700 shadow-sm backdrop-blur dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">Advt No: {advertisementNo}</Badge>
             )}
             {isUrgent && (
-              <Badge className="bg-amber-400 text-amber-950">
-                <AlarmClock className="mr-1 h-3 w-3" /> Closing Soon
+              <Badge className="bg-amber-400 font-bold text-amber-950 shadow-md ring-2 ring-amber-500/50">
+                <AlarmClock className="mr-1 h-3.5 w-3.5" /> Closing Soon
               </Badge>
             )}
             {isClosed && (
-              <Badge className="bg-red-500 text-white">
-                <Clock className="mr-1 h-3 w-3" /> Closed
+              <Badge className="bg-red-600 font-bold text-white shadow-md ring-2 ring-red-500/40">
+                <Clock className="mr-1 h-3.5 w-3.5" /> Closed
               </Badge>
             )}
             {totalVacancies ? (
-              <Badge className="bg-white/15 text-white backdrop-blur">{totalVacancies.toLocaleString("en-IN")} Vacancies</Badge>
+              <Badge className="border border-gray-200 bg-white/80 text-gray-700 shadow-sm backdrop-blur dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">{totalVacancies.toLocaleString("en-IN")} Vacancies</Badge>
             ) : null}
           </div>
 
-          <h1 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{title}</h1>
-          <p className="mt-2 flex items-center gap-2 text-blue-100">
-            <span className="font-medium text-white">{department}</span>
+          <h1 className="text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-3xl">{title}</h1>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-semibold text-[#1e3a5f] dark:text-gray-100">{department}</span>
             {location && (
               <>
-                <span className="text-blue-300">•</span>
-                <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{location}</span>
+                <span className="text-orange-500">•</span>
+                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-300"><MapPin className="h-4 w-4" />{location}</span>
               </>
             )}
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <Button size="sm" className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+            <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
               <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
               </a>
             </Button>
             <ApplicationTracker jobId={jobId} variant="full" />
-            <BookmarkButton jobId={jobId} size="default" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20" />
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/15" onClick={() => window.print()} title="Print">
+            <BookmarkButton jobId={jobId} size="default" variant="outline" className="border-orange-300 bg-white/80 text-gray-700 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200" />
+            <Button variant="outline" size="icon" className="border-gray-300 bg-white/80 text-gray-600 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300" onClick={() => window.print()} title="Print">
               <Printer className="h-4 w-4" />
             </Button>
           </div>
@@ -215,17 +230,23 @@ export function JobDetailContent({
         education={education}
       />
 
-      {/* ── Live Countdown ────────────────────────────── */}
+      {/* ── Live Countdown / Application Status — always clearly visible ── */}
       {lastDateMs && !isClosed && (
-        <div className={cn(
-          "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border p-4",
-          isUrgent ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/50" : "border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50",
-        )}>
+        <div
+          role="status"
+          aria-live="polite"
+          className={cn(
+            "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border-2 border-l-8 p-4 shadow-md",
+            isUrgent
+              ? "border-red-300 border-l-red-600 bg-red-50 dark:border-red-800 dark:border-l-red-500 dark:bg-red-950/60"
+              : "border-orange-300 border-l-[#FF9933] bg-gradient-to-r from-orange-50 via-white to-green-50 dark:border-gray-600 dark:from-[#231303] dark:via-gray-900 dark:to-[#071a0e]",
+          )}
+        >
           <span className={cn(
-            "flex items-center gap-2 text-sm font-semibold",
-            isUrgent ? "text-red-700 dark:text-red-400" : "text-blue-700 dark:text-blue-400",
+            "flex items-center gap-2 text-base font-bold",
+            isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white",
           )}>
-            <AlarmClock className="h-5 w-5" /> Time Left to Apply
+            <AlarmClock className="h-6 w-6" /> Time Left to Apply
           </span>
           <div className="flex items-center gap-2">
             {[
@@ -234,18 +255,18 @@ export function JobDetailContent({
               { value: minsLeft, unit: "Min" },
             ].map((t) => (
               <div key={t.unit} className={cn(
-                "rounded-lg px-3 py-1.5 text-center",
-                isUrgent ? "bg-red-100 dark:bg-red-900" : "bg-blue-100 dark:bg-blue-900",
+                "rounded-lg px-3.5 py-2 text-center shadow-sm ring-1",
+                isUrgent ? "bg-white ring-red-300 dark:bg-red-900 dark:ring-red-700" : "bg-white ring-orange-200 dark:bg-gray-800 dark:ring-gray-600",
               )}>
-                <div className={cn("text-lg font-bold leading-none", isUrgent ? "text-red-700 dark:text-red-400" : "text-blue-800 dark:text-blue-300")}>
+                <div className={cn("text-xl font-extrabold leading-none tabular-nums", isUrgent ? "text-red-700 dark:text-red-300" : "text-green-800 dark:text-green-300")}>
                   {t.value !== null ? t.value : 0}
                 </div>
-                <div className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t.unit}</div>
+                <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.unit}</div>
               </div>
             ))}
           </div>
-          <p className="ml-auto text-sm text-gray-600 dark:text-gray-400">
-            Final date: <span className="font-semibold">{formatDate(lastDate!)}</span>
+          <p className="ml-auto text-sm font-medium text-gray-700 dark:text-gray-200">
+            Final date: <span className="font-bold">{formatDate(lastDate!)}</span>
           </p>
         </div>
       )}
@@ -281,7 +302,7 @@ export function JobDetailContent({
               key={s.id}
               type="button"
               onClick={() => scrollTo(s.id)}
-              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-700 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-700 dark:hover:bg-orange-950 dark:hover:text-orange-300"
             >
               <s.icon className="h-3.5 w-3.5" /> {s.label}
             </button>
@@ -321,7 +342,7 @@ export function JobDetailContent({
           <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <ClipboardList className="h-5 w-5 text-blue-600" /> Vacancy Details
+                <ClipboardList className="h-5 w-5 text-orange-600" /> Vacancy Details
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -331,7 +352,7 @@ export function JobDetailContent({
                     <TableRow key={item.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
                       <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
                         <span className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4 shrink-0 text-blue-500" /> {item.label}
+                          <item.icon className="h-4 w-4 shrink-0 text-orange-500" /> {item.label}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -356,7 +377,7 @@ export function JobDetailContent({
           <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Calendar className="h-5 w-5 text-blue-600" /> Important Dates
+                <Calendar className="h-5 w-5 text-orange-600" /> Important Dates
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -367,7 +388,7 @@ export function JobDetailContent({
                     return (
                       <TableRow key={d.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
                         <TableCell className="w-10 text-center">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-950 dark:text-orange-300">
                             {i + 1}
                           </span>
                         </TableCell>
@@ -393,13 +414,13 @@ export function JobDetailContent({
           <Card className="border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5 text-blue-600" /> Eligibility Criteria
+                <GraduationCap className="h-5 w-5 text-orange-600" /> Eligibility Criteria
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="flex flex-wrap gap-2">
                 {education && !containsHtml(education) && (
-                  <Badge variant="secondary" className="bg-blue-50 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                  <Badge variant="secondary" className="bg-orange-50 text-xs text-orange-700 dark:bg-orange-950 dark:text-orange-300">
                     <GraduationCap className="mr-1 h-3 w-3" /> {education}
                   </Badge>
                 )}
@@ -437,7 +458,7 @@ export function JobDetailContent({
                     <ol className="space-y-2">
                       {stepify(selectionProcess).map((step, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-[11px] font-bold text-white">
                             {i + 1}
                           </span>
                           {step}
@@ -476,7 +497,7 @@ export function JobDetailContent({
           <Card className="border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <ListChecks className="h-5 w-5 text-blue-600" /> Documents Required
+                <ListChecks className="h-5 w-5 text-orange-600" /> Documents Required
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -504,7 +525,7 @@ export function JobDetailContent({
           <Card className="border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <FileText className="h-5 w-5 text-blue-600" /> How to Apply
+                <FileText className="h-5 w-5 text-orange-600" /> How to Apply
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -514,7 +535,7 @@ export function JobDetailContent({
                 <ol className="space-y-3">
                   {stepify(howToApply).map((step, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-xs font-bold text-white">
                         {i + 1}
                       </span>
                       <span className="whitespace-pre-line">{step}</span>
@@ -553,7 +574,7 @@ export function JobDetailContent({
             </a>
           </Button>
         )}
-        <Button size="lg" className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+        <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
           <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
           </a>
@@ -566,10 +587,10 @@ export function JobDetailContent({
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</p>
             <p className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              isClosed ? "text-red-600" : isUrgent ? "text-red-500" : "text-green-600",
+              "flex items-center gap-1.5 text-sm font-bold",
+              isClosed ? "text-red-600 dark:text-red-400" : isUrgent ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400",
             )}>
-              {isClosed ? <Clock className="h-3 w-3" /> : <AlarmClock className="h-3 w-3" />}
+              {isClosed ? <Clock className="h-4 w-4" /> : <AlarmClock className="h-4 w-4" />}
               {isClosed
                 ? "Applications closed"
                 : daysLeft !== null
@@ -577,7 +598,7 @@ export function JobDetailContent({
                   : "Applications open"}
             </p>
           </div>
-          <Button className="bg-amber-400 font-semibold text-amber-950 hover:bg-amber-300" asChild>
+          <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
             <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
             </a>
