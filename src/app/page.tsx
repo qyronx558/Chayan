@@ -11,7 +11,6 @@ const LatestAdmitCards = dynamic(() => import("@/components/home/LatestAdmitCard
 const JobsByQualification = dynamic(() => import("@/components/home/JobsByQualification").then(m => ({ default: m.JobsByQualification })))
 const LatestPrivateJobs = dynamic(() => import("@/components/home/LatestPrivateJobs").then(m => ({ default: m.LatestPrivateJobs })))
 const PopularExams = dynamic(() => import("@/components/home/PopularExams").then(m => ({ default: m.PopularExams })))
-const FAQ = dynamic(() => import("@/components/home/FAQ").then(m => ({ default: m.FAQ })))
 const LatestBlog = dynamic(() => import("@/components/home/LatestBlog").then(m => ({ default: m.LatestBlog })))
 
 export default function HomePage() {
@@ -28,7 +27,6 @@ export default function HomePage() {
       <LatestBlog />
       <LatestPrivateJobs />
       <PopularExams />
-      <FAQ />
       <TrustBadges />
     </>
   )
