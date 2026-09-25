@@ -2,6 +2,7 @@ import dynamic from "next/dynamic"
 import { FeaturedSlider } from "@/components/home/FeaturedSlider"
 import { SearchBar } from "@/components/home/SearchBar"
 import { QuickLinks } from "@/components/home/QuickLinks"
+import { RecentlyViewed } from "@/components/home/RecentlyViewed"
 import { LatestJobs } from "@/components/home/LatestJobs"
 import { UpcomingDeadlines } from "@/components/home/UpcomingDeadlines"
 import { TrustBadges } from "@/components/home/TrustBadges"
@@ -19,6 +20,7 @@ export default function HomePage() {
       <FeaturedSlider />
       <SearchBar />
       <QuickLinks />
+      <RecentlyViewed />
       <UpcomingDeadlines />
       <LatestJobs />
       <LatestResults />

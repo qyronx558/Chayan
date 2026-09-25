@@ -6,6 +6,7 @@ import { Providers } from "@/components/layout/Providers"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
+import { ActivityTracker } from "@/components/layout/ActivityTracker"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
@@ -113,6 +114,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <WelcomeOnboarding />
+          <ActivityTracker />
           <CookieConsent />
           <Suspense fallback={null}>
             <GoogleAnalytics />
