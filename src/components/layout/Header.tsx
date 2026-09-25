@@ -35,6 +35,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ThemeToggle } from "./ThemeToggle"
 import { MobileNav } from "./MobileNav"
 import { SearchDialog, useSearchDialog } from "@/components/layout/SearchDialog"
+import { SearchTrigger } from "@/components/search/SearchTrigger"
 import { LogoSmall } from "@/components/layout/LogoSmall"
 import { NotificationBell } from "./NotificationBell"
 
@@ -74,7 +75,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       className={cn(
-        "relative px-3.5 py-2.5 text-sm font-semibold tracking-wide transition-all duration-200 rounded-md",
+        "relative whitespace-nowrap rounded-md px-2 py-2 text-sm font-semibold tracking-wide transition-all duration-200",
         isActive
           ? "text-blue-700 dark:text-blue-300 bg-blue-50/80 dark:bg-blue-950/40"
           : "text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-950/40"
@@ -104,7 +105,7 @@ function NavDropdown({
     >
       <button
         className={cn(
-          "relative px-3.5 py-2.5 text-sm font-semibold tracking-wide transition-all duration-200 rounded-md inline-flex items-center gap-1",
+          "relative inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-sm font-semibold tracking-wide transition-all duration-200",
           isActive
             ? "text-blue-700 dark:text-blue-300 bg-blue-50/80 dark:bg-blue-950/40"
             : "text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-950/40"
@@ -178,13 +179,13 @@ export function Header() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <div className="flex items-center gap-1">
+          <div className="flex h-16 items-center justify-between gap-2 xl:gap-3">
+            <div className="flex shrink-0 items-center gap-1">
               <MobileNav />
               <LogoSmall />
             </div>
 
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex">
               <NavLink href="/">Home</NavLink>
 
               <NavDropdown label="Jobs" isActive={jobsActive}>
@@ -213,15 +214,23 @@ export function Header() {
               </NavDropdown>
             </nav>
 
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1">
+              {/* Compact pill on wide screens — easy to spot & tap, no crowding */}
+              <SearchTrigger
+                onTrigger={() => setSearchOpen(true)}
+                placeholder="Search..."
+                showKbd={false}
+                className="hidden h-9 w-40 shrink-0 xl:flex"
+              />
+              {/* Icon fallback for lg–xl where the pill would squeeze the nav */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearchOpen(true)}
-                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                aria-label="Search"
+                className="hidden text-gray-600 hover:text-blue-600 lg:inline-flex xl:hidden dark:text-gray-400 dark:hover:text-blue-400"
               >
                 <Search className="h-5 w-5" />
-                <span className="sr-only">Search</span>
               </Button>
 
               <NotificationBell />
@@ -306,6 +315,13 @@ export function Header() {
                 </div>
               )}
             </div>
+          </div>
+          <div className="pb-3 lg:hidden">
+            <SearchTrigger
+              onTrigger={() => setSearchOpen(true)}
+              placeholder="Search jobs, results, admit cards..."
+              className="w-full"
+            />
           </div>
         </div>
       </header>

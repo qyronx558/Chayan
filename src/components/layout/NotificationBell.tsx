@@ -123,7 +123,22 @@ export function NotificationBell() {
     }
   }
 
-  if (!session?.user) return null
+  // Always visible in the header: guests get a bell linking to the public
+  // notifications page, signed-in users get the live popover.
+  if (!session?.user) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        asChild
+        className="text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400"
+      >
+        <Link href="/notifications" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
+        </Link>
+      </Button>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

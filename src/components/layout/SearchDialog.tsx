@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { POPULAR_SEARCHES, OPEN_SEARCH_EVENT } from "@/lib/search-constants"
 
 interface SearchResult {
   id: string
@@ -41,21 +42,6 @@ const typeConfig = {
   blog: { icon: Newspaper, label: "Blogs", href: "/blog", color: "text-teal-500", bgColor: "bg-teal-50 dark:bg-teal-950/30" },
 } as const
 
-const POPULAR_SEARCHES = [
-  "SSC CGL 2024",
-  "UPSC Civil Services",
-  "IBPS PO",
-  "RRB NTPC",
-  "State PSC",
-  "Bank Clerk",
-  "Railway Group D",
-  "Defence Jobs",
-  "Teaching Jobs",
-  "Engineering Jobs",
-  "Nursing Jobs",
-  "Police Constable",
-]
-
 const CATEGORY_CHIPS = [
   { label: "All", value: "" },
   { label: "Govt Jobs", value: "job" },
@@ -65,6 +51,20 @@ const CATEGORY_CHIPS = [
   { label: "Answer Keys", value: "answer_key" },
   { label: "Blogs", value: "blog" },
 ]
+
+// Module-level pending query so any visible trigger (header pill, hero hint)
+// can open the dialog with a prefilled query. Consumed once on mount.
+let pendingSearchQuery = ""
+
+export function setPendingSearchQuery(q: string) {
+  pendingSearchQuery = q
+}
+
+function consumePendingSearchQuery() {
+  const q = pendingSearchQuery
+  pendingSearchQuery = ""
+  return q
+}
 
 function SearchContent({ onNavigate }: { onNavigate: () => void }) {
   const router = useRouter()
@@ -177,6 +177,19 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => performSearch(value, selectedCategory || undefined), 150)
   }
+
+  // Prefill when opened via a visible trigger carrying a query (hero chip,
+  // header pill with context). Consumes the module-level pending query once.
+  React.useEffect(() => {
+    const pending = consumePendingSearchQuery()
+    if (pending.trim()) {
+      setQuery(pending)
+      setShowSuggestions(false)
+      const t = setTimeout(() => performSearch(pending, undefined), 50)
+      return () => clearTimeout(t)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category)
@@ -473,6 +486,11 @@ export function SearchDialog({
 export function useSearchDialog() {
   const [open, setOpen] = React.useState(false)
 
+  const openWithQuery = React.useCallback((q: string) => {
+    setPendingSearchQuery(q)
+    setOpen(true)
+  }, [])
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
@@ -480,9 +498,18 @@ export function useSearchDialog() {
         setOpen((prev) => !prev)
       }
     }
+    const onRequest = (e: Event) => {
+      const query = (e as CustomEvent<string>).detail ?? ""
+      setPendingSearchQuery(query)
+      setOpen(true)
+    }
     document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
+    window.addEventListener(OPEN_SEARCH_EVENT, onRequest)
+    return () => {
+      document.removeEventListener("keydown", down)
+      window.removeEventListener(OPEN_SEARCH_EVENT, onRequest)
+    }
   }, [])
 
-  return { open, setOpen }
+  return { open, setOpen, openWithQuery }
 }
