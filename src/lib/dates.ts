@@ -45,3 +45,45 @@ export function monthLabel(month: string): string {
     timeZone: "UTC",
   })
 }
+
+export function parseMonthParts(month: string): { year: number; month: number } {
+  const [y, m] = month.split("-").map((v) => parseInt(v, 10))
+  return { year: Number.isNaN(y) ? new Date().getFullYear() : y, month: Number.isNaN(m) ? 1 : Math.min(12, Math.max(1, m)) }
+}
+
+/** Local-calendar day key `yyyy-mm-dd` for grouping ISO dates by viewer day. */
+export function toDayKey(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+/** Build a month matrix: rows of 7 cells, `null` for outside-month padding. */
+export function getMonthMatrix(month: string): (number | null)[][] {
+  const { year, month: m } = parseMonthParts(month)
+  const firstWeekday = new Date(year, m - 1, 1).getDay()
+  const daysInMonth = new Date(year, m, 0).getDate()
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ]
+  while (cells.length % 7 !== 0) cells.push(null)
+  const weeks: (number | null)[][] = []
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
+  return weeks
+}
+
+export function daysInMonthFor(month: string): number {
+  const { year, month: m } = parseMonthParts(month)
+  return new Date(year, m, 0).getDate()
+}
+
+/** "exam_date_foo" -> "Exam Date Foo" */
+export function humanizeKey(key: string): string {
+  return key
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ")
+}

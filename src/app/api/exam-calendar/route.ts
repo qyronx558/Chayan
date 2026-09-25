@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { parseFlexibleDate, monthRange, toMonthKey } from "@/lib/dates"
+import { parseFlexibleDate, monthRange, toMonthKey, humanizeKey } from "@/lib/dates"
+
+export const revalidate = 300
 
 export interface CalendarEvent {
   date: string
@@ -80,7 +82,7 @@ export async function GET(request: NextRequest) {
           events.push({
             date: parsed.toISOString(),
             type,
-            label: key,
+            label: humanizeKey(key),
             title: job.title,
             department: job.department.name,
             href: `/apply/${job.slug}`,
@@ -148,10 +150,16 @@ export async function GET(request: NextRequest) {
       const now = new Date()
       const upcoming = filtered.filter((e) => new Date(e.date) >= now)
       const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "6", 10)))
-      return NextResponse.json({ success: true, month, type: typeFilter, data: upcoming.slice(0, limit) })
+      return NextResponse.json(
+        { success: true, month, type: typeFilter, data: upcoming.slice(0, limit) },
+        { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+      )
     }
 
-    return NextResponse.json({ success: true, month, type: typeFilter, data: filtered })
+    return NextResponse.json(
+      { success: true, month, type: typeFilter, data: filtered },
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+    )
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch exam calendar" },
