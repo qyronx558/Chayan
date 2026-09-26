@@ -7,6 +7,7 @@ import {
   ListChecks, ClipboardList, UserRound, Clock,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { formatDate, cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -204,11 +205,13 @@ export function JobDetailContent({
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-              <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
-              </a>
-            </Button>
+            {applyLink || officialWebsite ? (
+              <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
+                <Link href={`/apply/${slug}/start`}>
+                  <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
+                </Link>
+              </Button>
+            ) : null}
             <ApplicationTracker jobId={jobId} variant="full" />
             <BookmarkButton jobId={jobId} size="default" variant="outline" className="border-orange-300 bg-white/80 text-gray-700 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200" />
             <Button variant="outline" size="icon" className="border-gray-300 bg-white/80 text-gray-600 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300" onClick={() => window.print()} title="Print">
@@ -574,11 +577,13 @@ export function JobDetailContent({
             </a>
           </Button>
         )}
-        <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-          <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
-          </a>
-        </Button>
+        {applyLink || officialWebsite ? (
+          <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
+            <Link href={`/apply/${slug}/start`}>
+              <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
+            </Link>
+          </Button>
+        ) : null}
       </div>
 
       {/* ── Sticky Mobile Apply Bar ───────────────────── */}
@@ -598,11 +603,13 @@ export function JobDetailContent({
                   : "Applications open"}
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-            <a href={applyLink || officialWebsite || "#"} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
-            </a>
-          </Button>
+          {applyLink || officialWebsite ? (
+            <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
+              <Link href={`/apply/${slug}/start`}>
+                <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
+              </Link>
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>

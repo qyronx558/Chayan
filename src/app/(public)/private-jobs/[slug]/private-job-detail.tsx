@@ -66,9 +66,9 @@ export function PrivateJobDetail({ job }: { job: PrivateJob }) {
         <BookmarkButton privateJobId={job.id} />
         {job.applicationUrl && (
           <Button asChild>
-            <a href={job.applicationUrl} target="_blank" rel="noopener noreferrer">
+            <Link href={`/private-jobs/${job.slug}/apply`}>
               <ExternalLink className="mr-2 h-4 w-4" /> Apply Now
-            </a>
+            </Link>
           </Button>
         )}
         {job.applicationEmail && (
