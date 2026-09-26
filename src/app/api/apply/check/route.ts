@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
         ok: true,
         hostname,
         frameable: null as boolean | null, // unknown — let client try iframe
+        proxyable: true,
         reason: "unreachable",
       })
     }
@@ -63,6 +64,7 @@ export async function GET(req: NextRequest) {
       ok: true,
       hostname,
       frameable: !blocked,
+      proxyable: true,
       status: res.status,
     })
   } catch {
@@ -70,6 +72,7 @@ export async function GET(req: NextRequest) {
       ok: true,
       hostname,
       frameable: null as boolean | null,
+      proxyable: true,
       reason: "check-failed",
     })
   }
