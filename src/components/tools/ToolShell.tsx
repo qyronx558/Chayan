@@ -28,10 +28,10 @@ export function ToolShell({ toolKey, title, subtitle, badge, children, faq }: {
         <div className={cn("absolute inset-x-0 top-0 h-1", theme.accent)} aria-hidden="true" />
         <div className="relative">
           <Badge className="border border-slate-300/70 bg-white/70 font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{badge}</Badge>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl dark:text-slate-100">{title}</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-[15px] dark:text-slate-400">{subtitle}</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            {["100% Free", "No signup needed", "Works offline in browser"].map((t) => (
+          <h1 className="mt-3 text-[26px] font-semibold tracking-tight text-slate-800 sm:text-[30px] dark:text-slate-100">{title}</h1>
+          <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">{subtitle}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-[13px]">
+            {["Free", "No signup", "Works on your phone"].map((t) => (
               <span key={t} className="rounded-full border border-slate-300/60 bg-white/60 px-3 py-1 font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{t}</span>
             ))}
           </div>
@@ -40,24 +40,24 @@ export function ToolShell({ toolKey, title, subtitle, badge, children, faq }: {
       <div className="mt-6">{children}</div>
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         {[
-          { t: "Age Calculator", h: "/tools/age-calculator", d: "All-India exams, exact Y-M-D age" },
-          { t: "Salary Explorer", h: "/tools/salary-calculator", d: "7th + 8th pay, in-hand breakup" },
-          { t: "Photo Resizer", h: "/tools/photo-resizer", d: "20KB photo, sign and PDF tools" },
+          { t: "Age Calculator", h: "/tools/age-calculator", d: "Check age in seconds" },
+          { t: "Salary Explorer", h: "/tools/salary-calculator", d: "See take-home pay" },
+          { t: "Photo Resizer", h: "/tools/photo-resizer", d: "Photo ready in one click" },
         ].filter((l) => !l.h.endsWith(toolKey === "age" ? "age-calculator" : toolKey === "salary" ? "salary-calculator" : toolKey === "photo" ? "photo-resizer" : "___")).slice(0, 3).map((l) => (
           <Link key={l.h} href={l.h} className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{l.t}</p>
-            <p className="text-xs text-slate-500">{l.d}</p>
+            <p className="text-[15px] font-semibold text-slate-900 dark:text-slate-100">{l.t}</p>
+            <p className="mt-0.5 text-[13px] text-slate-500">{l.d}</p>
           </Link>
         ))}
       </div>
       {faq && faq.length > 0 && (
         <section className="mt-8 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">FAQs</h2>
+          <h2 className="text-[18px] font-semibold text-slate-900 dark:text-slate-100">Common questions</h2>
           <div className="mt-3 space-y-4">
             {faq.map((f) => (
               <div key={f.q}>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{f.q}</p>
-                <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{f.a}</p>
+                <p className="text-[15px] font-semibold text-slate-800 dark:text-slate-200">{f.q}</p>
+                <p className="mt-1 text-[14px] leading-relaxed text-slate-600 dark:text-slate-400">{f.a}</p>
               </div>
             ))}
           </div>

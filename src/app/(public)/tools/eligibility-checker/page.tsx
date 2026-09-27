@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <ToolShell toolKey="eligibility" badge="Age + qualification + category" title="Eligibility Checker - Am I Eligible?" subtitle="One profile, every exam family. Combines exact age math with qualification mapping and category relaxation - then tells you where to apply next." faq={[
+    <ToolShell toolKey="eligibility" badge="2-minute check" title="Eligibility Checker" subtitle="Answer 3 questions to see where you can apply." faq={[
       { q: "How accurate is this?", a: "Age math is exact; qualification mapping uses standard norms (e.g., Graduate unlocks CGL/PO/NTPC). Post-wise exceptions exist - confirm in the PDF." },
       { q: "Does it cover state exams?", a: "Core families (UPSC/SSC/Bank/Railway/Police/Teaching/Agniveer) are covered. State PSC limits are similar to UPSC with local reservation - use Custom mode with notification values." },
     ]}>

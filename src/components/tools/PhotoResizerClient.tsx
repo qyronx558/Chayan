@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/tools/ToolShell";
 
-type Preset = { id: string; label: string; w: number; h: number; kb: number; hint: string };
+type Preset = { id: string; label: string; sub: string; w: number; h: number; kb: number };
 
 const PRESETS: Preset[] = [
-  { id: "ssc-photo", label: "SSC Photo (20–50 KB)", w: 600, h: 750, kb: 45, hint: "JPG, white bg, 4.5×3.5cm feel" },
-  { id: "ssc-sign", label: "Signature (10–20 KB)", w: 600, h: 200, kb: 18, hint: "Black ink, white paper, JPG" },
-  { id: "upsc-photo", label: "UPSC / IBPS Photo (≤300 KB)", w: 800, h: 1000, kb: 200, hint: "Recent, plain background" },
-  { id: "thumb", label: "Thumb impression (≤30 KB)", w: 400, h: 400, kb: 25, hint: "Left thumb, blue ink" },
+  { id: "ssc-photo", label: "Photo", sub: "20–50 KB", w: 600, h: 750, kb: 45 },
+  { id: "ssc-sign", label: "Signature", sub: "10–20 KB", w: 600, h: 200, kb: 18 },
+  { id: "upsc-photo", label: "Big photo", sub: "Up to 300 KB", w: 800, h: 1000, kb: 200 },
+  { id: "thumb", label: "Thumb", sub: "Up to 30 KB", w: 400, h: 400, kb: 25 },
 ];
 
 async function fileToImage(file: File): Promise<HTMLImageElement> {
@@ -32,16 +32,16 @@ function drawCover(img: HTMLImageElement, w: number, h: number): HTMLCanvasEleme
   return c;
 }
 
-async function canvasToSizedJpg(canvas: HTMLCanvasElement, targetKb: number): Promise<{ blob: Blob; kb: number; q: number }> {
+async function canvasToSizedJpg(canvas: HTMLCanvasElement, targetKb: number): Promise<{ blob: Blob; kb: number }> {
   let q = 0.92;
   for (let i = 0; i < 7; i++) {
     const blob: Blob = await new Promise((res) => canvas.toBlob((b) => res(b!), "image/jpeg", q));
     const kb = blob.size / 1024;
-    if (kb <= targetKb || q <= 0.3) return { blob, kb, q };
+    if (kb <= targetKb || q <= 0.3) return { blob, kb };
     q -= 0.12;
   }
   const blob: Blob = await new Promise((res) => canvas.toBlob((b) => res(b!), "image/jpeg", 0.3));
-  return { blob, kb: blob.size / 1024, q: 0.3 };
+  return { blob, kb: blob.size / 1024 };
 }
 
 export default function PhotoResizerClient() {
@@ -49,10 +49,9 @@ export default function PhotoResizerClient() {
   const [customKb, setCustomKb] = useState(50);
   const [preview, setPreview] = useState<string | null>(null);
   const [outUrl, setOutUrl] = useState<string | null>(null);
-  const [meta, setMeta] = useState<{ kb: number; w: number; h: number; q: number } | null>(null);
+  const [meta, setMeta] = useState<{ kb: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [quality, setQuality] = useState(80);
-  const [maxDim, setMaxDim] = useState(1200);
   const [compOut, setCompOut] = useState<{ url: string; kb: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const compRef = useRef<HTMLInputElement>(null);
@@ -64,9 +63,9 @@ export default function PhotoResizerClient() {
       const img = await fileToImage(f);
       const c = drawCover(img, preset.w, preset.h);
       setPreview(c.toDataURL("image/jpeg", 0.85));
-      const { blob, kb, q } = await canvasToSizedJpg(c, customKb || preset.kb);
+      const { blob, kb } = await canvasToSizedJpg(c, customKb || preset.kb);
       setOutUrl(URL.createObjectURL(blob));
-      setMeta({ kb, w: preset.w, h: preset.h, q });
+      setMeta({ kb });
     } finally { setBusy(false); }
   };
 
@@ -75,7 +74,7 @@ export default function PhotoResizerClient() {
     setBusy(true);
     try {
       const img = await fileToImage(f);
-      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const scale = Math.min(1, 1200 / Math.max(img.width, img.height));
       const c = document.createElement("canvas");
       c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
       c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
@@ -94,50 +93,44 @@ export default function PhotoResizerClient() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="border-[#e2d3bd] dark:border-[#4a3a28]">
-        <CardHeader className="bg-[#f3ece1] dark:bg-[#2b2118]"><CardTitle className="text-base text-slate-800 dark:text-slate-100">Exam-spec photo / signature resizer</CardTitle></CardHeader>
-        <CardContent className="space-y-4 p-5">
+        <CardHeader className="bg-[#f3ece1] dark:bg-[#2b2118]"><CardTitle className="text-[17px] text-slate-800 dark:text-slate-100">Make photo ready</CardTitle></CardHeader>
+        <CardContent className="space-y-5 p-5">
           <div className="grid grid-cols-2 gap-2">
             {PRESETS.map((p) => (
-              <button key={p.id} onClick={() => setPreset(p)} className={`rounded-xl border p-3 text-left transition ${preset.id === p.id ? "border-[#b07a4f] bg-[#f3ece1] dark:bg-[#2b2118] dark:border-[#b07a4f]" : "border-slate-200 dark:border-slate-700"}`}>
-                <p className="text-xs font-bold">{p.label}</p>
-                <p className="text-[11px] text-gray-500">{p.w}×{p.h}px • {p.hint}</p>
+              <button key={p.id} onClick={() => setPreset(p)} className={`min-h-[64px] rounded-xl border p-3 text-left transition ${preset.id === p.id ? "border-[#b07a4f] bg-[#f3ece1] dark:bg-[#2b2118] dark:border-[#b07a4f]" : "border-slate-200 dark:border-slate-700"}`}>
+                <p className="text-[15px] font-bold">{p.label}</p>
+                <p className="mt-0.5 text-[13px] text-gray-500">{p.sub}</p>
               </button>
             ))}
           </div>
-          <div><Label>Target size (KB)</Label><Input type="number" value={customKb} onChange={(e) => setCustomKb(+e.target.value)} className="mt-1" /></div>
+          <div><Label className="text-[15px]">Need size up to (KB)</Label><Input type="number" value={customKb} onChange={(e) => setCustomKb(+e.target.value)} className="mt-1.5 h-12 text-base" /></div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
-          <Button onClick={() => fileRef.current?.click()} disabled={busy} className="w-full bg-[#8f6238] text-white hover:bg-[#7a5330]">{busy ? "Processing..." : "Upload and resize"}</Button>
+          <Button onClick={() => fileRef.current?.click()} disabled={busy} className="h-12 w-full bg-[#8f6238] text-base text-white hover:bg-[#7a5330]">{busy ? "Making..." : "Choose photo"}</Button>
           {preview && (
-            <div className="flex items-center gap-4 rounded-xl bg-gray-50 p-3 dark:bg-gray-900">
+            <div className="flex items-center gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={preview} alt="resized preview" className="h-24 w-20 rounded-lg border object-cover" />
               <div className="flex-1">
-                {meta && <div className="flex flex-wrap gap-2">{meta.kb <= (customKb || preset.kb) + 1 ? <StatusPill tone="ok">✓ {meta.kb.toFixed(1)} KB - within limit</StatusPill> : <StatusPill tone="warn">{meta.kb.toFixed(1)} KB - slightly over, retry lower KB</StatusPill>}</div>}
-                <p className="mt-1 text-xs text-gray-500">{meta?.w}×{meta?.h}px • JPG quality {Math.round((meta?.q ?? 0.8) * 100)}%</p>
-                <div className="mt-2 flex gap-2">
-                  {outUrl && <a href={outUrl} download={`${preset.id}-${meta?.w}x${meta?.h}.jpg`} className="rounded-lg bg-[#8f6238] px-3 py-1.5 text-xs font-medium text-white">Download JPG</a>}
-                  <button onClick={printPdf} className="rounded-lg border px-3 py-1.5 text-xs font-bold">Save as PDF</button>
+                {meta && <div className="flex flex-wrap gap-2">{meta.kb <= (customKb || preset.kb) + 1 ? <StatusPill tone="ok">✓ Ready — {meta.kb.toFixed(0)} KB</StatusPill> : <StatusPill tone="warn">A bit big — try smaller size</StatusPill>}</div>}
+                <div className="mt-3 flex gap-2">
+                  {outUrl && <a href={outUrl} download={`${preset.id}.jpg`} className="rounded-lg bg-[#8f6238] px-4 py-2.5 text-[14px] font-medium text-white">Download</a>}
+                  <button onClick={printPdf} className="rounded-lg border px-4 py-2.5 text-[14px] font-bold">Save PDF</button>
                 </div>
               </div>
             </div>
           )}
-          <p className="text-[11px] text-gray-500">Files never leave your device - processing is 100% in-browser. JPG output with white background matches SSC/IBPS/Railway specs.</p>
+          <p className="text-[13px] text-gray-500">Private — stays on your phone.</p>
         </CardContent>
       </Card>
 
       <Card className="border-[#e2d3bd] dark:border-[#4a3a28]">
-        <CardHeader className="bg-[#f3ece1] dark:bg-[#2b2118]"><CardTitle className="text-base text-slate-800 dark:text-slate-100">Universal image compressor</CardTitle></CardHeader>
-        <CardContent className="space-y-4 p-5">
-          <div><Label>Quality: {quality}%</Label><input type="range" min={30} max={95} value={quality} onChange={(e) => setQuality(+e.target.value)} className="mt-2 w-full accent-[#b07a4f]" /></div>
-          <div><Label>Max dimension: {maxDim}px</Label><input type="range" min={400} max={2500} step={100} value={maxDim} onChange={(e) => setMaxDim(+e.target.value)} className="mt-2 w-full accent-[#b07a4f]" /></div>
+        <CardHeader className="bg-[#f3ece1] dark:bg-[#2b2118]"><CardTitle className="text-[17px] text-slate-800 dark:text-slate-100">Compress any photo</CardTitle></CardHeader>
+        <CardContent className="space-y-5 p-5">
+          <div><Label className="text-[15px]">Quality: {quality}%</Label><input type="range" min={30} max={95} value={quality} onChange={(e) => setQuality(+e.target.value)} className="mt-2 w-full accent-[#b07a4f]" /></div>
           <input ref={compRef} type="file" accept="image/*" className="hidden" onChange={(e) => onCompress(e.target.files?.[0])} />
-          <Button variant="outline" onClick={() => compRef.current?.click()} disabled={busy} className="w-full">{busy ? "Compressing..." : "Upload and compress"}</Button>
-          {compOut && <div className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800"><StatusPill tone="ok">Compressed to {compOut.kb.toFixed(1)} KB</StatusPill><a href={compOut.url} download="compressed.jpg" className="ml-3 font-semibold text-slate-700 underline dark:text-slate-300">Download</a></div>}
-          <ul className="text-xs text-gray-500 space-y-1">
-            <li>• SSC photo: 20–50 KB JPG • Signature: 10–20 KB</li>
-            <li>• IBPS photo: 20–50 KB • Thumb: 20–50 KB</li>
-            <li>• Resume PDF: keep under 2 MB for portals</li>
-          </ul>
+          <Button variant="outline" onClick={() => compRef.current?.click()} disabled={busy} className="h-12 w-full text-base">{busy ? "Making..." : "Choose image"}</Button>
+          {compOut && <div className="rounded-xl bg-slate-100 p-4 text-[15px] dark:bg-slate-800"><StatusPill tone="ok">Ready — {compOut.kb.toFixed(0)} KB</StatusPill><a href={compOut.url} download="photo.jpg" className="ml-3 font-semibold text-slate-700 underline dark:text-slate-300">Download</a></div>}
+          <p className="text-[13px] text-gray-500">Works for SSC, Bank, Railway, UPSC forms.</p>
         </CardContent>
       </Card>
     </div>
