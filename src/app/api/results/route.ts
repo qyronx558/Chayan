@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || ""
     const categoryId = searchParams.get("categoryId") || ""
     const departmentId = searchParams.get("departmentId") || ""
+    const status = searchParams.get("status") || ""
+    const sort = searchParams.get("sort") || "latest"
     const skip = (page - 1) * limit
 
     const where: Prisma.ResultWhereInput = {}
@@ -34,12 +36,22 @@ export async function GET(request: NextRequest) {
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
+    if (status) where.status = status
+
+    const orderBy: Prisma.ResultOrderByWithRelationInput =
+      sort === "oldest"
+        ? { createdAt: "asc" }
+        : sort === "title_asc"
+          ? { title: "asc" }
+          : sort === "title_desc"
+            ? { title: "desc" }
+            : { createdAt: "desc" }
 
     const [results, total] = await Promise.all([
       prisma.result.findMany({
         where,
         include: { department: true, category: true, job: true },
-        orderBy: [{ resultDate: "desc" }, { createdAt: "desc" }],
+        orderBy,
         skip,
         take: limit,
       }),

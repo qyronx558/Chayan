@@ -224,7 +224,7 @@ export const privateJobSchema = z
     applicationUrl: z.string().nullable().optional(),
     applicationEmail: z.string().nullable().optional(),
     lastDate: z.coerce.date().nullable().optional(),
-    status: z.enum(["ACTIVE", "EXPIRED"]).default("ACTIVE"),
+    status: z.enum(["ACTIVE", "EXPIRED", "UPCOMING"]).default("ACTIVE"),
   })
   .refine((data) => Boolean(data.companyId) !== Boolean(data.companyName), {
     message: "Select an existing company or enter a new company name",
@@ -284,3 +284,9 @@ export const featuredItemSchema = z.object({
 })
 
 export type FeaturedItemInput = z.infer<typeof featuredItemSchema>
+
+export const CONTENT_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const
+export type ContentStatus = (typeof CONTENT_STATUSES)[number]
+
+export const JOB_STATUSES = ["ACTIVE", "EXPIRED", "UPCOMING"] as const
+export const PRIVATE_JOB_STATUSES = ["ACTIVE", "EXPIRED", "UPCOMING"] as const

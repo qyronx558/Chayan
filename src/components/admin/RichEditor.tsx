@@ -222,10 +222,16 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   }, [closeAllDropdowns])
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4] },
         codeBlock: { HTMLAttributes: { class: "!bg-muted" } },
+        // Disabled here because customized instances are registered below.
+        // (StarterKit v3 ships link, underline and dropcursor by default.)
+        link: false,
+        underline: false,
+        dropcursor: false,
       }),
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),

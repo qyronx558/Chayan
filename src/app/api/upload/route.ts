@@ -28,7 +28,13 @@ export async function POST(request: NextRequest) {
 
     const folder = (formData.get("folder") as string) || "chayan"
     const transform = (formData.get("transform") as string) || ""
+    const kind = (formData.get("kind") as string) || "image"
     const buffer = Buffer.from(await file.arrayBuffer())
+
+    const isPdf = kind === "pdf" || file.type === "application/pdf"
+    if (isPdf && file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ success: false, error: "PDF must be under 10MB" }, { status: 400 })
+    }
 
     const transformOptions = transform === "slide"
       ? {
@@ -43,7 +49,11 @@ export async function POST(request: NextRequest) {
 
     const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder, resource_type: "image", transformation: transformOptions },
+        {
+          folder,
+          resource_type: isPdf ? "raw" : "image",
+          ...(isPdf ? { format: "pdf" } : { transformation: transformOptions }),
+        },
         (error, result) => {
           if (error) reject(error)
           else resolve(result as { secure_url: string; public_id: string })
