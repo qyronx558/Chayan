@@ -23,6 +23,10 @@ interface ApplicationInfoDrawerProps {
   updatedLabel?: string | null
   infoRows: ApplicationInfoRow[]
   onReport: () => void
+  /** Overrides the default apply-flow explainer (used by document viewers). */
+  aboutCopy?: string
+  /** Overrides the footer CTA label (used by document viewers). */
+  ctaLabel?: string
 }
 
 /**
@@ -41,6 +45,8 @@ export function ApplicationInfoDrawer({
   updatedLabel,
   infoRows,
   onReport,
+  aboutCopy,
+  ctaLabel = "Apply Now",
 }: ApplicationInfoDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -84,8 +90,8 @@ export function ApplicationInfoDrawer({
 
           <div className="mt-4 rounded-xl bg-gray-50 px-3.5 py-3 text-xs leading-relaxed text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
             <p>
-              You apply on the {sourceLabel.toLowerCase()} ({hostname}). ChayanJobs only opens the
-              verified official page for you.
+              {aboutCopy ??
+                `You apply on the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobs only opens the verified official page for you.`}
             </p>
             {updatedLabel ? <p className="mt-1 text-gray-400">Last checked · {updatedLabel}</p> : null}
           </div>
@@ -98,7 +104,7 @@ export function ApplicationInfoDrawer({
             rel="noopener noreferrer"
             className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
           >
-            Apply Now
+            {ctaLabel}
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </a>
           <button

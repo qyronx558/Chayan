@@ -12,6 +12,8 @@ interface ApplicationFloatingCTAProps {
   onApply: () => void
   /** Desktop floating card vs mobile bottom bar. */
   variant: "desktop" | "mobile"
+  /** Main CTA text. Defaults to "Apply Now". */
+  title?: string
 }
 
 /**
@@ -25,6 +27,7 @@ export function ApplicationFloatingCTA({
   sublabel,
   onApply,
   variant,
+  title = "Apply Now",
 }: ApplicationFloatingCTAProps) {
   const [intro, setIntro] = useState(true)
 
@@ -41,7 +44,7 @@ export function ApplicationFloatingCTA({
           target="_blank"
           rel="noopener noreferrer"
           onClick={onApply}
-          aria-label={`Apply now on ${hostname}`}
+          aria-label={`${title} on ${hostname}`}
           className={cn(
             "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-base font-semibold text-white",
             "shadow-[0_8px_24px_rgba(5,150,105,0.4)] transition hover:bg-emerald-700 active:scale-[0.99]",
@@ -49,7 +52,7 @@ export function ApplicationFloatingCTA({
             intro && "scale-[0.97]"
           )}
         >
-          Apply Now
+          {title}
           <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
         </a>
         <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -66,7 +69,7 @@ export function ApplicationFloatingCTA({
       target="_blank"
       rel="noopener noreferrer"
       onClick={onApply}
-      aria-label={`Apply now on ${hostname}`}
+      aria-label={`${title} on ${hostname}`}
       className={cn(
         "fixed bottom-5 right-5 z-40 hidden w-[200px] flex-col justify-center gap-0.5 rounded-xl bg-emerald-600 px-4 py-3 text-white md:flex",
         "shadow-[0_10px_36px_rgba(5,150,105,0.45)] transition hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-[0_14px_40px_rgba(5,150,105,0.5)]",
@@ -75,7 +78,7 @@ export function ApplicationFloatingCTA({
       )}
     >
       <span className="flex items-center justify-between text-[15px] font-semibold leading-tight">
-        Apply Now
+        {title}
         <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="text-[11px] font-normal leading-tight text-emerald-50">{sublabel}</span>

@@ -82,6 +82,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
           : null}
         downloadUrl={syllabus.pdfUrl}
         downloadLabel="Download Syllabus PDF"
+        viewerHref={`/syllabus/${syllabus.slug}/view`}
         bookmarkSyllabusId={syllabus.id}
         publishedAt={syllabus.createdAt.toISOString()}
         relatedTitle="Related Syllabus"

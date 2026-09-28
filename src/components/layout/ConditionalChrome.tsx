@@ -4,16 +4,25 @@ import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
 /**
- * Returns true for Application Mode routes, which render their own
+ * Returns true for fullscreen viewer routes, which render their own
  * minimal chrome (tool rail + thin top bar) and need maximum screen space:
- * - /apply/[slug]/start (government)
- * - /private-jobs/[slug]/apply (private)
+ * - /apply/[slug]/start (government applications)
+ * - /private-jobs/[slug]/apply (private applications)
+ * - /result/[slug]/view, /admit-card/[slug]/view, /answer-key/[slug]/view,
+ *   /syllabus/[slug]/view, /admission/[slug]/view (official documents)
  */
 export function isApplicationModePath(pathname: string | null): boolean {
   if (!pathname) return false
   if (pathname.startsWith("/apply/") && pathname.endsWith("/start")) return true
   if (pathname.startsWith("/private-jobs/") && pathname.endsWith("/apply")) return true
-  return false
+  if (!pathname.endsWith("/view")) return false
+  return (
+    pathname.startsWith("/result/") ||
+    pathname.startsWith("/admit-card/") ||
+    pathname.startsWith("/answer-key/") ||
+    pathname.startsWith("/syllabus/") ||
+    pathname.startsWith("/admission/")
+  )
 }
 
 /**

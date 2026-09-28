@@ -55,6 +55,8 @@ interface DocumentDetailProps {
   list?: { label: string; items: string[] } | null
   downloadUrl?: string | null
   downloadLabel: string
+  /** Fullscreen viewer route (e.g. `/result/[slug]/view`). Shown only when a download URL exists. */
+  viewerHref?: string | null
   countdownDate?: string | null
   countdownLabel?: string
   bookmarkId?: { type: "result" | "admit-card"; id: string } | null
@@ -107,6 +109,7 @@ export function DocumentDetail({
   list,
   downloadUrl,
   downloadLabel,
+  viewerHref = null,
   countdownDate,
   countdownLabel,
   bookmarkId,
@@ -152,6 +155,10 @@ export function DocumentDetail({
   ].filter((k): k is NonNullable<typeof k> => k !== null).slice(0, 3)
 
   const filledRows = rows.filter((r) => r.value)
+
+  // When a fullscreen viewer route exists, every download button opens it —
+  // no separate viewer button needed. The viewer itself links the official file.
+  const viewerActive = Boolean(viewerHref && downloadUrl)
 
   const sections = [
     { id: "details", label: "Details", icon: ListChecks, show: filledRows.length > 0 || linkRows.length > 0 },
@@ -246,9 +253,15 @@ export function DocumentDetail({
           <div className="mt-5 flex flex-wrap items-center gap-2 print:hidden">
             {downloadUrl ? (
               <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-                <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                  <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
-                </a>
+                {viewerActive ? (
+                  <Link href={viewerHref as string}>
+                    <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
+                  </Link>
+                ) : (
+                  <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                    <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
+                  </a>
+                )}
               </Button>
             ) : (
               <Button size="sm" variant="outline" className="border-gray-300 bg-white/70 font-semibold text-gray-500" disabled>
@@ -467,14 +480,20 @@ export function DocumentDetail({
                   <FileText className="h-5 w-5 text-amber-600" /> {downloadLabel}
                 </h3>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  Get the official PDF from the latest notification. Click the button to open the file in a new tab.
+                  Get the official PDF from the latest notification. Click the button to open the file in the fullscreen viewer.
                 </p>
               </div>
               {downloadUrl ? (
                 <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-                  <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                    <FileText className="mr-2 h-5 w-5" /> {downloadLabel}
-                  </a>
+                  {viewerActive ? (
+                    <Link href={viewerHref as string}>
+                      <FileText className="mr-2 h-5 w-5" /> {downloadLabel}
+                    </Link>
+                  ) : (
+                    <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                      <FileText className="mr-2 h-5 w-5" /> {downloadLabel}
+                    </a>
+                  )}
                 </Button>
               ) : (
                 <Button size="lg" disabled className="bg-amber-100 font-semibold text-amber-700">
@@ -505,6 +524,7 @@ export function DocumentDetail({
           category={category}
           downloadUrl={downloadUrl}
           downloadLabel={downloadLabel}
+          viewerHref={viewerActive ? viewerHref : null}
           linkRows={linkRows}
           publishedAt={publishedAt}
           sections={sections.map((s) => ({ id: s.id, label: s.label }))}
@@ -565,9 +585,15 @@ export function DocumentDetail({
           </div>
           {downloadUrl ? (
             <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-              <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
-              </a>
+              {viewerActive ? (
+                <Link href={viewerHref as string}>
+                  <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
+                </Link>
+              ) : (
+                <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                  <FileText className="mr-1.5 h-4 w-4" /> {downloadLabel}
+                </a>
+              )}
             </Button>
           ) : null}
         </div>

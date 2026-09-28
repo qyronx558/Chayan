@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import Link from "next/link"
 import {
   FileText,
   ShieldCheck,
@@ -34,6 +35,8 @@ interface Props {
   category?: string | null
   downloadUrl?: string | null
   downloadLabel: string
+  /** Fullscreen viewer route. When set, the download button opens it. */
+  viewerHref?: string | null
   linkRows?: RelatedLink[]
   publishedAt?: string | null
   sections: RailSection[]
@@ -75,9 +78,15 @@ export function DocumentSideRail(p: Props) {
         <CardContent className="space-y-2.5">
           {p.downloadUrl ? (
             <Button className="w-full bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white hover:opacity-90" size="lg" asChild>
-              <a href={p.downloadUrl} target="_blank" rel="noopener noreferrer">
-                <FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}
-              </a>
+              {p.viewerHref ? (
+                <Link href={p.viewerHref}>
+                  <FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}
+                </Link>
+              ) : (
+                <a href={p.downloadUrl} target="_blank" rel="noopener noreferrer">
+                  <FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}
+                </a>
+              )}
             </Button>
           ) : (
             <Button className="w-full" size="lg" disabled>

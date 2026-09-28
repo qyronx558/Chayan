@@ -79,6 +79,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
         linkRows={answerKey.job ? [{ label: "Related Job", value: answerKey.job.title, href: `/jobs/${answerKey.job.slug}` }] : []}
         downloadUrl={answerKey.pdfUrl}
         downloadLabel="Download Answer Key PDF"
+        viewerHref={`/answer-key/${answerKey.slug}/view`}
         followJob={answerKey.job ? { jobId: answerKey.job.id } : null}
         publishedAt={answerKey.createdAt.toISOString()}
         relatedTitle="Related Answer Keys"

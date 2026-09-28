@@ -80,6 +80,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
         linkRows={admitCard.job ? [{ label: "Related Job", value: admitCard.job.title, href: `/jobs/${admitCard.job.slug}` }] : []}
         downloadUrl={admitCard.downloadUrl}
         downloadLabel="Download Admit Card"
+        viewerHref={`/admit-card/${admitCard.slug}/view`}
         countdownDate={admitCard.examDate ? admitCard.examDate.toISOString() : null}
         countdownLabel="Exam Date"
         bookmarkId={{ type: "admit-card", id: admitCard.id }}

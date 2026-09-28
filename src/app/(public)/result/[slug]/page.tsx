@@ -91,6 +91,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
         linkRows={result.job ? [{ label: "Related Job", value: result.job.title, href: `/jobs/${result.job.slug}` }] : []}
         downloadUrl={result.pdfUrl}
         downloadLabel="Download Result PDF"
+        viewerHref={`/result/${result.slug}/view`}
         bookmarkId={{ type: "result", id: result.id }}
         followJob={result.job ? { jobId: result.job.id } : null}
         primaryDate={result.resultDate ? result.resultDate.toISOString() : null}

@@ -7,6 +7,7 @@ interface ApplicationFallbackProps {
   hostname: string
   officialUrl: string
   sourceLabel: string
+  headline?: string
   onReload: () => void
   onReport: () => void
   onOpenOfficial: () => void
@@ -22,6 +23,7 @@ export function ApplicationFallback({
   hostname,
   officialUrl,
   sourceLabel,
+  headline = "Official application website",
   onReload,
   onReport,
   onOpenOfficial,
@@ -34,7 +36,7 @@ export function ApplicationFallback({
         </div>
 
         <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
-          Official application website
+          {headline}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
           This website doesn&apos;t allow embedded viewing. For security, continue directly on the

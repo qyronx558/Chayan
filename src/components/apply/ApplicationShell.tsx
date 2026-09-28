@@ -11,6 +11,7 @@ import { ApplicationInfoDrawer } from "@/components/apply/ApplicationInfoDrawer"
 import { ApplicationFallback } from "@/components/apply/ApplicationFallback"
 import { ApplicationMobileMenu } from "@/components/apply/ApplicationMobileMenu"
 import type { ApplicationShellProps } from "@/components/apply/application-types"
+import { isDocumentApplication } from "@/components/apply/application-types"
 import { trackApplyEvent } from "@/lib/apply-analytics"
 
 type FrameStatus = "checking" | "allowed" | "blocked" | "unknown"
@@ -192,7 +193,17 @@ export function ApplicationShell(props: ApplicationShellProps) {
   }, [title, organization])
 
   const blocked = frameStatus === "blocked" || loadError
-  const ctaSublabel = type === "government" ? "Official Website" : "Official Application"
+  const isDocument = isDocumentApplication(type)
+  const ctaSublabel = isDocument
+    ? "Official Document"
+    : type === "government"
+      ? "Official Website"
+      : "Official Application"
+  const noticeText = isDocument
+    ? "You are opening the official document in fullscreen."
+    : type === "government"
+      ? "You are opening the official application website."
+      : "You'll complete your application on the company's official careers website."
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
@@ -241,6 +252,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
               hostname={hostname}
               officialUrl={officialUrl}
               sourceLabel={sourceLabel}
+              headline={isDocument ? "Official document" : undefined}
               onReload={reload}
               onReport={reportIssue}
               onOpenOfficial={handleApply}
@@ -295,9 +307,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
                       aria-hidden="true"
                     />
                     <p className="flex-1 leading-relaxed">
-                      {type === "government"
-                        ? "You are opening the official application website."
-                        : "You'll complete your application on the company's official careers website."}
+                      {noticeText}
                     </p>
                     <button
                       type="button"
@@ -321,6 +331,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
             officialUrl={officialUrl}
             hostname={hostname}
             sublabel={ctaSublabel}
+            title={isDocument ? "Open Document" : undefined}
             onApply={handleApply}
           />
         </div>
@@ -332,6 +343,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
         officialUrl={officialUrl}
         hostname={hostname}
         sublabel={ctaSublabel}
+        title={isDocument ? "Open Document" : undefined}
         onApply={handleApply}
       />
 
@@ -348,6 +360,12 @@ export function ApplicationShell(props: ApplicationShellProps) {
         deadlineLabel={deadlineLabel}
         updatedLabel={updatedLabel}
         infoRows={infoRows}
+        ctaLabel={isDocument ? "Open Document" : undefined}
+        aboutCopy={
+          isDocument
+            ? `This document opens from the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobs only opens the verified official file for you.`
+            : undefined
+        }
         onReport={reportIssue}
       />
     </div>

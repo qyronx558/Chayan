@@ -4,7 +4,19 @@
  * private (/private-jobs/[slug]/apply) application routes.
  */
 
-export type ApplicationType = "government" | "private"
+export type ApplicationType =
+  | "government"
+  | "private"
+  | "result"
+  | "admit-card"
+  | "answer-key"
+  | "syllabus"
+  | "admission"
+
+/** True for document-viewer flows (result/admit-card/answer-key/syllabus/admission). */
+export function isDocumentApplication(type: ApplicationType): boolean {
+  return type !== "government" && type !== "private"
+}
 
 export interface ApplicationInfoRow {
   label: string
