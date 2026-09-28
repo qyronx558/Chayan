@@ -149,7 +149,18 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    await prisma.job.delete({ where: { id } })
+    // Clear dependents first: Job has no onDelete cascade, so linked
+    // views/bookmarks and optional job links would otherwise block the
+    // delete with a foreign-key violation.
+    await prisma.$transaction([
+      prisma.jobView.deleteMany({ where: { jobId: id } }),
+      prisma.bookmark.deleteMany({ where: { jobId: id } }),
+      prisma.result.updateMany({ where: { jobId: id }, data: { jobId: null } }),
+      prisma.admitCard.updateMany({ where: { jobId: id }, data: { jobId: null } }),
+      prisma.answerKey.updateMany({ where: { jobId: id }, data: { jobId: null } }),
+      prisma.syllabus.updateMany({ where: { jobId: id }, data: { jobId: null } }),
+      prisma.job.delete({ where: { id } }),
+    ])
     revalidatePublicContent("job", existing.slug)
 
     return NextResponse.json({ success: true, data: null })

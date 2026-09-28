@@ -222,10 +222,19 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   }, [closeAllDropdowns])
 
   const editor = useEditor({
+    // Client-only admin editor: explicit false keeps the current safe
+    // behavior (mount in an effect, no SSR/hydration mismatch) and
+    // silences the Next.js immediatelyRender info warning.
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4] },
         codeBlock: { HTMLAttributes: { class: "!bg-muted" } },
+        // StarterKit v3 already bundles these — disable here since we add
+        // our own configured instances below (avoids duplicate-name warns).
+        link: false,
+        underline: false,
+        dropcursor: false,
       }),
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),

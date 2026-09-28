@@ -107,7 +107,11 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    await prisma.syllabus.delete({ where: { id } })
+    // Bookmarks reference syllabus rows with no onDelete cascade — clear them first.
+    await prisma.$transaction([
+      prisma.bookmark.deleteMany({ where: { syllabusId: id } }),
+      prisma.syllabus.delete({ where: { id } }),
+    ])
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

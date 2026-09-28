@@ -10,8 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Menu, LogOut, User } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Menu, LogOut, User, ExternalLink } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 interface AdminHeaderProps {
   onMenuClick: () => void
@@ -19,14 +21,27 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const { data: session } = useSession()
+  const pathname = usePathname()
+  const crumb = (pathname || "/admin").split("/").filter(Boolean).slice(1).join(" / ") || "dashboard"
 
   return (
-    <header className="sticky top-[env(safe-area-inset-top)] z-30 flex h-16 items-center gap-4 border-b border-gray-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/90 px-4 backdrop-blur lg:px-6 dark:border-gray-800 dark:bg-gray-900/90">
       <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
         <Menu className="h-5 w-5" />
       </Button>
 
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">{crumb.replaceAll("-", " ")}</p>
+        <p className="hidden text-xs text-gray-400 sm:block">Manage content - plain text or styled HTML, previewed exactly as readers see it</p>
+      </div>
+
       <div className="flex-1" />
+
+      <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
+        <Link href="/" target="_blank" rel="noopener noreferrer">
+          <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> View site
+        </Link>
+      </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -38,8 +53,15 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
               </AvatarFallback>
             </Avatar>
             <div className="hidden text-left sm:block">
-              <p className="text-sm font-medium">{session?.user?.name || "Admin"}</p>
-              <p className="text-xs text-gray-500">{session?.user?.email}</p>
+              <div className="flex items-center gap-1.5 text-sm font-medium">
+                {session?.user?.name || "Admin"}
+                {session?.user?.role && (
+                  <Badge variant="secondary" className="h-5 px-1.5 text-[10px] uppercase tracking-wide">
+                    {session.user.role}
+                  </Badge>
+                )}
+              </div>
+              <div className="text-xs text-gray-500">{session?.user?.email}</div>
             </div>
           </Button>
         </DropdownMenuTrigger>

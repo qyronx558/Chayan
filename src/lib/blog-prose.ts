@@ -113,8 +113,10 @@ export const extractFaq = (html: string | null | undefined, max = 4): FaqItem[] 
 
 export const prepareArticleHtml = (html: string | null | undefined): string => {
   if (!html) return ""
-  const sanitized = sanitizeHtmlDocument(renderRichHtml(html))
-  return addHeadingIds(sanitized)
+  // renderRichHtml already drops doctype/html/head/body/title and scopes
+  // custom <style> CSS to .rich-content — keep it so the article matches
+  // the admin preview exactly (sanitizeHtmlDocument would strip styles).
+  return addHeadingIds(renderRichHtml(html))
 }
 
 export const BLOG_PROSE_CLASSES = [

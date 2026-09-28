@@ -48,8 +48,8 @@ async function request<T>(
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "An error occurred" }))
-    throw new ApiError(error.message || "An error occurred", response.status)
+    const error = await response.json().catch(() => ({ error: "An error occurred" }))
+    throw new ApiError(error.error || error.message || "An error occurred", response.status)
   }
 
   return response.json() as Promise<T>
