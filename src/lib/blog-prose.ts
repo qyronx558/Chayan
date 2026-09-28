@@ -114,7 +114,7 @@ export const extractFaq = (html: string | null | undefined, max = 4): FaqItem[] 
 export const prepareArticleHtml = (html: string | null | undefined): string => {
   if (!html) return ""
   // renderRichHtml already drops doctype/html/head/body/title and scopes
-  // custom <style> CSS to .rich-content — keep it so the article matches
+  // custom <style> CSS to .rich-content - keep it so the article matches
   // the admin preview exactly (sanitizeHtmlDocument would strip styles).
   return addHeadingIds(renderRichHtml(html))
 }

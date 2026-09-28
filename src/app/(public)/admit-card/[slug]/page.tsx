@@ -56,7 +56,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
       <BreadcrumbNav
         segments={[
@@ -84,6 +84,10 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
         countdownLabel="Exam Date"
         bookmarkId={{ type: "admit-card", id: admitCard.id }}
         followJob={admitCard.job ? { jobId: admitCard.job.id } : null}
+        primaryDate={admitCard.examDate ? admitCard.examDate.toISOString() : null}
+        primaryDateLabel="Exam date"
+        primaryDateMode="countdown"
+        publishedAt={admitCard.createdAt.toISOString()}
         relatedTitle="Related Admit Cards"
         relatedItems={relatedCards.map((rc) => ({
           href: `/admit-card/${rc.slug}`,

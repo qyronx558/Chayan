@@ -65,7 +65,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
@@ -93,6 +93,10 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
         downloadLabel="Download Result PDF"
         bookmarkId={{ type: "result", id: result.id }}
         followJob={result.job ? { jobId: result.job.id } : null}
+        primaryDate={result.resultDate ? result.resultDate.toISOString() : null}
+        primaryDateLabel="Result declared"
+        primaryDateMode="since"
+        publishedAt={result.createdAt.toISOString()}
         relatedTitle="Related Results"
         relatedItems={relatedResults.map((rr) => ({
           href: `/result/${rr.slug}`,

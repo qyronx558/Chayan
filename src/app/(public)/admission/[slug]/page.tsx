@@ -56,7 +56,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
       <BreadcrumbNav
         segments={[
@@ -84,6 +84,11 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
         countdownDate={admission.lastDate ? admission.lastDate.toISOString() : null}
         countdownLabel="Last Date to Apply"
         application={{ type: "admission", id: admission.id }}
+        primaryDate={admission.lastDate ? admission.lastDate.toISOString() : null}
+        primaryDateLabel="Last date to apply"
+        primaryDateMode="countdown"
+        windowStart={admission.startDate ? admission.startDate.toISOString() : null}
+        publishedAt={admission.createdAt.toISOString()}
         relatedTitle="Related Admissions"
         relatedItems={relatedAdmissions.map((ra) => ({
           href: `/admission/${ra.slug}`,

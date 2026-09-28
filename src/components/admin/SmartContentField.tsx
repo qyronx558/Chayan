@@ -30,7 +30,7 @@ export function SmartContentField({
   value,
   onChange,
   placeholder = "Write plain text, or switch to HTML/CSS to paste styled content...",
-  htmlPlaceholder = "Paste HTML here — <style> blocks, tables, section-blocks are supported and will be scoped on preview...",
+  htmlPlaceholder = "Paste HTML here - <style> blocks, tables, section-blocks are supported and will be scoped on preview...",
   rows = 8,
 }: SmartContentFieldProps) {
   const text = value ?? ""
@@ -77,7 +77,7 @@ export function SmartContentField({
             <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs leading-relaxed text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
               This content contains custom <code>&lt;style&gt;</code> CSS, shown styled in Preview and on the public
               page. Viewing it here is safe, but <strong>typing any edit in Visual will re-save without the custom
-              styles</strong> — keep style changes in the HTML / CSS tab.
+              styles</strong> - keep style changes in the HTML / CSS tab.
             </div>
           )}
           <div className="[&_>div]:!rounded-none [&_>div]:!border-0">

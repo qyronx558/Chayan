@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { formatDate, getBaseUrl } from "@/lib/utils"
+import { getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
@@ -56,7 +56,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
       <BreadcrumbNav
         segments={[
@@ -80,6 +80,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
         downloadUrl={answerKey.pdfUrl}
         downloadLabel="Download Answer Key PDF"
         followJob={answerKey.job ? { jobId: answerKey.job.id } : null}
+        publishedAt={answerKey.createdAt.toISOString()}
         relatedTitle="Related Answer Keys"
         relatedItems={relatedKeys.map((rk) => ({
           href: `/answer-key/${rk.slug}`,

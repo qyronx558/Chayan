@@ -9,9 +9,11 @@ import {
   CornerDownRight,
   Flag,
   MessageSquare,
+  Minus,
   MoreHorizontal,
   Pencil,
   Pin,
+  Plus,
   ShieldCheck,
   Trash2,
 } from "lucide-react"
@@ -45,7 +47,7 @@ function TimeAgo({ date }: { date: string | Date }) {
     return () => clearInterval(interval)
   }, [date])
 
-  return <span className="text-xs text-gray-400">{timeAgo}</span>
+  return <span className="text-[11px] text-gray-400 dark:text-gray-500">{timeAgo}</span>
 }
 
 interface CommentItemProps {
@@ -66,6 +68,11 @@ interface CommentItemProps {
   onLoadReplies: (parentId: string, cursor?: string) => Promise<{ comments: CommentDTO[]; nextCursor: string | null }>
 }
 
+/**
+ * Reddit-style comment row: slim vote rail on the left, single meta
+ * line (avatar + user + time), collapsible body, thread line for
+ * nested replies. All data handling unchanged - presentation only.
+ */
 export function CommentItem({
   comment,
   depth = 0,
@@ -91,6 +98,7 @@ export function CommentItem({
   const [editing, setEditing] = useState(false)
   const [editText, setEditText] = useState(comment.content)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
 
   const withinEditWindow = comment.canEdit ?? false
   const isNested = depth > 0
@@ -116,304 +124,300 @@ export function CommentItem({
   }
 
   const showThreadControls = !locked && currentUserId && comment.status === "APPROVED"
+  const childCount = Math.max(comment.replyCount, replyList.length)
 
   return (
     <div
       className={cn(
-        "group",
-        isNested && "pl-4 border-l-2 border-gray-100 dark:border-gray-700",
+        "py-2",
+        isNested && "ml-1 border-l-2 border-gray-100 pl-2 hover:border-gray-200 dark:border-gray-800 dark:hover:border-gray-700",
         depth > MAX_INDENT_LEVEL && "max-w-[calc(100%-1.5rem)]"
       )}
       style={depth > MAX_INDENT_LEVEL ? { marginLeft: `${MAX_INDENT_LEVEL * 1.5}rem` } : undefined}
     >
-      <div className="relative flex gap-3">
-        {/* Depth indicator line for nested replies */}
-        {isNested && (
-          <div className="absolute left-[-6px] top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-700 rounded-full" />
-        )}
-
-        {/* Avatar column - fixed width for alignment */}
-        <div className="flex shrink-0 w-10">
-          <div
+      <div className="flex gap-1.5">
+        {/* ── Vote rail ── */}
+        <div className="flex w-6 shrink-0 flex-col items-center pt-0.5">
+          <button
+            type="button"
+            onClick={() => onUpvote(comment.id)}
+            disabled={!currentUserId}
+            aria-label="Upvote"
             className={cn(
-              "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-semibold select-none",
-              comment.isOfficial
-                ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs shadow-sm shadow-blue-500/30"
-                : isNested
-                  ? "bg-gray-100 dark:bg-gray-800 text-[10px] text-gray-600 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700"
-                  : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 text-xs text-gray-700 dark:text-gray-300 ring-1 ring-gray-200 dark:ring-gray-700"
+              "rounded p-0.5 transition-colors",
+              currentUserId
+                ? comment.hasUpvoted
+                  ? "text-orange-600 dark:text-orange-400"
+                  : "text-gray-400 hover:bg-gray-100 hover:text-orange-600 dark:text-gray-500 dark:hover:bg-gray-800"
+                : "cursor-not-allowed opacity-50"
             )}
           >
-            {comment.isOfficial ? (
-              <ShieldCheck className="h-4 w-4 mx-auto" />
-            ) : (
-              <span className="mx-auto leading-none">{initials(comment.user.name)}</span>
-            )}
-          </div>
+            <ArrowBigUp className={cn("h-4 w-4", comment.hasUpvoted && "fill-current")} />
+          </button>
+          <span className={cn(
+            "text-[11px] font-bold tabular-nums",
+            comment.hasUpvoted ? "text-orange-600 dark:text-orange-400" : "text-gray-500 dark:text-gray-400"
+          )}>
+            {comment.upvoteCount > 0 ? comment.upvoteCount : "•"}
+          </span>
         </div>
 
-        {/* Comment content - flexible width */}
+        {/* ── Content ── */}
         <div className="min-w-0 flex-1">
-          <div
-            className={cn(
-              "relative rounded-xl p-3 transition-all duration-200",
-              comment.isOfficial
-                ? "bg-blue-50/80 dark:bg-blue-900/30 border border-blue-200/50 dark:border-blue-800/50"
-                : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
+          {/* Meta line */}
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            <button
+              type="button"
+              onClick={() => setCollapsed((v) => !v)}
+              aria-label={collapsed ? "Expand comment" : "Collapse comment"}
+              className="rounded p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+            >
+              {collapsed ? <Plus className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+            </button>
+            <span
+              className={cn(
+                "flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold select-none",
+                comment.isOfficial
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+              )}
+            >
+              {comment.isOfficial ? <ShieldCheck className="h-3 w-3" /> : initials(comment.user.name)}
+            </span>
+            <span className="text-xs font-medium text-gray-800 dark:text-gray-200">{comment.user.name}</span>
+
+            {!comment.isOfficial && comment.user.helpfulCount >= REPUTATION_THRESHOLD && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-px text-[10px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-800">
+                <BadgeCheck className="h-2.5 w-2.5" />
+                {Math.floor(comment.user.helpfulCount / REPUTATION_THRESHOLD) * REPUTATION_THRESHOLD}+ helpful
+              </span>
             )}
-          >
-            {/* Official badge */}
+
             {comment.isOfficial && (
-              <div className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white">
-                <ShieldCheck className="h-3 w-3" />
+              <span className="rounded-full bg-blue-600 px-1.5 py-px text-[10px] font-medium text-white">
                 Chayan team
-              </div>
+              </span>
             )}
 
-            {/* Header row */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-              <span className="font-medium text-gray-900 dark:text-gray-100">{comment.user.name}</span>
-
-              {!comment.isOfficial && comment.user.helpfulCount >= REPUTATION_THRESHOLD && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50/80 dark:bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
-                  <BadgeCheck className="h-3 w-3" />
-                  {Math.floor(comment.user.helpfulCount / REPUTATION_THRESHOLD) * REPUTATION_THRESHOLD}+ helpful
-                </span>
-              )}
-
-              {comment.isBestAnswer && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50/80 dark:bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
-                  <CheckCircle2 className="h-3 w-3" /> Best answer
-                </span>
-              )}
-
-              {comment.kind === "QUESTION" && depth === 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50/80 dark:bg-amber-900/30 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/50 dark:ring-amber-800/50">
-                  Question
-                </span>
-              )}
-
-              <TimeAgo date={comment.createdAt} />
-              {comment.editedAt && (
-                <span className="text-xs italic text-gray-400 dark:text-gray-500">(edited)</span>
-              )}
-            </div>
-
-            {/* Body */}
-            {editing ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  rows={3}
-                  className="text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                />
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      onEdit(comment.id, editText.trim())
-                      setEditing(false)
-                    }}
-                  >
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                {comment.content.split(/(@[\w\s.-]{2,40}?)(?=\s|$)/g).map((part, i) =>
-                  part.startsWith("@") ? (
-                    <span key={i} className="font-medium text-blue-600 dark:text-blue-400">
-                      {part}
-                    </span>
-                  ) : (
-                    part
-                  )
-                )}
-              </p>
+            {comment.isBestAnswer && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-px text-[10px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-800">
+                <CheckCircle2 className="h-2.5 w-2.5" /> Best answer
+              </span>
             )}
 
-            {/* Image attachment */}
-            {comment.imageUrl && (
-              <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block">
-                <img
-                  src={comment.imageUrl}
-                  alt="Attachment"
-                  className="max-h-48 max-w-xs cursor-zoom-in rounded-lg border border-gray-200 dark:border-gray-700 object-cover shadow-sm"
-                />
-              </a>
+            {comment.kind === "QUESTION" && depth === 0 && (
+              <span className="rounded-full bg-amber-50 px-1.5 py-px text-[10px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:ring-amber-800">
+                Question
+              </span>
             )}
 
-            {/* Pending review notice */}
-            {comment.status === "PENDING_REVIEW" && (
-              <div className="mt-2 rounded-lg bg-amber-50/80 dark:bg-amber-900/30 border border-amber-200/50 dark:border-amber-800/50 px-3 py-2">
-                <p className="text-xs text-amber-700 dark:text-amber-400">
-                  This comment is held for moderation review{comment.flaggedReasons.length > 0 ? ` (${comment.flaggedReasons.join(", ").replace(/_/g, " ")})` : ""}.
-                </p>
-              </div>
+            <TimeAgo date={comment.createdAt} />
+            {comment.editedAt && (
+              <span className="text-[11px] italic text-gray-400">(edited)</span>
+            )}
+            {collapsed && childCount > 0 && (
+              <span className="text-[11px] text-gray-400">({childCount} {childCount === 1 ? "reply" : "replies"})</span>
             )}
           </div>
 
-          {/* Action row */}
-          {comment.status === "APPROVED" && !editing && (
-            <div className="mt-2 flex flex-wrap items-center gap-1">
-              {/* Upvote */}
-              <button
-                type="button"
-                onClick={() => onUpvote(comment.id)}
-                disabled={!currentUserId}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200",
-                  currentUserId
-                    ? comment.hasUpvoted
-                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800/50"
-                      : "bg-gray-50 dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
-                    : "opacity-50 cursor-not-allowed"
+          {!collapsed && (
+            <>
+              {/* Body */}
+              <div className={cn(
+                "mt-1 rounded-lg px-2.5 py-1.5",
+                comment.isOfficial && "border border-blue-200/60 bg-blue-50/60 dark:border-blue-800/60 dark:bg-blue-900/20"
+              )}>
+                {editing ? (
+                  <div className="space-y-1.5 py-1">
+                    <Textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      rows={2}
+                      className="bg-white text-[13px] dark:bg-gray-800"
+                    />
+                    <div className="flex justify-end gap-1.5">
+                      <Button
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          onEdit(comment.id, editText.trim())
+                          setEditing(false)
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditing(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="whitespace-pre-wrap break-words text-[13px] leading-relaxed text-gray-700 dark:text-gray-300">
+                    {comment.content.split(/(@[\w\s.-]{2,40}?)(?=\s|$)/g).map((part, i) =>
+                      part.startsWith("@") ? (
+                        <span key={i} className="font-medium text-blue-600 dark:text-blue-400">
+                          {part}
+                        </span>
+                      ) : (
+                        part
+                      )
+                    )}
+                  </p>
                 )}
-              >
-                <ArrowBigUp className={cn("h-4 w-4", comment.hasUpvoted ? "fill-current" : "")} />
-                {comment.upvoteCount > 0 ? comment.upvoteCount : "Helpful"}
-              </button>
 
-              {/* Reply button */}
-              {showThreadControls && (
-                <button
-                  type="button"
-                  onClick={() => setReplyOpen((v) => !v)}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  Reply
-                </button>
-              )}
+                {comment.imageUrl && (
+                  <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={comment.imageUrl}
+                      alt="Attachment"
+                      className="max-h-36 max-w-[240px] cursor-zoom-in rounded-md border border-gray-200 object-cover dark:border-gray-700"
+                    />
+                  </a>
+                )}
 
-              {/* Best answer */}
-              {canMarkBestAnswer && comment.parentId && (
-                <button
-                  type="button"
-                  onClick={() => onBestAnswer(comment.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200",
-                    comment.isBestAnswer
-                      ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-200/50 dark:ring-emerald-800/50"
-                      : "bg-gray-50 dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
+                {comment.status === "PENDING_REVIEW" && (
+                  <p className="mt-1.5 rounded-md border border-amber-200/60 bg-amber-50 px-2 py-1 text-[11px] text-amber-700 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-400">
+                    Held for moderation review{comment.flaggedReasons.length > 0 ? ` (${comment.flaggedReasons.join(", ").replace(/_/g, " ")})` : ""}.
+                  </p>
+                )}
+              </div>
+
+              {/* Action row */}
+              {comment.status === "APPROVED" && !editing && (
+                <div className="mt-0.5 flex flex-wrap items-center">
+                  {showThreadControls && (
+                    <button
+                      type="button"
+                      onClick={() => setReplyOpen((v) => !v)}
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-semibold text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                    >
+                      <MessageSquare className="h-3 w-3" />
+                      Reply
+                    </button>
                   )}
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  {comment.isBestAnswer ? "Unmark" : "Best answer"}
-                </button>
-              )}
 
-              {/* More menu */}
-              {(withinEditWindow || isAdmin) && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
-                    className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    aria-label="More actions"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                  {menuOpen && (
-                    <div className="absolute right-0 top-full z-10 mt-1.5 w-40 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-200/50 dark:ring-gray-700/50">
-                      {withinEditWindow && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMenuOpen(false)
-                            setEditText(comment.content)
-                            setEditing(true)
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          <Pencil className="h-4 w-4" /> Edit
-                          <span className="ml-auto text-xs text-gray-400">15 min</span>
-                        </button>
+                  {canMarkBestAnswer && comment.parentId && (
+                    <button
+                      type="button"
+                      onClick={() => onBestAnswer(comment.id)}
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-semibold transition-colors",
+                        comment.isBestAnswer
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800"
                       )}
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      {comment.isBestAnswer ? "Unmark" : "Best answer"}
+                    </button>
+                  )}
+
+                  {(withinEditWindow || isAdmin) && (
+                    <div className="relative">
                       <button
                         type="button"
-                        onClick={() => {
-                          setMenuOpen(false)
-                          if (confirm("Delete this comment?")) onDelete(comment.id)
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => setMenuOpen((v) => !v)}
+                        className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+                        aria-label="More actions"
                       >
-                        <Trash2 className="h-4 w-4" /> Delete
+                        <MoreHorizontal className="h-3.5 w-3.5" />
                       </button>
+                      {menuOpen && (
+                        <div className="absolute left-0 top-full z-10 mt-1 w-36 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                          {withinEditWindow && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMenuOpen(false)
+                                setEditText(comment.content)
+                                setEditing(true)
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                            >
+                              <Pencil className="h-3.5 w-3.5" /> Edit
+                              <span className="ml-auto text-[10px] text-gray-400">15 min</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMenuOpen(false)
+                              if (confirm("Delete this comment?")) onDelete(comment.id)
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
+                  )}
+
+                  {!comment.isOwn && currentUserId && (
+                    <button
+                      type="button"
+                      onClick={() => onReport(comment.id)}
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    >
+                      <Flag className="h-3 w-3" />
+                      Report
+                    </button>
+                  )}
+
+                  {isAdmin && depth === 0 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        fetch("/api/admin/discussion", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(
+                            comment.isPinned
+                              ? { action: "unpin", commentId: comment.id }
+                              : { action: "pin", commentId: comment.id, postType, postId },
+                          ),
+                        }).then(() => toast(comment.isPinned ? "Comment unpinned" : "Comment pinned", "success"))
+                      }
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                    >
+                      <Pin className="h-3 w-3" />
+                      {comment.isPinned ? "Unpin" : "Pin"}
+                    </button>
                   )}
                 </div>
               )}
 
-              {/* Report */}
-              {!comment.isOwn && currentUserId && (
-                <button
-                  type="button"
-                  onClick={() => onReport(comment.id)}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  <Flag className="h-3.5 w-3.5" />
-                  Report
-                </button>
+              {/* Reply composer */}
+              {replyOpen && currentUserId && (
+                <div className="mt-1.5 flex gap-1.5">
+                  <div className="relative flex-1">
+                    <Textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder={`Reply to ${comment.user.name}…`}
+                      rows={2}
+                      className="bg-white pr-16 text-[13px] dark:bg-gray-800"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={submitReply}
+                      disabled={!replyText.trim()}
+                      className="absolute bottom-1 right-1 h-7 px-3 text-xs"
+                    >
+                      Reply
+                    </Button>
+                  </div>
+                </div>
               )}
-
-              {/* Admin pin */}
-              {isAdmin && depth === 0 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    fetch("/api/admin/discussion", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(
-                        comment.isPinned
-                          ? { action: "unpin", commentId: comment.id }
-                          : { action: "pin", commentId: comment.id, postType, postId },
-                      ),
-                    }).then(() => toast(comment.isPinned ? "Comment unpinned" : "Comment pinned", "success"))
-                  }
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                >
-                  <Pin className="h-3.5 w-3.5" />
-                  {comment.isPinned ? "Unpin" : "Pin"}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Reply composer */}
-          {replyOpen && currentUserId && (
-            <div className="mt-3 flex gap-2">
-              <div className="flex-1 relative">
-                <Textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`Reply to ${comment.user.name}… use @name to mention`}
-                  rows={2}
-                  className="pr-20 text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500/20"
-                />
-                <Button
-                  size="sm"
-                  onClick={submitReply}
-                  disabled={!replyText.trim()}
-                  className="absolute right-1 bottom-1 h-8 px-3"
-                >
-                  Send
-                </Button>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
 
       {/* Nested replies */}
-      {replyList.length > 0 && (
-        <div className="mt-3 space-y-3">
+      {!collapsed && replyList.length > 0 && (
+        <div className="mt-0.5">
           {replyList.map((r) => (
             <CommentItem
               key={r.id}
@@ -437,22 +441,21 @@ export function CommentItem({
         </div>
       )}
 
-      {/* Load more replies button */}
-      {hasMoreReplies && (
+      {/* Load more replies */}
+      {!collapsed && hasMoreReplies && (
         <button
           type="button"
           onClick={loadMoreReplies}
           disabled={loadingReplies}
-          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50"
+          className="ml-8 mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline disabled:opacity-50 dark:text-blue-400"
         >
-          <CornerDownRight className="h-3.5 w-3.5" />
+          <CornerDownRight className="h-3 w-3" />
           {loadingReplies ? "Loading…" : `View ${Math.min(REPLIES_PAGE_SIZE, comment.replyCount - replyList.length)} more ${comment.replyCount - replyList.length === 1 ? "reply" : "replies"}`}
         </button>
       )}
 
-      {/* Hidden count */}
-      {!hasMoreReplies && replyList.length > 0 && comment.replyCount > replyList.length && (
-        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+      {!collapsed && !hasMoreReplies && replyList.length > 0 && comment.replyCount > replyList.length && (
+        <p className="ml-8 mt-1 text-[11px] text-gray-400">
           {comment.replyCount - replyList.length} more {comment.replyCount - replyList.length === 1 ? "reply" : "replies"} hidden
         </p>
       )}

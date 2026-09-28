@@ -1,14 +1,14 @@
 "use client"
 
 import {
-  FileText, ExternalLink, Check, Copy, Printer,
+  FileText, ExternalLink, Printer,
   Calendar, CalendarClock, CalendarPlus, Users, IndianRupee, MapPin,
   GraduationCap, Briefcase, Wallet, Hash, AlarmClock, ShieldCheck,
-  ListChecks, ClipboardList, UserRound, Clock,
+  ListChecks, ClipboardList, UserRound, Clock, BadgeCheck, Eye,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { formatDate, cn } from "@/lib/utils"
+import { formatDate, formatCompact, cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,8 +17,14 @@ import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { AshokaChakra } from "@/components/layout/AshokaChakra"
 import { JobQuickSummary } from "@/components/jobs/JobQuickSummary"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
+import { JobInsightDashboard } from "@/components/jobs/JobInsightDashboard"
+import { JobTimeline } from "@/components/jobs/JobTimeline"
+import { JobDocumentsChecklist } from "@/components/jobs/JobDocumentsChecklist"
+import { JobSelectionStepper } from "@/components/jobs/JobSelectionStepper"
+import { JobApplyRail } from "@/components/jobs/JobApplyRail"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
+import { feeKpi, stepify, windowProgress } from "@/lib/job-insights"
 
 interface JobDetailContentProps {
   jobId: string
@@ -44,6 +50,8 @@ interface JobDetailContentProps {
   startDate: string | null
   lastDate: string | null
   slug: string
+  updatedAt?: string | null
+  viewsTotal?: number | null
 }
 
 export function JobDetailContent({
@@ -69,37 +77,15 @@ export function JobDetailContent({
   startDate,
   lastDate,
   slug,
+  updatedAt = null,
+  viewsTotal = null,
 }: JobDetailContentProps) {
-  const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(() => Date.now())
-  const [shareUrl, setShareUrl] = useState("")
-  const [whatsappUrl, setWhatsappUrl] = useState("")
-  const [twitterUrl, setTwitterUrl] = useState("")
-  const [facebookUrl, setFacebookUrl] = useState("")
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30000)
     return () => clearInterval(timer)
   }, [])
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const url = window.location.href
-      setShareUrl(url)
-      setWhatsappUrl(`https://wa.me/?text=${encodeURIComponent(`${title} - ${url}`)}`)
-      setTwitterUrl(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${title} ${url}`)}`)
-      setFacebookUrl(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`)
-    }
-  }, [title])
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-    }
-  }
 
   const dates: { label: string; date: string }[] = importantDates
     ? Object.entries(importantDates).map(([label, date]) => ({ label, date }))
@@ -112,15 +98,15 @@ export function JobDetailContent({
   const minsLeft = diff !== null ? Math.floor((diff % 3600000) / 60000) : null
   const isUrgent = diff !== null && diff > 0 && diff <= 7 * 86400000
   const isClosed = diff !== null && diff <= 0
+  const canApply = Boolean(applyLink || officialWebsite)
+  const progress = windowProgress(startDate, lastDate, now)
+  const feeShort = feeKpi(applicationFee)
 
-  const stats = [
-    { icon: Users, label: "Total Vacancies", value: totalVacancies ? totalVacancies.toLocaleString("en-IN") : null, highlight: true },
-    { icon: IndianRupee, label: "Salary / Pay Scale", value: salary },
-    { icon: CalendarClock, label: "Last Date", value: lastDate ? formatDate(lastDate) : null, urgent: isUrgent || undefined },
-    { icon: MapPin, label: "Location", value: location },
-  ].filter((s) => s.value)
-
-  const stepify = (text: string): string[] => text.split("\n").map((s) => s.trim()).filter(Boolean)
+  const heroKpis = [
+    totalVacancies ? { icon: Users, label: "Vacancies", value: totalVacancies.toLocaleString("en-IN") } : null,
+    lastDate ? { icon: CalendarClock, label: "Last date", value: formatDate(lastDate), urgent: isUrgent } : null,
+    feeShort ? { icon: Wallet, label: "Fee", value: feeShort } : null,
+  ].filter((k): k is NonNullable<typeof k> => k !== null)
 
   const details: { icon: typeof Hash; label: string; value: string | null }[] = [
     { icon: Hash, label: "Advertisement No", value: advertisementNo },
@@ -152,9 +138,11 @@ export function JobDetailContent({
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
+  const howSteps = stepify(howToApply)
+
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
-      {/* ── Header / Hero - Tricolour ─────────────────── */}
+      {/* ── Header / Hero - Tricolour + KPI strip ─────── */}
       <header className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50 via-white to-green-50 shadow-lg dark:border-gray-700 dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]">
         <div
           aria-hidden="true"
@@ -178,6 +166,9 @@ export function JobDetailContent({
             {advertisementNo && (
               <Badge className="border border-gray-200 bg-white/80 text-gray-700 shadow-sm backdrop-blur dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">Advt No: {advertisementNo}</Badge>
             )}
+            <Badge className="border border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200">
+              <BadgeCheck className="mr-1 h-3.5 w-3.5" /> Verified
+            </Badge>
             {isUrgent && (
               <Badge className="bg-amber-400 font-bold text-amber-950 shadow-md ring-2 ring-amber-500/50">
                 <AlarmClock className="mr-1 h-3.5 w-3.5" /> Closing Soon
@@ -202,10 +193,16 @@ export function JobDetailContent({
                 <span className="flex items-center gap-1 text-gray-600 dark:text-gray-300"><MapPin className="h-4 w-4" />{location}</span>
               </>
             )}
+            {viewsTotal !== null && viewsTotal > 0 ? (
+              <>
+                <span className="text-orange-500">•</span>
+                <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400"><Eye className="h-4 w-4" />{formatCompact(viewsTotal)} views</span>
+              </>
+            ) : null}
           </p>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {applyLink || officialWebsite ? (
+          <div className="mt-5 flex flex-wrap items-center gap-2 print:hidden">
+            {canApply ? (
               <Button size="sm" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
                 <Link href={`/apply/${slug}/start`}>
                   <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
@@ -218,377 +215,380 @@ export function JobDetailContent({
               <Printer className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* KPI strip - 30-second scan */}
+          {heroKpis.length > 0 ? (
+            <dl className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {heroKpis.map((k) => (
+                <div key={k.label} className={cn(
+                  "flex items-center gap-3 rounded-xl border px-3.5 py-2.5 backdrop-blur",
+                  k.urgent
+                    ? "border-red-300 bg-red-50/90 dark:border-red-800 dark:bg-red-950/60"
+                    : "border-white/60 bg-white/70 dark:border-gray-700 dark:bg-gray-800/80",
+                )}>
+                  <span className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                    k.urgent ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" : "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+                  )}>
+                    <k.icon className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{k.label}</dt>
+                    <dd className={cn("truncate text-sm font-extrabold", k.urgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white")} title={k.value}>{k.value}</dd>
+                  </div>
+                </div>
+              ))}
+            </dl>
+          ) : null}
         </div>
       </header>
 
-      {/* ── 2-min TL;DR summary + viral share ─────── */}
-      <JobQuickSummary
-        title={title}
-        department={department}
-        slug={slug}
+      {/* ── Data-first insight dashboard (graphs + snapshot) ── */}
+      <JobInsightDashboard
         totalVacancies={totalVacancies}
-        lastDate={lastDate}
+        salary={salary}
         applicationFee={applicationFee}
         ageLimit={ageLimit}
         education={education}
+        startDate={startDate}
+        lastDate={lastDate}
       />
 
-      {/* ── Live Countdown / Application Status - always clearly visible ── */}
-      {lastDateMs && !isClosed && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={cn(
-            "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border-2 border-l-8 p-4 shadow-md",
-            isUrgent
-              ? "border-red-300 border-l-red-600 bg-red-50 dark:border-red-800 dark:border-l-red-500 dark:bg-red-950/60"
-              : "border-orange-300 border-l-[#FF9933] bg-gradient-to-r from-orange-50 via-white to-green-50 dark:border-gray-600 dark:from-[#231303] dark:via-gray-900 dark:to-[#071a0e]",
-          )}
-        >
-          <span className={cn(
-            "flex items-center gap-2 text-base font-bold",
-            isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white",
-          )}>
-            <AlarmClock className="h-6 w-6" /> Time Left to Apply
-          </span>
-          <div className="flex items-center gap-2">
-            {[
-              { value: daysLeft, unit: "Days" },
-              { value: hoursLeft, unit: "Hrs" },
-              { value: minsLeft, unit: "Min" },
-            ].map((t) => (
-              <div key={t.unit} className={cn(
-                "rounded-lg px-3.5 py-2 text-center shadow-sm ring-1",
-                isUrgent ? "bg-white ring-red-300 dark:bg-red-900 dark:ring-red-700" : "bg-white ring-orange-200 dark:bg-gray-800 dark:ring-gray-600",
-              )}>
-                <div className={cn("text-xl font-extrabold leading-none tabular-nums", isUrgent ? "text-red-700 dark:text-red-300" : "text-green-800 dark:text-green-300")}>
-                  {t.value !== null ? t.value : 0}
-                </div>
-                <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.unit}</div>
-              </div>
-            ))}
-          </div>
-          <p className="ml-auto text-sm font-medium text-gray-700 dark:text-gray-200">
-            Final date: <span className="font-bold">{formatDate(lastDate!)}</span>
-          </p>
-        </div>
-      )}
-
-      {/* ── Quick Stats ───────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className={cn(
-            "rounded-xl border p-4",
-            s.urgent ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
-          )}>
-            <div className={cn(
-              "mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide",
-              s.urgent ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-gray-400",
-            )}>
-              <s.icon className="h-3.5 w-3.5" /> {s.label}
-            </div>
-            <div className={cn(
-              "text-sm font-bold",
-              s.urgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-gray-100",
-            )}>
-              {s.value}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Quick Navigation ──────────────────────────── */}
-      {sections.length > 1 && (
-        <nav className="flex flex-wrap gap-2">
-          {sections.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => scrollTo(s.id)}
-              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-700 dark:hover:bg-orange-950 dark:hover:text-orange-300"
+      {/* ── 2-column premium layout ── */}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Main column */}
+        <div className="min-w-0 space-y-6">
+          {/* ── Live Countdown ── */}
+          {lastDateMs && !isClosed && (
+            <div
+              role="status"
+              aria-live="polite"
+              className={cn(
+                "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border-2 border-l-8 p-4 shadow-md",
+                isUrgent
+                  ? "border-red-300 border-l-red-600 bg-red-50 dark:border-red-800 dark:border-l-red-500 dark:bg-red-950/60"
+                  : "border-orange-300 border-l-[#FF9933] bg-gradient-to-r from-orange-50 via-white to-green-50 dark:border-gray-600 dark:from-[#231303] dark:via-gray-900 dark:to-[#071a0e]",
+              )}
             >
-              <s.icon className="h-3.5 w-3.5" /> {s.label}
-            </button>
-          ))}
-        </nav>
-      )}
-
-{/* ── Share ─────────────────────────────────────── */}
-      {whatsappUrl && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-gray-500">Share this job:</span>
-          <Button variant="outline" size="sm" onClick={copyLink}>
-            {copied ? <Check className="mr-1 h-4 w-4 text-green-500" /> : <Copy className="mr-1 h-4 w-4" />}
-            {copied ? "Copied!" : "Copy Link"}
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp">
-              <svg className="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            </a>
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-            <a href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="Share on X">
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-            <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
-              <svg className="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </a>
-          </Button>
-        </div>
-      )}
-
-      {/* ── Job Details Table ─────────────────────────── */}
-      {details.length > 0 && (
-        <section id="job-details" className="scroll-mt-24">
-          <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ClipboardList className="h-5 w-5 text-orange-600" /> Vacancy Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableBody>
-                  {details.map((item, i) => (
-                    <TableRow key={item.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
-                      <TableCell className="w-44 sm:w-56 font-medium text-gray-700 dark:text-gray-300">
-                        <span className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4 shrink-0 text-orange-500" /> {item.label}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                          {containsHtml(item.value) ? (
-                            <RichTextView html={item.value} />
-                          ) : (
-                            <span className="whitespace-pre-line">{item.value}</span>
-                          )}
-                        </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      {/* ── Important Dates ───────────────────────────── */}
-      {dates.length > 0 && (
-        <section id="important-dates" className="scroll-mt-24">
-          <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Calendar className="h-5 w-5 text-orange-600" /> Important Dates
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableBody>
-                  {dates.map((d, i) => {
-                    const isKeyDate = /begin|start|last|clos/i.test(d.label)
-                    return (
-                      <TableRow key={d.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
-                        <TableCell className="w-10 text-center">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-950 dark:text-orange-300">
-                            {i + 1}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-medium text-gray-700 dark:text-gray-300">{d.label}</TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant={isKeyDate ? "default" : "outline"} className={cn(!isKeyDate && "bg-white dark:bg-gray-800")}>
-                            {d.date}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      {/* ── Eligibility ───────────────────────────────── */}
-      {(education || ageLimit || experience || selectionProcess) && (
-        <section id="eligibility" className="scroll-mt-24">
-          <Card className="border-gray-200 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5 text-orange-600" /> Eligibility Criteria
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="flex flex-wrap gap-2">
-                {education && !containsHtml(education) && (
-                  <Badge variant="secondary" className="bg-orange-50 text-xs text-orange-700 dark:bg-orange-950 dark:text-orange-300">
-                    <GraduationCap className="mr-1 h-3 w-3" /> {education}
-                  </Badge>
-                )}
-                {ageLimit && (
-                  <Badge variant="secondary" className="bg-green-50 text-xs text-green-700 dark:bg-green-900 dark:text-green-300">
-                    <UserRound className="mr-1 h-3 w-3" /> Age: {ageLimit}
-                  </Badge>
-                )}
-                {experience && (
-                  <Badge variant="secondary" className="bg-purple-50 text-xs text-purple-700 dark:bg-purple-900 dark:text-purple-300">
-                    <Briefcase className="mr-1 h-3 w-3" /> {experience}
-                  </Badge>
-                )}
+              <span className={cn(
+                "flex items-center gap-2 text-base font-bold",
+                isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white",
+              )}>
+                <AlarmClock className="h-6 w-6" /> Time Left to Apply
+              </span>
+              <div className="flex items-center gap-2">
+                {[
+                  { value: daysLeft, unit: "Days" },
+                  { value: hoursLeft, unit: "Hrs" },
+                  { value: minsLeft, unit: "Min" },
+                ].map((t) => (
+                  <div key={t.unit} className={cn(
+                    "rounded-lg px-3.5 py-2 text-center shadow-sm ring-1",
+                    isUrgent ? "bg-white ring-red-300 dark:bg-red-900 dark:ring-red-700" : "bg-white ring-orange-200 dark:bg-gray-800 dark:ring-gray-600",
+                  )}>
+                    <div className={cn("text-xl font-extrabold leading-none tabular-nums", isUrgent ? "text-red-700 dark:text-red-300" : "text-green-800 dark:text-green-300")}>
+                      {t.value !== null ? t.value : 0}
+                    </div>
+                    <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.unit}</div>
+                  </div>
+                ))}
               </div>
-              {education && containsHtml(education) && (
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Education Qualification
-                  </p>
-                  <RichTextView html={education} />
-                </div>
-              )}
-              {ageRelaxation && (
-                <div>
-                  <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Age Relaxation</p>
-                  <RichTextView html={ageRelaxation} className="text-gray-600 dark:text-gray-400" />
-                </div>
-              )}
-              {selectionProcess && (
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Selection Process</p>
-                  {containsHtml(selectionProcess) ? (
-                    <RichTextView html={selectionProcess} className="text-gray-600 dark:text-gray-400" />
-                  ) : stepify(selectionProcess).length > 1 ? (
-                    <ol className="space-y-2">
-                      {stepify(selectionProcess).map((step, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-[11px] font-bold text-white">
-                            {i + 1}
-                          </span>
-                          {step}
-                        </li>
+              <p className="ml-auto text-sm font-medium text-gray-700 dark:text-gray-200">
+                Final date: <span className="font-bold">{formatDate(lastDate!)}</span>
+              </p>
+            </div>
+          )}
+
+          {/* ── Quick Navigation pills ── */}
+          {sections.length > 1 && (
+            <nav aria-label="Job sections" className="flex gap-2 overflow-x-auto pb-1">
+              {sections.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => scrollTo(s.id)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-700 dark:hover:bg-orange-950 dark:hover:text-orange-300"
+                >
+                  <s.icon className="h-3.5 w-3.5" /> {s.label}
+                </button>
+              ))}
+            </nav>
+          )}
+
+          {/* ── 2-min TL;DR summary (share lives here only - deduped) ── */}
+          <JobQuickSummary
+            title={title}
+            department={department}
+            slug={slug}
+            totalVacancies={totalVacancies}
+            lastDate={lastDate}
+            applicationFee={applicationFee}
+            ageLimit={ageLimit}
+            education={education}
+          />
+
+          {/* ── Job Details Table ── */}
+          {details.length > 0 && (
+            <section id="job-details" className="scroll-mt-24">
+              <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <ClipboardList className="h-5 w-5 text-orange-600" /> Vacancy Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableBody>
+                      {details.map((item, i) => (
+                        <TableRow key={item.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
+                          <TableCell className="w-44 font-medium text-gray-700 sm:w-56 dark:text-gray-300">
+                            <span className="flex items-center gap-2">
+                              <item.icon className="h-4 w-4 shrink-0 text-orange-500" /> {item.label}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {containsHtml(item.value) ? (
+                              <RichTextView html={item.value} />
+                            ) : (
+                              <span className="whitespace-pre-line">{item.value}</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </ol>
-                  ) : (
-                    <div className="whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">{selectionProcess}</div>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {/* ── Important Dates: visual timeline + table ── */}
+          {dates.length > 0 && (
+            <section id="important-dates" className="scroll-mt-24">
+              <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Calendar className="h-5 w-5 text-orange-600" /> Important Dates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5 p-4 sm:p-6">
+                  <JobTimeline importantDates={importantDates} startDate={startDate} lastDate={lastDate} />
+                  <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+                    <Table>
+                      <TableBody>
+                        {dates.map((d, i) => {
+                          const isKeyDate = /begin|start|last|clos/i.test(d.label)
+                          return (
+                            <TableRow key={d.label} className={cn(i % 2 === 1 && "bg-gray-50/70 dark:bg-gray-800/40")}>
+                              <TableCell className="w-10 text-center">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                                  {i + 1}
+                                </span>
+                              </TableCell>
+                              <TableCell className="font-medium text-gray-700 dark:text-gray-300">{d.label}</TableCell>
+                              <TableCell className="text-right">
+                                <Badge variant={isKeyDate ? "default" : "outline"} className={cn(!isKeyDate && "bg-white dark:bg-gray-800")}>
+                                  {d.date}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {/* ── Eligibility + visual selection stepper ── */}
+          {(education || ageLimit || experience || selectionProcess) && (
+            <section id="eligibility" className="scroll-mt-24">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <GraduationCap className="h-5 w-5 text-orange-600" /> Eligibility Criteria
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5 p-4 sm:p-6">
+                  <div className="flex flex-wrap gap-2">
+                    {education && !containsHtml(education) && (
+                      <Badge variant="secondary" className="bg-orange-50 text-xs text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+                        <GraduationCap className="mr-1 h-3 w-3" /> {education}
+                      </Badge>
+                    )}
+                    {ageLimit && (
+                      <Badge variant="secondary" className="bg-green-50 text-xs text-green-700 dark:bg-green-900 dark:text-green-300">
+                        <UserRound className="mr-1 h-3 w-3" /> Age: {ageLimit}
+                      </Badge>
+                    )}
+                    {experience && (
+                      <Badge variant="secondary" className="bg-purple-50 text-xs text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                        <Briefcase className="mr-1 h-3 w-3" /> {experience}
+                      </Badge>
+                    )}
+                  </div>
+                  {education && containsHtml(education) && (
+                    <div>
+                      <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Education Qualification
+                      </p>
+                      <RichTextView html={education} />
+                    </div>
                   )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      )}
+                  {ageRelaxation && (
+                    <div>
+                      <p className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Age Relaxation</p>
+                      <RichTextView html={ageRelaxation} className="text-gray-600 dark:text-gray-400" />
+                    </div>
+                  )}
+                  {selectionProcess && (
+                    <div>
+                      <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Selection Process</p>
+                      <JobSelectionStepper selectionProcess={selectionProcess} />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
-      {/* ── Application Fees ──────────────────────────── */}
-      {applicationFee && (
-        <section id="fees" className="scroll-mt-24">
-          <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg text-amber-800 dark:text-amber-300">
-                <Wallet className="h-5 w-5 text-amber-600" /> Application Fee
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RichTextView html={applicationFee} />
-            </CardContent>
-          </Card>
-        </section>
-      )}
+          {/* ── Application Fees (full text; chart lives in dashboard) ── */}
+          {applicationFee && (
+            <section id="fees" className="scroll-mt-24">
+              <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg text-amber-800 dark:text-amber-300">
+                    <Wallet className="h-5 w-5 text-amber-600" /> Application Fee
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RichTextView html={applicationFee} />
+                  <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-400/80">Category-wise comparison chart shown in the insights panel above (when parseable).</p>
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
-      {/* ── Documents Required ────────────────────────── */}
-      {documentsRequired && (
-        <section id="documents" className="scroll-mt-24">
-          <Card className="border-gray-200 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ListChecks className="h-5 w-5 text-orange-600" /> Documents Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {containsHtml(documentsRequired) ? (
-                <RichTextView html={documentsRequired} />
-              ) : stepify(documentsRequired).length > 1 ? (
-                <ul className="space-y-2">
-                  {stepify(documentsRequired).map((doc, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" /> {doc}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{documentsRequired}</div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      )}
+          {/* ── Documents Required: interactive checklist ── */}
+          {documentsRequired && (
+            <section id="documents" className="scroll-mt-24">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <ListChecks className="h-5 w-5 text-orange-600" /> Documents Required
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                  <JobDocumentsChecklist key={jobId} jobId={jobId} documentsRequired={documentsRequired} />
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
-      {/* ── How to Apply ──────────────────────────────── */}
-      {howToApply && (
-        <section id="how-to-apply" className="scroll-mt-24">
-          <Card className="border-gray-200 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <FileText className="h-5 w-5 text-orange-600" /> How to Apply
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {containsHtml(howToApply) ? (
-                <RichTextView html={howToApply} />
-              ) : stepify(howToApply).length > 1 ? (
-                <ol className="space-y-3">
-                  {stepify(howToApply).map((step, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-xs font-bold text-white">
-                        {i + 1}
-                      </span>
-                      <span className="whitespace-pre-line">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <div className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{howToApply}</div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      )}
+          {/* ── How to Apply: vertical timeline + mid CTA ── */}
+          {howToApply && (
+            <section id="how-to-apply" className="scroll-mt-24">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="border-b bg-gray-50 dark:bg-gray-800/60">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="h-5 w-5 text-orange-600" /> How to Apply
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                  {containsHtml(howToApply) ? (
+                    <RichTextView html={howToApply} />
+                  ) : howSteps.length > 1 ? (
+                    <div>
+                      <ol className="relative space-y-4 border-l-2 border-orange-200 pl-6 dark:border-orange-900">
+                        {howSteps.map((step, i) => (
+                          <li key={i} className="relative">
+                            <span className="absolute -left-[37px] flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-xs font-bold text-white shadow">
+                              {i + 1}
+                            </span>
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700 dark:text-gray-300">{step}</p>
+                          </li>
+                        ))}
+                      </ol>
+                      {canApply && !isClosed ? (
+                        <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl bg-gradient-to-r from-orange-50 to-green-50 p-4 dark:from-orange-950/40 dark:to-green-950/40">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Ready with documents? Don&apos;t wait for the last date.</p>
+                          <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white hover:opacity-90" asChild>
+                            <Link href={`/apply/${slug}/start`}>
+                              <ExternalLink className="mr-2 h-4 w-4" /> Apply Online Now
+                            </Link>
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{howToApply}</div>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
-      {/* ── Trust / Verify Note ───────────────────────── */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40">
-        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          <p className="font-semibold text-amber-800 dark:text-amber-300">Important Note</p>
-          <p className="mt-0.5">
-            This is not a government website. Always verify all details (fees, dates, eligibility) from the{" "}
-            <a href={officialWebsite || "#"} target="_blank" rel="noopener noreferrer" className="font-medium text-amber-700 underline dark:text-amber-400">
-              official notification
-            </a>{" "}
-            before applying. We recommend applying only through the official website.
-          </p>
+          {/* ── Trust / Verify Note ── */}
+          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40">
+            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="font-semibold text-amber-800 dark:text-amber-300">Important Note</p>
+              <p className="mt-0.5">
+                This is not a government website. Always verify all details (fees, dates, eligibility) from the{" "}
+                <a href={officialWebsite || "#"} target="_blank" rel="noopener noreferrer" className="font-medium text-amber-700 underline dark:text-amber-400">
+                  official notification
+                </a>{" "}
+                before applying. We recommend applying only through the official website.
+              </p>
+            </div>
+          </div>
+
+          {/* ── Bottom Actions (3rd Apply CTA) ── */}
+          <div className="flex flex-wrap gap-3 pt-2">
+            {officialNotification && (
+              <Button variant="outline" size="lg" asChild>
+                <a href={officialNotification} target="_blank" rel="noopener noreferrer">
+                  <FileText className="mr-2 h-5 w-5" /> Download Official Notification
+                </a>
+              </Button>
+            )}
+            {canApply ? (
+              <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
+                <Link href={`/apply/${slug}/start`}>
+                  <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
+
+        {/* Sticky conversion rail */}
+        <JobApplyRail
+          jobId={jobId}
+          slug={slug}
+          title={title}
+          department={department}
+          advertisementNo={advertisementNo}
+          officialNotification={officialNotification}
+          officialWebsite={officialWebsite}
+          applyLink={applyLink}
+          updatedAt={updatedAt}
+          viewsTotal={viewsTotal}
+          lastDate={lastDate}
+          sections={sections.map((s) => ({ id: s.id, label: s.label }))}
+        />
       </div>
 
-      {/* ── Bottom Actions ────────────────────────────── */}
-      <div className="flex flex-wrap gap-3 pt-2">
-        {officialNotification && (
-          <Button variant="outline" size="lg" asChild>
-            <a href={officialNotification} target="_blank" rel="noopener noreferrer">
-              <FileText className="mr-2 h-5 w-5" /> Download Official Notification
-            </a>
-          </Button>
-        )}
-        {applyLink || officialWebsite ? (
-          <Button size="lg" className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
-            <Link href={`/apply/${slug}/start`}>
-              <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
-            </Link>
-          </Button>
+      {/* ── Sticky Mobile Apply Bar with window progress (never printed) ── */}
+      <div className="sticky bottom-0 z-40 -mx-4 mt-4 border-t bg-white/95 backdrop-blur print:hidden lg:hidden dark:border-gray-700 dark:bg-gray-900/95">
+        {progress !== null && !isClosed ? (
+          <div className="h-1 w-full bg-gray-100 dark:bg-gray-800" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+            <div className={cn("h-full", progress > 85 ? "bg-red-500" : "bg-gradient-to-r from-[#FF9933] to-[#138808]")} style={{ width: `${progress}%` }} />
+          </div>
         ) : null}
-      </div>
-
-      {/* ── Sticky Mobile Apply Bar ───────────────────── */}
-      <div className="sticky bottom-0 z-40 -mx-4 mt-4 border-t bg-white/95 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 lg:hidden">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</p>
             <p className={cn(
@@ -603,7 +603,7 @@ export function JobDetailContent({
                   : "Applications open"}
             </p>
           </div>
-          {applyLink || officialWebsite ? (
+          {canApply ? (
             <Button className="bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white shadow-sm hover:opacity-90" asChild>
               <Link href={`/apply/${slug}/start`}>
                 <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now

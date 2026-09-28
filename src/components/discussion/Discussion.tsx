@@ -459,26 +459,29 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   const adminControls = meta.isAdmin
 
   return (
-    <section className="mt-12">
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-6">
-          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-gray-900">
-            <MessageSquare className="h-5 w-5 text-gray-500" />
-            Discussion · {meta.total}
+    <section className="mt-8">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+        {/* Compact header */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-gray-100 px-3 py-2.5 sm:px-4 dark:border-gray-800">
+          <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <MessageSquare className="h-4 w-4 text-orange-500" />
+            Discussion
+            <span className="rounded-full bg-gray-100 px-1.5 py-px text-[11px] font-bold tabular-nums text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+              {meta.total}
+            </span>
           </h2>
-          <div className="flex items-center gap-2">
-            <div className="flex overflow-hidden rounded-md border border-gray-200">
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="flex overflow-hidden rounded-full border border-gray-200 dark:border-gray-700">
               {SORTS.map((s) => (
                 <button
                   key={s.key}
                   type="button"
                   onClick={() => setSort(s.key)}
                   className={cn(
-                    "px-3 py-1.5 text-xs font-medium transition-colors",
+                    "px-2.5 py-1 text-[11px] font-semibold transition-colors",
                     sort === s.key
-                      ? "bg-gray-900 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
                   )}
                 >
                   {s.label}
@@ -486,67 +489,67 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
               ))}
             </div>
             {currentUserId && (
-              <Button variant="outline" size="sm" onClick={toggleFollow}>
+              <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={toggleFollow}>
                 {meta.following ? "Following" : "Follow"}
               </Button>
             )}
             {adminControls && (
               <>
-                <Button variant="outline" size="sm" onClick={toggleLock}>
-                  <Lock className="mr-1 h-3.5 w-3.5" />
+                <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={toggleLock}>
+                  <Lock className="mr-1 h-3 w-3" />
                   {meta.locked ? "Unlock" : "Lock"}
                 </Button>
-                <Button variant="outline" size="sm" onClick={bulkDeleteFlagged}>
+                <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={bulkDeleteFlagged}>
                   Review flagged
                 </Button>
               </>
             )}
-            <div className="flex items-center gap-1.5">
-              <span className={cn("h-2 w-2 rounded-full", connected ? "bg-green-500" : "bg-red-500")} />
-              <span className="text-xs text-gray-500">
-                {connected ? "Live" : reconnecting ? "Reconnecting…" : "Offline"}
+            <span className="flex items-center gap-1" title={connected ? "Live updates on" : "Live updates off"}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "bg-green-500" : "bg-red-500")} />
+              <span className="text-[11px] text-gray-400">
+                {connected ? "Live" : reconnecting ? "…" : "Off"}
               </span>
-            </div>
+            </span>
           </div>
         </div>
 
-        {/* Filters + search */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-3 sm:px-6">
+        {/* Slim filters + search */}
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-gray-100 px-3 py-2 sm:px-4 dark:border-gray-800">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors",
                 filter === f.key
-                  ? "border-gray-900 bg-gray-900 text-white"
-                  : "border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
+                  ? "border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-gray-900"
+                  : "border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-100"
               )}
             >
               {f.label}
             </button>
           ))}
-          <div className="relative ml-auto w-full sm:w-56">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+          <div className="relative ml-auto w-full sm:w-48">
+            <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search in discussion…"
-              className="h-8 pl-8 text-xs"
+              placeholder="Search comments…"
+              className="h-7 pl-7 text-xs"
             />
           </div>
         </div>
 
         {meta.locked && (
-          <div className="flex items-center gap-2 border-b border-gray-100 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 sm:px-6">
-            <Lock className="h-4 w-4" /> This discussion is locked. New comments are disabled.
+          <div className="flex items-center gap-1.5 border-b border-gray-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800 sm:px-4 dark:border-gray-800">
+            <Lock className="h-3 w-3" /> Locked — new comments are disabled.
           </div>
         )}
 
         {/* Pinned official comment */}
         {meta.pinnedComment && !search && filter === "all" && (
-          <div className="border-b border-l-4 border-b-gray-100 border-l-blue-600 bg-blue-50/60 px-4 py-4 sm:px-6">
+          <div className="border-b border-l-2 border-b-gray-100 border-l-blue-600 bg-blue-50/60 px-1 py-0.5 sm:px-2 dark:border-gray-800 dark:bg-blue-950/30">
             <CommentItem
               comment={{ ...meta.pinnedComment, replies: [], visibleReplyCount: 0 }}
               depth={0}
@@ -568,16 +571,17 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
         )}
 
         {/* Composer */}
-        <div className="border-b border-gray-100 px-4 py-4 sm:px-6">
+        <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2.5 sm:px-4 dark:border-gray-800 dark:bg-gray-800/30">
           {currentUserId ? (
             meta.locked ? null : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Share information, ask a question, or help others… (@mention to notify someone)"
-                  rows={3}
+                  placeholder="Join the discussion…"
+                  rows={2}
                   maxLength={5000}
+                  className="bg-white text-[13px] dark:bg-gray-900"
                 />
                 {imageUrl && (
                   <div className="relative inline-block">
@@ -605,11 +609,11 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
                     />
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50">
-                      <ImageIcon className="h-3.5 w-3.5" />
-                      {uploading ? "Compressing…" : "Image"}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-medium text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                      <ImageIcon className="h-3 w-3" />
+                      {uploading ? "…" : "Image"}
                       <input
                         type="file"
                         accept="image/*"
@@ -619,15 +623,15 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
                       />
                     </label>
                     {!content && (
-                      <div className="flex overflow-hidden rounded-md border border-gray-200">
+                      <div className="flex overflow-hidden rounded-full border border-gray-200 dark:border-gray-700">
                         {(["GENERAL", "QUESTION"] as const).map((k) => (
                           <button
                             key={k}
                             type="button"
                             onClick={() => setKind(k)}
                             className={cn(
-                              "px-2.5 py-1.5 text-xs font-medium",
-                              kind === k ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                              "px-2 py-1 text-[11px] font-semibold",
+                              kind === k ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900" : "bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400"
                             )}
                           >
                             {k === "GENERAL" ? "Comment" : "Question"}
@@ -636,14 +640,14 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
                       </div>
                     )}
                   </div>
-                  <Button onClick={() => submit()} disabled={!content.trim() || submitting || uploading}>
+                  <Button className="h-7 px-3 text-xs" onClick={() => submit()} disabled={!content.trim() || submitting || uploading}>
                     {submitting ? "Posting…" : "Post"}
                   </Button>
                 </div>
               </div>
             )
           ) : (
-            <p className="rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-500">
+            <p className="rounded-md bg-gray-50 px-3 py-2 text-[13px] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               <a href="/login" className="font-medium text-blue-700 hover:underline">
                 Sign in
               </a>{" "}
@@ -653,16 +657,16 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
         </div>
 
         {/* Comment list */}
-        <div className="divide-y divide-gray-50 px-4 py-2 sm:px-6">
+        <div className="divide-y divide-gray-100 px-3 sm:px-4 dark:divide-gray-800">
           {loading && comments.length === 0 ? (
-            <div className="space-y-3 py-6">
+            <div className="space-y-1.5 py-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-50" />
+                <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-50 dark:bg-gray-800" />
               ))}
             </div>
           ) : comments.length === 0 ? (
-            <p className="py-10 text-center text-sm text-gray-500">
-              No comments yet. Be the first to share.
+            <p className="py-6 text-center text-[13px] text-gray-500">
+              No comments yet — be the first to share.
             </p>
           ) : (
             comments.map((comment) => (
@@ -690,8 +694,8 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
 
         {/* Load more */}
         {nextCursor && (
-          <div className="border-t border-gray-100 px-4 py-3 text-center sm:px-6">
-            <Button variant="outline" size="sm" onClick={() => fetchComments({ cursor: nextCursor, append: true })}>
+          <div className="border-t border-gray-100 px-3 py-2 text-center sm:px-4 dark:border-gray-800">
+            <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => fetchComments({ cursor: nextCursor, append: true })}>
               Load more comments
             </Button>
           </div>

@@ -55,6 +55,15 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     include: { department: true },
   })
 
+  const viewsAgg = await prisma.jobView.aggregate({
+    where: { jobId: job.id },
+    _sum: { views: true },
+  })
+  const viewsTotal = viewsAgg._sum.views ?? 0
+  // Single timestamp per request for stable related-job badges (server render).
+  // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
+  const nowMs = Date.now()
+
   const breadCrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -87,7 +96,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
@@ -122,35 +131,60 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         startDate={job.startDate?.toISOString() || null}
         lastDate={job.lastDate?.toISOString() || null}
         slug={job.slug}
+        updatedAt={job.updatedAt?.toISOString() || null}
+        viewsTotal={viewsTotal}
       />
 <JobViewTracker jobId={job.id} />
 
       <DiscussionSection postType="JOB" postId={job.id} path={`/apply/${job.slug}`} />
 {relatedJobs.length > 0 && (
         <section className="mt-12">
-          <h2 className="mb-6 text-xl font-bold text-gray-900">Related Jobs</h2>
+          <div className="mb-6 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Related Jobs</h2>
+              <p className="mt-0.5 text-sm text-gray-500">More openings from {job.department.name}</p>
+            </div>
+            <Link href="/jobs" className="shrink-0 text-sm font-semibold text-orange-700 hover:underline dark:text-orange-300">
+              View all jobs →
+            </Link>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {relatedJobs.map((rj) => (
+            {relatedJobs.map((rj) => {
+              const rjLast = rj.lastDate ? new Date(rj.lastDate).getTime() : null
+              const rjDays = rjLast ? Math.floor((rjLast - nowMs) / 86400000) : null
+              const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
+              return (
               <Link key={rj.id} href={`/apply/${rj.slug}`}>
-                <Card className="group h-full border-gray-200 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-gray-700">
-                  <CardHeader>
+                <Card className="group h-full border-gray-200 transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-gray-700">
+                  <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <Badge variant="secondary" className="mb-2 bg-blue-50 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">{rj.department.name}</Badge>
-                        <CardTitle className="text-base group-hover:text-blue-700">{rj.title}</CardTitle>
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                          <Badge variant="secondary" className="bg-blue-50 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">{rj.department.name}</Badge>
+                          {rjDays !== null && rjDays >= 0 && rjDays <= 7 ? (
+                            <Badge className="bg-red-100 text-[11px] text-red-700 dark:bg-red-950 dark:text-red-300">Only {rjDays}d left</Badge>
+                          ) : rjDays !== null && rjDays > 7 ? (
+                            <Badge variant="outline" className="text-[11px]">{rjDays}d left</Badge>
+                          ) : null}
+                          {rjUrgent ? null : rj.totalVacancies ? (
+                            <Badge variant="outline" className="text-[11px]">{rj.totalVacancies.toLocaleString("en-IN")} posts</Badge>
+                          ) : null}
+                        </div>
+                        <CardTitle className="text-base leading-snug group-hover:text-orange-700 dark:group-hover:text-orange-300">{rj.title}</CardTitle>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      {rj.location && <p>Location: {rj.location}</p>}
-                      {rj.lastDate && <p>Last Date: {formatDate(rj.lastDate)}</p>}
-                      {rj.totalVacancies && <p>Vacancies: {rj.totalVacancies.toLocaleString("en-IN")}</p>}
+                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                      {rj.location && <p>📍 {rj.location}</p>}
+                      {rj.lastDate && <p>🗓 Last Date: <span className={rjUrgent ? "font-bold text-red-600" : "font-medium"}>{formatDate(rj.lastDate)}</span></p>}
+                      {rj.totalVacancies && <p>👥 Vacancies: {rj.totalVacancies.toLocaleString("en-IN")}</p>}
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </section>
       )}

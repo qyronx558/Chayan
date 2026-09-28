@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    // Bookmarks reference private jobs with no onDelete cascade — clear them first.
+    // Bookmarks reference private jobs with no onDelete cascade - clear them first.
     await prisma.$transaction([
       prisma.bookmark.deleteMany({ where: { privateJobId: id } }),
       prisma.privateJob.delete({ where: { id } }),

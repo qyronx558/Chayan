@@ -230,7 +230,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4] },
         codeBlock: { HTMLAttributes: { class: "!bg-muted" } },
-        // StarterKit v3 already bundles these — disable here since we add
+        // StarterKit v3 already bundles these - disable here since we add
         // our own configured instances below (avoids duplicate-name warns).
         link: false,
         underline: false,
