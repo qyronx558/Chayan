@@ -5,6 +5,7 @@ import { Suspense } from "react"
 import { Providers } from "@/components/layout/Providers"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
+import { ConditionalChrome } from "@/components/layout/ConditionalChrome"
 import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
 import { ActivityTracker } from "@/components/layout/ActivityTracker"
 import { CookieConsent } from "@/components/layout/CookieConsent"
@@ -108,11 +109,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <Providers>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <ConditionalChrome header={<Header />} footer={<Footer />}>
+            {children}
+          </ConditionalChrome>
           <WelcomeOnboarding />
           <ActivityTracker />
           <CookieConsent />
