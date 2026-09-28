@@ -80,7 +80,7 @@ export default function AboutPage() {
         <p className="mb-4 leading-relaxed text-gray-700">
           We understand the importance of accurate information when it comes to your career. Every
           notification published on our platform is verified against official government sources including
-          departmental websites and the Employment News. We do not create or modify job listings — we
+          departmental websites and the Employment News. We do not create or modify job listings - we
           simply aggregate and organize publicly available information for your convenience.
         </p>
         <p className="leading-relaxed text-gray-700">

@@ -393,7 +393,7 @@ export default function AdminFeaturedSlider() {
 
               <FormField control={form.control} name="image" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Slide Image (optional) <span className="text-xs font-normal text-gray-400">— 1200×900 (4:3) recommended, auto-cropped on upload</span></FormLabel>
+                  <FormLabel>Slide Image (optional) <span className="text-xs font-normal text-gray-400">- 1200×900 (4:3) recommended, auto-cropped on upload</span></FormLabel>
                   <div className="flex items-center gap-3">
                     <FormControl>
                       <Input type="file" accept="image/*" className="hidden" id="slide-image" disabled={uploading}
@@ -412,7 +412,7 @@ export default function AdminFeaturedSlider() {
                       <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue("image", "")}>Remove</Button>
                     </div>
                   ) : (
-                    <p className="mt-2 text-xs text-gray-400">No image — the slide will show without a visual.</p>
+                    <p className="mt-2 text-xs text-gray-400">No image - the slide will show without a visual.</p>
                   )}
                   <FormMessage />
                 </FormItem>

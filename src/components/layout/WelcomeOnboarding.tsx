@@ -13,7 +13,7 @@ const steps = [
   {
     id: "search",
     title: "Discover Opportunities",
-    description: "Search thousands of government & private jobs with smart filters — by qualification, location, category, and more.",
+    description: "Search thousands of government & private jobs with smart filters - by qualification, location, category, and more.",
     icon: Search,
     illustration: (
       <div className="relative w-full max-w-xs mx-auto">
@@ -67,7 +67,7 @@ const steps = [
             </div>
             <div>
               <p className="font-medium text-white">Exam Calendar</p>
-              <p className="text-sm text-gray-400">UPSC, SSC, Banking, State PSCs — all dates</p>
+              <p className="text-sm text-gray-400">UPSC, SSC, Banking, State PSCs - all dates</p>
             </div>
             <Sparkles className="h-5 w-5 text-amber-400" />
           </div>
@@ -99,7 +99,7 @@ const steps = [
   {
     id: "alerts",
     title: "Get Instant Alerts",
-    description: "Real-time notifications for new jobs matching your profile, admit card releases, and result declarations — via email & push.",
+    description: "Real-time notifications for new jobs matching your profile, admit card releases, and result declarations - via email & push.",
     icon: Bell,
     illustration: (
       <div className="relative w-full max-w-xs mx-auto">
@@ -274,7 +274,7 @@ export function WelcomeOnboarding() {
           </AnimatePresence>
 
           <p className="mt-6 text-center text-xs text-gray-500">
-            Don&apos;t show this again — we&apos;ll remember your choice
+            Don&apos;t show this again - we&apos;ll remember your choice
           </p>
         </div>
 

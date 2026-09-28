@@ -116,7 +116,7 @@ export function SearchClient() {
           {activeQ ? `Results for “${activeQ}”` : "What are you looking for?"}
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Jobs, results, admit cards, answer keys, private jobs and blogs — in one place.
+          Jobs, results, admit cards, answer keys, private jobs and blogs - in one place.
         </p>
       </div>
 

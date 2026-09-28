@@ -117,7 +117,7 @@ export function JobQuickSummary(p: Props) {
       a.remove();
       setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
     } catch {
-      setDownloadError("Download failed — try opening the full image instead.");
+      setDownloadError("Download failed - try opening the full image instead.");
       window.open(og, "_blank", "noopener,noreferrer");
     } finally {
       setDownloading(false);
@@ -204,7 +204,7 @@ export function JobQuickSummary(p: Props) {
         ))}
       </ul>
 
-      {/* helpful next steps — quiet text links, not loud buttons */}
+      {/* helpful next steps - quiet text links, not loud buttons */}
       <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3 text-[13px] dark:border-slate-800 dark:bg-slate-800/40">
         {ageText && (
           <Link href="/tools/age-calculator" className="inline-flex items-center gap-1 text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline dark:text-slate-300 dark:hover:text-white">
@@ -272,7 +272,7 @@ export function JobQuickSummary(p: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={og}
-              alt={`${p.title} — job poster`}
+              alt={`${p.title} - job poster`}
               width={1200}
               height={630}
               className="h-auto w-full"

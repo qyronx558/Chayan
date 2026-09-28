@@ -19,12 +19,12 @@ async function main() {
   const result = await runNewsletterDigest()
 
   if (result.status === "skipped-already-sent") {
-    console.log("[newsletter] digest already sent today — skipping")
+    console.log("[newsletter] digest already sent today - skipping")
   } else if (result.status === "skipped-no-items") {
-    console.log("[newsletter] no new items since last send — nothing to send")
+    console.log("[newsletter] no new items since last send - nothing to send")
   } else {
     console.log(
-      `[newsletter] done — ${result.items} item(s) to ${result.subscribers} subscriber(s): ${result.delivered} delivered, ${result.failed} failed`
+      `[newsletter] done - ${result.items} item(s) to ${result.subscribers} subscriber(s): ${result.delivered} delivered, ${result.failed} failed`
     )
   }
 }

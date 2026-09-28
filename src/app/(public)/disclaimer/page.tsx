@@ -34,8 +34,8 @@ export default function DisclaimerPage() {
           change at the discretion of the respective authorities.
         </p>
         <p className="leading-relaxed text-gray-700">
-          Users are strongly advised to verify all details — including eligibility criteria, application
-          fees, exam patterns, and important dates — on the official website of the concerned department
+          Users are strongly advised to verify all details - including eligibility criteria, application
+          fees, exam patterns, and important dates - on the official website of the concerned department
           or recruiting body before applying for any position.
         </p>
       </section>

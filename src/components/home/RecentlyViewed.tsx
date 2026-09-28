@@ -99,7 +99,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
           title="Continue Exploring"
           subtitle={
             paused
-              ? "History is paused — resume to keep tracking what you view"
+              ? "History is paused - resume to keep tracking what you view"
               : items.length > 0
                 ? `Pick up where you left off · ${items.length} recent ${items.length === 1 ? "visit" : "visits"}`
                 : "Pages you open will appear here automatically"
@@ -190,7 +190,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
             <div>
               <p className="text-sm font-bold text-gray-900">Nothing here yet</p>
               <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-gray-500">
-                Like YouTube watch history — every job, result, admit card or article you open
+                Like YouTube watch history - every job, result, admit card or article you open
                 will show up here so you can jump back in one tap.
               </p>
             </div>
@@ -289,7 +289,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
                           />
                         </div>
                         <p className="mt-1 text-[10px] font-medium text-gray-400">
-                          {item.progress}% explored — continue reading
+                          {item.progress}% explored - continue reading
                         </p>
                       </>
                     ) : item.progress >= 100 ? (

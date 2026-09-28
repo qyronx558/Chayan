@@ -19,8 +19,8 @@ export default function CopyrightPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Our Copyright</h2>
         <p className="leading-relaxed text-gray-700">
-          All original content published on Chayan — including articles, compilations, layouts, graphics,
-          logos, and design elements — is the intellectual property of Chayan unless otherwise stated.
+          All original content published on Chayan - including articles, compilations, layouts, graphics,
+          logos, and design elements - is the intellectual property of Chayan unless otherwise stated.
           This content is protected under applicable copyright laws.
         </p>
       </section>

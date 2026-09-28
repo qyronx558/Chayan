@@ -479,7 +479,7 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
               </div>
 
               <p className="mt-3 text-center text-[11px] text-gray-400">
-                {name ? `${name} · ` : ""}JPG, PNG, WEBP or GIF — max 5MB
+                {name ? `${name} · ` : ""}JPG, PNG, WEBP or GIF - max 5MB
               </p>
             </div>
           </div>

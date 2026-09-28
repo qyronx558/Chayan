@@ -67,7 +67,7 @@ export function Footer({ className }: { className?: string }) {
               </Link>
               <p className="mt-4 text-sm leading-relaxed text-slate-300/80">
                 Your trusted government job portal. Latest notifications, results,
-                admit cards, answer keys and more — all in one place.
+                admit cards, answer keys and more - all in one place.
               </p>
               <div className="mt-4 space-y-2 text-sm text-slate-300/80">
                 <div className="flex items-start gap-2">

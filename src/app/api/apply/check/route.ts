@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         ok: true,
         hostname,
-        frameable: null as boolean | null, // unknown — let client try iframe
+        frameable: null as boolean | null, // unknown - let client try iframe
         proxyable: true,
         reason: "unreachable",
       })

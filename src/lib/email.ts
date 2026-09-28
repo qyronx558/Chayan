@@ -106,7 +106,7 @@ export async function sendNewsletterDigest(
     <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
         <div style="font-size:20px;font-weight:700;color:#fff">Your Chayan Job Alert Digest</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} — ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+        <div style="font-size:13px;color:#99f6e4;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
         <table style="width:100%;border-collapse:collapse">
@@ -131,7 +131,7 @@ export async function sendNewsletterDigest(
   const { data, error } = await resend.emails.send({
     from: `Chayan <${fromEmail}>`,
     to: email,
-    subject: `${items.length} new government job update${items.length === 1 ? "" : "s"} — Chayan Digest`,
+    subject: `${items.length} new government job update${items.length === 1 ? "" : "s"} - Chayan Digest`,
     html,
   })
 
@@ -172,7 +172,7 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
     <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
         <div style="font-size:20px;font-weight:700;color:#fff">Hello ${name}, your application updates are here</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">Chayan application tracker reminder — ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+        <div style="font-size:13px;color:#99f6e4;margin-top:4px">Chayan application tracker reminder - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
         <table style="width:100%;border-collapse:collapse">
@@ -202,7 +202,7 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
   const { data, error } = await resend.emails.send({
     from: `Chayan <${fromEmail}>`,
     to: email,
-    subject: `⏰ ${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up — Chayan`,
+    subject: `⏰ ${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up - Chayan`,
     html,
   })
 

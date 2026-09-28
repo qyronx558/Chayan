@@ -47,7 +47,7 @@ const navIconMap: Record<string, React.ElementType> = {
   Notifications: Bell,
 }
 
-// "Gov Jobs" uses Jobs' href (/jobs) — not a separate mainNav entry
+// "Gov Jobs" uses Jobs' href (/jobs) - not a separate mainNav entry
 
 export function MobileNav() {
   const pathname = usePathname()

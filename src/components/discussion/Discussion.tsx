@@ -30,7 +30,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "announcements", label: "Announcements" },
 ]
 
-/** Client-side image compression: max 1280px, JPEG q0.7 — keeps uploads small before Cloudinary */
+/** Client-side image compression: max 1280px, JPEG q0.7 - keeps uploads small before Cloudinary */
 async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file)
   const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height))

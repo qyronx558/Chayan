@@ -23,7 +23,7 @@ Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirant
 
 **Live Site:** [https://www.chayanjobs.com](https://www.chayanjobs.com)
 
-> *Screenshots coming soon — home page with featured slider, smart search, job cards, exam calendar, and personalized dashboard.*
+> *Screenshots coming soon - home page with featured slider, smart search, job cards, exam calendar, and personalized dashboard.*
 
 ---
 
@@ -143,12 +143,12 @@ NEXT_PUBLIC_APP_URL
 We welcome contributions! Please follow these steps:
 
 1. **Fork** the repository
-2. **Create a branch** — `git checkout -b feat/your-feature`
-3. **Make changes** — Follow existing code style (ESLint + Prettier)
-4. **Test** — Run `npm run lint`, `npm run typecheck`, `npm run build`
-5. **Commit** — Use conventional commits: `feat: add exam calendar filters`
-6. **Push** — `git push origin feat/your-feature`
-7. **Open PR** — Target `main` branch with description
+2. **Create a branch** - `git checkout -b feat/your-feature`
+3. **Make changes** - Follow existing code style (ESLint + Prettier)
+4. **Test** - Run `npm run lint`, `npm run typecheck`, `npm run build`
+5. **Commit** - Use conventional commits: `feat: add exam calendar filters`
+6. **Push** - `git push origin feat/your-feature`
+7. **Open PR** - Target `main` branch with description
 
 ### Guidelines
 - Write typed TypeScript (no `any`)
@@ -170,17 +170,17 @@ MIT License - see [LICENSE](LICENSE) for details.
 **Maintainer:** [Amit Kumar](https://github.com/officialamit558)
 
 **Built with:**
-- [Next.js](https://nextjs.org/) — The React Framework for Production
-- [Prisma](https://www.prisma.io/) — Next-generation ORM
-- [shadcn/ui](https://ui.shadcn.com/) — Beautifully designed components
-- [Tailwind CSS](https://tailwindcss.com/) — Utility-first CSS
-- [Framer Motion](https://www.framer.com/motion/) — Animation library
-- [TanStack Query](https://tanstack.com/query) — Server state management
-- [NextAuth.js](https://next-auth.js.org/) — Authentication for Next.js
-- [Vercel](https://vercel.com/) — Hosting platform
-- [Neon](https://neon.tech/) — Serverless Postgres
-- [Resend](https://resend.com/) — Email API
-- [Cloudinary](https://cloudinary.com/) — Image management
+- [Next.js](https://nextjs.org/) - The React Framework for Production
+- [Prisma](https://www.prisma.io/) - Next-generation ORM
+- [shadcn/ui](https://ui.shadcn.com/) - Beautifully designed components
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+- [Framer Motion](https://www.framer.com/motion/) - Animation library
+- [TanStack Query](https://tanstack.com/query) - Server state management
+- [NextAuth.js](https://next-auth.js.org/) - Authentication for Next.js
+- [Vercel](https://vercel.com/) - Hosting platform
+- [Neon](https://neon.tech/) - Serverless Postgres
+- [Resend](https://resend.com/) - Email API
+- [Cloudinary](https://cloudinary.com/) - Image management
 
 **Inspired by** the need for a single, reliable source for Indian government job aspirants who previously had to monitor 50+ official websites daily.
 

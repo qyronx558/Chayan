@@ -79,7 +79,7 @@ export default async function Image() {
             marginTop: 40,
           }}
         >
-          Your trusted government job portal — Latest notifications, results, admit cards, answer keys and more
+          Your trusted government job portal - Latest notifications, results, admit cards, answer keys and more
         </div>
       </div>
     ),

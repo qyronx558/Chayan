@@ -136,7 +136,7 @@ export function SearchBar() {
                 onFocus={() => setFocused(true)}
                 onBlur={() => setTimeout(() => setFocused(false), 150)}
                 onKeyDown={handleKeyDown}
-                aria-label="Search everything — jobs, results, admit cards and blogs"
+                aria-label="Search everything - jobs, results, admit cards and blogs"
                 role="combobox"
                 aria-expanded={showDropdown}
                 className="h-12 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-base shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600/30 dark:border-gray-800 dark:bg-gray-950"
@@ -153,7 +153,7 @@ export function SearchBar() {
                       className="flex w-full items-center justify-between px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-900"
                     >
                       <span>
-                        No quick matches — see full results for “{searchQuery.trim()}”
+                        No quick matches - see full results for “{searchQuery.trim()}”
                       </span>
                       <ArrowRight className="h-4 w-4" />
                     </button>
@@ -239,7 +239,7 @@ export function SearchBar() {
           </div>
 
           <p className="mt-2 text-xs text-gray-400">
-            Universal search — press Enter for the full results & recommendations page
+            Universal search - press Enter for the full results & recommendations page
           </p>
         </div>
       </div>

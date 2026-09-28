@@ -256,7 +256,7 @@ export function ExamCalendarClient() {
                 Never miss an <span className="text-teal-700 dark:text-teal-300">exam date</span>
               </h1>
               <p className="mt-2 max-w-xl text-sm font-medium text-slate-600 sm:text-base dark:text-gray-300">
-                Application deadlines, exam dates, admit cards and results — all in one calm monthly view.
+                Application deadlines, exam dates, admit cards and results - all in one calm monthly view.
                 Tap any day to see everything scheduled.
               </p>
             </div>
@@ -474,7 +474,7 @@ export function ExamCalendarClient() {
                         </span>
 
                         {dayEvents.length === 0 ? (
-                          <span className="mt-2 hidden text-[10px] font-medium text-gray-300 sm:block dark:text-gray-700">—</span>
+                          <span className="mt-2 hidden text-[10px] font-medium text-gray-300 sm:block dark:text-gray-700">-</span>
                         ) : (
                           <>
                             {/* Mobile: bold color bars + count (space-efficient, tappable) */}
@@ -498,7 +498,7 @@ export function ExamCalendarClient() {
                                   key={`${e.date}-${idx}`}
                                   href={e.href}
                                   onClick={(ev) => ev.stopPropagation()}
-                                  title={`${humanizeKey(e.label)} — ${e.title}`}
+                                  title={`${humanizeKey(e.label)} - ${e.title}`}
                                   className={cn(
                                     "flex items-center truncate rounded-md border border-l-4 px-1.5 py-1 text-[11px] font-bold leading-tight",
                                     CALENDAR_TYPE_STYLES[e.type].pill
@@ -576,7 +576,7 @@ export function ExamCalendarClient() {
         {/* ---- Agenda: full same-day visibility ---- */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">
-            Schedule — {monthLabel(month)}
+            Schedule - {monthLabel(month)}
           </h2>
           {selectedDay && (
             <button
@@ -661,7 +661,7 @@ export function ExamCalendarClient() {
               <span className="ml-2 text-sm font-semibold text-gray-400">{dialogDay ? weekdayName(dialogDay) : ""}</span>
             </DialogTitle>
             <DialogDescription className="font-medium">
-              {dialogEvents.length} event{dialogEvents.length === 1 ? "" : "s"} scheduled — tap any item to open details.
+              {dialogEvents.length} event{dialogEvents.length === 1 ? "" : "s"} scheduled - tap any item to open details.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">

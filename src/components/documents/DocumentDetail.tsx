@@ -150,7 +150,7 @@ export function DocumentDetail({
 
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
-      {/* ── Header / Hero — Tricolour ─────────────────── */}
+      {/* ── Header / Hero - Tricolour ─────────────────── */}
       <header className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50 via-white to-green-50 shadow-lg dark:border-gray-700 dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]">
         {/* top tricolour strip with slow flow */}
         <div
@@ -239,7 +239,7 @@ export function DocumentDetail({
         </div>
       </header>
 
-      {/* ── Live Countdown / Application Status — always clearly visible ── */}
+      {/* ── Live Countdown / Application Status - always clearly visible ── */}
       {countdownMs !== null && !(diff !== null && diff <= 0) && (
         <div
           role="status"
@@ -255,7 +255,7 @@ export function DocumentDetail({
             "flex items-center gap-2 text-base font-bold",
             isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white",
           )}>
-            <AlarmClock className="h-6 w-6" /> Time Left — {countdownLabel}
+            <AlarmClock className="h-6 w-6" /> Time Left - {countdownLabel}
           </span>
           <div className="flex items-center gap-2">
             {[

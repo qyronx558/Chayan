@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
 
   const benefits = [
     { icon: <Shield className="h-5 w-5" />, title: "Secure Reset", description: "Password reset links are single-use and expire in 1 hour for security." },
-    { icon: <Mail className="h-5 w-5" />, title: "Instant Delivery", description: "Reset emails are sent immediately — check your inbox and spam folder." },
+    { icon: <Mail className="h-5 w-5" />, title: "Instant Delivery", description: "Reset emails are sent immediately - check your inbox and spam folder." },
     { icon: <Clock className="h-5 w-5" />, title: "Quick Recovery", description: "Get back to tracking your applications in minutes, not hours." },
   ]
 

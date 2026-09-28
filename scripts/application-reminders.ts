@@ -202,7 +202,7 @@ async function main() {
     }
 
     if (!user.email && !user.phone) {
-      console.warn(`[reminders] user ${userId} has no email/phone — skipped`)
+      console.warn(`[reminders] user ${userId} has no email/phone - skipped`)
     }
 
     for (const r of results) {
@@ -222,7 +222,7 @@ async function main() {
     }
   }
 
-  console.log(`[reminders] done — ${sentCount} reminder(s) sent, ${fresh.length - sentCount} skipped/failed`)
+  console.log(`[reminders] done - ${sentCount} reminder(s) sent, ${fresh.length - sentCount} skipped/failed`)
 }
 
 function smsText(r: ApplicationReminderItem): string {

@@ -187,7 +187,7 @@ export default function AdminNotifications() {
                       {n.type ? (
                         <Badge variant="secondary" className="text-[10px]">{n.type.replace(/_/g, " ")}</Badge>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -196,7 +196,7 @@ export default function AdminNotifications() {
                           <ExternalLink className="h-3 w-3" /> Official
                         </a>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-gray-500">{n.views}</TableCell>
@@ -239,7 +239,7 @@ export default function AdminNotifications() {
                   {matchedContent ? (
                     <p className="text-xs text-emerald-600">View Details button will link to: {matchedContent.title}</p>
                   ) : watchedSlug && contentData?.data?.length ? (
-                    <p className="text-xs text-amber-600">No content with this slug — the View Details button will be hidden.</p>
+                    <p className="text-xs text-amber-600">No content with this slug - the View Details button will be hidden.</p>
                   ) : null}
                   <FormMessage />
                 </FormItem>
@@ -283,7 +283,7 @@ export default function AdminNotifications() {
                     value={matchedContent ? watchedSlug : undefined}
                     onValueChange={(v) => { if (v) form.setValue("slug", v, { shouldValidate: true }) }}
                   >
-                    <SelectTrigger><SelectValue placeholder="Select content — fills the slug automatically" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select content - fills the slug automatically" /></SelectTrigger>
                     <SelectContent>
                       {(contentData?.data || []).map((c) => (
                         <SelectItem key={c.id} value={c.slug}>{c.title}</SelectItem>

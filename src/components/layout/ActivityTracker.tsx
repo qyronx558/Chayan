@@ -11,7 +11,7 @@ import {
 } from "@/lib/recently-viewed"
 
 /**
- * Global visit tracker — mounted once in the root layout.
+ * Global visit tracker - mounted once in the root layout.
  * Like YouTube / Netflix watch history:
  * - records every detail-page visit (job, result, admit card, blog…)
  * - tracks max scroll depth so the home section can show "resume" progress

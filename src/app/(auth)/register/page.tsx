@@ -75,7 +75,7 @@ export default function RegisterPage() {
   }
 
   const benefits = [
-    { icon: <Bell className="h-5 w-5" />, title: "Personalized Alerts", description: "Get job notifications tailored to your qualifications, location, and preferences — govt & private." },
+    { icon: <Bell className="h-5 w-5" />, title: "Personalized Alerts", description: "Get job notifications tailored to your qualifications, location, and preferences - govt & private." },
     { icon: <Bookmark className="h-5 w-5" />, title: "Application Tracker", description: "Track every application status, deadlines, and documents in one place." },
     { icon: <Shield className="h-5 w-5" />, title: "Verified Sources Only", description: "Curated opportunities from official government portals & reputable private employers." },
     { icon: <CheckCircle2 className="h-5 w-5" />, title: "Exam Calendar & Syllabus", description: "Access exam dates, admit cards, results, and syllabi for all major exams." },

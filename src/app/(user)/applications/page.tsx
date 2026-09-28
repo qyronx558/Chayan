@@ -138,7 +138,7 @@ export default function ApplicationsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
-            <p className="text-sm text-gray-500">Track every job and admission you care about — from interested to result.</p>
+            <p className="text-sm text-gray-500">Track every job and admission you care about - from interested to result.</p>
           </div>
           <div className="ml-auto flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
             <span className="relative flex h-2 w-2">

@@ -50,7 +50,7 @@ export default function SalaryCalculatorClient() {
             <Label className="text-[15px]">Pay level</Label>
             <select value={level} onChange={(e) => setLevel(+e.target.value)} className="mt-1.5 h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base dark:border-slate-700 dark:bg-slate-900">
               {PAY_MATRIX_7.map((p) => (
-                <option key={p.level} value={p.level}>Level {p.level} — {inr(p.basic7)}</option>
+                <option key={p.level} value={p.level}>Level {p.level} - {inr(p.basic7)}</option>
               ))}
             </select>
             <p className="mt-1.5 text-[13px] text-gray-500">Most CGL, SI posts are Level 6–7.</p>
@@ -69,7 +69,7 @@ export default function SalaryCalculatorClient() {
           ) : (
             <div><Label className="text-[15px]">Expected hike: {fitment.toFixed(2)}x</Label>
               <input type="range" min={1.5} max={2.5} step={0.01} value={fitment} onChange={(e) => setFitment(+e.target.value)} className="mt-2 w-full accent-[#4f8577]" />
-              <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">Estimate only — not official yet.</p></div>
+              <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">Estimate only - not official yet.</p></div>
           )}
         </CardContent>
       </Card>

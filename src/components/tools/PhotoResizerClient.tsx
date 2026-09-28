@@ -111,7 +111,7 @@ export default function PhotoResizerClient() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={preview} alt="resized preview" className="h-24 w-20 rounded-lg border object-cover" />
               <div className="flex-1">
-                {meta && <div className="flex flex-wrap gap-2">{meta.kb <= (customKb || preset.kb) + 1 ? <StatusPill tone="ok">✓ Ready — {meta.kb.toFixed(0)} KB</StatusPill> : <StatusPill tone="warn">A bit big — try smaller size</StatusPill>}</div>}
+                {meta && <div className="flex flex-wrap gap-2">{meta.kb <= (customKb || preset.kb) + 1 ? <StatusPill tone="ok">✓ Ready - {meta.kb.toFixed(0)} KB</StatusPill> : <StatusPill tone="warn">A bit big - try smaller size</StatusPill>}</div>}
                 <div className="mt-3 flex gap-2">
                   {outUrl && <a href={outUrl} download={`${preset.id}.jpg`} className="rounded-lg bg-[#8f6238] px-4 py-2.5 text-[14px] font-medium text-white">Download</a>}
                   <button onClick={printPdf} className="rounded-lg border px-4 py-2.5 text-[14px] font-bold">Save PDF</button>
@@ -119,7 +119,7 @@ export default function PhotoResizerClient() {
               </div>
             </div>
           )}
-          <p className="text-[13px] text-gray-500">Private — stays on your phone.</p>
+          <p className="text-[13px] text-gray-500">Private - stays on your phone.</p>
         </CardContent>
       </Card>
 
@@ -129,7 +129,7 @@ export default function PhotoResizerClient() {
           <div><Label className="text-[15px]">Quality: {quality}%</Label><input type="range" min={30} max={95} value={quality} onChange={(e) => setQuality(+e.target.value)} className="mt-2 w-full accent-[#b07a4f]" /></div>
           <input ref={compRef} type="file" accept="image/*" className="hidden" onChange={(e) => onCompress(e.target.files?.[0])} />
           <Button variant="outline" onClick={() => compRef.current?.click()} disabled={busy} className="h-12 w-full text-base">{busy ? "Making..." : "Choose image"}</Button>
-          {compOut && <div className="rounded-xl bg-slate-100 p-4 text-[15px] dark:bg-slate-800"><StatusPill tone="ok">Ready — {compOut.kb.toFixed(0)} KB</StatusPill><a href={compOut.url} download="photo.jpg" className="ml-3 font-semibold text-slate-700 underline dark:text-slate-300">Download</a></div>}
+          {compOut && <div className="rounded-xl bg-slate-100 p-4 text-[15px] dark:bg-slate-800"><StatusPill tone="ok">Ready - {compOut.kb.toFixed(0)} KB</StatusPill><a href={compOut.url} download="photo.jpg" className="ml-3 font-semibold text-slate-700 underline dark:text-slate-300">Download</a></div>}
           <p className="text-[13px] text-gray-500">Works for SSC, Bank, Railway, UPSC forms.</p>
         </CardContent>
       </Card>

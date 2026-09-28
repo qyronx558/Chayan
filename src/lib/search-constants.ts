@@ -1,4 +1,4 @@
-// Shared search constants — single source of truth for popular searches.
+// Shared search constants - single source of truth for popular searches.
 // Imported by SearchDialog (modal) and homepage SearchBar (hero) so both stay in sync.
 
 export const POPULAR_SEARCHES = [

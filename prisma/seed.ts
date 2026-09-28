@@ -265,7 +265,7 @@ async function main() {
           slug: 'morning-routine-calm-focused',
           category: 'Productivity & Lifestyle',
           tags: 'routine, habits, focus, work-life',
-          excerpt: 'Small, sustainable habits that build focus over effort — a routine you can actually keep.',
+          excerpt: 'Small, sustainable habits that build focus over effort - a routine you can actually keep.',
           content: '<h2>Design for the average day</h2><p>The best routine is the one that survives your worst day, not the one optimised for your best.</p>',
           views: 5100, daysAgo: 4,
         }),

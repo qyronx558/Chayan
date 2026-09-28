@@ -151,7 +151,7 @@ export function updateProgress(href: string, progress: number) {
     if (clamped <= (items[idx].progress ?? 0)) return
     items[idx] = { ...items[idx], progress: clamped }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-    // Don't emit on every scroll tick — the section reads progress on mount/remount.
+    // Don't emit on every scroll tick - the section reads progress on mount/remount.
   } catch {}
 }
 
