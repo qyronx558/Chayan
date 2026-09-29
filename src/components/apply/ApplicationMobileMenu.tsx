@@ -19,7 +19,7 @@ interface ApplicationMobileMenuProps {
 }
 
 /**
- * Mobile ⋮ menu — holds every desktop rail action except Apply,
+ * Mobile ⋮ menu - holds every desktop rail action except Apply,
  * which always stays directly accessible in the bottom bar.
  */
 export function ApplicationMobileMenu({

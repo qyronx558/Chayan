@@ -6,6 +6,7 @@ import { Providers } from "@/components/layout/Providers"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { ConditionalChrome } from "@/components/layout/ConditionalChrome"
+import { HideOnAdmin } from "@/components/layout/HideOnAdmin"
 import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
 import { ActivityTracker } from "@/components/layout/ActivityTracker"
 import { CookieConsent } from "@/components/layout/CookieConsent"
@@ -112,9 +113,13 @@ export default function RootLayout({
           <ConditionalChrome header={<Header />} footer={<Footer />}>
             {children}
           </ConditionalChrome>
-          <WelcomeOnboarding />
+          <HideOnAdmin>
+            <WelcomeOnboarding />
+          </HideOnAdmin>
           <ActivityTracker />
-          <CookieConsent />
+          <HideOnAdmin>
+            <CookieConsent />
+          </HideOnAdmin>
           <Suspense fallback={null}>
             <GoogleAnalytics />
             <AdSenseScript />

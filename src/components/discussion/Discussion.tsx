@@ -543,7 +543,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
 
         {meta.locked && (
           <div className="flex items-center gap-1.5 border-b border-gray-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800 sm:px-4 dark:border-gray-800">
-            <Lock className="h-3 w-3" /> Locked — new comments are disabled.
+            <Lock className="h-3 w-3" /> Locked - new comments are disabled.
           </div>
         )}
 
@@ -666,7 +666,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
             </div>
           ) : comments.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-gray-500">
-              No comments yet — be the first to share.
+              No comments yet - be the first to share.
             </p>
           ) : (
             comments.map((comment) => (

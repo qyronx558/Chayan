@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const dynamic = "force-dynamic"
 
 /**
- * Private jobs — same unified Application Mode as government jobs.
+ * Private jobs - same unified Application Mode as government jobs.
  * URL resolution logic unchanged: the company's original application URL.
  */
 export default async function PrivateJobApplyPage({ params }: Props) {

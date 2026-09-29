@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Government jobs — unified Application Mode.
+ * Government jobs - unified Application Mode.
  * URL resolution logic unchanged: applyLink first, then officialWebsite.
  */
 export default async function ApplyStartPage({ params }: Props) {

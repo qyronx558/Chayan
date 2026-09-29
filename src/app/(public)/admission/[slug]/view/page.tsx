@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Admissions — fullscreen official-document viewer on the shared shell.
+ * Admissions - fullscreen official-document viewer on the shared shell.
  * URL resolution unchanged: the stored official PDF URL.
  */
 export default async function AdmissionViewPage({ params }: Props) {

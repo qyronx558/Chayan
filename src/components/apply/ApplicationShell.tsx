@@ -183,12 +183,12 @@ export function ApplicationShell(props: ApplicationShellProps) {
     const url = window.location.href
     try {
       if (navigator.share) {
-        await navigator.share({ title, text: `${title} — ${organization}`, url })
+        await navigator.share({ title, text: `${title} - ${organization}`, url })
         return
       }
       await navigator.clipboard.writeText(url)
     } catch {
-      // User cancelled or clipboard unavailable — stay silent.
+      // User cancelled or clipboard unavailable - stay silent.
     }
   }, [title, organization])
 
@@ -282,7 +282,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
                   </p>
                   <p className="max-w-sm text-xs text-gray-500">
                     {slowLoad
-                      ? "Still loading. The portal may be slow — please wait or try Reload."
+                      ? "Still loading. The portal may be slow - please wait or try Reload."
                       : "Loading the official website for you."}
                   </p>
                   {slowLoad && (
@@ -337,7 +337,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
         </div>
       </div>
 
-      {/* Desktop floating Apply CTA — always visible */}
+      {/* Desktop floating Apply CTA - always visible */}
       <ApplicationFloatingCTA
         variant="desktop"
         officialUrl={officialUrl}

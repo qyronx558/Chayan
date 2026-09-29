@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Results — fullscreen official-document viewer on the shared shell.
+ * Results - fullscreen official-document viewer on the shared shell.
  * URL resolution unchanged: the stored official PDF URL.
  */
 export default async function ResultViewPage({ params }: Props) {

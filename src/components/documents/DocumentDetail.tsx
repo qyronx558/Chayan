@@ -156,7 +156,7 @@ export function DocumentDetail({
 
   const filledRows = rows.filter((r) => r.value)
 
-  // When a fullscreen viewer route exists, every download button opens it —
+  // When a fullscreen viewer route exists, every download button opens it -
   // no separate viewer button needed. The viewer itself links the official file.
   const viewerActive = Boolean(viewerHref && downloadUrl)
 

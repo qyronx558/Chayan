@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Admit cards — fullscreen official-document viewer on the shared shell.
+ * Admit cards - fullscreen official-document viewer on the shared shell.
  * URL resolution unchanged: the stored official download URL.
  */
 export default async function AdmitCardViewPage({ params }: Props) {

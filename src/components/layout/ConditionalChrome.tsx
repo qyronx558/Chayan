@@ -25,10 +25,17 @@ export function isApplicationModePath(pathname: string | null): boolean {
   )
 }
 
+export function isAdminPath(pathname: string | null): boolean {
+  if (!pathname) return false
+  return pathname === "/admin" || pathname.startsWith("/admin/")
+}
+
 /**
  * Hides the normal site Header/Footer on Application Mode routes so the
- * official website gets ~90–96% of useful screen area. Everything else
- * (onboarding, trackers, consent, analytics) keeps running.
+ * official website gets ~90–96% of useful screen area, and on Admin routes
+ * so /admin renders as a standalone SaaS panel (own sidebar + topbar only).
+ * Everything else (onboarding, trackers, consent, analytics) keeps running
+ * unless separately hidden.
  */
 export function ConditionalChrome({
   header,
@@ -40,6 +47,15 @@ export function ConditionalChrome({
   children: ReactNode
 }) {
   const pathname = usePathname()
+
+  if (isAdminPath(pathname)) {
+    // Standalone SaaS admin: no main-site header/footer, only admin shell.
+    return (
+      <div className="min-h-[100dvh] bg-slate-100 dark:bg-[#070d1a]">
+        <main className="min-h-[100dvh]">{children}</main>
+      </div>
+    )
+  }
 
   if (isApplicationModePath(pathname)) {
     return (

@@ -77,7 +77,7 @@ function RailButton({
     </button>
   )
 
-  // Expanded rows already show their name — a tooltip would be redundant.
+  // Expanded rows already show their name - a tooltip would be redundant.
   if (expanded) return button
 
   return (
@@ -92,7 +92,7 @@ function RailButton({
  * Desktop tool rail with two states:
  * - Open: wide rail showing icon + name for every action.
  * - Collapsed: compact icon-only rail.
- * Desktop only — rendered `hidden md:flex` by the shell.
+ * Desktop only - rendered `hidden md:flex` by the shell.
  */
 export function ApplicationToolRail({
   collapsed,

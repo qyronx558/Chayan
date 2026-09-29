@@ -30,7 +30,7 @@ interface ApplicationInfoDrawerProps {
 }
 
 /**
- * Overlay drawer — floats above the iframe, never resizes it.
+ * Overlay drawer - floats above the iframe, never resizes it.
  * Desktop 320–400px, mobile 85–95vw. ESC closes (Radix default).
  */
 export function ApplicationInfoDrawer({

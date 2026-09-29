@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Syllabus — fullscreen official-document viewer on the shared shell.
+ * Syllabus - fullscreen official-document viewer on the shared shell.
  * URL resolution unchanged: the stored official PDF URL.
  */
 export default async function SyllabusViewPage({ params }: Props) {

@@ -290,7 +290,7 @@ export function Header() {
                     {(session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN") && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/admin/dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <Link href="/admin/dashboard" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 cursor-pointer">
                             <LayoutDashboard className="h-4 w-4" />
                             Admin Dashboard
                           </Link>

@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-export function LogoSmall({ className }: { className?: string }) {
+export function LogoSmall({ className, href = "/" }: { className?: string; href?: string }) {
   return (
-    <Link href="/" className={cn("flex items-center gap-2.5", className)}>
+    <Link href={href} className={cn("flex items-center gap-2.5", className)}>
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-600">
         <svg viewBox="0 0 80 80" className="h-6 w-6">
           <path d="M20 48 L30 58 L55 28" fill="none" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />

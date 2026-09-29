@@ -21,6 +21,7 @@ import {
   LogOut,
   Bookmark,
   ClipboardList,
+  LayoutDashboard,
   Menu,
   X,
   Wrench,
@@ -30,6 +31,7 @@ import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { mainNav } from "@/lib/constants"
+import { isAdmin } from "@/lib/roles"
 import { ThemeToggle } from "./ThemeToggle"
 import { LogoSmall } from "@/components/layout/LogoSmall"
 
@@ -132,6 +134,22 @@ export function MobileNav() {
             <div className="space-y-0.5 px-2">
               {session?.user ? (
                 <>
+                  {isAdmin(session.user.role) && (
+                    <SheetClose asChild>
+                      <Link
+                        href="/admin/dashboard"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold text-teal-700 transition-colors hover:bg-teal-50 dark:text-teal-300 dark:hover:bg-teal-950"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Admin Panel
+                        <span className="ml-auto rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-700 dark:bg-teal-900 dark:text-teal-200">
+                          New tab
+                        </span>
+                      </Link>
+                    </SheetClose>
+                  )}
                   <SheetClose asChild>
                     <Link
                       href="/profile"
