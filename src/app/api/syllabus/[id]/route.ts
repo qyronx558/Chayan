@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
+import { writeAuditLog } from "@/lib/moderation"
 
 export async function GET(
   request: NextRequest,
@@ -74,7 +75,22 @@ export async function PUT(
       ...(status !== undefined ? { status } : {}),
     }
 
+    if (session.user.role === "ADMIN") {
+      data.moderation = "PENDING"
+      data.reviewedById = null
+      data.reviewedAt = null
+      data.reviewNote = null
+    }
+
     const updatedSyllabus = await prisma.syllabus.update({ where: { id }, data })
+
+    await writeAuditLog({
+      action: "UPDATE",
+      entity: "Syllabus",
+      entityId: id,
+      userId: session.user.id,
+      details: `Updated by ${session.user.email} (${session.user.id})`,
+    })
 
     return NextResponse.json({ success: true, data: updatedSyllabus })
   } catch (error) {

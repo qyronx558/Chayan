@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
-import { isAdmin, contentScope } from "@/lib/roles"
+import { isAdmin } from "@/lib/roles"
+import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/admin-content"
+import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
 import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
@@ -22,9 +24,14 @@ export async function GET(request: NextRequest) {
 
     const where: Record<string, unknown> = {}
 
-    if (searchParams.get("scope") === "mine") {
-      const session = await auth()
-      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    let isAdminScope = false
+    try {
+      ;({ isAdminScope } = await applyContentScope(where, searchParams))
+    } catch (e) {
+      return NextResponse.json(
+        { success: false, error: e instanceof Error ? e.message : "Forbidden" },
+        { status: scopeErrorStatus(e) }
+      )
     }
     if (search) {
       where.OR = [
@@ -40,7 +47,7 @@ export async function GET(request: NextRequest) {
     const [items, total] = await Promise.all([
       prisma.privateJob.findMany({
         where,
-        include: { company: true },
+        include: { company: true, ...CREATED_BY_SELECT },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -53,7 +60,7 @@ export async function GET(request: NextRequest) {
       data: items,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     }
-    return searchParams.get("scope") === "mine" ? NextResponse.json(payload) : publicApiResponse(payload)
+    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch private jobs" },
@@ -80,14 +87,28 @@ export async function POST(request: NextRequest) {
     const job = await prisma.privateJob.create({
       data: {
         ...rest,
+        moderation: defaultModerationForRole(session.user.role),
+        ...(session.user.role === "SUPER_ADMIN"
+          ? { reviewedById: session.user.id, reviewedAt: new Date() }
+          : {}),
         company: { connect: { id: company ? company.id : companyId } },
         createdBy: { connect: { id: session.user.id } },
       },
     })
+    await writeAuditLog({
+      action: "CREATE",
+      entity: "PrivateJob",
+      entityId: job.id,
+      userId: session.user.id,
+      details: `Created by ${session.user.email} (${session.user.id}) moderation=${job.moderation}`,
+    })
     revalidatePublicContent("private-job", job.slug)
 
-    await notifyUsers("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`)
-    sendNotificationSMS("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`).catch(console.error)
+    // Notify subscribers only for approved (live) content; pending items notify on approval.
+    if (job.moderation === "APPROVED") {
+      await notifyUsers("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`)
+      sendNotificationSMS("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`).catch(console.error)
+    }
 
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (error) {

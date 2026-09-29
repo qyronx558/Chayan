@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api, fetcher } from "@/lib/api"
 import { useSession } from "next-auth/react"
@@ -26,17 +26,21 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
-import { isAdmin } from "@/lib/roles"
+import { isAdmin, isSuperAdmin } from "@/lib/roles"
 import { ImageUpload } from "@/components/admin/ImageUpload"
 import { RichEditor } from "@/components/admin/RichEditor"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, Search, Eye, EyeOff, Image, Send } from "lucide-react"
+import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
+import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface BlogItem {
   id: string; title: string; slug: string; excerpt: string | null; content: string | null; author: string | null; image: string | null; tags: string | null; categoryId: string | null; category: { id: string; name: string; slug: string; color: string | null } | null; published: boolean; views: number; createdAt: string
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
 }
 
 interface BlogCategoryItem {
@@ -58,13 +62,23 @@ export default function AdminBlog() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const [scope, setScope] = useState<"mine" | "all">("mine")
+  const [moderationFilter, setModerationFilter] = useState("")
+  const [adminIdFilter, setAdminIdFilter] = useState("")
+  const superView = isSuperAdmin(session?.user?.role)
+  useEffect(() => {
+    if (superView) {
+      setScope("all")
+      setModerationFilter((m) => m || "PENDING")
+    }
+  }, [superView])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: postsData, isLoading } = useQuery<{ success: boolean; data: BlogItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-blog", page, search],
-    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}&scope=mine`),
+    queryKey: ["admin-blog", page, search, scope, moderationFilter, adminIdFilter],
+    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: categoriesData } = useQuery<{ success: boolean; data: BlogCategoryItem[] }>({
@@ -142,14 +156,17 @@ export default function AdminBlog() {
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Search posts..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-              className="pl-9"
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Search posts..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                className="pl-9"
+              />
+            </div>
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} />
           </div>
         </CardHeader>
         <CardContent>
@@ -161,7 +178,9 @@ export default function AdminBlog() {
                     <TableHead>Title</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Author</TableHead>
+                    <TableHead>Uploaded by</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Moderation</TableHead>
                     <TableHead>Views</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -194,12 +213,18 @@ export default function AdminBlog() {
                         </TableCell>
                         <TableCell>{post.author || "Chayan"}</TableCell>
                         <TableCell>
+                          <p className="text-sm">{post.createdBy?.name || "-"}</p>
+                          <p className="text-xs text-gray-400">{post.createdBy?.email || ""}</p>
+                          <AdminIdBadge id={post.createdBy?.id || post.createdById} />
+                        </TableCell>
+                        <TableCell>
                           {post.published ? (
                             <Badge className="bg-green-100 text-green-700"><Eye className="mr-1 h-3 w-3" /> Published</Badge>
                           ) : (
                             <Badge variant="secondary"><EyeOff className="mr-1 h-3 w-3" /> Draft</Badge>
                           )}
                         </TableCell>
+                        <TableCell><ModerationBadge value={post.moderation} /></TableCell>
                         <TableCell>{post.views}</TableCell>
                         <TableCell>{formatDate(post.createdAt)}</TableCell>
                         <TableCell className="text-right">
@@ -216,7 +241,7 @@ export default function AdminBlog() {
                     ))}
                   </AnimatePresence>
                   {posts.length === 0 && (
-                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No posts found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="text-center text-gray-500">No posts found</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>

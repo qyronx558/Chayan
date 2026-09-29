@@ -43,6 +43,12 @@ enum JobStatus {
   UPCOMING
 }
 
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum JobType {
   FULL_TIME
   PART_TIME
@@ -278,6 +284,10 @@ model Job {
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
   createdById          String?
+  moderation           ModerationStatus @default(APPROVED)
+  reviewedById         String?
+  reviewedAt           DateTime?
+  reviewNote           String?
   department           Department  @relation(fields: [departmentId], references: [id])
   category             Category    @relation(fields: [categoryId], references: [id])
   state                State?      @relation(fields: [stateId], references: [id])
@@ -296,6 +306,8 @@ model Job {
   @@index([categoryId])
   @@index([stateId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model Company {
@@ -330,6 +342,10 @@ model PrivateJob {
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
   createdById      String?
+  moderation       ModerationStatus @default(APPROVED)
+  reviewedById     String?
+  reviewedAt       DateTime?
+  reviewNote       String?
   company          Company    @relation(fields: [companyId], references: [id])
   createdBy        User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
   bookmark         Bookmark[]
@@ -340,6 +356,8 @@ model PrivateJob {
   @@index([type])
   @@index([status])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model Result {
@@ -353,8 +371,12 @@ model Result {
   pdfUrl       String?
   resultDate   DateTime?
   status       String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime @default(now())
   createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
   department   Department @relation(fields: [departmentId], references: [id])
   category     Category   @relation(fields: [categoryId], references: [id])
   job          Job?       @relation(fields: [jobId], references: [id])
@@ -367,6 +389,8 @@ model Result {
   @@index([categoryId])
   @@index([jobId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model AdmitCard {
@@ -380,8 +404,12 @@ model AdmitCard {
   examDate     DateTime?
   downloadUrl  String?
   status       String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime @default(now())
   createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
   department   Department @relation(fields: [departmentId], references: [id])
   category     Category   @relation(fields: [categoryId], references: [id])
   job          Job?       @relation(fields: [jobId], references: [id])
@@ -394,6 +422,8 @@ model AdmitCard {
   @@index([categoryId])
   @@index([jobId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model AnswerKey {
@@ -406,8 +436,12 @@ model AnswerKey {
   jobId        String?
   pdfUrl       String?
   status       String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime @default(now())
   createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
   department   Department @relation(fields: [departmentId], references: [id])
   category     Category   @relation(fields: [categoryId], references: [id])
   job          Job?       @relation(fields: [jobId], references: [id])
@@ -419,6 +453,8 @@ model AnswerKey {
   @@index([categoryId])
   @@index([jobId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model Admission {
@@ -431,19 +467,25 @@ model Admission {
   startDate      DateTime?
   lastDate       DateTime?
   applicationFee String?
-  pdfUrl         String?
-  status         String?
-  createdAt      DateTime   @default(now())
-  createdById    String?
-  department     Department @relation(fields: [departmentId], references: [id])
-  category       Category   @relation(fields: [categoryId], references: [id])
-  createdBy      User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  pdfUrl       String?
+  status       String?
+  createdAt    DateTime @default(now())
+  createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  department   Department @relation(fields: [departmentId], references: [id])
+  category     Category   @relation(fields: [categoryId], references: [id])
+  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([title])
   @@index([slug])
   @@index([departmentId])
   @@index([categoryId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model Syllabus {
@@ -459,6 +501,10 @@ model Syllabus {
   status       String?
   createdAt    DateTime   @default(now())
   createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
   department   Department @relation(fields: [departmentId], references: [id])
   category     Category   @relation(fields: [categoryId], references: [id])
   job          Job?       @relation(fields: [jobId], references: [id])
@@ -471,6 +517,8 @@ model Syllabus {
   @@index([categoryId])
   @@index([jobId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model Notification {
@@ -701,6 +749,10 @@ model BlogPost {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   createdById String?
+  moderation  ModerationStatus @default(APPROVED)
+  reviewedById String?
+  reviewedAt  DateTime?
+  reviewNote  String?
   category    BlogCategory? @relation(fields: [categoryId], references: [id])
   createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
@@ -709,6 +761,8 @@ model BlogPost {
   @@index([createdAt])
   @@index([categoryId])
   @@index([createdById])
+  @@index([moderation])
+  @@index([createdById, moderation])
 }
 
 model BlogCategory {

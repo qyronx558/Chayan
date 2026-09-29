@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
 import { findOrCreateCompany } from "@/lib/companies"
 import { isAdmin } from "@/lib/roles"
+import { Prisma } from "@prisma/client"
+import { writeAuditLog } from "@/lib/moderation"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -48,12 +50,29 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const { companyId, companyName, ...rest } = validation.data
     const company = companyName ? await findOrCreateCompany(companyName) : null
+    const data: Prisma.PrivateJobUpdateInput = {
+      ...rest,
+      company: { connect: { id: company ? company.id : companyId } },
+    }
+
+    if (session.user.role === "ADMIN") {
+      data.moderation = "PENDING"
+      data.reviewedById = null
+      data.reviewedAt = null
+      data.reviewNote = null
+    }
+
     const job = await prisma.privateJob.update({
       where: { id },
-      data: {
-        ...rest,
-        company: { connect: { id: company ? company.id : companyId } },
-      },
+      data,
+    })
+
+    await writeAuditLog({
+      action: "UPDATE",
+      entity: "PrivateJob",
+      entityId: id,
+      userId: session.user.id,
+      details: `Updated by ${session.user.email} (${session.user.id})`,
     })
 
     return NextResponse.json({ success: true, data: job })

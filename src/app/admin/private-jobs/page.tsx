@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api, fetcher } from "@/lib/api"
 import { useSession } from "next-auth/react"
@@ -28,7 +28,10 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
-import { isAdmin } from "@/lib/roles"
+import { isAdmin, isSuperAdmin } from "@/lib/roles"
+import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
+import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { Search, ArrowLeft, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader"
@@ -43,6 +46,7 @@ import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
 interface Company { id: string; name: string }
 interface PrivateJobItem {
   id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; experience: string | null; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
 }
 interface PaginationInfo { total: number; page: number; limit: number; totalPages: number }
 
@@ -55,6 +59,9 @@ export default function AdminPrivateJobs() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
+  const [scope, setScope] = useState<"mine" | "all">("mine")
+  const [moderationFilter, setModerationFilter] = useState("")
+  const [adminIdFilter, setAdminIdFilter] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -64,10 +71,17 @@ export default function AdminPrivateJobs() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [bulkDeleting, setBulkDeleting] = useState(false)
+  const superView = isSuperAdmin(session?.user?.role)
+  useEffect(() => {
+    if (superView) {
+      setScope("all")
+      setModerationFilter((m) => m || "PENDING")
+    }
+  }, [superView])
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: PrivateJobItem[]; pagination: PaginationInfo }>({
-    queryKey: ["admin-private-jobs", page, search, typeFilter],
-    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=10&search=${search}&type=${typeFilter}&scope=mine`),
+    queryKey: ["admin-private-jobs", page, search, typeFilter, scope, moderationFilter, adminIdFilter],
+    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=10&search=${search}&type=${typeFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: companiesData } = useQuery<{ success: boolean; data: Company[] }>({
@@ -270,6 +284,7 @@ export default function AdminPrivateJobs() {
                 <SelectItem value="CONTRACT">Contract</SelectItem>
               </SelectContent>
             </Select>
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} />
           </div>
           <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
         </CardHeader>
@@ -286,6 +301,8 @@ export default function AdminPrivateJobs() {
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Type</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Status</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Last Date</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Uploaded by</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Status</TableHead>
                       <TableHead className="text-right text-xs font-semibold uppercase tracking-wide">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -299,6 +316,8 @@ export default function AdminPrivateJobs() {
                           <TableCell><Badge variant="outline">{job.type.replace("_", " ")}</Badge></TableCell>
                           <TableCell><Badge variant={job.status === "ACTIVE" ? "default" : "secondary"}>{job.status}</Badge></TableCell>
                           <TableCell className="whitespace-nowrap">{job.lastDate ? formatDate(job.lastDate) : "N/A"}</TableCell>
+                          <TableCell><div><p className="whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{job.createdBy?.name || job.createdBy?.email || "-"}</p><AdminIdBadge id={job.createdBy?.id || job.createdById} /></div></TableCell>
+                          <TableCell><ModerationBadge value={job.moderation} /></TableCell>
                           <TableCell className="text-right">
                             <RowActions
                               onEdit={() => openEdit(job)}
@@ -314,7 +333,7 @@ export default function AdminPrivateJobs() {
                         </motion.tr>
                       ))}
                     </AnimatePresence>
-                    {jobs.length === 0 && <TableRow><TableCell colSpan={7} className="py-10 text-center text-gray-500">No private jobs found</TableCell></TableRow>}
+                    {jobs.length === 0 && <TableRow><TableCell colSpan={9} className="py-10 text-center text-gray-500">No private jobs found</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>

@@ -3,7 +3,9 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { blogPostSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
-import { contentScope, isAdmin } from "@/lib/roles"
+import { isAdmin } from "@/lib/roles"
+import { applyContentScope, scopeErrorStatus } from "@/lib/admin-content"
+import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 
@@ -21,16 +23,25 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.BlogPostWhereInput = {}
 
-    const isOwnerScope = searchParams.get("scope") === "mine"
+    const scope = searchParams.get("scope")
+    const isOwnerScope = scope === "mine" || scope === "all"
     if (isOwnerScope) {
       const session = await auth()
       if (!session?.user || !isAdmin(session.user.role)) {
         return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
       }
-      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+      try {
+        await applyContentScope(where, searchParams)
+      } catch (e) {
+        return NextResponse.json(
+          { success: false, error: e instanceof Error ? e.message : "Forbidden" },
+          { status: scopeErrorStatus(e) }
+        )
+      }
     } else {
       // Unpublished posts are CMS-only and must never be exposed by a public query.
       where.published = true
+      where.moderation = "APPROVED"
     }
 
     if (search) {
@@ -55,7 +66,7 @@ export async function GET(request: NextRequest) {
     const [posts, total] = await Promise.all([
       prisma.blogPost.findMany({
         where,
-        include: { category: true },
+        include: { category: true, createdBy: { select: { id: true, name: true, email: true } } },
         orderBy: sort === "popular" ? [{ views: "desc" }, { createdAt: "desc" }] : { createdAt: "desc" },
         skip,
         take: limit,
@@ -107,11 +118,23 @@ export async function POST(request: NextRequest) {
         ...(tags !== undefined && tags !== null ? { tags } : {}),
         ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
         published,
+        moderation: defaultModerationForRole(session.user.role),
+        ...(session.user.role === "SUPER_ADMIN"
+          ? { reviewedById: session.user.id, reviewedAt: new Date() }
+          : {}),
         createdBy: { connect: { id: session.user.id } },
       },
     })
 
-    if (post.published) {
+    await writeAuditLog({
+      action: "CREATE",
+      entity: "Blog",
+      entityId: post.id,
+      userId: session.user.id,
+      details: `Created by ${session.user.email} (${session.user.id}) moderation=${post.moderation}`,
+    })
+
+    if (post.published && post.moderation === "APPROVED") {
       await notifyUsers("BLOG", post.title, post.slug, `New blog post published: ${post.title}`)
       sendNotificationSMS("BLOG", post.title, post.slug, `New blog post published: ${post.title}`).catch(console.error)
     }

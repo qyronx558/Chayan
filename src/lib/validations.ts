@@ -154,6 +154,35 @@ export const profileSchema = z.object({
   phone: z.string().nullable().optional(),
 })
 
+export const roleUpdateSchema = z.object({
+  role: z.enum(["USER", "ADMIN"]),
+})
+
+export type RoleUpdateInput = z.infer<typeof roleUpdateSchema>
+
+export const reviewActionSchema = z.object({
+  entity: z.enum([
+    "Job",
+    "PrivateJob",
+    "Result",
+    "AdmitCard",
+    "AnswerKey",
+    "Admission",
+    "Syllabus",
+    "Blog",
+  ]),
+  id: z.string().min(1, "Content id is required"),
+  action: z.enum(["APPROVE", "REJECT"]),
+  note: z.string().max(2000).nullable().optional(),
+}).refine((d) => d.action !== "REJECT" || (d.note && d.note.trim().length > 0), {
+  message: "Rejection requires a review note",
+  path: ["note"],
+})
+
+export type ReviewActionInput = z.infer<typeof reviewActionSchema>
+
+export const moderationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"])
+
 export const bookmarkSchema = z.object({
   jobId: z.string().nullable().optional(),
   resultId: z.string().nullable().optional(),

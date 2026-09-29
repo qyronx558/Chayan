@@ -5,6 +5,7 @@ import { jobSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { revalidatePublicContent } from "@/lib/cache"
+import { writeAuditLog } from "@/lib/moderation"
 
 export async function GET(
   request: NextRequest,
@@ -115,8 +116,19 @@ export async function PUT(
       status: status || "ACTIVE",
     }
 
+    if (session.user.role === "ADMIN") {
+      Object.assign(data, { moderation: "PENDING", reviewedById: null, reviewedAt: null, reviewNote: null })
+    }
+
     const job = await prisma.job.update({ where: { id }, data })
     revalidatePublicContent("job", job.slug)
+    await writeAuditLog({
+      action: "UPDATE",
+      entity: "Job",
+      entityId: id,
+      userId: session.user.id,
+      details: `Updated by ${session.user.email} (${session.user.id})`,
+    })
 
     return NextResponse.json({ success: true, data: job })
   } catch (error) {

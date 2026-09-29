@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api, fetcher } from "@/lib/api"
 import { useSession } from "next-auth/react"
@@ -28,12 +28,15 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { slugify } from "@/lib/utils"
-import { isAdmin } from "@/lib/roles"
+import { isAdmin, isSuperAdmin } from "@/lib/roles"
 import { Search, ArrowLeft, ArrowRight } from "lucide-react"
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader"
 import { RowActions } from "@/components/admin/RowActions"
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog"
 import { BulkActionBar } from "@/components/admin/BulkActionBar"
+import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
+import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { WizardSteps } from "@/components/admin/WizardSteps"
 import { FormSection } from "@/components/admin/FormSection"
 import { SmartContentField } from "@/components/admin/SmartContentField"
@@ -44,6 +47,7 @@ interface Category { id: string; name: string }
 interface SyllabusItem {
   id: string; title: string; slug: string; description: string | null; jobId: string | null; pdfUrl: string | null; subjects: string | null; status: string | null; createdAt: string
   department: Department; category: Category
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
 }
 
 const WIZARD_STEPS = ["Basic info", "Content & subjects", "Review"]
@@ -54,6 +58,16 @@ export default function AdminSyllabus() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const [scope, setScope] = useState<"mine" | "all">("mine")
+  const [moderationFilter, setModerationFilter] = useState("")
+  const [adminIdFilter, setAdminIdFilter] = useState("")
+  const superView = isSuperAdmin(session?.user?.role)
+  useEffect(() => {
+    if (superView) {
+      setScope("all")
+      setModerationFilter((m) => m || "PENDING")
+    }
+  }, [superView])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -64,8 +78,8 @@ export default function AdminSyllabus() {
   const [bulkDeleting, setBulkDeleting] = useState(false)
 
   const { data: syllabusData, isLoading } = useQuery<{ success: boolean; data: SyllabusItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-syllabus", page, search],
-    queryFn: () => fetcher(`/api/syllabus?page=${page}&limit=10&search=${search}&scope=mine`),
+    queryKey: ["admin-syllabus", page, search, scope, moderationFilter, adminIdFilter],
+    queryFn: () => fetcher(`/api/syllabus?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({ queryKey: ["admin-departments"], queryFn: () => fetcher("/api/departments") })
@@ -209,9 +223,12 @@ export default function AdminSyllabus() {
 
       <Card className="overflow-hidden rounded-2xl border-gray-200 shadow-sm dark:border-gray-800">
         <CardHeader className="space-y-3 border-b border-gray-100 bg-white pb-4 dark:border-gray-800 dark:bg-gray-900">
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input placeholder="Search syllabus..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="bg-gray-50 pl-9 dark:bg-gray-800" />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input placeholder="Search syllabus..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="bg-gray-50 pl-9 dark:bg-gray-800" />
+            </div>
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} />
           </div>
           <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
         </CardHeader>
@@ -226,6 +243,8 @@ export default function AdminSyllabus() {
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Title</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Department</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Status</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Uploaded by</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Moderation</TableHead>
                       <TableHead className="text-right text-xs font-semibold uppercase tracking-wide">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -236,6 +255,12 @@ export default function AdminSyllabus() {
                         <TableCell className="max-w-[250px] truncate font-medium">{s.title}</TableCell>
                         <TableCell className="whitespace-nowrap">{s.department.name}</TableCell>
                         <TableCell><Badge variant={s.status === "PUBLISHED" ? "default" : "secondary"}>{s.status || "Draft"}</Badge></TableCell>
+                        <TableCell>
+                          <p className="text-sm">{s.createdBy?.name || "-"}</p>
+                          <p className="text-xs text-gray-400">{s.createdBy?.email || ""}</p>
+                          <AdminIdBadge id={s.createdBy?.id || s.createdById} />
+                        </TableCell>
+                        <TableCell><ModerationBadge value={s.moderation} /></TableCell>
                         <TableCell className="text-right">
                           <RowActions
                             onEdit={() => openEdit(s)}
@@ -250,7 +275,7 @@ export default function AdminSyllabus() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {syllabusList.length === 0 && <TableRow><TableCell colSpan={5} className="py-10 text-center text-gray-500">No syllabus found</TableCell></TableRow>}
+                    {syllabusList.length === 0 && <TableRow><TableCell colSpan={7} className="py-10 text-center text-gray-500">No syllabus found</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>

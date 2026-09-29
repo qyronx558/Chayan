@@ -62,7 +62,7 @@ ehthumbs.db
 Desktop.ini
 
 # logs
-logs/
+/logs/
 *.log
 report.json
 lighthouse-perf.json

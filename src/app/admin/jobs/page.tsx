@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api, fetcher } from "@/lib/api"
 import { useSession } from "next-auth/react"
@@ -28,7 +28,10 @@ import {
 import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, getStatusColor, slugify } from "@/lib/utils"
-import { isAdmin } from "@/lib/roles"
+import { isAdmin, isSuperAdmin } from "@/lib/roles"
+import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
+import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { Search, ArrowLeft, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader"
@@ -46,6 +49,7 @@ interface State { id: string; name: string }
 interface JobItem {
   id: string; title: string; slug: string; status: string; advertisementNo: string | null; totalVacancies: number | null; salary: string | null; location: string | null; ageLimit: string | null; ageRelaxation: string | null; education: string | null; selectionProcess: string | null; applicationFee: string | null; importantDates: Record<string, string> | null; documentsRequired: string | null; howToApply: string | null; officialNotification: string | null; officialWebsite: string | null; applyLink: string | null; experience: string | null; startDate: string | null; lastDate: string | null; createdAt: string
   department: Department; category: Category; state: State | null
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
 }
 
 const WIZARD_STEPS = ["Basic info", "Details & content", "Links & dates", "Review"]
@@ -65,6 +69,9 @@ export default function AdminJobs() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
+  const [scope, setScope] = useState<"mine" | "all">("mine")
+  const [moderationFilter, setModerationFilter] = useState("")
+  const [adminIdFilter, setAdminIdFilter] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -73,10 +80,17 @@ export default function AdminJobs() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [bulkDeleting, setBulkDeleting] = useState(false)
+  const superView = isSuperAdmin(session?.user?.role)
+  useEffect(() => {
+    if (superView) {
+      setScope("all")
+      setModerationFilter((m) => m || "PENDING")
+    }
+  }, [superView])
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: JobItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-jobs", page, search, statusFilter],
-    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}&scope=mine`),
+    queryKey: ["admin-jobs", page, search, statusFilter, scope, moderationFilter, adminIdFilter],
+    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({
@@ -296,6 +310,7 @@ export default function AdminJobs() {
                 <SelectItem value="UPCOMING">Upcoming</SelectItem>
               </SelectContent>
             </Select>
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} />
           </div>
           <BulkActionBar
             selectedCount={selected.size}
@@ -321,6 +336,8 @@ export default function AdminJobs() {
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Status</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Last Date</TableHead>
                       <TableHead className="text-xs font-semibold uppercase tracking-wide">Vacancies</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Uploaded by</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wide">Status</TableHead>
                       <TableHead className="text-right text-xs font-semibold uppercase tracking-wide">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -343,6 +360,8 @@ export default function AdminJobs() {
                           <TableCell><Badge className={getStatusColor(job.status)}>{job.status}</Badge></TableCell>
                           <TableCell className="whitespace-nowrap">{formatDate(job.lastDate) || "-"}</TableCell>
                           <TableCell className="tabular-nums">{job.totalVacancies ?? "N/A"}</TableCell>
+                          <TableCell><div><p className="whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{job.createdBy?.name || job.createdBy?.email || "-"}</p><AdminIdBadge id={job.createdBy?.id || job.createdById} /></div></TableCell>
+                          <TableCell><ModerationBadge value={job.moderation} /></TableCell>
                           <TableCell className="text-right">
                             <RowActions
                               onEdit={() => openEdit(job)}
@@ -359,7 +378,7 @@ export default function AdminJobs() {
                       ))}
                     </AnimatePresence>
                     {jobs.length === 0 && (
-                      <TableRow><TableCell colSpan={8} className="py-10 text-center text-gray-500">No jobs found. Try a different search or add a new job.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={10} className="py-10 text-center text-gray-500">No jobs found. Try a different search or add a new job.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>

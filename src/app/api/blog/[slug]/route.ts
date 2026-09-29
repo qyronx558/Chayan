@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { blogPostSchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
 import { revalidatePublicContent } from "@/lib/cache"
+import { Prisma } from "@prisma/client"
+import { writeAuditLog } from "@/lib/moderation"
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -36,19 +38,36 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: "A post with this slug already exists" }, { status: 409 })
     }
 
+    const data: Prisma.BlogPostUpdateInput = {
+      title,
+      slug: postSlug,
+      ...(excerpt !== undefined && excerpt !== null ? { excerpt } : {}),
+      ...(content !== undefined && content !== null ? { content } : {}),
+      ...(author !== undefined && author !== null ? { author } : {}),
+      ...(image !== undefined && image !== null ? { image } : {}),
+      ...(tags !== undefined && tags !== null ? { tags } : {}),
+      ...(categoryId !== undefined && categoryId !== null ? { categoryId } : {}),
+      published,
+    }
+
+    if (session.user.role === "ADMIN") {
+      data.moderation = "PENDING"
+      data.reviewedById = null
+      data.reviewedAt = null
+      data.reviewNote = null
+    }
+
     const post = await prisma.blogPost.update({
       where: { id: slug },
-      data: {
-        title,
-        slug: postSlug,
-        ...(excerpt !== undefined && excerpt !== null ? { excerpt } : {}),
-        ...(content !== undefined && content !== null ? { content } : {}),
-        ...(author !== undefined && author !== null ? { author } : {}),
-        ...(image !== undefined && image !== null ? { image } : {}),
-        ...(tags !== undefined && tags !== null ? { tags } : {}),
-        ...(categoryId !== undefined && categoryId !== null ? { categoryId } : {}),
-        published,
-      },
+      data,
+    })
+
+    await writeAuditLog({
+      action: "UPDATE",
+      entity: "Blog",
+      entityId: post.id,
+      userId: session.user.id,
+      details: `Updated by ${session.user.email} (${session.user.id})`,
     })
     revalidatePublicContent("blog", existing.slug)
     if (post.slug !== existing.slug) revalidatePublicContent("blog", post.slug)

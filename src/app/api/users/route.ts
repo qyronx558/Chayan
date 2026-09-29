@@ -55,16 +55,22 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "10")))
     const search = searchParams.get("search") || ""
+    const role = searchParams.get("role") || ""
     const skip = (page - 1) * limit
 
-    const where = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { email: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
-      : {}
+    // Unique Admin ID = User.id (cuid). Search matches name, email, or id prefix/full.
+    const searchOr = search
+      ? [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { email: { contains: search, mode: "insensitive" as const } },
+          { id: { contains: search } },
+        ]
+      : []
+
+    const where = {
+      ...(searchOr.length > 0 ? { OR: searchOr } : {}),
+      ...(role === "USER" || role === "ADMIN" || role === "SUPER_ADMIN" ? { role: role as "USER" | "ADMIN" | "SUPER_ADMIN" } : {}),
+    }
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -79,7 +85,20 @@ export async function GET(request: NextRequest) {
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
-          _count: { select: { bookmark: true, comments: true } },
+          _count: {
+            select: {
+              bookmark: true,
+              comments: true,
+              jobs: true,
+              privateJobs: true,
+              results: true,
+              admitCards: true,
+              answerKeys: true,
+              admissions: true,
+              syllabi: true,
+              blogPosts: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,

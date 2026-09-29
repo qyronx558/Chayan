@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { resultSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
+import { writeAuditLog } from "@/lib/moderation"
 
 export async function GET(
   request: NextRequest,
@@ -74,7 +75,18 @@ export async function PUT(
       ...(status !== undefined ? { status } : {}),
     }
 
+    if (session.user.role === "ADMIN") {
+      Object.assign(data, { moderation: "PENDING", reviewedById: null, reviewedAt: null, reviewNote: null })
+    }
+
     const result = await prisma.result.update({ where: { id }, data })
+    await writeAuditLog({
+      action: "UPDATE",
+      entity: "Result",
+      entityId: id,
+      userId: session.user.id,
+      details: `Updated by ${session.user.email} (${session.user.id})`,
+    })
 
     return NextResponse.json({ success: true, data: result })
   } catch (error) {

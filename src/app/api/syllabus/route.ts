@@ -3,7 +3,9 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
-import { contentScope, isAdmin } from "@/lib/roles"
+import { isAdmin } from "@/lib/roles"
+import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/admin-content"
+import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
@@ -20,9 +22,14 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.SyllabusWhereInput = {}
 
-    if (searchParams.get("scope") === "mine") {
-      const session = await auth()
-      Object.assign(where, contentScope(session?.user?.role, session?.user?.id))
+    let isAdminScope = false
+    try {
+      ;({ isAdminScope } = await applyContentScope(where, searchParams))
+    } catch (e) {
+      return NextResponse.json(
+        { success: false, error: e instanceof Error ? e.message : "Forbidden" },
+        { status: scopeErrorStatus(e) }
+      )
     }
 
     if (search) {
@@ -38,7 +45,7 @@ export async function GET(request: NextRequest) {
     const [syllabusList, total] = await Promise.all([
       prisma.syllabus.findMany({
         where,
-        include: { department: true, category: true, job: true },
+        include: { department: true, category: true, job: true, ...CREATED_BY_SELECT },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -51,7 +58,7 @@ export async function GET(request: NextRequest) {
       data: syllabusList,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     }
-    return searchParams.get("scope") === "mine" ? NextResponse.json(payload) : publicApiResponse(payload)
+    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch syllabus" },
@@ -91,14 +98,28 @@ export async function POST(request: NextRequest) {
       ...(pdfUrl !== undefined && pdfUrl !== null ? { pdfUrl } : {}),
       ...(subjects !== undefined && subjects !== null ? { subjects } : {}),
       ...(status !== undefined && status !== null ? { status } : {}),
+      moderation: defaultModerationForRole(session.user.role),
+      ...(session.user.role === "SUPER_ADMIN"
+        ? { reviewedById: session.user.id, reviewedAt: new Date() }
+        : {}),
       createdBy: { connect: { id: session.user.id } },
     }
 
     const syllabus = await prisma.syllabus.create({ data })
+    await writeAuditLog({
+      action: "CREATE",
+      entity: "Syllabus",
+      entityId: syllabus.id,
+      userId: session.user.id,
+      details: `Created by ${session.user.email} (${session.user.id}) moderation=${syllabus.moderation}`,
+    })
     revalidatePublicContent("syllabus", syllabus.slug)
 
-    await notifyUsers("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`)
-    sendNotificationSMS("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`).catch(console.error)
+    // Notify subscribers only for approved (live) content; pending items notify on approval.
+    if (syllabus.moderation === "APPROVED") {
+      await notifyUsers("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`)
+      sendNotificationSMS("SYLLABUS", syllabus.title, syllabus.slug, `New syllabus published: ${syllabus.title}`).catch(console.error)
+    }
 
     return NextResponse.json({ success: true, data: syllabus }, { status: 201 })
   } catch (error) {
