@@ -44,8 +44,8 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
   const isCtaExternal = ctaHref.startsWith("http")
 
   return (
-    <div className="mx-auto flex min-h-[420px] max-w-7xl flex-col items-center justify-center gap-7 px-4 py-10 sm:min-h-[460px] sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
-      <div className="w-full lg:flex-1">
+    <div className="mx-auto flex min-h-[420px] w-full max-w-7xl min-w-0 flex-col items-center justify-center gap-7 px-4 py-10 sm:min-h-[460px] sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
+      <div className="w-full min-w-0 lg:flex-1">
         {item.image && (
           <div className="relative mb-5 aspect-[16/10] w-full max-w-xl overflow-hidden rounded-xl border border-white/10 shadow-lg sm:mx-auto sm:aspect-[4/3] lg:hidden">
             <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" loading="lazy" />
@@ -57,7 +57,7 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
           {badge}
         </div>
 
-        <h1 className="mb-3 text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+        <h1 className="mb-3 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
           {item.title}
         </h1>
 

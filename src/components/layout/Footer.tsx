@@ -47,12 +47,12 @@ export function Footer({ className }: { className?: string }) {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className={cn("bg-[#0b1e33] text-slate-300", className)}>
+    <footer className={cn("w-full max-w-[100vw] overflow-x-clip bg-[#0b1e33] text-slate-300", className)}>
       <div className="h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-amber-400" aria-hidden="true" />
 
       <div className="bg-gradient-to-b from-[#142f4d] to-[#0b1e33]">
-        <div className="mx-auto max-w-7xl px-4 py-12">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 min-w-0">
+          <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-12">
             <div className="sm:col-span-2 lg:col-span-4">
               <Link href="/" className="flex items-center gap-2.5">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-500">
@@ -74,9 +74,9 @@ export function Footer({ className }: { className?: string }) {
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
                   <span>New Delhi, India</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <Mail className="h-4 w-4 shrink-0 text-teal-400" />
-                  <span>contact@chayanjobs.com</span>
+                  <span className="min-w-0 break-all">contact@chayanjobs.com</span>
                 </div>
               </div>
               <Newsletter className="mt-4" variant="footer" />
@@ -94,8 +94,8 @@ export function Footer({ className }: { className?: string }) {
             ))}
           </div>
 
-          <div className="mt-12 border-t border-white/10 pt-10">
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-12 min-w-0 border-t border-white/10 pt-10">
+            <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-5">
               <div>
                 <FooterHeading>Trending Searches</FooterHeading>
                 <ul className="space-y-2.5">
@@ -118,8 +118,8 @@ export function Footer({ className }: { className?: string }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-center py-10">
-            <div className="text-7xl font-bold tracking-[0.15em] text-white/95 sm:text-8xl md:text-9xl">Chayan</div>
+          <div className="flex items-center justify-center overflow-hidden py-10 min-w-0">
+            <div className="max-w-full break-words text-center text-6xl font-bold leading-none tracking-[0.15em] text-white/95 sm:text-8xl md:text-9xl">Chayan</div>
           </div>
 
           <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">

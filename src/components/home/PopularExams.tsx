@@ -85,9 +85,9 @@ export function PopularExams({ className }: { className?: string }) {
         />
 
         {loading ? (
-          <div className="flex gap-5 overflow-x-auto pb-4">
+          <div className="no-scrollbar flex min-w-0 snap-x gap-5 overflow-x-auto px-1 pb-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="w-72 shrink-0">
+              <div key={i} className="w-[78vw] max-w-72 shrink-0 snap-start sm:w-72">
                 <Card className="overflow-hidden border-gray-200">
                   <Skeleton className="h-32 w-full" />
                   <CardContent className="p-4">
@@ -101,10 +101,10 @@ export function PopularExams({ className }: { className?: string }) {
         ) : exams.length === 0 ? (
           <p className="py-12 text-center text-gray-500">No exams available.</p>
         ) : (
-          <div className="overflow-x-auto pb-4">
-            <div className="flex gap-5" style={{ minWidth: "max-content" }}>
+          <div className="no-scrollbar min-w-0 overflow-x-auto px-1 pb-4">
+            <div className="flex min-w-0 snap-x gap-5">
               {exams.map((exam) => (
-                <div key={exam.id} className="w-72 shrink-0">
+                <div key={exam.id} className="w-[78vw] max-w-72 shrink-0 snap-start sm:w-72">
                   <Link href={`/jobs?categoryId=${exam.categoryId}`} className="group block">
                     <Card className="overflow-hidden border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/10">
                       <CardContent className="p-0">

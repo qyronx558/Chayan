@@ -108,23 +108,23 @@ export function QuickLinks({ className }: { className?: string }) {
           subtitle="Everything you need to track your government job applications"
         />
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4 lg:gap-4">
+        <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4 lg:gap-4">
           {links.map((link, i) => (
             <Link
               key={link.title}
               href={link.href}
               className={cn(
-                "group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10",
+                "group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10 sm:p-4",
                 "animate-fade-in-up"
               )}
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-blue-600 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-              <div className="mb-3 flex items-start justify-between">
+              <div className="mb-3 flex min-w-0 items-start justify-between gap-2">
                 <span
                   className={cn(
-                    "flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110",
+                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110",
                     link.gradient
                   )}
                 >
@@ -140,10 +140,10 @@ export function QuickLinks({ className }: { className?: string }) {
                 </span>
               </div>
 
-              <h3 className="text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-700">
+              <h3 className="break-words text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-700">
                 {link.title}
               </h3>
-              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-gray-500">{link.description}</p>
+              <p className="mt-1 line-clamp-2 break-words text-[11px] leading-snug text-gray-500">{link.description}</p>
 
               <span className="mt-3 inline-flex items-center gap-0.5 text-[11px] font-semibold text-blue-600 opacity-70 transition-all duration-300 group-hover:gap-1.5 group-hover:opacity-100">
                 Explore <ArrowUpRight className="h-3 w-3" />

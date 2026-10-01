@@ -77,8 +77,67 @@
   @apply border-border;
 }
 
+html,
+body {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
 body {
   @apply bg-background text-foreground;
+  min-width: 0;
+}
+
+/* ── Uniform site container: single source of truth for header / sections / footer ── */
+.container-site {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem; /* max-w-7xl */
+  padding-inline: 1rem; /* px-4 */
+}
+@media (min-width: 640px) {
+  .container-site {
+    padding-inline: 1.5rem; /* sm:px-6 */
+  }
+}
+@media (min-width: 1024px) {
+  .container-site {
+    padding-inline: 2rem; /* lg:px-8 */
+  }
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Uniform alignment guard: header / main sections / footer share one gutter ── */
+header div.mx-auto.max-w-7xl,
+main div.mx-auto.max-w-7xl,
+footer div.mx-auto.max-w-7xl {
+  width: 100%;
+  min-width: 0;
+}
+
+main > section {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  min-width: 0;
+}
+
+main section div[class*="grid"] {
+  min-width: 0;
+}
+
+/* Hide scrollbars for inset pill / card scrollers while keeping swipe */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .ProseMirror {

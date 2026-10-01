@@ -165,7 +165,7 @@ export function Header() {
     <>
       <header
         className={cn(
-          "sticky top-[env(safe-area-inset-top)] z-50 w-full transition-shadow duration-200",
+          "sticky top-[env(safe-area-inset-top)] z-50 w-full max-w-[100vw] overflow-x-clip transition-shadow duration-200",
           "bg-gradient-to-r from-orange-50 via-white to-green-50",
           "dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]",
           scrolled && "shadow-md"
@@ -189,9 +189,9 @@ export function Header() {
             <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/2 bg-gradient-to-r from-transparent via-white/45 to-transparent" />
             <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/4 bg-gradient-to-r from-transparent via-white/25 to-transparent [animation-delay:1.8s]" />
           </div>
-          <div className="relative z-10 mx-auto max-w-7xl px-4 flex items-center justify-between h-9">
-            <div className="w-[200px] hidden sm:block" />
-            <span className="flex-1 sm:flex-none rounded-full bg-white/65 px-3 py-[2px] text-xs text-[#1e3a5f] dark:bg-black/35 dark:text-white font-semibold text-center shadow-sm backdrop-blur-[1px]">
+          <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 h-9 min-w-0">
+            <div className="hidden flex-1 sm:block" />
+            <span className="min-w-0 flex-1 sm:flex-none truncate rounded-full bg-white/65 px-3 py-[2px] text-xs text-[#1e3a5f] dark:bg-black/35 dark:text-white font-semibold text-center shadow-sm backdrop-blur-[1px]">
               Welcome to Chayan{session?.user?.name ? `, ${session.user.name}` : ""}
             </span>
             <div className="hidden md:block">
@@ -200,9 +200,9 @@ export function Header() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="flex h-16 items-center justify-between gap-2 xl:gap-3">
-            <div className="flex shrink-0 items-center gap-1">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-2 xl:gap-3 min-w-0">
+            <div className="flex min-w-0 shrink-0 items-center gap-1">
               <MobileNav />
               <LogoSmall />
             </div>
@@ -338,11 +338,11 @@ export function Header() {
               )}
             </div>
           </div>
-          <div className="pb-3 lg:hidden">
+          <div className="pb-3 lg:hidden min-w-0">
             <SearchTrigger
               onTrigger={() => setSearchOpen(true)}
               placeholder="Search jobs, results, admit cards..."
-              className="w-full"
+              className="w-full min-w-0"
             />
           </div>
         </div>

@@ -66,9 +66,9 @@ export function ConditionalChrome({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip">
       {header}
-      <main className="flex-1">{children}</main>
+      <main className="w-full min-w-0 flex-1 overflow-x-clip">{children}</main>
       {footer}
     </div>
   )

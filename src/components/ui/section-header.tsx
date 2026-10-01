@@ -23,8 +23,8 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div className={cn("mb-6 flex flex-wrap items-center justify-between gap-3", className)}>
-      <div className="flex min-w-0 items-center gap-3.5">
+    <div className={cn("mb-6 flex min-w-0 flex-wrap items-center justify-between gap-3", className)}>
+      <div className="flex min-w-0 flex-1 items-center gap-3.5">
         <span
           className={cn(
             "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm",
@@ -33,9 +33,9 @@ export function SectionHeader({
         >
           <Icon className="h-5 w-5" />
         </span>
-        <div className="min-w-0">
-          <h2 className="truncate text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">{title}</h2>
-          {subtitle && <p className="mt-0.5 truncate text-sm text-gray-500">{subtitle}</p>}
+        <div className="min-w-0 flex-1">
+          <h2 className="line-clamp-2 break-words text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">{title}</h2>
+          {subtitle && <p className="mt-0.5 line-clamp-2 break-words text-sm text-gray-500">{subtitle}</p>}
         </div>
       </div>
       {viewAllHref && (

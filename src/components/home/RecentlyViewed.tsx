@@ -107,7 +107,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
         />
 
         {/* Controls row: filters + history actions */}
-        <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="mb-5 flex min-w-0 flex-wrap items-center gap-2">
           <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Filter history by type">
             {FILTERS.map((f) => {
               const count = f.value === "all" ? items.length : (counts.get(f.value) ?? 0)
@@ -223,7 +223,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
         ) : (
           <div
             ref={scrollerRef}
-            className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 pt-1 [scrollbar-width:thin] sm:mx-0 sm:px-1"
+            className="mx-0 flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:thin]"
           >
             {visible.map((item) => {
               const meta = TYPE_META[item.type] ?? TYPE_META.page
@@ -232,7 +232,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
               return (
                 <article
                   key={item.href}
-                  className="group relative flex w-[260px] flex-none snap-start flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10 sm:w-[300px]"
+                  className="group relative flex w-[78vw] max-w-[300px] flex-none snap-start flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10 sm:w-[300px] sm:max-w-none"
                 >
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-blue-600 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 

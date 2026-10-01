@@ -153,8 +153,8 @@ export function JobsByQualification({ className }: { className?: string }) {
         </div>
 
         {loading ? (
-          <div className="space-y-4">
-            <div className="flex gap-2 pb-2">
+          <div className="min-w-0 space-y-4">
+            <div className="no-scrollbar flex min-w-0 gap-2 overflow-x-auto pb-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-9 w-24 rounded-full" />
               ))}
@@ -181,14 +181,14 @@ export function JobsByQualification({ className }: { className?: string }) {
         ) : (
           <>
             {qualifications.length > 0 && (
-              <div className="mb-8 overflow-x-auto">
-                <div className="flex gap-2 pb-2">
+              <div className="no-scrollbar mb-8 min-w-0 overflow-x-auto px-1 pb-1">
+                <div className="flex min-w-0 snap-x gap-2 pb-2">
                   {qualifications.map((qual) => (
                     <button
                       key={qual}
                       onClick={() => setSelectedQual(qual)}
                       className={cn(
-                        "whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-all",
+                        "shrink-0 snap-start whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-all",
                         selectedQual === qual
                           ? "bg-amber-500 text-white shadow-md"
                           : "bg-white text-gray-600 hover:text-amber-600 hover:border-amber-300 border"

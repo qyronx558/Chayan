@@ -9,12 +9,12 @@ export function TrustBadges({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "border-y border-gray-200 bg-gradient-to-b from-gray-50 to-white dark:border-gray-800 dark:from-gray-900 dark:to-gray-950",
+        "w-full max-w-[100vw] overflow-x-clip border-y border-gray-200 bg-gradient-to-b from-gray-50 to-white dark:border-gray-800 dark:from-gray-900 dark:to-gray-950",
         className
       )}
     >
       <Script src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js" strategy="lazyOnload" />
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl min-w-0 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
             Why Trust Chayan

@@ -50,7 +50,7 @@ export function FeaturedSlider() {
 
   return (
     <section
-      className="relative overflow-hidden bg-[#0a1628]"
+      className="relative w-full max-w-[100vw] overflow-hidden bg-[#0a1628]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -67,7 +67,7 @@ export function FeaturedSlider() {
         </div>
       </div>
 
-      <div className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-4 pb-5 sm:px-6 lg:px-8">
+      <div className="relative z-20 mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between px-4 pb-5 sm:px-6 lg:px-8">
         <button
           onClick={() => emblaApi?.scrollPrev()}
           className="rounded-full border border-white/15 bg-white/5 p-2 text-white/70 backdrop-blur-md transition-all hover:bg-white/15 hover:text-white"
