@@ -9,6 +9,7 @@ import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { computeTrustScore } from "@/lib/private-jobs-trust"
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +21,13 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || ""
     const companyId = searchParams.get("companyId") || ""
     const location = searchParams.get("location") || ""
+    const remote = searchParams.get("remote") || ""
+    const minSalary = parseInt(searchParams.get("minSalary") || "0") || 0
+    const exp = searchParams.get("exp") || ""
+    const fresher = searchParams.get("fresher") || ""
+    const walkin = searchParams.get("walkin") || ""
+    const skill = searchParams.get("skill") || ""
+    const sort = searchParams.get("sort") || "new"
     const skip = (page - 1) * limit
 
     const where: Record<string, unknown> = {}
@@ -37,18 +45,33 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" as const } },
         { company: { name: { contains: search, mode: "insensitive" as const } } },
+        { skills: { has: search } },
       ]
     }
-    if (type) where.type = type
+    if (type && type !== "all") where.type = type
     if (status) where.status = status
-    if (companyId) where.companyId = companyId
-    if (location) where.location = { contains: location, mode: "insensitive" as const }
+    if (companyId && companyId !== "all") where.companyId = companyId
+    if (location && location !== "all") where.location = { contains: location, mode: "insensitive" as const }
+    if (remote && remote !== "all") where.remotePolicy = remote
+    if (minSalary > 0) where.salaryMax = { gte: minSalary }
+    if (exp) {
+      const yrs = parseInt(exp)
+      if (!isNaN(yrs)) where.AND = [...((where.AND as unknown[]) || []), { OR: [{ expMax: null }, { expMax: { gte: yrs } }] }]
+    }
+    if (fresher === "1") where.isFresherFriendly = true
+    if (walkin === "1") where.isWalkIn = true
+    if (skill && skill !== "all") where.skills = { has: skill }
+
+    const orderBy =
+      sort === "salary" ? [{ salaryMax: "desc" as const }, { createdAt: "desc" as const }] :
+      sort === "trust" ? [{ trustScore: "desc" as const }, { createdAt: "desc" as const }] :
+      [{ createdAt: "desc" as const }]
 
     const [items, total] = await Promise.all([
       prisma.privateJob.findMany({
         where,
         include: { company: true, ...CREATED_BY_SELECT },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip,
         take: limit,
       }),
@@ -82,11 +105,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const { companyId, companyName, ...rest } = validation.data
-    const company = companyName ? await findOrCreateCompany(companyName) : null
+    const { companyId, companyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
+    const company = companyName ? await findOrCreateCompany(companyName) : await prisma.company.findUnique({ where: { id: companyId! } })
+    const trust = computeTrustScore({
+      applicationUrl: rest.applicationUrl,
+      applicationEmail: rest.applicationEmail,
+      proofUrl: rest.proofUrl,
+      companyWebsite: company?.website,
+      companyVerified: company?.verifiedStatus === "VERIFIED",
+      description: rest.description,
+    })
     const job = await prisma.privateJob.create({
       data: {
         ...rest,
+        ...(isFresherFriendly != null ? { isFresherFriendly } : {}),
+        ...(isWalkIn != null ? { isWalkIn } : {}),
+        skills: skills ?? [],
+        trustScore: trust.score,
         moderation: defaultModerationForRole(session.user.role),
         ...(session.user.role === "SUPER_ADMIN"
           ? { reviewedById: session.user.id, reviewedAt: new Date() }

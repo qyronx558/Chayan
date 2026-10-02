@@ -4,10 +4,15 @@ import { prisma } from "@/lib/prisma"
 import { companySchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const verified = searchParams.get("verified") || ""
+    const withStats = searchParams.get("withStats") === "1"
     const companies = await prisma.company.findMany({
+      where: verified ? { verifiedStatus: verified as never } : {},
       orderBy: { name: "asc" },
+      include: withStats ? { _count: { select: { privateJob: true } } } : undefined,
     })
     return NextResponse.json({ success: true, data: companies })
   } catch (error) {

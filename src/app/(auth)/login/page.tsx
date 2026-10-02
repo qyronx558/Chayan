@@ -7,7 +7,7 @@ import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Mail, Loader2, Shield, Bell, Bookmark, Clock } from "lucide-react"
+import { Mail, Loader2, Shield, Bell, Bookmark, Clock, Briefcase, Building2, User } from "lucide-react"
 import { loginSchema, type LoginInput } from "@/lib/validations"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
@@ -20,6 +20,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
+  const initialMode = searchParams.get("mode") === "employer" ? "employer" : "seeker"
+  const callbackUrl = searchParams.get("callbackUrl") || "/"
+  const [mode, setMode] = useState<"seeker" | "employer">(initialMode)
   const authError = searchParams.get("error")
   const errorMessage: Record<string, string> = {
     OAuthAccountNotLinked: "This email is already registered with a password. Sign in with your email and password instead.",
@@ -58,7 +61,8 @@ export default function LoginPage() {
         return
       }
 
-      router.push("/")
+      // Employer flow: same normal login first, then continue to company verification.
+      router.push(mode === "employer" && !searchParams.get("callbackUrl") ? "/employer/jobs" : callbackUrl)
       router.refresh()
     } catch {
       toast("An error occurred. Please try again.", "destructive")
@@ -69,7 +73,7 @@ export default function LoginPage() {
 
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true)
-    await signIn("google", { callbackUrl: "/" })
+    await signIn("google", { callbackUrl: mode === "employer" && !searchParams.get("callbackUrl") ? "/employer/jobs" : callbackUrl })
   }
 
   const benefits = [
@@ -90,6 +94,33 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign In</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">Continue to your dashboard</p>
         </div>
+
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
+          <button
+            type="button"
+            onClick={() => setMode("seeker")}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "seeker" ? "bg-white text-gray-900 shadow dark:bg-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            <User className="h-4 w-4" /> Jobseeker
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("employer")}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "employer" ? "bg-white text-gray-900 shadow dark:bg-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            <Building2 className="h-4 w-4" /> Employer
+          </button>
+        </div>
+
+        {mode === "employer" && (
+          <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800 dark:border-teal-800 dark:bg-teal-950/30 dark:text-teal-200">
+            <p className="flex items-center gap-1.5 font-bold"><Briefcase className="h-4 w-4" /> Company login - 2 steps</p>
+            <ol className="mt-1.5 list-decimal space-y-0.5 pl-5 text-[13px]">
+              <li>Sign in below with your normal account (same as jobseekers).</li>
+              <li>Continue to prove your work inbox with a 6-digit OTP code, then Studio unlocks. Typing a domain alone never verifies.</li>
+            </ol>
+          </div>
+        )}
 
         {shownError && (
           <motion.div
@@ -152,11 +183,19 @@ export default function LoginPage() {
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Signing in...
               </>
+            ) : mode === "employer" ? (
+              "Sign In & Continue to Company Verification"
             ) : (
               "Sign In"
             )}
           </Button>
         </form>
+
+        {mode === "employer" && (
+          <p className="text-center text-xs text-gray-500">
+            New company not listed? You can create it manually with domain right after login in Studio Step 1.
+          </p>
+        )}
 
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           Don&apos;t have an account?{" "}

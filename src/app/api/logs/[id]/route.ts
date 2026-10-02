@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-/** DELETE /api/logs/:id — single audit entry (SUPER_ADMIN only). */
+/** DELETE /api/logs/:id - single audit entry (SUPER_ADMIN only). */
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 
 /**
- * Activity Logs — the audit trail behind the super-admin panel.
+ * Activity Logs - the audit trail behind the super-admin panel.
  * - GET    ?page&limit&action&entity&search&from&to  (ADMIN and SUPER_ADMIN)
  * - DELETE ?before=ISO  retention purge, no param = clear all (SUPER_ADMIN only)
  */

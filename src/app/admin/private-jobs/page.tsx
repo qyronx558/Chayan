@@ -45,7 +45,7 @@ import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
 
 interface Company { id: string; name: string }
 interface PrivateJobItem {
-  id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; experience: string | null; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
+  id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; salaryMin?: number | null; salaryMax?: number | null; experience: string | null; expMin?: number | null; expMax?: number | null; qualification?: string | null; skills?: string[]; remotePolicy?: string | null; vacancies?: number | null; isFresherFriendly?: boolean; isWalkIn?: boolean; walkInVenue?: string | null; walkInDate?: string | null; proofUrl?: string | null; trustScore?: number; views?: number; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
   moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
 }
 interface PaginationInfo { total: number; page: number; limit: number; totalPages: number }
@@ -93,9 +93,10 @@ export default function AdminPrivateJobs() {
     resolver: zodResolver(privateJobSchema) as any,
     defaultValues: {
       title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME",
-      category: null, description: null, location: null, salary: null,
-      experience: null, applicationUrl: null, applicationEmail: null,
-      lastDate: null, status: "ACTIVE",
+      category: null, description: null, location: null, salary: null, salaryMin: null, salaryMax: null,
+      experience: null, expMin: null, expMax: null, qualification: null, skills: [], remotePolicy: null, vacancies: null,
+      applicationUrl: null, applicationEmail: null, proofUrl: null,
+      lastDate: null, status: "ACTIVE", isFresherFriendly: false, isWalkIn: false, walkInVenue: null, walkInDate: null,
     },
   })
 
@@ -158,10 +159,14 @@ export default function AdminPrivateJobs() {
     form.reset({
       title: job.title, slug: job.slug, companyId: job.company.id, companyName: "",
       type: job.type as any, category: job.category, description: job.description,
-      location: job.location, salary: job.salary, experience: job.experience,
-      applicationUrl: job.applicationUrl, applicationEmail: job.applicationEmail,
+      location: job.location, salary: job.salary, salaryMin: job.salaryMin ?? null, salaryMax: job.salaryMax ?? null,
+      experience: job.experience, expMin: job.expMin ?? null, expMax: job.expMax ?? null, qualification: job.qualification ?? null,
+      skills: job.skills ?? [], remotePolicy: (job.remotePolicy as never) ?? null, vacancies: job.vacancies ?? null,
+      applicationUrl: job.applicationUrl, applicationEmail: job.applicationEmail, proofUrl: job.proofUrl ?? null,
       lastDate: job.lastDate ? new Date(job.lastDate) : null,
       status: job.status as "ACTIVE" | "EXPIRED",
+      isFresherFriendly: !!job.isFresherFriendly, isWalkIn: !!job.isWalkIn, walkInVenue: job.walkInVenue ?? null,
+      walkInDate: job.walkInDate ? new Date(job.walkInDate) : null,
     })
     setDialogOpen(true)
   }
@@ -170,7 +175,7 @@ export default function AdminPrivateJobs() {
     setEditingId(null)
     setNewCompanyMode(false)
     setWizardStep(0)
-    form.reset({ title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME", category: null, description: null, location: null, salary: null, experience: null, applicationUrl: null, applicationEmail: null, lastDate: null, status: "ACTIVE" })
+    form.reset({ title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME", category: null, description: null, location: null, salary: null, salaryMin: null, salaryMax: null, experience: null, expMin: null, expMax: null, qualification: null, skills: [], remotePolicy: null, vacancies: null, applicationUrl: null, applicationEmail: null, proofUrl: null, lastDate: null, status: "ACTIVE", isFresherFriendly: false, isWalkIn: false, walkInVenue: null, walkInDate: null })
     setDialogOpen(true)
   }
 
@@ -181,9 +186,11 @@ export default function AdminPrivateJobs() {
       const payload = {
         title: job.title, slug: job.slug, companyId: job.company.id, companyName: undefined,
         type: job.type, category: job.category, description: job.description,
-        location: job.location, salary: job.salary, experience: job.experience,
-        applicationUrl: job.applicationUrl, applicationEmail: job.applicationEmail,
+        location: job.location, salary: job.salary, salaryMin: job.salaryMin ?? null, salaryMax: job.salaryMax ?? null,
+        experience: job.experience, skills: job.skills ?? [], remotePolicy: job.remotePolicy ?? null,
+        applicationUrl: job.applicationUrl, applicationEmail: job.applicationEmail, proofUrl: job.proofUrl ?? null,
         lastDate: job.lastDate ? new Date(job.lastDate) : null, status: next,
+        isFresherFriendly: !!job.isFresherFriendly, isWalkIn: !!job.isWalkIn,
       }
       await api.put(`/api/private-jobs/${job.id}`, payload)
       queryClient.invalidateQueries({ queryKey: ["admin-private-jobs"] })
@@ -442,10 +449,53 @@ export default function AdminPrivateJobs() {
                       <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="salary" render={({ field }) => (
-                      <FormItem><FormLabel>Salary</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Salary (text)</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="experience" render={({ field }) => (
-                      <FormItem><FormLabel>Experience</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Experience (text)</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <FormField control={form.control} name="salaryMin" render={({ field }) => (
+                      <FormItem><FormLabel>Salary min (monthly ₹)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="salaryMax" render={({ field }) => (
+                      <FormItem><FormLabel>Salary max (monthly ₹)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="vacancies" render={({ field }) => (
+                      <FormItem><FormLabel>Openings</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <FormField control={form.control} name="expMin" render={({ field }) => (
+                      <FormItem><FormLabel>Exp min (yrs)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl></FormItem>
+                    )} />
+                    <FormField control={form.control} name="expMax" render={({ field }) => (
+                      <FormItem><FormLabel>Exp max (yrs)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl></FormItem>
+                    )} />
+                    <FormField control={form.control} name="remotePolicy" render={({ field }) => (
+                      <FormItem><FormLabel>Work mode</FormLabel>
+                        <Select onValueChange={(v) => field.onChange(v === "__none__" ? null : v)} value={field.value || "__none__"}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
+                          <SelectContent><SelectItem value="__none__">Not specified</SelectItem><SelectItem value="ONSITE">On-site</SelectItem><SelectItem value="HYBRID">Hybrid</SelectItem><SelectItem value="REMOTE">Remote</SelectItem></SelectContent>
+                        </Select>
+                      </FormItem>
+                    )} />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField control={form.control} name="skills" render={({ field }) => (
+                      <FormItem><FormLabel>Skills (comma separated)</FormLabel><FormControl><Input value={(field.value || []).join(", ")} onChange={(e) => field.onChange(e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} placeholder="React, Sales, Excel" /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="qualification" render={({ field }) => (
+                      <FormItem><FormLabel>Qualification</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="Any Graduate / B.Tech" /></FormControl></FormItem>
+                    )} />
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <FormField control={form.control} name="isFresherFriendly" render={({ field }) => (
+                      <FormItem className="flex items-center gap-2"><FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="!mt-0">Fresher friendly</FormLabel></FormItem>
+                    )} />
+                    <FormField control={form.control} name="isWalkIn" render={({ field }) => (
+                      <FormItem className="flex items-center gap-2"><FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="!mt-0">Walk-in</FormLabel></FormItem>
                     )} />
                   </div>
                 </div>
@@ -462,6 +512,17 @@ export default function AdminPrivateJobs() {
                   </div>
                   <FormField control={form.control} name="lastDate" render={({ field }) => (
                     <FormItem><FormLabel>Last Date</FormLabel><FormControl><Input type="date" value={field.value ? formatDate(field.value, "yyyy-MM-dd") : ""} onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField control={form.control} name="proofUrl" render={({ field }) => (
+                      <FormItem><FormLabel>Proof URL (official posting)</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="https://company.com/careers/..." /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="walkInVenue" render={({ field }) => (
+                      <FormItem><FormLabel>Walk-in venue</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl></FormItem>
+                    )} />
+                  </div>
+                  <FormField control={form.control} name="walkInDate" render={({ field }) => (
+                    <FormItem><FormLabel>Walk-in date</FormLabel><FormControl><Input type="date" value={field.value ? formatDate(field.value, "yyyy-MM-dd") : ""} onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)} /></FormControl></FormItem>
                   )} />
                 </FormSection>
               )}

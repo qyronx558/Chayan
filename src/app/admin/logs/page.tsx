@@ -192,7 +192,7 @@ export default function AdminLogs() {
                       <TableCell className="font-medium">{log.entity}</TableCell>
                       <TableCell className="font-mono text-xs text-gray-500" title={log.entityId}>{log.entityId.substring(0, 8)}...</TableCell>
                       <TableCell>{log.user ? log.user.name || log.user.email : "System"}</TableCell>
-                      <TableCell className="max-w-[260px] truncate text-gray-500">{log.details || "—"}</TableCell>
+                      <TableCell className="max-w-[260px] truncate text-gray-500">{log.details || "-"}</TableCell>
                       <TableCell className="whitespace-nowrap">{formatDate(log.createdAt, "dd MMM yyyy HH:mm")}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
@@ -205,7 +205,7 @@ export default function AdminLogs() {
                     </TableRow>
                   ))}
                   {logs.length === 0 && (
-                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No logs found — adjust filters, or perform a create/update/delete in Jobs, Results, Admit Cards, etc. to generate audit events.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No logs found - adjust filters, or perform a create/update/delete in Jobs, Results, Admit Cards, etc. to generate audit events.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -239,11 +239,11 @@ export default function AdminLogs() {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase text-gray-400">Actor</p>
-                <p className="mt-1 font-medium">{detail.user ? `${detail.user.name || "—"} (${detail.user.email})` : "System"}</p>
+                <p className="mt-1 font-medium">{detail.user ? `${detail.user.name || "-"} (${detail.user.email})` : "System"}</p>
               </div>
               <div>
                 <p className="text-xs font-medium uppercase text-gray-400">Details</p>
-                <p className="mt-1 whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700">{detail.details || "—"}</p>
+                <p className="mt-1 whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700">{detail.details || "-"}</p>
               </div>
             </div>
           )}

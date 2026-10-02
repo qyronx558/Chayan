@@ -30,6 +30,11 @@ export function isAdminPath(pathname: string | null): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/")
 }
 
+export function isEmployerPath(pathname: string | null): boolean {
+  if (!pathname) return false
+  return pathname === "/employer" || pathname.startsWith("/employer/")
+}
+
 /**
  * Hides the normal site Header/Footer on Application Mode routes so the
  * official website gets ~90–96% of useful screen area, and on Admin routes
@@ -48,8 +53,9 @@ export function ConditionalChrome({
 }) {
   const pathname = usePathname()
 
-  if (isAdminPath(pathname)) {
-    // Standalone SaaS admin: no main-site header/footer, only admin shell.
+  if (isAdminPath(pathname) || isEmployerPath(pathname)) {
+    // Standalone SaaS shells (admin + employer studio): no main-site
+    // header/footer - each renders its own sidebar + topbar only.
     return (
       <div className="min-h-[100dvh] bg-slate-100 dark:bg-[#070d1a]">
         <main className="min-h-[100dvh]">{children}</main>

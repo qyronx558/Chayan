@@ -133,14 +133,16 @@ function NavDropdown({
   )
 }
 
-function DropdownItem({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
+function DropdownItem({ href, icon: Icon, label, newTab }: { href: string; icon: React.ElementType; label: string; newTab?: boolean }) {
   return (
     <Link
       href={href}
+      {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className="flex items-center gap-2.5 px-3.5 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/80 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-950/40 transition-colors rounded-md mx-1"
     >
       <Icon className="h-4 w-4" />
       {label}
+      {newTab && <span className="ml-auto text-[10px] text-slate-400">↗</span>}
     </Link>
   )
 }
@@ -213,6 +215,7 @@ export function Header() {
               <NavDropdown label="Jobs" isActive={jobsActive}>
                 <DropdownItem href="/jobs" icon={Briefcase} label="Gov Jobs" />
                 <DropdownItem href="/private-jobs" icon={Building2} label="Private Jobs" />
+                <DropdownItem href="/employer" icon={Building2} label="For Employers" newTab />
               </NavDropdown>
 
               <NavLink href="/results">Results</NavLink>

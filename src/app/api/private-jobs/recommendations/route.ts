@@ -27,17 +27,25 @@ export async function GET(request: NextRequest) {
       where: { status: "ACTIVE" },
       include: { company: true },
       orderBy: { createdAt: "desc" },
+      take: 300,
     })
 
     const recommendations = jobs.map(job => {
+      // Boost skill matching with structured skills array + remote/fresher bonuses
+      const structured = (job.skills || []).join(" ")
       const match = computeMatchScore(resumeSkills, resumeExperience, resumeEducation, resumeLocations, {
-        title: job.title,
+        title: `${job.title} ${structured}`,
         description: job.description || "",
         category: job.category || "",
         location: job.location || "",
-        experience: job.experience || "",
+        experience: job.experience || (job.expMin != null ? `${job.expMin} years` : ""),
         salary: job.salary || "",
       })
+      let bonus = 0
+      const details = [...match.details]
+      if (job.remotePolicy === "REMOTE" && resumeLocations.some((l) => /remote/i.test(l))) { bonus += 5; details.push("Remote match") }
+      if (job.isFresherFriendly && resumeExperience <= 1) { bonus += 5; details.push("Fresher friendly") }
+      if (job.trustScore >= 70) { bonus += 3; details.push("Verified employer") }
       const tips = generateImprovementTips(match.score, match.matchedSkills, resumeSkills, {
         title: job.title,
         description: job.description || "",
@@ -57,9 +65,9 @@ export async function GET(request: NextRequest) {
         company: job.company,
         status: job.status,
         createdAt: job.createdAt,
-        matchScore: match.score,
+        matchScore: Math.min(100, match.score + bonus),
         matchedSkills: match.matchedSkills,
-        matchDetails: match.details,
+        matchDetails: details,
         improvementTips: tips,
       }
     })

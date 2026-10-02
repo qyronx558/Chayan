@@ -6,6 +6,7 @@ import { findOrCreateCompany } from "@/lib/companies"
 import { isAdmin } from "@/lib/roles"
 import { Prisma } from "@prisma/client"
 import { writeAuditLog } from "@/lib/moderation"
+import { computeTrustScore } from "@/lib/private-jobs-trust"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -48,11 +49,24 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    const { companyId, companyName, ...rest } = validation.data
-    const company = companyName ? await findOrCreateCompany(companyName) : null
+    const { companyId, companyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
+    const company = companyName ? await findOrCreateCompany(companyName) : companyId ? await prisma.company.findUnique({ where: { id: companyId } }) : null
+    const trust = computeTrustScore({
+      applicationUrl: rest.applicationUrl,
+      applicationEmail: rest.applicationEmail,
+      proofUrl: (rest as { proofUrl?: string | null }).proofUrl,
+      companyWebsite: company?.website,
+      companyVerified: company?.verifiedStatus === "VERIFIED",
+      description: rest.description,
+    })
+    const { isFresherFriendly: _ff, isWalkIn: _wi, ...restClean } = rest as Record<string, unknown>
     const data: Prisma.PrivateJobUpdateInput = {
-      ...rest,
-      company: { connect: { id: company ? company.id : companyId } },
+      ...(restClean as Prisma.PrivateJobUpdateInput),
+      ...(isFresherFriendly !== undefined && isFresherFriendly !== null ? { isFresherFriendly } : {}),
+      ...(isWalkIn !== undefined && isWalkIn !== null ? { isWalkIn } : {}),
+      ...(skills !== undefined ? { skills: skills ?? [] } : {}),
+      trustScore: trust.score,
+      ...(company || companyId ? { company: { connect: { id: company ? company.id : companyId! } } } : {}),
     }
 
     if (session.user.role === "ADMIN") {
@@ -100,9 +114,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    // Bookmarks reference private jobs with no onDelete cascade - clear them first.
+    // Clear dependent rows (bookmarks have no cascade; new tables cascade but be explicit).
     await prisma.$transaction([
       prisma.bookmark.deleteMany({ where: { privateJobId: id } }),
+      prisma.privateApplication.deleteMany({ where: { privateJobId: id } }),
+      prisma.privateJobView.deleteMany({ where: { privateJobId: id } }),
+      prisma.jobReport.deleteMany({ where: { privateJobId: id } }),
       prisma.privateJob.delete({ where: { id } }),
     ])
 

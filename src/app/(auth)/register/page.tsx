@@ -13,7 +13,18 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
+import { Suspense, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { AuthLayout, GoogleButton, Divider, InputWithIcon, PasswordInput, StrengthMeter } from "@/components/auth/AuthComponents"
+import { captureReferralFromUrl } from "@/lib/referral-attribution"
+
+function ReferralCaptureMount() {
+  const params = useSearchParams()
+  useEffect(() => {
+    captureReferralFromUrl()
+  }, [params])
+  return null
+}
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -82,6 +93,8 @@ export default function RegisterPage() {
   ]
 
   return (
+    <>
+    <Suspense fallback={null}><ReferralCaptureMount /></Suspense>
     <AuthLayout
       sideTitle="Your Career Gateway"
       sideDescription="Create your free account and join thousands discovering opportunities across government & private sectors."
@@ -190,5 +203,6 @@ export default function RegisterPage() {
         </p>
       </div>
     </AuthLayout>
+    </>
   )
 }

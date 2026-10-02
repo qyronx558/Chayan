@@ -214,6 +214,53 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
   return { success: true, id: data?.id }
 }
 
+/**
+ * Company-ownership OTP. Anti-phishing rules baked in:
+ * - code only, NO login links (links are the #1 phishing vector)
+ * - short expiry stated, single-use stated
+ * - "never share / we never ask password" warnings
+ * - minimal company info (name only), no sensitive data
+ */
+export async function sendCompanyVerificationOtp(email: string, otp: string, companyName: string) {
+  const safeCompany = companyName.replace(/[<>&"]/g, "")
+  const subject = `Verify ${safeCompany} - your Chayan employer code`
+  const html = `
+    <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
+      <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:20px 24px">
+        <div style="font-size:18px;font-weight:700;color:#fff">Chayan Employer Verification</div>
+        <div style="font-size:13px;color:#99f6e4;margin-top:4px">Confirm you own this work inbox</div>
+      </div>
+      <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+        <p style="color:#374151;font-size:14px;line-height:1.6">You requested employer access for <strong>${safeCompany}</strong>. Enter this code in Chayan (Employer Studio → Step 1):</p>
+        <div style="text-align:center;margin:20px 0">
+          <span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:8px;color:#111827;background:#f3f4f6;border:1px dashed #9ca3af;border-radius:10px;padding:12px 20px 12px 28px">${otp}</span>
+        </div>
+        <p style="color:#374151;font-size:13px">Valid for <strong>10 minutes</strong>, single use. After 5 wrong tries the code is locked and you must request a new one.</p>
+        <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 14px;margin-top:16px">
+          <p style="color:#92400e;font-size:12px;margin:0;line-height:1.6"><strong>Security:</strong> never share this code. Chayan will NEVER ask for your password, OTP or bank details over email or phone. Only enter the code on <strong>chayanjobs.com</strong> - check the address bar before typing.</p>
+        </div>
+        <p style="color:#9ca3af;font-size:12px;margin-top:16px">Didn't request this? Ignore this email - your account stays unchanged. If this repeats, reset your Chayan password.</p>
+      </div>
+      <p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:16px">Chayan - select right. serve right. | Automated mail from noreply, do not reply.</p>
+    </div>
+  `
+  if (!resend) {
+    console.log(`[Email Mock] Company OTP to ${email}: code ${otp} for ${safeCompany}`)
+    return { success: true, mocked: true }
+  }
+  const { data, error } = await resend.emails.send({
+    from: `Chayan Verify <${fromEmail}>`,
+    to: email,
+    subject,
+    html,
+  })
+  if (error) {
+    console.error("Failed to send company OTP:", error.message)
+    return { success: false, error: error.message }
+  }
+  return { success: true, id: data?.id }
+}
+
 export async function sendContactEmail(
   name: string,
   email: string,

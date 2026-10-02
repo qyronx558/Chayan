@@ -249,11 +249,24 @@ export const privateJobSchema = z
     description: z.string().nullable().optional(),
     location: z.string().nullable().optional(),
     salary: z.string().nullable().optional(),
+    salaryMin: z.coerce.number().int().nonnegative().nullable().optional(),
+    salaryMax: z.coerce.number().int().nonnegative().nullable().optional(),
     experience: z.string().nullable().optional(),
+    expMin: z.coerce.number().int().min(0).max(30).nullable().optional(),
+    expMax: z.coerce.number().int().min(0).max(30).nullable().optional(),
+    qualification: z.string().nullable().optional(),
+    skills: z.array(z.string().trim().min(1).max(60)).max(30).nullable().optional(),
+    remotePolicy: z.enum(["ONSITE", "HYBRID", "REMOTE"]).nullable().optional(),
+    vacancies: z.coerce.number().int().positive().nullable().optional(),
     applicationUrl: z.string().nullable().optional(),
     applicationEmail: z.string().nullable().optional(),
     lastDate: z.coerce.date().nullable().optional(),
     status: z.enum(["ACTIVE", "EXPIRED"]).default("ACTIVE"),
+    isFresherFriendly: z.boolean().nullable().optional(),
+    isWalkIn: z.boolean().nullable().optional(),
+    walkInVenue: z.string().nullable().optional(),
+    walkInDate: z.coerce.date().nullable().optional(),
+    proofUrl: z.string().nullable().optional(),
   })
   .refine((data) => Boolean(data.companyId) !== Boolean(data.companyName), {
     message: "Select an existing company or enter a new company name",
@@ -268,9 +281,69 @@ export const companySchema = z.object({
   logo: z.string().nullable().optional(),
   website: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
+  industry: z.string().nullable().optional(),
+  size: z.string().nullable().optional(),
+  hq: z.string().nullable().optional(),
+  verifiedStatus: z.enum(["UNVERIFIED", "PENDING", "VERIFIED"]).optional(),
+  claimEmailDomain: z.string().nullable().optional(),
 })
 
 export type CompanyInput = z.infer<typeof companySchema>
+
+export const privateApplicationSchema = z.object({
+  privateJobId: z.string().min(1, "privateJobId is required"),
+  status: z.enum(["saved", "applied", "shortlisted", "interview", "offer", "joined", "rejected", "withdrawn"]).default("saved"),
+  interviewAt: z.coerce.date().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+})
+
+export type PrivateApplicationInput = z.infer<typeof privateApplicationSchema>
+
+export const jobReferralSchema = z.object({
+  title: z.string().min(4, "Job title is required").max(200),
+  companyName: z.string().min(2, "Company name is required").max(120),
+  url: z.string().url("Enter a valid application URL (https://...)"),
+  proofUrl: z.string().url().nullable().optional().or(z.literal("")),
+  location: z.string().max(120).nullable().optional(),
+  note: z.string().max(1000).nullable().optional(),
+})
+
+export type JobReferralInput = z.infer<typeof jobReferralSchema>
+
+export const jobReportSchema = z.object({
+  reason: z.string().min(4, "Reason is required").max(120),
+  details: z.string().max(2000).nullable().optional(),
+})
+
+export type JobReportInput = z.infer<typeof jobReportSchema>
+
+export const companyClaimSchema = z.object({
+  companyId: z.string().min(1, "companyId is required"),
+  workEmail: z.string().email("Enter your work email"),
+  note: z.string().max(1000).nullable().optional(),
+})
+
+export type CompanyClaimInput = z.infer<typeof companyClaimSchema>
+
+export const companyOtpSendSchema = z.object({
+  companyId: z.string().min(1).optional(),
+  name: z.string().trim().min(2).max(120).optional(),
+  domain: z.string().trim().min(3).max(200).optional(),
+  description: z.string().trim().max(2000).nullable().optional(),
+  workEmail: z.string().trim().email("Enter your work email"),
+}).refine((d) => !!d.companyId || (!!d.name && !!d.domain), {
+  message: "Select a company or enter new company name + domain",
+  path: ["companyId"],
+})
+
+export type CompanyOtpSendInput = z.infer<typeof companyOtpSendSchema>
+
+export const companyOtpVerifySchema = z.object({
+  challengeId: z.string().min(1, "challengeId is required"),
+  otp: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code"),
+})
+
+export type CompanyOtpVerifyInput = z.infer<typeof companyOtpVerifySchema>
 
 export type SearchInput = z.infer<typeof searchSchema>
 
