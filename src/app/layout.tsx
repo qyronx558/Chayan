@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
 import { ConditionalChrome } from "@/components/layout/ConditionalChrome"
 import { HideOnAdmin } from "@/components/layout/HideOnAdmin"
-import { WelcomeOnboarding } from "@/components/layout/WelcomeOnboarding"
+import { SpotlightTour } from "@/components/onboarding/SpotlightTour"
 import { ActivityTracker } from "@/components/layout/ActivityTracker"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
@@ -114,7 +114,7 @@ export default function RootLayout({
             {children}
           </ConditionalChrome>
           <HideOnAdmin>
-            <WelcomeOnboarding />
+            <SpotlightTour />
           </HideOnAdmin>
           <ActivityTracker />
           <HideOnAdmin>

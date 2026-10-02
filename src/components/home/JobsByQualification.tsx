@@ -181,7 +181,7 @@ export function JobsByQualification({ className }: { className?: string }) {
         ) : (
           <>
             {qualifications.length > 0 && (
-              <div className="no-scrollbar mb-8 min-w-0 overflow-x-auto px-1 pb-1">
+              <div className="no-scrollbar mb-8 min-w-0 overflow-x-auto px-1 pb-1" data-tour="qualification-pills">
                 <div className="flex min-w-0 snap-x gap-2 pb-2">
                   {qualifications.map((qual) => (
                     <button

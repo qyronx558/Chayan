@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Mail, MapPin, ChevronRight } from "lucide-react"
 import { Newsletter } from "@/components/layout/Newsletter"
 import { BackToTop } from "@/components/layout/BackToTop"
+import { TourReplayButton } from "@/components/onboarding/TourReplayButton"
 import { siteConfig, footerLinks, trendingTags, exploreFooterLinks } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 
@@ -80,6 +81,9 @@ export function Footer({ className }: { className?: string }) {
                 </div>
               </div>
               <Newsletter className="mt-4" variant="footer" />
+              <div className="mt-3">
+                <TourReplayButton />
+              </div>
             </div>
 
             {footerLinks.map((section) => (

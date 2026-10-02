@@ -286,7 +286,7 @@ export function ExamCalendarClient() {
 
         {/* ---- Toolbar ---- */}
         <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3" data-tour="cal-month-nav">
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Previous month" className="font-bold">
                 <ChevronLeft className="h-4 w-4" />
@@ -318,7 +318,7 @@ export function ExamCalendarClient() {
               </Button>
             </div>
 
-            <div className="relative w-full sm:w-64">
+            <div className="relative w-full sm:w-64" data-tour="cal-search">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 value={query}
@@ -340,7 +340,7 @@ export function ExamCalendarClient() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Filter by event type">
+          <div className="flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Filter by event type" data-tour="cal-filters">
             {FILTERS.map((f) => {
               const active = type === f.value
               const count = f.value === "" ? filteredEvents.length : typeCounts.get(f.value) || 0
@@ -392,7 +392,7 @@ export function ExamCalendarClient() {
         </div>
 
         {/* ---- Month grid ---- */}
-        <Card className="mb-8 overflow-hidden border-2 border-gray-200 shadow-sm dark:border-gray-700">
+        <Card className="mb-8 overflow-hidden border-2 border-gray-200 shadow-sm dark:border-gray-700" data-tour="cal-grid">
           <CardContent className="p-0">
             <div className="grid grid-cols-7 border-b border-sky-100 bg-gradient-to-r from-sky-50 via-white to-teal-50 text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-600 dark:border-gray-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 dark:text-gray-300">
               {WEEKDAYS.map((d) => (
@@ -426,11 +426,12 @@ export function ExamCalendarClient() {
                     const hidden = dayEvents.length - visible.length
                     const weekend = isWeekendIndex(c)
 
-                    return (
+                      return (
                       <div
                         key={dayKey}
                         role="button"
                         tabIndex={0}
+                        data-tour={dayEvents.length > 0 ? "cal-day" : undefined}
                         aria-pressed={isSelected}
                         aria-label={`${formatDate(dayKey)}: ${dayEvents.length} events`}
                         onClick={() => selectDay(dayKey)}
@@ -588,7 +589,7 @@ export function ExamCalendarClient() {
             </button>
           )}
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6" data-tour="cal-agenda">
           {groupedDays.map(([dayKey, dayEvents]) => {
             const left = daysUntil(dayEvents[0].date)
             const urgent = left >= 0 && left <= 7

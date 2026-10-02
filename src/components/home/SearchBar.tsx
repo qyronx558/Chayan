@@ -125,7 +125,7 @@ export function SearchBar() {
     <section className="w-full max-w-[100vw] overflow-x-clip py-6 sm:py-8">
       <div className="mx-auto w-full max-w-7xl min-w-0 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto w-full min-w-0 max-w-2xl text-center">
-          <form onSubmit={handleSearch} className="flex w-full min-w-0 items-start gap-2">
+          <form onSubmit={handleSearch} className="flex w-full min-w-0 items-start gap-2" data-tour="search-input">
             <div className="relative min-w-0 flex-1">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <Input
@@ -221,7 +221,7 @@ export function SearchBar() {
             </Button>
           </form>
 
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5" data-tour="trending-searches">
             <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
               <TrendingUp className="h-3.5 w-3.5" />
               Popular:

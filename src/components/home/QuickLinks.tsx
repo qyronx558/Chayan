@@ -100,7 +100,7 @@ const links: QuickLink[] = [
 
 export function QuickLinks({ className }: { className?: string }) {
   return (
-    <section className={cn("py-16", className)}>
+    <section className={cn("py-16", className)} data-tour="quicklinks">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           icon={Briefcase}
@@ -113,6 +113,7 @@ export function QuickLinks({ className }: { className?: string }) {
             <Link
               key={link.title}
               href={link.href}
+              data-tour={i === 0 ? "quicklink-jobs" : undefined}
               className={cn(
                 "group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10 sm:p-4",
                 "animate-fade-in-up"

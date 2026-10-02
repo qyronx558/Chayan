@@ -139,6 +139,12 @@ const steps = [
   },
 ]
 
+/**
+ * @deprecated Replaced by intelligent spotlight tour
+ * (`src/components/onboarding/SpotlightTour.tsx`) which points arrows at the
+ * real SearchBar / QuickLinks / Qualification / Exam Calendar buttons.
+ * Kept for reference only — not mounted in `src/app/layout.tsx` anymore.
+ */
 export function WelcomeOnboarding() {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -146,6 +152,16 @@ export function WelcomeOnboarding() {
 
   useEffect(() => {
     setMounted(true)
+    // Never compete with the new spotlight tour: if the new tour hasn't been
+    // seen yet (or ?tour=1 replay requested), stay hidden.
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get("tour") === "1") return
+      if (!localStorage.getItem("chayan_tour_v2_home_seen") && window.location.pathname === "/") return
+      if (!localStorage.getItem("chayan_tour_v2_calendar_seen") && window.location.pathname.startsWith("/exam-calendar")) return
+    } catch {
+      // ignore and fall through to legacy behaviour
+    }
     const welcomed = localStorage.getItem(STORAGE_KEY)
     if (!welcomed) {
       const timer = setTimeout(() => setIsOpen(true), 1500)

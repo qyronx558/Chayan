@@ -41,7 +41,7 @@ export function UpcomingDeadlines({ className }: { className?: string }) {
   }, [])
 
   return (
-    <section className={cn("py-16", className)}>
+    <section className={cn("py-16", className)} data-tour="deadlines-teaser">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           icon={CalendarDays}
