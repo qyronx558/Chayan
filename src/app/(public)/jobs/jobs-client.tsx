@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
+import { SearchableFilter } from "@/components/jobs/SearchableFilter"
 
 interface FilterOption {
   id: string
@@ -175,23 +176,27 @@ export function JobsClient() {
         </div>
 
         <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
-          {[
-            { value: selectedCategory, onChange: (v: string) => { setSelectedCategory(v); setPage(1) }, options: categories, placeholder: "All Categories", key: "category" },
-            { value: selectedDepartment, onChange: (v: string) => { setSelectedDepartment(v); setPage(1) }, options: departments, placeholder: "All Departments", key: "department" },
-            { value: selectedState, onChange: (v: string) => { setSelectedState(v); setPage(1) }, options: states, placeholder: "All States", key: "state" },
-          ].map((f) => (
-            <select
-              key={f.key}
-              value={f.value}
-              onChange={(e) => f.onChange(e.target.value)}
-              className="h-10 w-full min-w-0 truncate rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">{f.placeholder}</option>
-              {f.options.map((o) => (
-                <option key={o.id} value={o.id}>{o.name}</option>
-              ))}
-            </select>
-          ))}
+          <SearchableFilter
+            value={selectedCategory}
+            options={categories}
+            allLabel="All Categories"
+            searchPlaceholder="Search categories..."
+            onChange={(v) => { setSelectedCategory(v); setPage(1) }}
+          />
+          <SearchableFilter
+            value={selectedDepartment}
+            options={departments}
+            allLabel="All Departments"
+            searchPlaceholder="Search departments..."
+            onChange={(v) => { setSelectedDepartment(v); setPage(1) }}
+          />
+          <SearchableFilter
+            value={selectedState}
+            options={states}
+            allLabel="All States"
+            searchPlaceholder="Search states..."
+            onChange={(v) => { setSelectedState(v); setPage(1) }}
+          />
           <select
             value={selectedStatus}
             onChange={(e) => { setSelectedStatus(e.target.value); setPage(1) }}

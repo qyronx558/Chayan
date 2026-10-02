@@ -161,6 +161,7 @@ model User {
   answerKeys             AnswerKey[]
   admissions             Admission[]
   syllabi                Syllabus[]
+  departments            Department[]
   blogPosts              BlogPost[]
   applications           Application[]
   reminderLogs           ReminderLog[]
@@ -274,6 +275,8 @@ model Department {
   slug        String      @unique
   description String?
   createdAt   DateTime    @default(now())
+  createdById String?
+  createdBy   User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
   job         Job[]
   result      Result[]
   admitCard   AdmitCard[]
@@ -283,6 +286,7 @@ model Department {
 
   @@index([name])
   @@index([slug])
+  @@index([createdById])
 }
 
 model State {

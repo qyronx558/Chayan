@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   DatabaseZap,
   ClipboardCheck,
+  Landmark,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -50,6 +51,7 @@ const sidebarLinks = [
   { href: "/admin/syllabus", label: "Syllabus", icon: BookOpen, group: "Content" },
   { href: "/admin/blog", label: "Blog", icon: Newspaper, group: "Content" },
   { href: "/admin/categories", label: "Categories", icon: FolderKanban, group: "Manage" },
+  { href: "/admin/departments", label: "Departments", icon: Landmark, group: "Manage" },
   { href: "/admin/notifications", label: "Notifications", icon: BellRing, group: "Manage" },
   { href: "/admin/review", label: "Content Verification", icon: ClipboardCheck, superOnly: true, group: "Manage" },
   { href: "/admin/uploads", label: "Admin Uploads (Read Only)", icon: Eye, superOnly: true, group: "Manage" },

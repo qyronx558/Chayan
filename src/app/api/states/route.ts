@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { INDIAN_STATES_28 } from "@/lib/states"
 
 export async function GET() {
   try {
-    const states = await prisma.state.findMany({ orderBy: { name: "asc" } })
+    // Only the 28 states (no UTs, no cities/capitals), alphabetical.
+    // Legacy UT rows stay in the DB so old jobs linked to them keep rendering.
+    const states = await prisma.state.findMany({
+      where: { name: { in: [...INDIAN_STATES_28] } },
+      orderBy: { name: "asc" },
+    })
     return NextResponse.json({ success: true, data: states })
   } catch (error) {
     return NextResponse.json(
