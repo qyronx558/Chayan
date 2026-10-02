@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "DMCA Policy",
-  description: "DMCA notice and takedown policy for Chayan. Learn how to report copyright infringement.",
+  description: "DMCA notice and takedown policy for ChayanJobs. Learn how to report copyright infringement.",
   openGraph: {
-    title: "DMCA Policy - Chayan",
-    description: "Learn how to report copyright infringement on Chayan.",
+    title: "DMCA Policy - ChayanJobs",
+    description: "Learn how to report copyright infringement on ChayanJobs.",
   },
 }
 
@@ -19,7 +19,7 @@ export default function DMCAPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Notice of Copyright Infringement</h2>
         <p className="leading-relaxed text-gray-700">
-          Chayan respects the intellectual property rights of others. We comply with the Digital Millennium
+          ChayanJobs respects the intellectual property rights of others. We comply with the Digital Millennium
           Copyright Act (DMCA) and other applicable copyright laws. If you believe that any content on our
           website infringes upon your copyright, please notify us with the following information:
         </p>

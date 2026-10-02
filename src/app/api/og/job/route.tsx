@@ -52,7 +52,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const title = safeParam(searchParams.get("title"), "Latest Sarkari Job", 90);
-    const dept = safeParam(searchParams.get("dept"), "Chayan Jobs", 50);
+    const dept = safeParam(searchParams.get("dept"), "ChayanJobs Jobs", 50);
     const meta = safeParam(searchParams.get("meta"), "Apply now", 40);
     const vacancies = optionalParam(searchParams.get("vacancies"), 20);
     const lastDate = optionalParam(searchParams.get("lastDate"), 24);
@@ -128,7 +128,7 @@ export async function GET(req: Request) {
                       lineHeight: 1.25,
                     }}
                   >
-                    Chayan
+                    ChayanJobs
                   </div>
                   <div
                     style={{

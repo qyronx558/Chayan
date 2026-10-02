@@ -54,7 +54,7 @@ export function debounce<T extends (...args: Parameters<T>) => void>(
 }
 
 export function getBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL || "https://chayan.in").replace(/\/+$/, "")
+  return (process.env.NEXT_PUBLIC_APP_URL || "https://ChayanJobs.in").replace(/\/+$/, "")
 }
 
 export function generateSEO({
@@ -83,7 +83,7 @@ export function generateSEO({
       title,
       description,
       url: fullUrl,
-      siteName: "Chayan",
+      siteName: "ChayanJobs",
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type,
       publishedTime,

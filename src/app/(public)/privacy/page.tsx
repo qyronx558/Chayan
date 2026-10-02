@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy of Chayan. Learn about how we collect, use, and protect your personal information.",
+  description: "Privacy Policy of ChayanJobs. Learn about how we collect, use, and protect your personal information.",
   openGraph: {
-    title: "Privacy Policy - Chayan",
-    description: "Understand how Chayan handles your data and protects your privacy.",
+    title: "Privacy Policy - ChayanJobs",
+    description: "Understand how ChayanJobs handles your data and protects your privacy.",
   },
 }
 
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Information We Collect</h2>
         <p className="mb-3 leading-relaxed text-gray-700">
-          When you visit Chayan, we may collect certain information automatically, including your
+          When you visit ChayanJobs, we may collect certain information automatically, including your
           IP address, browser type, operating system, referring URLs, and your interactions with our site.
           If you subscribe to our newsletter or contact us via email, we collect the personal information
           you provide, such as your name and email address.
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Cookies</h2>
         <p className="mb-3 leading-relaxed text-gray-700">
-          Chayan uses cookies and similar tracking technologies to enhance your browsing experience,
+          ChayanJobs uses cookies and similar tracking technologies to enhance your browsing experience,
           analyze site traffic, and understand where our visitors come from. Cookies are small text files
           stored on your device by your web browser.
         </p>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
         </p>
         <p className="leading-relaxed text-gray-700">
           We encourage you to review the privacy policies of any third-party sites you visit. The
-          inclusion of a link does not imply endorsement by Chayan.
+          inclusion of a link does not imply endorsement by ChayanJobs.
         </p>
       </section>
 

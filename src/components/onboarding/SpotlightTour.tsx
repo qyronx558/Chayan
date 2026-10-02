@@ -7,9 +7,9 @@ import { X, ChevronRight, ChevronLeft, MapPin, CalendarDays, RotateCcw } from "l
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-const HOME_SEEN_KEY = "chayan_tour_v2_home_seen"
-const CAL_SEEN_KEY = "chayan_tour_v2_calendar_seen"
-const LEGACY_KEY = "chayan_welcomed"
+const HOME_SEEN_KEY = "ChayanJobs_tour_v2_home_seen"
+const CAL_SEEN_KEY = "ChayanJobs_tour_v2_calendar_seen"
+const LEGACY_KEY = "ChayanJobs_welcomed"
 
 type TourAction = "next" | "goto-calendar" | "finish"
 
@@ -42,7 +42,7 @@ const HOME_STEPS: TourStep[] = [
   {
     id: "quicklink-jobs",
     title: "Jump to any section",
-    description: "Active Jobs, Admit Cards, Results, Answer Keys, Syllabus — everything is one tap away.",
+    description: "Active Jobs, Admit Cards, Results, Answer Keys, Syllabus - everything is one tap away.",
     cta: "Next",
     action: "next",
     fallbackSelector: '[data-tour="quicklinks"]',
@@ -75,7 +75,7 @@ const CALENDAR_STEPS: TourStep[] = [
   {
     id: "cal-search",
     title: "Search this month",
-    description: "Type an exam or department — e.g. SSC, UPSC, Railway — to filter the month view.",
+    description: "Type an exam or department - e.g. SSC, UPSC, Railway - to filter the month view.",
     cta: "Next",
     action: "next",
     fallbackSelector: '[data-tour="cal-month-nav"]',
@@ -341,7 +341,7 @@ export function SpotlightTour() {
         timer = setTimeout(() => start(0), reduceMotion ? 400 : 1400)
       }
     } catch {
-      // private mode etc — don't tour
+      // private mode etc - don't tour
     }
     return () => {
       if (timer) clearTimeout(timer)
@@ -385,8 +385,8 @@ export function SpotlightTour() {
   // Global replay event from footer ("Take a quick tour")
   useEffect(() => {
     const onReplay = () => start(0)
-    window.addEventListener("chayan:replay-tour", onReplay)
-    return () => window.removeEventListener("chayan:replay-tour", onReplay)
+    window.addEventListener("ChayanJobs:replay-tour", onReplay)
+    return () => window.removeEventListener("ChayanJobs:replay-tour", onReplay)
   }, [start])
 
   if (!active || steps.length === 0) return null
@@ -408,7 +408,7 @@ export function SpotlightTour() {
 
   return (
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-live="polite" aria-label={`Guided tour: ${step.title}`}>
-      {/* Dim layer — click does nothing (must use Skip) to avoid accidental loss */}
+      {/* Dim layer - click does nothing (must use Skip) to avoid accidental loss */}
       <div className="absolute inset-0 bg-black/60" />
 
       {/* Spotlight cutout */}

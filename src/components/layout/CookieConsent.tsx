@@ -9,7 +9,7 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const consent = localStorage.getItem("chayan-cookie-consent")
+    const consent = localStorage.getItem("ChayanJobs-cookie-consent")
     if (!consent) {
       const timer = setTimeout(() => setVisible(true), 1000)
       return () => clearTimeout(timer)
@@ -17,12 +17,12 @@ export function CookieConsent() {
   }, [])
 
   function accept() {
-    localStorage.setItem("chayan-cookie-consent", "accepted")
+    localStorage.setItem("ChayanJobs-cookie-consent", "accepted")
     setVisible(false)
   }
 
   function decline() {
-    localStorage.setItem("chayan-cookie-consent", "declined")
+    localStorage.setItem("ChayanJobs-cookie-consent", "declined")
     setVisible(false)
   }
 

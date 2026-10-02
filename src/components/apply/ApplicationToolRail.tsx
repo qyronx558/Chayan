@@ -131,8 +131,8 @@ export function ApplicationToolRail({
     >
       <Link
         href="/"
-        aria-label="ChayanJobs home"
-        title="ChayanJobs"
+        aria-label="ChayanJobsJobs home"
+        title="ChayanJobsJobs"
         className={cn(
           "mb-1 flex h-11 items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600",
           expanded ? "gap-2.5 px-2" : "w-11 justify-center"
@@ -153,7 +153,7 @@ export function ApplicationToolRail({
         {expanded ? (
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-base font-bold text-gray-900 dark:text-white">
-              Chayan
+              ChayanJobs
             </span>
             <span className="-mt-0.5 block truncate text-[10px] font-medium tracking-wider text-gray-500 dark:text-gray-400">
               select right. serve right.

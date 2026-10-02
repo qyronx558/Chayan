@@ -17,9 +17,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${getBaseUrl()}/reset-password?token=${token}`
 
   const { data, error } = await resend.emails.send({
-    from: `Chayan <${fromEmail}>`,
+    from: `ChayanJobs <${fromEmail}>`,
     to: email,
-    subject: "Reset Your Password - Chayan",
+    subject: "Reset Your Password - ChayanJobs",
     html: `
       <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
         <h2 style="color:#1e3a5f">Reset Your Password</h2>
@@ -27,7 +27,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin:16px 0">Reset Password</a>
         <p style="color:#999;font-size:12px">If you didn't request this, ignore this email. Your password will remain unchanged.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px">Chayan - select right. serve right.</p>
+        <p style="color:#999;font-size:12px">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   })
@@ -47,16 +47,16 @@ export async function sendNewsletterWelcome(email: string) {
   }
 
   const { error } = await resend.emails.send({
-    from: `Chayan <${fromEmail}>`,
+    from: `ChayanJobs <${fromEmail}>`,
     to: email,
-    subject: "Welcome to Chayan Newsletter!",
+    subject: "Welcome to ChayanJobs Newsletter!",
     html: `
       <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <h2 style="color:#1e3a5f">Welcome to Chayan!</h2>
+        <h2 style="color:#1e3a5f">Welcome to ChayanJobs!</h2>
         <p style="color:#555;line-height:1.6">You've subscribed to our newsletter. You'll now receive the latest government job alerts, exam notifications, and preparation tips directly in your inbox.</p>
         <p style="color:#555;line-height:1.6">Stay tuned for updates!</p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px">Chayan - select right. serve right.</p>
+        <p style="color:#999;font-size:12px">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   })
@@ -100,12 +100,12 @@ export async function sendNewsletterDigest(
 
   const unsubscribeHtml = unsubscribeToken
     ? `<a href="${baseUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}" style="color:#999">Unsubscribe</a>`
-    : "You are receiving this because you subscribed to Chayan job alerts."
+    : "You are receiving this because you subscribed to ChayanJobs job alerts."
 
   const html = `
     <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
-        <div style="font-size:20px;font-weight:700;color:#fff">Your Chayan Job Alert Digest</div>
+        <div style="font-size:20px;font-weight:700;color:#fff">Your ChayanJobs Job Alert Digest</div>
         <div style="font-size:13px;color:#99f6e4;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
@@ -119,7 +119,7 @@ export async function sendNewsletterDigest(
         </table>
       </div>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-      <p style="color:#999;font-size:12px;text-align:center">Chayan - select right. serve right. | ${unsubscribeHtml}</p>
+      <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | ${unsubscribeHtml}</p>
     </div>
   `
 
@@ -129,9 +129,9 @@ export async function sendNewsletterDigest(
   }
 
   const { data, error } = await resend.emails.send({
-    from: `Chayan <${fromEmail}>`,
+    from: `ChayanJobs <${fromEmail}>`,
     to: email,
-    subject: `${items.length} new government job update${items.length === 1 ? "" : "s"} - Chayan Digest`,
+    subject: `${items.length} new government job update${items.length === 1 ? "" : "s"} - ChayanJobs Digest`,
     html,
   })
 
@@ -172,7 +172,7 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
     <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
         <div style="font-size:20px;font-weight:700;color:#fff">Hello ${name}, your application updates are here</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">Chayan application tracker reminder - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+        <div style="font-size:13px;color:#99f6e4;margin-top:4px">ChayanJobs application tracker reminder - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
         <table style="width:100%;border-collapse:collapse">
@@ -190,7 +190,7 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
         </table>
       </div>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-      <p style="color:#999;font-size:12px;text-align:center">Chayan - select right. serve right. | You are receiving this because you are tracking applications.</p>
+      <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | You are receiving this because you are tracking applications.</p>
     </div>
   `
 
@@ -200,9 +200,9 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
   }
 
   const { data, error } = await resend.emails.send({
-    from: `Chayan <${fromEmail}>`,
+    from: `ChayanJobs <${fromEmail}>`,
     to: email,
-    subject: `⏰ ${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up - Chayan`,
+    subject: `⏰ ${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up - ChayanJobs`,
     html,
   })
 
@@ -223,25 +223,25 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
  */
 export async function sendCompanyVerificationOtp(email: string, otp: string, companyName: string) {
   const safeCompany = companyName.replace(/[<>&"]/g, "")
-  const subject = `Verify ${safeCompany} - your Chayan employer code`
+  const subject = `Verify ${safeCompany} - your ChayanJobs employer code`
   const html = `
     <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
       <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:20px 24px">
-        <div style="font-size:18px;font-weight:700;color:#fff">Chayan Employer Verification</div>
+        <div style="font-size:18px;font-weight:700;color:#fff">ChayanJobs Employer Verification</div>
         <div style="font-size:13px;color:#99f6e4;margin-top:4px">Confirm you own this work inbox</div>
       </div>
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px">
-        <p style="color:#374151;font-size:14px;line-height:1.6">You requested employer access for <strong>${safeCompany}</strong>. Enter this code in Chayan (Employer Studio → Step 1):</p>
+        <p style="color:#374151;font-size:14px;line-height:1.6">You requested employer access for <strong>${safeCompany}</strong>. Enter this code in ChayanJobs (Employer Studio → Step 1):</p>
         <div style="text-align:center;margin:20px 0">
           <span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:8px;color:#111827;background:#f3f4f6;border:1px dashed #9ca3af;border-radius:10px;padding:12px 20px 12px 28px">${otp}</span>
         </div>
         <p style="color:#374151;font-size:13px">Valid for <strong>10 minutes</strong>, single use. After 5 wrong tries the code is locked and you must request a new one.</p>
         <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 14px;margin-top:16px">
-          <p style="color:#92400e;font-size:12px;margin:0;line-height:1.6"><strong>Security:</strong> never share this code. Chayan will NEVER ask for your password, OTP or bank details over email or phone. Only enter the code on <strong>chayanjobs.com</strong> - check the address bar before typing.</p>
+          <p style="color:#92400e;font-size:12px;margin:0;line-height:1.6"><strong>Security:</strong> never share this code. ChayanJobs will NEVER ask for your password, OTP or bank details over email or phone. Only enter the code on <strong>chayanjobs.com</strong> - check the address bar before typing.</p>
         </div>
-        <p style="color:#9ca3af;font-size:12px;margin-top:16px">Didn't request this? Ignore this email - your account stays unchanged. If this repeats, reset your Chayan password.</p>
+        <p style="color:#9ca3af;font-size:12px;margin-top:16px">Didn't request this? Ignore this email - your account stays unchanged. If this repeats, reset your ChayanJobs password.</p>
       </div>
-      <p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:16px">Chayan - select right. serve right. | Automated mail from noreply, do not reply.</p>
+      <p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:16px">ChayanJobs - select right. serve right. | Automated mail from noreply, do not reply.</p>
     </div>
   `
   if (!resend) {
@@ -249,7 +249,7 @@ export async function sendCompanyVerificationOtp(email: string, otp: string, com
     return { success: true, mocked: true }
   }
   const { data, error } = await resend.emails.send({
-    from: `Chayan Verify <${fromEmail}>`,
+    from: `ChayanJobs Verify <${fromEmail}>`,
     to: email,
     subject,
     html,
@@ -273,15 +273,15 @@ export async function sendContactEmail(
   }
 
   const { data, error } = await resend.emails.send({
-    from: `Chayan Contact <${fromEmail}>`,
+    from: `ChayanJobs Contact <${fromEmail}>`,
     to: "contact@chayanjobs.com",
     replyTo: email,
-    subject: `[Chayan Contact] ${subject}`,
+    subject: `[ChayanJobs Contact] ${subject}`,
     html: `
       <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
         <div style="background:linear-gradient(135deg,#1e3a5f,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
           <div style="font-size:20px;font-weight:700;color:#fff">New Contact Message</div>
-          <div style="font-size:13px;color:#99f6e4;margin-top:4px">Received via Chayan website contact form</div>
+          <div style="font-size:13px;color:#99f6e4;margin-top:4px">Received via ChayanJobs website contact form</div>
         </div>
         <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px 28px">
           <table style="width:100%;border-collapse:collapse">
@@ -317,7 +317,7 @@ export async function sendContactEmail(
           </div>
         </div>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px;text-align:center">Chayan - select right. serve right.</p>
+        <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   })

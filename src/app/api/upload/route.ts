@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 })
     }
 
-    const folder = (formData.get("folder") as string) || "chayan"
+    const folder = (formData.get("folder") as string) || "ChayanJobs"
     const transform = (formData.get("transform") as string) || ""
     const buffer = Buffer.from(await file.arrayBuffer())
 

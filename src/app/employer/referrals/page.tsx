@@ -31,9 +31,9 @@ export default function EmployerReferrals() {
 
   const share = async () => {
     if (!d) return
-    const text = `Hiring? Post free jobs on ChayanJobs Employer Studio - earn 1,000 coins (₹20 per 1,000) when companies you invite reach 3 applications: ${d.link}`
+    const text = `Hiring? Post free jobs on ChayanJobsJobs Employer Studio - earn 1,000 coins (₹20 per 1,000) when companies you invite reach 3 applications: ${d.link}`
     if (navigator.share) {
-      try { await navigator.share({ title: "ChayanJobs Employer Referral", text, url: d.link }) } catch { /* dismissed */ }
+      try { await navigator.share({ title: "ChayanJobsJobs Employer Referral", text, url: d.link }) } catch { /* dismissed */ }
     } else copy(d.link)
   }
 

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 import { prisma } from "@/lib/prisma"
 
-export const alt = "Chayan Blog Article"
+export const alt = "ChayanJobs Blog Article"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -12,8 +12,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     include: { category: true },
   })
 
-  const title = post?.title || "Chayan Blog"
-  const categoryName = post?.category?.name || "Chayan Blog"
+  const title = post?.title || "ChayanJobs Blog"
+  const categoryName = post?.category?.name || "ChayanJobs Blog"
 
   return new ImageResponse(
     (
@@ -73,7 +73,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 30, fontWeight: 600, color: "#ffffff", letterSpacing: -0.5 }}>Chayan</div>
+            <div style={{ fontSize: 30, fontWeight: 600, color: "#ffffff", letterSpacing: -0.5 }}>ChayanJobs</div>
             <div style={{ fontSize: 15, color: "#93c5fd" }}>select right. serve right.</div>
           </div>
         </div>

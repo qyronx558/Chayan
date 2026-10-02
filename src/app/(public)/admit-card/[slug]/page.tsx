@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: admitCard.title,
     description: `${admitCard.title} - ${admitCard.department.name}${admitCard.examDate ? ` | Exam Date: ${formatDate(admitCard.examDate)}` : ""}${admitCard.description ? ` | ${admitCard.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/admit-card/${admitCard.slug}` },
-    twitter: { card: "summary_large_image", title: `${admitCard.title} | Chayan`, description: `${admitCard.department.name}${admitCard.examDate ? ` - Exam: ${formatDate(admitCard.examDate)}` : ""}` },
+    twitter: { card: "summary_large_image", title: `${admitCard.title} | ChayanJobs`, description: `${admitCard.department.name}${admitCard.examDate ? ` - Exam: ${formatDate(admitCard.examDate)}` : ""}` },
   }
 }
 

@@ -86,7 +86,7 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
     inputRef.current?.focus()
     // Load recent searches
     try {
-      const stored = localStorage.getItem(`chayan_recent_searches_${session?.user?.id || "guest"}`)
+      const stored = localStorage.getItem(`ChayanJobs_recent_searches_${session?.user?.id || "guest"}`)
       if (stored) setRecentSearches(JSON.parse(stored))
     } catch {}
   }, [session?.user?.id])
@@ -97,7 +97,7 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
 
   const saveRecentSearch = (q: string) => {
     if (!q.trim()) return
-    const key = `chayan_recent_searches_${session?.user?.id || "guest"}`
+    const key = `ChayanJobs_recent_searches_${session?.user?.id || "guest"}`
     try {
       const current = recentSearches.filter((s) => s.toLowerCase() !== q.toLowerCase())
       const updated = [q, ...current].slice(0, 5)
@@ -257,7 +257,7 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
   const clearRecentSearches = () => {
     setRecentSearches([])
     try {
-      localStorage.removeItem(`chayan_recent_searches_${session?.user?.id || "guest"}`)
+      localStorage.removeItem(`ChayanJobs_recent_searches_${session?.user?.id || "guest"}`)
     } catch {}
   }
 

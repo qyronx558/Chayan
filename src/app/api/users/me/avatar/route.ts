@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "chayan/avatars",
+          folder: "ChayanJobs/avatars",
           resource_type: "image",
           transformation: {
             width: 400,

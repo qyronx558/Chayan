@@ -13,7 +13,7 @@ interface ImageUploadProps {
   className?: string
 }
 
-export function ImageUpload({ value, onChange, folder = "chayan", className }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, folder = "ChayanJobs", className }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)

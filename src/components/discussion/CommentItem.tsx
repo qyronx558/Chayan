@@ -195,7 +195,7 @@ export function CommentItem({
 
             {comment.isOfficial && (
               <span className="rounded-full bg-blue-600 px-1.5 py-px text-[10px] font-medium text-white">
-                Chayan team
+                ChayanJobs team
               </span>
             )}
 

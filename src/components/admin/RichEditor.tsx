@@ -281,7 +281,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       try {
         const formData = new FormData()
         formData.set("file", file)
-        formData.set("folder", "chayan/blog")
+        formData.set("folder", "ChayanJobs/blog")
         const res = await fetch("/api/upload", { method: "POST", body: formData })
         const json = await res.json()
         if (json.success) {

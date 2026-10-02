@@ -8,7 +8,7 @@ export function PrintButton({ title }: { title?: string }) {
     const prevTitle = document.title
     if (title) {
       const safe = title.replace(/[\\/:*?"<>|]/g, "").trim().slice(0, 120)
-      if (safe) document.title = `${safe} - Chayan Blog`
+      if (safe) document.title = `${safe} - ChayanJobs Blog`
     }
     const restore = () => {
       document.title = prevTitle

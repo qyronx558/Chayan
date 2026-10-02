@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "Cookie Policy of Chayan. Learn about how we use cookies and similar tracking technologies.",
+  description: "Cookie Policy of ChayanJobs. Learn about how we use cookies and similar tracking technologies.",
   openGraph: {
-    title: "Cookie Policy - Chayan",
-    description: "Learn about how Chayan uses cookies and similar tracking technologies.",
+    title: "Cookie Policy - ChayanJobs",
+    description: "Learn about how ChayanJobs uses cookies and similar tracking technologies.",
   },
 }
 
@@ -28,7 +28,7 @@ export default function CookiePolicyPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">How We Use Cookies</h2>
         <p className="mb-3 leading-relaxed text-gray-700">
-          Chayan uses cookies for the following purposes:
+          ChayanJobs uses cookies for the following purposes:
         </p>
         <ul className="list-disc space-y-2 pl-6 text-gray-700">
           <li><strong>Essential Cookies:</strong> Required for the website to function properly. These enable core features like authentication and session management.</li>

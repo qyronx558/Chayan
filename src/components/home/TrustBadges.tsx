@@ -17,7 +17,7 @@ export function TrustBadges({ className }: { className?: string }) {
       <div className="mx-auto w-full max-w-7xl min-w-0 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-teal-600 dark:text-teal-400">
-            Why Trust Chayan
+            Why Trust ChayanJobs
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             Your career updates, protected and verified at every step.

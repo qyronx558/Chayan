@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Copyright Policy",
-  description: "Copyright Policy of Chayan. Information about intellectual property rights and content usage.",
+  description: "Copyright Policy of ChayanJobs. Information about intellectual property rights and content usage.",
   openGraph: {
-    title: "Copyright Policy - Chayan",
-    description: "Learn about copyright and content usage on Chayan.",
+    title: "Copyright Policy - ChayanJobs",
+    description: "Learn about copyright and content usage on ChayanJobs.",
   },
 }
 
@@ -19,8 +19,8 @@ export default function CopyrightPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Our Copyright</h2>
         <p className="leading-relaxed text-gray-700">
-          All original content published on Chayan - including articles, compilations, layouts, graphics,
-          logos, and design elements - is the intellectual property of Chayan unless otherwise stated.
+          All original content published on ChayanJobs - including articles, compilations, layouts, graphics,
+          logos, and design elements - is the intellectual property of ChayanJobs unless otherwise stated.
           This content is protected under applicable copyright laws.
         </p>
       </section>
@@ -28,7 +28,7 @@ export default function CopyrightPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Publicly Available Information</h2>
         <p className="leading-relaxed text-gray-700">
-          Chayan aggregates and republishes publicly available information from official government sources,
+          ChayanJobs aggregates and republishes publicly available information from official government sources,
           including job notifications, exam results, admit cards, and answer keys. Such content is in the
           public domain or is published in the public interest. We provide proper attribution and links to
           the original government sources wherever possible.
@@ -60,7 +60,7 @@ export default function CopyrightPage() {
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Third-Party Content</h2>
         <p className="leading-relaxed text-gray-700">
           Our website may contain content from third parties, including images, articles, and embedded media.
-          Such content remains the property of their respective owners. Chayan does not claim ownership of
+          Such content remains the property of their respective owners. ChayanJobs does not claim ownership of
           third-party content and will remove it upon valid request from the copyright holder.
         </p>
       </section>
@@ -68,7 +68,7 @@ export default function CopyrightPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Reporting Copyright Infringement</h2>
         <p className="leading-relaxed text-gray-700">
-          If you believe that your copyrighted work has been used on Chayan in a way that constitutes
+          If you believe that your copyrighted work has been used on ChayanJobs in a way that constitutes
           copyright infringement, please refer to our{" "}
           <Link href="/dmca" className="text-teal-600 hover:underline">DMCA Policy</Link> for instructions
           on how to submit a takedown notice.

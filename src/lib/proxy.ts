@@ -67,7 +67,7 @@ function resolveWebUrl(href: string, officialUrl: string): URL | null {
   }
 }
 
-/** Remove meta CSP headers and rewrite links so same-site browsing stays inside Chayan preview. */
+/** Remove meta CSP headers and rewrite links so same-site browsing stays inside ChayanJobs preview. */
 export function rewriteHtmlForPreview(html: string, officialUrl: string): string {
   let out = html
   const official = new URL(officialUrl)
@@ -77,8 +77,8 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
   out = out.replace(/<meta[^>]+http-equiv\s*=\s*["']?\s*X-Frame-Options\s*["']?[^>]*>/gi, "")
 
   // Neutralize frame-busting inline scripts that force top navigation.
-  out = out.replace(/top\s*\.\s*location/gi, "__chayan_blocked_top_location")
-  out = out.replace(/parent\s*\.\s*location/gi, "__chayan_blocked_parent_location")
+  out = out.replace(/top\s*\.\s*location/gi, "__ChayanJobs_blocked_top_location")
+  out = out.replace(/parent\s*\.\s*location/gi, "__ChayanJobs_blocked_parent_location")
 
   // Base without target: relative resources resolve to the official site,
   // link clicks stay inside the preview frame unless marked _blank below.
@@ -91,7 +91,7 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
     out = `<head>${baseTag}</head>${out}`
   }
 
-  // Same-site links route through the preview so browsing stays on Chayan.
+  // Same-site links route through the preview so browsing stays on ChayanJobs.
   // Cross-site links open in a new tab on the real address.
   out = out.replace(/<a\b[^>]*>/gi, (tag) => {
     const hrefMatch = tag.match(/href\s*=\s*(["'])(.*?)\1/i)
@@ -112,7 +112,7 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
     return tag
   })
 
-  // Forms submit to the official site in a new tab, never through Chayan,
+  // Forms submit to the official site in a new tab, never through ChayanJobs,
   // so passwords, OTP, eKYC and payments stay on the original domain.
   out = out.replace(/<form(\s[^>]*)?>/gi, (m) => {
     if (/target\s*=/i.test(m)) return m.replace(/target\s*=\s*(["'])[^"']*\1/i, `target="_blank"`)
@@ -131,7 +131,7 @@ export async function fetchOfficialHtml(url: URL): Promise<{ html: string; final
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ChayanPreview/1.0; +https://chayan.in)",
+        "User-Agent": "Mozilla/5.0 (compatible; ChayanJobsPreview/1.0; +https://ChayanJobs.in)",
         Accept: "text/html,application/xhtml+xml",
         "Accept-Language": "en-IN,en;q=0.9,hi;q=0.8",
         Range: "bytes=0-2097151",

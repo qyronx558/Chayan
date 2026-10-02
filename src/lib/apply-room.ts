@@ -2,7 +2,7 @@
  * Shared helpers for the in-site "Apply Room".
  * Used by both gov jobs (/apply/[slug]/start) and private jobs
  * (/private-jobs/[slug]/apply) so any external website can be
- * embedded inside Chayan with a safe fallback.
+ * embedded inside ChayanJobs with a safe fallback.
  */
 
 /** Only http/https URLs are allowed to be embedded. */
@@ -65,7 +65,7 @@ export function headersBlockFraming(headers: Headers): boolean {
   const match = csp.match(/frame-ancestors([^;]*)/)
   if (!match) return false
   const value = match[1].trim()
-  // 'none' always blocks; 'self' blocks third-party embedding on Chayan
+  // 'none' always blocks; 'self' blocks third-party embedding on ChayanJobs
   if (value.includes("'none'")) return true
   if (value === "'self'" || value.startsWith("'self' ")) return true
   return false

@@ -10,7 +10,7 @@ export function LogoSmall({ className, href = "/" }: { className?: string; href?
         </svg>
       </div>
       <div className="leading-tight">
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">Chayan</div>
+        <div className="text-2xl font-bold text-gray-900 dark:text-white">ChayanJobs</div>
         <div className="text-xs font-medium tracking-wider text-gray-500 dark:text-gray-400 -mt-0.5">select right. serve right.</div>
       </div>
     </Link>

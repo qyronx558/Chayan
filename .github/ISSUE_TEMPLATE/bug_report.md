@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 ## Environment
 - Browser: [e.g. Chrome, Firefox]
 - Device: [e.g. Desktop, Mobile]
-- URL: [e.g. https://chayan.in/jobs]
+- URL: [e.g. https://ChayanJobs.in/jobs]
 
 ## Additional Context
 Add any other context about the problem here.

@@ -34,7 +34,7 @@ type ViewMode = "live" | "preview"
 /**
  * Universal viewer for any external application website.
  * Tier 1 tries the official site directly in an iframe.
- * Tier 2 shows a safe read-only preview served by Chayan when framing is blocked.
+ * Tier 2 shows a safe read-only preview served by ChayanJobs when framing is blocked.
  * Passwords, OTP, eKYC and payments always happen on the official site.
  */
 export function ApplyRoomClient({
@@ -83,7 +83,7 @@ export function ApplyRoomClient({
 
   const blocked = frameStatus === "blocked"
 
-  // When framing is blocked, stay on Chayan and show the preview.
+  // When framing is blocked, stay on ChayanJobs and show the preview.
   // No automatic new tab. The user leaves only by explicit choice.
   // State updates run in a timeout callback to avoid cascading renders.
   useEffect(() => {
@@ -197,7 +197,7 @@ export function ApplyRoomClient({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-100 bg-gray-50 px-3 py-1.5 text-xs sm:px-4 dark:border-gray-800 dark:bg-gray-800/50">
           <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
             <ShieldCheck className="h-3.5 w-3.5 text-gray-400" />
-            {mode === "preview" ? "Preview inside Chayan" : "Official website opened inside Chayan"}
+            {mode === "preview" ? "Preview inside ChayanJobs" : "Official website opened inside ChayanJobs"}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-gray-600 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700">
             <Lock className="h-3 w-3 text-gray-400" />
@@ -205,17 +205,17 @@ export function ApplyRoomClient({
           </span>
           <span className="hidden text-gray-400 lg:inline dark:text-gray-500">
             {mode === "preview"
-              ? "You stay on Chayan. Login and payment use the official site."
+              ? "You stay on ChayanJobs. Login and payment use the official site."
               : "Complete your application here."}
           </span>
         </div>
       </div>
 
-      {/* Notice when framing is blocked. User stays on Chayan. */}
+      {/* Notice when framing is blocked. User stays on ChayanJobs. */}
       {blocked && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 sm:px-4 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-300">
           <span>
-            You stay on Chayan. Preview of {hostname} is shown below, including its inner pages.
+            You stay on ChayanJobs. Preview of {hostname} is shown below, including its inner pages.
           </span>
           <span className="text-gray-400">Passwords, OTP and payments stay on {hostname}.</span>
           <Button size="sm" variant="outline" className="ml-auto" asChild>
@@ -235,7 +235,7 @@ export function ApplyRoomClient({
         <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-3 py-1.5 text-[11px] text-gray-500 sm:px-4 dark:border-gray-800 dark:bg-gray-800/50 dark:text-gray-400">
           <Globe className="h-3.5 w-3.5 shrink-0 text-gray-400" />
           <span className="min-w-0 flex-1 truncate font-mono">
-            {mode === "preview" ? `${hostname} preview via Chayan` : targetUrl}
+            {mode === "preview" ? `${hostname} preview via ChayanJobs` : targetUrl}
           </span>
           {loading ? (
             <Badge variant="secondary" className="shrink-0 animate-pulse text-[10px]">

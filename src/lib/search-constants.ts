@@ -19,7 +19,7 @@ export const POPULAR_SEARCHES = [
 // Short subset shown in the homepage hero to avoid overwhelming users.
 export const HERO_TRENDING_SEARCHES: readonly string[] = POPULAR_SEARCHES.slice(0, 5)
 
-export const OPEN_SEARCH_EVENT = "chayan:open-search"
+export const OPEN_SEARCH_EVENT = "ChayanJobs:open-search"
 
 export function requestOpenSearch(query = "") {
   if (typeof window === "undefined") return

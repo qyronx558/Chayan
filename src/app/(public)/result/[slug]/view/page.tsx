@@ -13,9 +13,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const result = await prisma.result.findUnique({ where: { slug } })
-  if (!result) return { title: "View Result | Chayan" }
+  if (!result) return { title: "View Result | ChayanJobs" }
   return {
-    title: `Result: ${result.title} | Chayan`,
+    title: `Result: ${result.title} | ChayanJobs`,
     description: `View ${result.title} in fullscreen on the original official document.`,
     robots: { index: false, follow: true },
   }

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: answerKey.title,
     description: `${answerKey.title} - ${answerKey.department.name}${answerKey.description ? ` | ${answerKey.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/answer-key/${answerKey.slug}` },
-    twitter: { card: "summary_large_image", title: `${answerKey.title} | Chayan`, description: `${answerKey.department.name} - Download answer key` },
+    twitter: { card: "summary_large_image", title: `${answerKey.title} | ChayanJobs`, description: `${answerKey.department.name} - Download answer key` },
   }
 }
 

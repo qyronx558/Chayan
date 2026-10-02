@@ -12,7 +12,7 @@ import {
  * strips framing blockers, keeps same-site browsing inside the preview,
  * and sends cross-site links and all forms to the official site in a new tab.
  * Passwords, OTP, eKYC and payments always happen on the official site,
- * never through Chayan.
+ * never through ChayanJobs.
  */
 export async function GET(req: NextRequest) {
   let target: URL

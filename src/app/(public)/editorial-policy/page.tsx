@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Editorial Policy",
-  description: "Editorial Policy of Chayan. Learn about our content standards, fact-checking process, and correction policy.",
+  description: "Editorial Policy of ChayanJobs. Learn about our content standards, fact-checking process, and correction policy.",
   openGraph: {
-    title: "Editorial Policy - Chayan",
-    description: "Learn about Chayan's content standards and editorial practices.",
+    title: "Editorial Policy - ChayanJobs",
+    description: "Learn about ChayanJobs's content standards and editorial practices.",
   },
 }
 
@@ -19,7 +19,7 @@ export default function EditorialPolicyPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Our Mission</h2>
         <p className="leading-relaxed text-gray-700">
-          Chayan is committed to providing accurate, timely, and reliable information about government job
+          ChayanJobs is committed to providing accurate, timely, and reliable information about government job
           opportunities, examination results, admit cards, answer keys, and related announcements across India.
           Our editorial team works diligently to aggregate and present information from official government sources
           in a clear, accessible manner.
@@ -29,7 +29,7 @@ export default function EditorialPolicyPage() {
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Content Sources</h2>
         <p className="mb-3 leading-relaxed text-gray-700">
-          All content published on Chayan is sourced from:
+          All content published on ChayanJobs is sourced from:
         </p>
         <ul className="list-disc space-y-2 pl-6 text-gray-700">
           <li>Official government websites and portals (e.g., SSC, UPSC, State PSC, Railway Recruitment Boards, etc.)</li>
@@ -69,14 +69,14 @@ export default function EditorialPolicyPage() {
         <p className="leading-relaxed text-gray-700">
           Comments and user contributions, if enabled, are monitored for compliance with our community guidelines.
           We reserve the right to remove any content that is spam, offensive, misleading, or violates applicable
-          laws. User comments represent the views of the individual and not necessarily those of Chayan.
+          laws. User comments represent the views of the individual and not necessarily those of ChayanJobs.
         </p>
       </section>
 
       <section className="mb-8">
         <h2 className="mb-3 text-2xl font-semibold text-gray-900">Advertising Policy</h2>
         <p className="mb-3 leading-relaxed text-gray-700">
-          Chayan displays advertisements through Google AdSense. Our editorial content is independent of
+          ChayanJobs displays advertisements through Google AdSense. Our editorial content is independent of
           advertising interests. We maintain a clear separation between editorial content and advertisements:
         </p>
         <ul className="list-disc space-y-2 pl-6 text-gray-700">

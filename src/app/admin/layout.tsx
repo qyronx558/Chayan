@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [session, status, router])
 
   useEffect(() => {
-    document.title = "Chayan Admin Console"
+    document.title = "ChayanJobs Admin Console"
   }, [])
 
   if (status === "loading" || !session || !isAdmin(session.user.role)) {
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {children}
             </div>
             <footer className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-slate-200/70 pb-4 pt-4 text-[11.5px] text-slate-400 sm:flex-row dark:border-white/[0.06] dark:text-slate-500">
-              <span>Chayan Admin Console · v2.0 - Secure staff area</span>
+              <span>ChayanJobs Admin Console · v2.0 - Secure staff area</span>
               <span>Isolated from the main site · opens in a separate tab</span>
             </footer>
           </div>

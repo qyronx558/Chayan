@@ -91,8 +91,8 @@ async function main() {
   // ── Admin User ──
   if ((await prisma.user.count()) === 0) {
     const pw = await bcrypt.hash('Admin@123', 12);
-    await prisma.user.create({ data: { name: 'Admin', email: 'admin@chayan.com', password: pw, role: Role.SUPER_ADMIN, emailVerified: new Date() } });
-    await prisma.adminUser.create({ data: { name: 'Super Admin', email: 'admin@chayan.com', password: pw, role: 'SUPER_ADMIN' } });
+    await prisma.user.create({ data: { name: 'Admin', email: 'admin@ChayanJobs.com', password: pw, role: Role.SUPER_ADMIN, emailVerified: new Date() } });
+    await prisma.adminUser.create({ data: { name: 'Super Admin', email: 'admin@ChayanJobs.com', password: pw, role: 'SUPER_ADMIN' } });
     console.log('  admin user seeded');
   }
 
@@ -209,7 +209,7 @@ async function main() {
   if ((await prisma.blogPost.count()) === 0) {
     const blogCat = Object.fromEntries((await prisma.blogCategory.findMany()).map(c => [c.name, c.id]));
     const sample = (p: { title: string; slug: string; category: string; tags: string; excerpt: string; content: string; views: number; daysAgo: number }) => ({
-      title: p.title, slug: p.slug, excerpt: p.excerpt, content: p.content, author: 'Chayan Team', tags: p.tags,
+      title: p.title, slug: p.slug, excerpt: p.excerpt, content: p.content, author: 'ChayanJobs Team', tags: p.tags,
       categoryId: blogCat[p.category], published: true, views: p.views,
       createdAt: daysAgo(p.daysAgo), updatedAt: daysAgo(p.daysAgo - 2),
     });

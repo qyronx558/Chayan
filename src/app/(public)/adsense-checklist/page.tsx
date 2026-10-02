@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "AdSense Compliance Checklist",
-  description: "Complete checklist for Google AdSense approval on Chayan. Review all requirements before applying.",
+  description: "Complete checklist for Google AdSense approval on ChayanJobs. Review all requirements before applying.",
   robots: { index: false, follow: false },
 }
 
@@ -68,7 +68,7 @@ export default function AdSenseChecklistPage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-2 text-4xl font-bold text-gray-900">AdSense Compliance Checklist</h1>
       <p className="mb-8 text-sm text-gray-500">
-        Use this checklist to verify Chayan meets all Google AdSense requirements before applying.
+        Use this checklist to verify ChayanJobs meets all Google AdSense requirements before applying.
       </p>
 
       <div className="mb-8 rounded-lg border border-teal-200 bg-teal-50 p-4">

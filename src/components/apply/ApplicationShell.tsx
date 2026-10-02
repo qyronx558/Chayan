@@ -21,7 +21,7 @@ const LOAD_TIMEOUT_MS = 12000
 
 /**
  * Unified "Application Mode" shell for government + private apply routes.
- * Maximum space for the official site; minimal ChayanJobs chrome;
+ * Maximum space for the official site; minimal ChayanJobsJobs chrome;
  * Apply CTA always visible; blocked embeds get a premium fallback.
  */
 export function ApplicationShell(props: ApplicationShellProps) {
@@ -363,7 +363,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
         ctaLabel={isDocument ? "Open Document" : undefined}
         aboutCopy={
           isDocument
-            ? `This document opens from the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobs only opens the verified official file for you.`
+            ? `This document opens from the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobsJobs only opens the verified official file for you.`
             : undefined
         }
         onReport={reportIssue}

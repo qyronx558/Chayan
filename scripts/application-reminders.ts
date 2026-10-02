@@ -226,7 +226,7 @@ async function main() {
 }
 
 function smsText(r: ApplicationReminderItem): string {
-  return `Chayan Jobs: ${r.type} reminder - ${r.title}. ${r.detail} Open: ${process.env.NEXT_PUBLIC_APP_URL || "https://chayanjobs.com"}${r.href}`
+  return `ChayanJobs Jobs: ${r.type} reminder - ${r.title}. ${r.detail} Open: ${process.env.NEXT_PUBLIC_APP_URL || "https://chayanjobs.com"}${r.href}`
 }
 
 main()

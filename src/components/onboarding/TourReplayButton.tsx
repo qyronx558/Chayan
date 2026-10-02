@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from "next/navigation"
 import { Sparkles } from "lucide-react"
 
-const HOME_SEEN_KEY = "chayan_tour_v2_home_seen"
-const CAL_SEEN_KEY = "chayan_tour_v2_calendar_seen"
+const HOME_SEEN_KEY = "ChayanJobs_tour_v2_home_seen"
+const CAL_SEEN_KEY = "ChayanJobs_tour_v2_calendar_seen"
 
 /** Footer / help entry point to replay the intelligent spotlight tour. */
 export function TourReplayButton({ className = "" }: { className?: string }) {
@@ -15,10 +15,10 @@ export function TourReplayButton({ className = "" }: { className?: string }) {
     try {
       if ((pathname ?? "/").startsWith("/exam-calendar")) {
         localStorage.removeItem(CAL_SEEN_KEY)
-        window.dispatchEvent(new Event("chayan:replay-tour"))
+        window.dispatchEvent(new Event("ChayanJobs:replay-tour"))
       } else if ((pathname ?? "/") === "/") {
         localStorage.removeItem(HOME_SEEN_KEY)
-        window.dispatchEvent(new Event("chayan:replay-tour"))
+        window.dispatchEvent(new Event("ChayanJobs:replay-tour"))
       } else {
         // From any other page, jump into the relevant tour
         router.push("/?tour=1")

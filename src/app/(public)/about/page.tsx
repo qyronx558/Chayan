@@ -3,9 +3,9 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about Chayan - India's trusted platform for government job notifications, exam results, admit cards, and career resources.",
+  description: "Learn about ChayanJobs - India's trusted platform for government job notifications, exam results, admit cards, and career resources.",
   openGraph: {
-    title: "About Chayan",
+    title: "About ChayanJobs",
     description: "Learn about India's trusted government job portal connecting millions with Sarkari career opportunities.",
   },
 }
@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-8 text-4xl font-bold text-gray-900">About Chayan</h1>
+      <h1 className="mb-8 text-4xl font-bold text-gray-900">About ChayanJobs</h1>
 
       <section className="mb-10">
         <h2 className="mb-4 text-2xl font-semibold text-gray-900">Who We Are</h2>
         <p className="mb-4 leading-relaxed text-gray-700">
-          Chayan is a comprehensive online platform dedicated to providing the latest information on
+          ChayanJobs is a comprehensive online platform dedicated to providing the latest information on
           government job opportunities across India. We aggregate job notifications from various central and
           state government departments, public sector undertakings, and autonomous bodies to create a
           single, reliable source for Sarkari job seekers.

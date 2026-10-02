@@ -12,7 +12,7 @@ services:
       - AUTH_SECRET=${AUTH_SECRET:-your-super-secret-key-change-in-production}
       - AUTH_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_PUBLIC_APP_NAME=Chayan
+      - NEXT_PUBLIC_APP_NAME=ChayanJobs
     depends_on:
       db:
         condition: service_healthy

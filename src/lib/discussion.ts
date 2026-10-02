@@ -85,7 +85,7 @@ export function moderateContent(content: string): FlagReason[] {
 }
 
 function secret(): string {
-  return process.env.AUTH_SECRET || "chayan-discussion-dev-secret"
+  return process.env.AUTH_SECRET || "ChayanJobs-discussion-dev-secret"
 }
 
 export function issueCaptcha(): { question: string; token: string } {

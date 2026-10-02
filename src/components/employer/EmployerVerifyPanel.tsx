@@ -118,7 +118,7 @@ export function EmployerVerifyPanel({ companies, onVerified }: Props) {
             <Button size="sm" variant="ghost" onClick={sendCode} disabled={sending}>{sending ? "Resending…" : "Resend code"}</Button>
             <Button size="sm" variant="ghost" onClick={() => { setChallengeId(""); setOtp("") }}>Change inbox</Button>
           </div>
-          <p className="flex items-start gap-1.5 text-xs text-gray-500"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />Anti-phishing: the mail comes only from <strong>Chayan Verify &lt;noreply@chayanjobs.com&gt;</strong> with a code and no login links. Never share the code; enter it only on chayanjobs.com. Full inbox addresses are never shown publicly - only {maskedEmail}.</p>
+          <p className="flex items-start gap-1.5 text-xs text-gray-500"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />Anti-phishing: the mail comes only from <strong>ChayanJobs Verify &lt;noreply@chayanjobs.com&gt;</strong> with a code and no login links. Never share the code; enter it only on chayanjobs.com. Full inbox addresses are never shown publicly - only {maskedEmail}.</p>
         </CardContent></Card>
       )}
     </div>

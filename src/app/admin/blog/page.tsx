@@ -211,7 +211,7 @@ export default function AdminBlog() {
                             <Badge variant="secondary">Uncategorized</Badge>
                           )}
                         </TableCell>
-                        <TableCell>{post.author || "Chayan"}</TableCell>
+                        <TableCell>{post.author || "ChayanJobs"}</TableCell>
                         <TableCell>
                           <p className="text-sm">{post.createdBy?.name || "-"}</p>
                           <p className="text-xs text-gray-400">{post.createdBy?.email || ""}</p>
@@ -303,7 +303,7 @@ export default function AdminBlog() {
                   <FormField control={form.control} name="author" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Author</FormLabel>
-                      <FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="Chayan" className="text-sm" /></FormControl>
+                      <FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="ChayanJobs" className="text-sm" /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -337,7 +337,7 @@ export default function AdminBlog() {
                     <FormItem>
                       <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Featured Image</FormLabel>
                       <FormControl>
-                        <ImageUpload value={field.value} onChange={field.onChange} folder="chayan/blog" className="!p-3" />
+                        <ImageUpload value={field.value} onChange={field.onChange} folder="ChayanJobs/blog" className="!p-3" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

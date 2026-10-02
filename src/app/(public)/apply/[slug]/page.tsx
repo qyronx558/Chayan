@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: job.title,
     description: `${job.title} - ${job.department.name} | ${job.totalVacancies ? `${job.totalVacancies} vacancies` : ""} | Apply before ${job.lastDate ? formatDate(job.lastDate) : "N/A"}`,
     alternates: { canonical: `${baseUrl}/apply/${job.slug}` },
-    twitter: { card: "summary_large_image", title: `${job.title} | Chayan`, description: `${job.department.name} - ${job.location || "All India"} | ${job.salary || "As per norms"}` },
+    twitter: { card: "summary_large_image", title: `${job.title} | ChayanJobs`, description: `${job.department.name} - ${job.location || "All India"} | ${job.salary || "As per norms"}` },
     openGraph: {
       title: job.title,
       description: `Department: ${job.department.name} | Location: ${job.location || "All India"} | Salary: ${job.salary || "As per norms"}`,

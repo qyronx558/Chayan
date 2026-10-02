@@ -16,12 +16,12 @@ export function AuthorCard({ name, bio, category }: AuthorCardProps) {
       <div className="min-w-0">
         <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{name}</p>
         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-          {bio || "Editor at Chayan - writes practical guides on careers, skills and money."}
+          {bio || "Editor at ChayanJobs - writes practical guides on careers, skills and money."}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {category && <Badge variant="secondary" className="text-[10px]">{category}</Badge>}
           <span className="flex items-center gap-1 text-xs text-gray-400">
-            <Mail className="h-3 w-3" /> Chayan Editorial
+            <Mail className="h-3 w-3" /> ChayanJobs Editorial
           </span>
         </div>
       </div>

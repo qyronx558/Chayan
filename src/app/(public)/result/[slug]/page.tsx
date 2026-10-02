@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: result.title,
     description: `${result.title} - ${result.department.name}${result.resultDate ? ` | Result Date: ${formatDate(result.resultDate)}` : ""}${result.description ? ` | ${result.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/result/${result.slug}` },
-    twitter: { card: "summary_large_image", title: `${result.title} | Chayan`, description: `${result.department.name} - ${result.resultDate ? `Result: ${formatDate(result.resultDate)}` : ""}` },
+    twitter: { card: "summary_large_image", title: `${result.title} | ChayanJobs`, description: `${result.department.name} - ${result.resultDate ? `Result: ${formatDate(result.resultDate)}` : ""}` },
   }
 }
 

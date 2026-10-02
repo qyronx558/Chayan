@@ -91,7 +91,7 @@ export function ApplicationInfoDrawer({
           <div className="mt-4 rounded-xl bg-gray-50 px-3.5 py-3 text-xs leading-relaxed text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
             <p>
               {aboutCopy ??
-                `You apply on the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobs only opens the verified official page for you.`}
+                `You apply on the ${sourceLabel.toLowerCase()} (${hostname}). ChayanJobsJobs only opens the verified official page for you.`}
             </p>
             {updatedLabel ? <p className="mt-1 text-gray-400">Last checked · {updatedLabel}</p> : null}
           </div>

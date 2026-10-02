@@ -22,10 +22,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const baseUrl = getBaseUrl()
   return {
-    title: `${category.name} Articles & Guides | Chayan Blog`,
-    description: category.description || `${category.name} articles, guides and resources on Chayan.`,
+    title: `${category.name} Articles & Guides | ChayanJobs Blog`,
+    description: category.description || `${category.name} articles, guides and resources on ChayanJobs.`,
     alternates: { canonical: `${baseUrl}/blog/topic/${category.slug}` },
-    openGraph: { title: `${category.name} | Chayan Blog`, description: category.description || undefined },
+    openGraph: { title: `${category.name} | ChayanJobs Blog`, description: category.description || undefined },
   }
 }
 

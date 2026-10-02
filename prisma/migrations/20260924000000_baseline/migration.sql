@@ -519,7 +519,7 @@ CREATE TABLE "BlogPost" (
     "slug" TEXT NOT NULL,
     "excerpt" TEXT,
     "content" TEXT,
-    "author" TEXT NOT NULL DEFAULT 'Chayan Team',
+    "author" TEXT NOT NULL DEFAULT 'ChayanJobs Team',
     "image" TEXT,
     "tags" TEXT,
     "categoryId" TEXT,

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: syllabus.title,
     description: `${syllabus.title} - ${syllabus.department.name}${syllabus.subjects ? ` | Subjects: ${syllabus.subjects}` : ""}${syllabus.description ? ` | ${syllabus.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/syllabus/${syllabus.slug}` },
-    twitter: { card: "summary_large_image", title: `${syllabus.title} | Chayan`, description: `${syllabus.department.name} - ${syllabus.subjects ? `Subjects: ${syllabus.subjects}` : "Download syllabus"}` },
+    twitter: { card: "summary_large_image", title: `${syllabus.title} | ChayanJobs`, description: `${syllabus.department.name} - ${syllabus.subjects ? `Subjects: ${syllabus.subjects}` : "Download syllabus"}` },
   }
 }
 

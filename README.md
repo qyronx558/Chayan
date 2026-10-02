@@ -1,10 +1,10 @@
-# Chayan
+# ChayanJobs
 
 **India's most trusted government & private jobs portal - discover, track, and never miss an opportunity.**
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/officialamit558/Chayan/ci.yml?branch=main)
-![Version](https://img.shields.io/github/package-json/v/officialamit558/Chayan)
-![License](https://img.shields.io/github/license/officialamit558/Chayan)
+![Build Status](https://img.shields.io/github/actions/workflow/status/officialamit558/ChayanJobs/ci.yml?branch=main)
+![Version](https://img.shields.io/github/package-json/v/officialamit558/ChayanJobs)
+![License](https://img.shields.io/github/license/officialamit558/ChayanJobs)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC)
@@ -13,7 +13,7 @@
 
 ## Overview
 
-Chayan is a production-ready job portal that aggregates government and private job notifications, exam results, admit cards, answer keys, syllabi, and admission updates from official sources across India. It solves the fragmentation problem where aspirants must check dozens of websites daily by providing a single, real-time, searchable platform with personalized alerts, application tracking, and an exam calendar - all in one place.
+ChayanJobs is a production-ready job portal that aggregates government and private job notifications, exam results, admit cards, answer keys, syllabi, and admission updates from official sources across India. It solves the fragmentation problem where aspirants must check dozens of websites daily by providing a single, real-time, searchable platform with personalized alerts, application tracking, and an exam calendar - all in one place.
 
 Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirants preparing for UPSC, SSC, Banking, Railway, Defence, and State PSC exams.
 
@@ -77,8 +77,8 @@ Built for scale, SEO, and AdSense monetization. Trusted by thousands of aspirant
 ## Installation
 
 ```bash
-git clone https://github.com/officialamit558/Chayan.git
-cd Chayan
+git clone https://github.com/officialamit558/ChayanJobs.git
+cd ChayanJobs
 
 npm install
 

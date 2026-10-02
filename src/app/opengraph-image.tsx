@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og"
 
 export const runtime = "edge"
 
-export const alt = "Chayan - Latest Government Jobs, Results, Admit Cards"
+export const alt = "ChayanJobs - Latest Government Jobs, Results, Admit Cards"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -62,7 +62,7 @@ export default async function Image() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: 72, fontWeight: 500, color: "#0b0b0b", letterSpacing: -1 }}>
-              Chayan
+              ChayanJobs
             </div>
             <div style={{ fontSize: 20, fontWeight: 400, color: "#52514e", marginTop: 4 }}>
               select right. serve right.

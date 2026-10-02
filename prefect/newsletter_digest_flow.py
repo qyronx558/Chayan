@@ -1,5 +1,5 @@
 """
-Prefect flow: Chayan newsletter digest cron.
+Prefect flow: ChayanJobs newsletter digest cron.
 
 Runs the TypeScript newsletter worker (scripts/newsletter-digest.ts)
 4 days a week (Mon, Wed, Fri, Sat) at 8:00 AM IST. The worker is

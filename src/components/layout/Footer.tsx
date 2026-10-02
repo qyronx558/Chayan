@@ -62,7 +62,7 @@ export function Footer({ className }: { className?: string }) {
                   </svg>
                 </div>
                 <div className="leading-tight">
-                  <div className="text-2xl font-bold text-white">Chayan</div>
+                  <div className="text-2xl font-bold text-white">ChayanJobs</div>
                   <div className="-mt-0.5 text-xs font-medium tracking-wider text-slate-400">select right. serve right.</div>
                 </div>
               </Link>
@@ -123,7 +123,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
 
           <div className="flex items-center justify-center overflow-hidden py-10 min-w-0">
-            <div className="max-w-full break-words text-center text-6xl font-bold leading-none tracking-[0.15em] text-white/95 sm:text-8xl md:text-9xl">Chayan</div>
+            <div className="max-w-full break-words text-center text-6xl font-bold leading-none tracking-[0.15em] text-white/95 sm:text-8xl md:text-9xl">ChayanJobs</div>
           </div>
 
           <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">

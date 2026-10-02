@@ -38,40 +38,6 @@ import { SearchDialog, useSearchDialog } from "@/components/layout/SearchDialog"
 import { SearchTrigger } from "@/components/search/SearchTrigger"
 import { LogoSmall } from "@/components/layout/LogoSmall"
 import { NotificationBell } from "./NotificationBell"
-import { AshokaChakra } from "./AshokaChakra"
-
-function DateTimeDisplay() {
-  const [display, setDisplay] = React.useState("")
-
-  React.useEffect(() => {
-    const update = () => {
-      const now = new Date()
-      const d = now.toLocaleDateString("en-IN", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-      const t = now.toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      })
-      setDisplay(`${d} | ${t}`)
-    }
-    update()
-    const id = setInterval(update, 1000)
-    return () => clearInterval(id)
-  }, [])
-
-  if (!display) return null
-  return (
-    <span className="rounded-full bg-white/65 px-2.5 py-[2px] text-xs text-[#1e3a5f]/90 font-medium tabular-nums shadow-sm backdrop-blur-[1px] dark:bg-black/35 dark:text-white/85">
-      {display}
-    </span>
-  )
-}
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname()
@@ -167,41 +133,11 @@ export function Header() {
     <>
       <header
         className={cn(
-          "sticky top-[env(safe-area-inset-top)] z-50 w-full max-w-[100vw] overflow-x-clip transition-shadow duration-200",
-          "bg-gradient-to-r from-orange-50 via-white to-green-50",
-          "dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]",
+          "sticky top-[env(safe-area-inset-top)] z-50 w-full max-w-[100vw] overflow-x-clip border-b border-gray-200 bg-white/95 backdrop-blur transition-shadow duration-200",
+          "dark:border-gray-800 dark:bg-gray-950/95",
           scrolled && "shadow-md"
         )}
       >
-        {/* Indian Tricolour - top strip with slow flowing-air sheen */}
-        <div
-          aria-hidden="true"
-          className="relative h-1.5 w-full overflow-hidden bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]"
-        >
-          <div className="animate-flag-sheen absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-        </div>
-        {/* Indian flag band - authentic horizontal saffron / white / green with light Ashoka Chakra + slow air flow */}
-        <div className="relative overflow-hidden border-b border-[#06038D]/20 bg-[linear-gradient(to_bottom,#FF9933_0%,#FF9933_33.3%,#FFFDF7_33.3%,#FFFDF7_66.6%,#138808_66.6%,#138808_100%)] dark:bg-[linear-gradient(to_bottom,#8a4d0e_0%,#8a4d0e_33.3%,#1c1c1e_33.3%,#1c1c1e_66.6%,#0b5a22_66.6%,#0b5a22_100%)]">
-          {/* Ashoka Chakra - light colour, centered */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <AshokaChakra className="h-8 w-8 text-[#06038D]/20 dark:text-white/25" />
-          </div>
-          {/* Flowing-air waves - slow drift across the flag */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/2 bg-gradient-to-r from-transparent via-white/45 to-transparent" />
-            <div className="animate-flag-sheen absolute inset-y-[-20%] left-0 w-1/4 bg-gradient-to-r from-transparent via-white/25 to-transparent [animation-delay:1.8s]" />
-          </div>
-          <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 h-9 min-w-0">
-            <div className="hidden flex-1 sm:block" />
-            <span className="min-w-0 flex-1 sm:flex-none truncate rounded-full bg-white/65 px-3 py-[2px] text-xs text-[#1e3a5f] dark:bg-black/35 dark:text-white font-semibold text-center shadow-sm backdrop-blur-[1px]">
-              Welcome to Chayan{session?.user?.name ? `, ${session.user.name}` : ""}
-            </span>
-            <div className="hidden md:block">
-              <DateTimeDisplay />
-            </div>
-          </div>
-        </div>
-
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-2 xl:gap-3 min-w-0">
             <div className="flex min-w-0 shrink-0 items-center gap-1">
@@ -348,13 +284,6 @@ export function Header() {
               className="w-full min-w-0"
             />
           </div>
-        </div>
-        {/* Indian Tricolour - bottom strip with slow flowing-air sheen */}
-        <div
-          aria-hidden="true"
-          className="relative h-[3px] w-full overflow-hidden bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)] dark:opacity-90"
-        >
-          <div className="animate-flag-sheen absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent [animation-delay:0.9s]" />
         </div>
       </header>
 

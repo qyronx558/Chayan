@@ -16,10 +16,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     where: { slug },
     include: { company: true },
   })
-  if (!job) return { title: "Apply | Chayan" }
+  if (!job) return { title: "Apply | ChayanJobs" }
   return {
-    title: `Apply: ${job.title} at ${job.company.name} | Chayan`,
-    description: `Apply for ${job.title} on the original application page, opened inside Chayan.`,
+    title: `Apply: ${job.title} at ${job.company.name} | ChayanJobs`,
+    description: `Apply for ${job.title} on the original application page, opened inside ChayanJobs.`,
     robots: { index: false, follow: true },
   }
 }

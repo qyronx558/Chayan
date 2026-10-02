@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-const STORAGE_KEY = "chayan_welcomed"
+const STORAGE_KEY = "ChayanJobs_welcomed"
 
 const steps = [
   {
@@ -143,7 +143,7 @@ const steps = [
  * @deprecated Replaced by intelligent spotlight tour
  * (`src/components/onboarding/SpotlightTour.tsx`) which points arrows at the
  * real SearchBar / QuickLinks / Qualification / Exam Calendar buttons.
- * Kept for reference only — not mounted in `src/app/layout.tsx` anymore.
+ * Kept for reference only - not mounted in `src/app/layout.tsx` anymore.
  */
 export function WelcomeOnboarding() {
   const [isOpen, setIsOpen] = useState(false)
@@ -157,8 +157,8 @@ export function WelcomeOnboarding() {
     try {
       const params = new URLSearchParams(window.location.search)
       if (params.get("tour") === "1") return
-      if (!localStorage.getItem("chayan_tour_v2_home_seen") && window.location.pathname === "/") return
-      if (!localStorage.getItem("chayan_tour_v2_calendar_seen") && window.location.pathname.startsWith("/exam-calendar")) return
+      if (!localStorage.getItem("ChayanJobs_tour_v2_home_seen") && window.location.pathname === "/") return
+      if (!localStorage.getItem("ChayanJobs_tour_v2_calendar_seen") && window.location.pathname.startsWith("/exam-calendar")) return
     } catch {
       // ignore and fall through to legacy behaviour
     }

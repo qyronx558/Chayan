@@ -1,12 +1,12 @@
 export const siteConfig = {
-  name: "Chayan",
+  name: "ChayanJobs",
   description: "Select right. serve right. Your trusted government job portal. Latest notifications, results, admit cards, answer keys and more.",
-  url: (process.env.NEXT_PUBLIC_APP_URL || "https://chayan.in").replace(/\/+$/, ""),
-  ogImage: `${(process.env.NEXT_PUBLIC_APP_URL || "https://chayan.in").replace(/\/+$/, "")}/og.png`,
+  url: (process.env.NEXT_PUBLIC_APP_URL || "https://ChayanJobs.in").replace(/\/+$/, ""),
+  ogImage: `${(process.env.NEXT_PUBLIC_APP_URL || "https://ChayanJobs.in").replace(/\/+$/, "")}/og.png`,
   links: {
-    twitter: "https://twitter.com/chayan",
-    facebook: "https://facebook.com/chayan",
-    youtube: "https://youtube.com/@chayan",
+    twitter: "https://twitter.com/ChayanJobs",
+    facebook: "https://facebook.com/ChayanJobs",
+    youtube: "https://youtube.com/@ChayanJobs",
   },
 }
 

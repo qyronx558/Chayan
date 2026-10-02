@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const baseUrl = getBaseUrl()
   const label = tag.replace(/-/g, " ")
   return {
-    title: `${label.charAt(0).toUpperCase() + label.slice(1)} Articles | Chayan Blog`,
-    description: `Articles tagged "${label}" on Chayan Blog.`,
+    title: `${label.charAt(0).toUpperCase() + label.slice(1)} Articles | ChayanJobs Blog`,
+    description: `Articles tagged "${label}" on ChayanJobs Blog.`,
     alternates: { canonical: `${baseUrl}/blog/tag/${tag}` },
   }
 }

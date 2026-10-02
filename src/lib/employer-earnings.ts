@@ -2,7 +2,7 @@ import { randomBytes, createHash } from "crypto"
 import { prisma } from "@/lib/prisma"
 
 /**
- * ChayanJobs coin rewards (pilot).
+ * ChayanJobsJobs coin rewards (pilot).
  * 1,000 coins = ₹20  →  1 coin = 2 paise.
  *
  * Poster (verified company, rewarded job only):
@@ -54,7 +54,7 @@ export function generateReferralCode(): string {
 
 /** Privacy-safe session fingerprint: salted hash, never raw IP/UA. */
 export function sessionHash(ip: string | null, ua: string | null, day: string): string {
-  const salt = process.env.AUTH_SECRET || "chayan-emp-metrics"
+  const salt = process.env.AUTH_SECRET || "ChayanJobs-emp-metrics"
   return createHash("sha256").update(`${salt}|${ip || ""}|${ua || ""}|${day}`).digest("hex").slice(0, 32)
 }
 

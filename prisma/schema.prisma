@@ -823,7 +823,7 @@ model BlogPost {
   slug        String        @unique
   excerpt     String?
   content     String?
-  author      String        @default("Chayan Team")
+  author      String        @default("ChayanJobs Team")
   image       String?
   tags        String?
   categoryId  String?

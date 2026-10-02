@@ -797,7 +797,7 @@ export default function ProfilePage() {
                     My Resume
                   </CardTitle>
                   <CardDescription>
-                    Upload your resume and Chayan analyzes it to power job recommendations and application insights.
+                    Upload your resume and ChayanJobs analyzes it to power job recommendations and application insights.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

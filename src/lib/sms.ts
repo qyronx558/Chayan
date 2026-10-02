@@ -47,10 +47,10 @@ function getConfig(): SMSConfig {
       msg91: {
         authKey: process.env.MSG91_AUTH_KEY || "",
         templateId: process.env.MSG91_TEMPLATE_ID || "",
-        senderId: process.env.MSG91_SENDER_ID || "CHAYAN",
+        senderId: process.env.MSG91_SENDER_ID || "ChayanJobs",
         flowId: process.env.MSG91_FLOW_ID || "",
       },
-      fromNumber: process.env.MSG91_SENDER_ID || "CHAYAN",
+      fromNumber: process.env.MSG91_SENDER_ID || "ChayanJobs",
     }
   } else if (provider === "generic") {
     config = {
@@ -67,7 +67,7 @@ function getConfig(): SMSConfig {
       fromNumber: process.env.SMS_FROM_NUMBER,
     }
   } else {
-    config = { provider: "console", fromNumber: "CHAYAN" }
+    config = { provider: "console", fromNumber: "ChayanJobs" }
   }
 
   return config
@@ -170,7 +170,7 @@ async function sendViaMsg91(
     // Docs: https://msg91.com/docs/api/http-api
     const httpUrl = "https://api.msg91.com/api/v2/sendsms"
     const httpBody = {
-      sender: msg91.senderId || "CHAYAN",
+      sender: msg91.senderId || "ChayanJobs",
       route: "4", // 4 = transactional, 1 = promotional
       country: "91",
       sms: [
@@ -295,7 +295,7 @@ export async function sendNotificationSMS(
 
     const text = message || `${title}`
     const formattedPhone = formatPhoneNumber(pref.user.phone)
-    const smsMessage = `[Chayan] ${text}`
+    const smsMessage = `[ChayanJobs] ${text}`
 
     await sendSMS(formattedPhone, smsMessage)
   } catch (error) {
@@ -305,12 +305,12 @@ export async function sendNotificationSMS(
 
 export async function sendOTPSMS(phone: string, otp: string): Promise<{ success: boolean; error?: string }> {
   const formattedPhone = formatPhoneNumber(phone)
-  const message = `[Chayan] Your verification code is ${otp}. Valid for 10 minutes. Do not share.`
+  const message = `[ChayanJobs] Your verification code is ${otp}. Valid for 10 minutes. Do not share.`
   return sendSMS(formattedPhone, message)
 }
 
 export async function sendWelcomeSMS(phone: string): Promise<{ success: boolean; error?: string }> {
   const formattedPhone = formatPhoneNumber(phone)
-  const message = `[Chayan] Welcome! You've successfully verified your phone number. You'll now receive SMS alerts for job notifications, results, and admit cards based on your preferences.`
+  const message = `[ChayanJobs] Welcome! You've successfully verified your phone number. You'll now receive SMS alerts for job notifications, results, and admit cards based on your preferences.`
   return sendSMS(formattedPhone, message)
 }

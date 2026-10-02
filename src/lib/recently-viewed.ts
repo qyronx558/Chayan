@@ -21,11 +21,11 @@ export interface ViewedItem {
   progress: number
 }
 
-const STORAGE_KEY = "chayan_recently_viewed_v1"
-const PAUSED_KEY = "chayan_recently_viewed_paused"
+const STORAGE_KEY = "ChayanJobs_recently_viewed_v1"
+const PAUSED_KEY = "ChayanJobs_recently_viewed_paused"
 const MAX_ITEMS = 20
 
-const EVENT_NAME = "chayan:recently-viewed-updated"
+const EVENT_NAME = "ChayanJobs:recently-viewed-updated"
 
 export function emitViewedUpdate() {
   if (typeof window !== "undefined") {
@@ -94,8 +94,8 @@ export function isTrackablePath(pathname: string): boolean {
 }
 
 export function prettifyTitle(pathname: string, fallback: string): string {
-  const clean = fallback.replace(/\s*\|\s*.*$/, "").replace(/\s*-\s*Chayan.*$/i, "").trim()
-  if (clean && clean.length > 3 && clean.toLowerCase() !== "chayan") return clean
+  const clean = fallback.replace(/\s*\|\s*.*$/, "").replace(/\s*-\s*ChayanJobs.*$/i, "").trim()
+  if (clean && clean.length > 3 && clean.toLowerCase() !== "ChayanJobs") return clean
   const slug = pathname.split("/").filter(Boolean).pop() ?? ""
   const words = slug.replace(/-/g, " ").trim()
   if (!words) return "Untitled page"

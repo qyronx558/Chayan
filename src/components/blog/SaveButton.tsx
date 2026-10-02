@@ -5,7 +5,7 @@ import { Bookmark, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function SaveButton({ slug, title }: { slug: string; title: string }) {
-  const key = `chayan-saved-blog-${slug}`
+  const key = `ChayanJobs-saved-blog-${slug}`
   const [saved, setSaved] = useState(() => {
     try { return localStorage.getItem(key) === "1" } catch { return false }
   })

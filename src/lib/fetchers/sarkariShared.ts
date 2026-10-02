@@ -1,4 +1,4 @@
-const USER_AGENT = "Mozilla/5.0 (compatible; ChayanBot/1.0)"
+const USER_AGENT = "Mozilla/5.0 (compatible; ChayanJobsBot/1.0)"
 
 export async function fetchHtml(url: string): Promise<string | null> {
   try {

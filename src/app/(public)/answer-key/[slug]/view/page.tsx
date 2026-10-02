@@ -13,9 +13,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const answerKey = await prisma.answerKey.findUnique({ where: { slug } })
-  if (!answerKey) return { title: "View Answer Key | Chayan" }
+  if (!answerKey) return { title: "View Answer Key | ChayanJobs" }
   return {
-    title: `Answer Key: ${answerKey.title} | Chayan`,
+    title: `Answer Key: ${answerKey.title} | ChayanJobs`,
     description: `View ${answerKey.title} in fullscreen on the original official document.`,
     robots: { index: false, follow: true },
   }

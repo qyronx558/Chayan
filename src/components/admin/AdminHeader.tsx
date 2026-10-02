@@ -89,7 +89,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
             )}
           </nav>
           <p className="hidden truncate text-[11.5px] text-slate-400 sm:block dark:text-slate-500">
-            Chayan Admin Console - publish & manage content
+            ChayanJobs Admin Console - publish & manage content
           </p>
         </div>
 

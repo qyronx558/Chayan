@@ -13,10 +13,10 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const job = await prisma.job.findUnique({ where: { slug } })
-  if (!job) return { title: "Apply | Chayan" }
+  if (!job) return { title: "Apply | ChayanJobs" }
   return {
-    title: `Apply: ${job.title} | Chayan`,
-    description: `Apply for ${job.title} on the original official website, opened inside Chayan.`,
+    title: `Apply: ${job.title} | ChayanJobs`,
+    description: `Apply for ${job.title} on the original official website, opened inside ChayanJobs.`,
     robots: { index: false, follow: true },
   }
 }

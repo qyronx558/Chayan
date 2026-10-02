@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata: Metadata = {
   title: "Sitemap",
-  description: "Complete sitemap of Chayan - Browse all pages, job listings, results, admit cards and more.",
+  description: "Complete sitemap of ChayanJobs - Browse all pages, job listings, results, admit cards and more.",
 }
 
 export const dynamic = "force-dynamic"
@@ -24,7 +24,7 @@ export default async function SitemapPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-2 text-3xl font-bold text-gray-900">Sitemap</h1>
-      <p className="mb-8 text-gray-600">Browse all pages and listings available on Chayan.</p>
+      <p className="mb-8 text-gray-600">Browse all pages and listings available on ChayanJobs.</p>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -220,7 +220,7 @@ export default async function SitemapPage() {
               </li>
               <li>
                 <Link href="/blog" className="text-sm text-gray-600 hover:text-teal-600">
-                  Chayan Blog
+                  ChayanJobs Blog
                 </Link>
               </li>
             </ul>

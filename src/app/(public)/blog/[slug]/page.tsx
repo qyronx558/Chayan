@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
     twitter: {
       card: "summary_large_image",
-      title: `${post.title} | Chayan Blog`,
+      title: `${post.title} | ChayanJobs Blog`,
       description: post.excerpt || post.title,
       images: [ogImage],
     },
@@ -116,7 +116,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
   const articleHtml = prepareArticleHtml(post.content)
   const takeaways = extractTakeaways(post.excerpt, post.content, 3)
   const faqs = extractFaq(post.content, 4)
-  const authorName = post.author || "Chayan Team"
+  const authorName = post.author || "ChayanJobs Team"
   const wordCount = post.content ? post.content.replace(/<[^>]+>/g, " ").trim().split(/\s+/).length : 0
   const postUrl = `${baseUrl}/blog/${post.slug}`
 
@@ -134,7 +134,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     author: { "@type": "Person", name: authorName },
     datePublished: post.createdAt,
     dateModified: post.updatedAt,
-    publisher: { "@type": "Organization", name: "Chayan", logo: { "@type": "ImageObject", url: `${baseUrl}/icon.svg` } },
+    publisher: { "@type": "Organization", name: "ChayanJobs", logo: { "@type": "ImageObject", url: `${baseUrl}/icon.svg` } },
   }
 
   const faqLd = faqs.length > 0 ? {
@@ -222,7 +222,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
               <div className="relative aspect-[16/8] w-full overflow-hidden bg-gray-100 sm:aspect-[21/9] dark:bg-gray-800">
                 <Image src={post.image} alt={post.title} fill priority sizes="(max-width: 1024px) 100vw, 1100px" className="object-cover" />
               </div>
-              <figcaption className="px-6 py-2.5 text-xs text-gray-400">Cover: {post.title} - Chayan Editorial</figcaption>
+              <figcaption className="px-6 py-2.5 text-xs text-gray-400">Cover: {post.title} - ChayanJobs Editorial</figcaption>
             </figure>
           )}
         </header>
@@ -238,7 +238,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           <article id="blog-print-area" className="min-w-0 rounded-2xl border border-[#E8E0CE] bg-white p-6 shadow-sm sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none dark:border-gray-800 dark:bg-gray-900">
             {/* Print-only masthead: brand + canonical + print date */}
             <div className="hidden print:mb-6 print:block print:border-b-2 print:border-[#101E33] print:pb-4">
-              <p className="print:text-lg print:font-extrabold print:text-black">Chayan Blog</p>
+              <p className="print:text-lg print:font-extrabold print:text-black">ChayanJobs Blog</p>
               <p className="print:text-xs print:text-gray-600">{postUrl} · Printed {formatDate(new Date())} · {formatCompact(post.views)} views · {readingTime} min read</p>
             </div>
             <KeyTakeaways items={takeaways} />

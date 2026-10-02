@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        { folder: "chayan/comments", resource_type: "image" },
+        { folder: "ChayanJobs/comments", resource_type: "image" },
         (err, res) => (err || !res ? reject(err || new Error("Upload failed")) : resolve(res))
       )
       stream.end(buffer)

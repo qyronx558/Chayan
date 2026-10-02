@@ -132,7 +132,7 @@ export function BlogClient() {
                 <Rss className="h-3 w-3" /> RSS
               </Link>
             </div>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-[#F7F3E8] sm:text-4xl">Chayan Blog</h1>
+            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-[#F7F3E8] sm:text-4xl">ChayanJobs Blog</h1>
             <p className="mt-2 text-sm leading-relaxed text-slate-300 sm:text-base">
               Career guides, exam prep, AI and money skills - practical, fact-checked, updated weekly.
             </p>

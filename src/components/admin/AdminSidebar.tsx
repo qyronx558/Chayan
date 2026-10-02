@@ -140,7 +140,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         {collapsed ? (
           <Link
             href="/admin/dashboard"
-            title="Chayan Admin"
+            title="ChayanJobs Admin"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-600 shadow-sm"
           >
             <svg viewBox="0 0 80 80" className="h-5 w-5">

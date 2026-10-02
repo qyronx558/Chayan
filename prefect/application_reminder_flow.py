@@ -1,5 +1,5 @@
 """
-Prefect flow: Chayan application-reminder cron.
+Prefect flow: ChayanJobs application-reminder cron.
 
 Runs the TypeScript reminder worker (scripts/application-reminders.ts)
 daily at 9:00 AM IST. The worker is idempotent (ReminderLog rows in the

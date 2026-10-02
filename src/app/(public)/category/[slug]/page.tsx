@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${category.name} Jobs`,
     description: `Browse latest ${category.name} government jobs. Find current openings, notifications, and application details for ${category.name} positions.`,
     alternates: { canonical: `${baseUrl}/category/${slug}` },
-    twitter: { card: "summary_large_image", title: `${category.name} Jobs | Chayan`, description: `Browse latest ${category.name} government jobs across India.` },
+    twitter: { card: "summary_large_image", title: `${category.name} Jobs | ChayanJobs`, description: `Browse latest ${category.name} government jobs across India.` },
   }
 }
 
