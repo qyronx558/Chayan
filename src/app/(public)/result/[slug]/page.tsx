@@ -88,7 +88,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
           { label: "Category", value: result.category.name },
           { label: "Status", value: result.status },
         ]}
-        linkRows={result.job ? [{ label: "Related Job", value: result.job.title, href: `/jobs/${result.job.slug}` }] : []}
+        linkRows={result.job ? [{ label: "Related Job", value: result.job.title, href: `/apply/${result.job.slug}` }] : []}
         downloadUrl={result.pdfUrl}
         downloadLabel="Download Result PDF"
         viewerHref={`/result/${result.slug}/view`}

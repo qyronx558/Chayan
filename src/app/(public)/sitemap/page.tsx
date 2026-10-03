@@ -50,7 +50,7 @@ export default async function SitemapPage() {
               </li>
               {jobs.slice(0, 10).map((job) => (
                 <li key={job.slug}>
-                  <Link href={`/jobs/${job.slug}`} className="text-sm text-gray-600 hover:text-teal-600 truncate block">
+                  <Link href={`/apply/${job.slug}`} className="text-sm text-gray-600 hover:text-teal-600 truncate block">
                     {job.title}
                   </Link>
                 </li>

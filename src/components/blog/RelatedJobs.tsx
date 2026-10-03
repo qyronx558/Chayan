@@ -47,7 +47,7 @@ export async function RelatedJobs({ tags, excludeSlug }: { tags: string[]; exclu
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-3">
         {jobs.map((j) => (
-          <Link key={j.id} href={`/jobs/${j.slug}`} className="group rounded-xl border border-[#E5DCC8] bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-[#B08D57] hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+          <Link key={j.id} href={`/apply/${j.slug}`} className="group rounded-xl border border-[#E5DCC8] bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-[#B08D57] hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
             <p className="line-clamp-2 min-h-[2.6rem] text-sm font-semibold leading-snug text-gray-900 group-hover:text-[#1B3A5C] dark:text-gray-100">{j.title}</p>
             <p className="mt-2 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <MapPin className="h-3 w-3" /> {j.department?.name || "Govt"} {j.state?.name ? `· ${j.state.name}` : ""}

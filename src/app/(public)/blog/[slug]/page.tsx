@@ -21,7 +21,6 @@ import { FaqBlock } from "@/components/blog/FaqBlock"
 import { SaveButton } from "@/components/blog/SaveButton"
 import { RelatedJobs } from "@/components/blog/RelatedJobs"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { NewsletterCTA } from "@/components/blog/NewsletterCTA"
 
 export const revalidate = 3600
 
@@ -316,8 +315,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         <div className="print:hidden">
           <DiscussionSection postType="BLOG" postId={post.id} path={`/blog/${post.slug}`} />
         </div>
-
-        <NewsletterCTA topic={post.category?.name} />
 
         {relatedPosts.length > 0 && (
           <section className="mt-12 print:hidden">

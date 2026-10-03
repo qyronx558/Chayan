@@ -64,7 +64,7 @@ export function JobCard({
         await navigator.share({
           title,
           text: `Apply for ${title} - ${department}`,
-          url: `/jobs/${slug}`,
+          url: `/apply/${slug}`,
         })
       } catch {
       } finally {

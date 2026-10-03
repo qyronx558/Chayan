@@ -76,7 +76,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
           { label: "Category", value: syllabus.category.name },
           { label: "Status", value: syllabus.status },
         ]}
-        linkRows={syllabus.job ? [{ label: "Related Job", value: syllabus.job.title, href: `/jobs/${syllabus.job.slug}` }] : []}
+        linkRows={syllabus.job ? [{ label: "Related Job", value: syllabus.job.title, href: `/apply/${syllabus.job.slug}` }] : []}
         list={syllabus.subjects
           ? { label: "Subjects / Topics", items: syllabus.subjects.split("\n").map((s) => s.trim()).filter(Boolean) }
           : null}

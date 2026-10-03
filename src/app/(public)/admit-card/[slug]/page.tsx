@@ -77,7 +77,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
           { label: "Category", value: admitCard.category.name },
           { label: "Status", value: admitCard.status },
         ]}
-        linkRows={admitCard.job ? [{ label: "Related Job", value: admitCard.job.title, href: `/jobs/${admitCard.job.slug}` }] : []}
+        linkRows={admitCard.job ? [{ label: "Related Job", value: admitCard.job.title, href: `/apply/${admitCard.job.slug}` }] : []}
         downloadUrl={admitCard.downloadUrl}
         downloadLabel="Download Admit Card"
         viewerHref={`/admit-card/${admitCard.slug}/view`}

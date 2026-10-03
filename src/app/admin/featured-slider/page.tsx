@@ -436,7 +436,7 @@ export default function AdminFeaturedSlider() {
               </div>
 
               <FormField control={form.control} name="linkUrl" render={({ field }) => (
-                <FormItem><FormLabel>View Details URL</FormLabel><FormControl><Input {...field} placeholder="/jobs/example-slug or https://..." /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>View Details URL</FormLabel><FormControl><Input {...field} placeholder="/apply/example-slug or https://..." /></FormControl><FormMessage /></FormItem>
               )} />
 
               <div className="grid grid-cols-2 gap-4">
