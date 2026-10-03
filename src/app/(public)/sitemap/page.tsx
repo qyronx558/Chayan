@@ -226,6 +226,33 @@ export default async function SitemapPage() {
             </ul>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              <Link href="/careers" className="text-teal-600 hover:text-teal-700">Company</Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/about" className="text-sm text-gray-600 hover:text-teal-600">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="text-sm text-gray-600 hover:text-teal-600">
+                  Careers - Join Our Team
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-sm text-gray-600 hover:text-teal-600">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

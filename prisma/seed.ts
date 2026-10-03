@@ -22,7 +22,7 @@ async function main() {
     console.log('  categories seeded');
   }
 
-  // ── States (28 states only — no UTs, no cities/capitals) ──
+  // ── States (28 states only - no UTs, no cities/capitals) ──
   if ((await prisma.state.count()) === 0) {
     const names = [
       'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana',

@@ -47,6 +47,7 @@ const navIconMap: Record<string, React.ElementType> = {
   Admissions: GraduationCap,
   "Exam Calendar": CalendarDays,
   Notifications: Bell,
+  Careers: Briefcase,
 }
 
 // "Gov Jobs" uses Jobs' href (/jobs) - not a separate mainNav entry

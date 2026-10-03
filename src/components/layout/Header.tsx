@@ -127,7 +127,7 @@ export function Header() {
 
   const jobsActive = pathname.startsWith("/jobs") || pathname.startsWith("/private-jobs")
   const toolsActive = pathname.startsWith("/tools")
-  const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar")
+  const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar") || pathname.startsWith("/careers")
 
   return (
     <>
@@ -172,6 +172,7 @@ export function Header() {
                 <DropdownItem href="/exam-calendar" icon={CalendarDays} label="Exam Calendar" />
                 <DropdownItem href="/blog" icon={Newspaper} label="Blog" />
                 <DropdownItem href="/notifications" icon={Bell} label="Notifications" />
+                <DropdownItem href="/careers" icon={Briefcase} label="Careers" />
               </NavDropdown>
             </nav>
 

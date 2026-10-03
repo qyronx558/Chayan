@@ -23,6 +23,7 @@ export const mainNav = [
   { title: "Free Tools", href: "/tools" },
   { title: "Notifications", href: "/notifications" },
   { title: "Blog", href: "/blog" },
+  { title: "Careers", href: "/careers" },
 ]
 
 export const footerLinks = [
