@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react"
 import { ArrowRight, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { stripHtmlToText } from "@/lib/blog-prose"
 
 interface ContentCardMeta {
   icon: LucideIcon
@@ -75,9 +76,11 @@ export function ContentCard({
               {title}
             </h3>
           </Link>
-          {description && (
-            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-500">{description}</p>
-          )}
+          {description ? (
+            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-500">
+              {stripHtmlToText(description)}
+            </p>
+          ) : null}
         </div>
 
         {meta.length > 0 && (
