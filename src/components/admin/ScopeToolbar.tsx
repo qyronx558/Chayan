@@ -1,6 +1,7 @@
 "use client"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { isSuperAdmin } from "@/lib/roles"
 
 interface ScopeToolbarProps {
@@ -11,11 +12,16 @@ interface ScopeToolbarProps {
   onModerationChange: (m: string) => void
   adminId: string
   onAdminIdChange: (v: string) => void
+  queueOnly: boolean
+  onQueueOnlyChange: (v: boolean) => void
 }
 
 /**
- * Super-admin verification toolbar: All/Mine scope, moderation filter,
- * and unique Admin ID (cuid) filter. Renders scope toggle only for super-admins.
+ * Super-admin listing toolbar: All/My uploads scope, moderation filter,
+ * unique Admin ID (cuid) filter, and a verification-queue toggle.
+ * Renders only for super-admins. Super-admin uploads (manual + bulk)
+ * are listed in the main views; the queue toggle narrows to admin
+ * uploads awaiting review.
  */
 export function ScopeToolbar({
   role,
@@ -25,6 +31,8 @@ export function ScopeToolbar({
   onModerationChange,
   adminId,
   onAdminIdChange,
+  queueOnly,
+  onQueueOnlyChange,
 }: ScopeToolbarProps) {
   if (!isSuperAdmin(role)) return null
   return (
@@ -35,7 +43,7 @@ export function ScopeToolbar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="mine">My uploads</SelectItem>
-          <SelectItem value="all">Admin uploads (verify)</SelectItem>
+          <SelectItem value="all">All uploads</SelectItem>
         </SelectContent>
       </Select>
       <Select value={moderation || "all"} onValueChange={(v) => onModerationChange(v === "all" ? "" : v)}>
@@ -49,6 +57,13 @@ export function ScopeToolbar({
           <SelectItem value="REJECTED">Rejected</SelectItem>
         </SelectContent>
       </Select>
+      <label
+        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-teal-600/40 hover:text-teal-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+        title="Show only admin uploads awaiting review (hides super-admin uploads)"
+      >
+        <Checkbox checked={queueOnly} onCheckedChange={(v) => onQueueOnlyChange(v === true)} />
+        Verification queue
+      </label>
       {scope === "all" && (
         <Input
           className="w-[240px] font-mono text-xs"

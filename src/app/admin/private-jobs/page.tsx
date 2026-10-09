@@ -30,7 +30,7 @@ import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
 import { isAdmin, isSuperAdmin } from "@/lib/roles"
 import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { UploaderCell } from "@/components/admin/UploaderCell"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { Search, ArrowLeft, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -46,7 +46,7 @@ import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
 interface Company { id: string; name: string }
 interface PrivateJobItem {
   id: string; title: string; slug: string; type: string; status: string; category: string | null; description: string | null; location: string | null; salary: string | null; salaryMin?: number | null; salaryMax?: number | null; experience: string | null; expMin?: number | null; expMax?: number | null; qualification?: string | null; skills?: string[]; remotePolicy?: string | null; vacancies?: number | null; isFresherFriendly?: boolean; isWalkIn?: boolean; walkInVenue?: string | null; walkInDate?: string | null; proofUrl?: string | null; trustScore?: number; views?: number; applicationUrl: string | null; applicationEmail: string | null; company: Company; lastDate: string | null; createdAt: string
-  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string; role?: string | null } | null; createdById?: string | null
 }
 interface PaginationInfo { total: number; page: number; limit: number; totalPages: number }
 
@@ -62,6 +62,7 @@ export default function AdminPrivateJobs() {
   const [scope, setScope] = useState<"mine" | "all">("mine")
   const [moderationFilter, setModerationFilter] = useState("")
   const [adminIdFilter, setAdminIdFilter] = useState("")
+  const [queueOnly, setQueueOnly] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -74,14 +75,16 @@ export default function AdminPrivateJobs() {
   const superView = isSuperAdmin(session?.user?.role)
   useEffect(() => {
     if (superView) {
+      // Full listing by default — super-admin uploads included.
       setScope("all")
-      setModerationFilter((m) => m || "PENDING")
+      setModerationFilter("")
+      setQueueOnly(false)
     }
   }, [superView])
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: PrivateJobItem[]; pagination: PaginationInfo }>({
-    queryKey: ["admin-private-jobs", page, search, typeFilter, scope, moderationFilter, adminIdFilter],
-    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=10&search=${search}&type=${typeFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
+    queryKey: ["admin-private-jobs", page, search, typeFilter, scope, moderationFilter, adminIdFilter, queueOnly],
+    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=10&search=${search}&type=${typeFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: companiesData } = useQuery<{ success: boolean; data: Company[] }>({
@@ -291,7 +294,7 @@ export default function AdminPrivateJobs() {
                 <SelectItem value="CONTRACT">Contract</SelectItem>
               </SelectContent>
             </Select>
-            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} />
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} queueOnly={queueOnly} onQueueOnlyChange={(v)=>{setQueueOnly(v); if (v) setModerationFilter("PENDING"); setPage(1)}} />
           </div>
           <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
         </CardHeader>
@@ -323,7 +326,7 @@ export default function AdminPrivateJobs() {
                           <TableCell><Badge variant="outline">{job.type.replace("_", " ")}</Badge></TableCell>
                           <TableCell><Badge variant={job.status === "ACTIVE" ? "default" : "secondary"}>{job.status}</Badge></TableCell>
                           <TableCell className="whitespace-nowrap">{job.lastDate ? formatDate(job.lastDate) : "N/A"}</TableCell>
-                          <TableCell><div><p className="whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{job.createdBy?.name || job.createdBy?.email || "-"}</p><AdminIdBadge id={job.createdBy?.id || job.createdById} /></div></TableCell>
+                          <TableCell><UploaderCell name={job.createdBy?.name} email={job.createdBy?.email} id={job.createdBy?.id || job.createdById} role={job.createdBy?.role} /></TableCell>
                           <TableCell><ModerationBadge value={job.moderation} /></TableCell>
                           <TableCell className="text-right">
                             <RowActions

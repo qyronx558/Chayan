@@ -34,6 +34,7 @@ import {
   DatabaseZap,
   ClipboardCheck,
   Landmark,
+  UploadCloud,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -59,6 +60,7 @@ const sidebarLinks = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3, superOnly: true, group: "Manage" },
   { href: "/admin/featured-slider", label: "Featured Slider", icon: SlidersHorizontal, superOnly: true, group: "Manage" },
   { href: "/admin/import-data", label: "Import Data", icon: DatabaseZap, superOnly: true, group: "System" },
+  { href: "/admin/bulk-upload", label: "Bulk Upload", icon: UploadCloud, superOnly: true, group: "System" },
   { href: "/admin/logs", label: "Activity Logs", icon: ScrollText, group: "System" },
 ]
 

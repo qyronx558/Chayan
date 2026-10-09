@@ -30,7 +30,7 @@ import { toast } from "@/components/ui/toast"
 import { formatDate, getStatusColor, slugify } from "@/lib/utils"
 import { isAdmin, isSuperAdmin } from "@/lib/roles"
 import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { UploaderCell } from "@/components/admin/UploaderCell"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { Search, ArrowLeft, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -49,7 +49,7 @@ interface State { id: string; name: string }
 interface JobItem {
   id: string; title: string; slug: string; status: string; advertisementNo: string | null; totalVacancies: number | null; salary: string | null; location: string | null; ageLimit: string | null; ageRelaxation: string | null; education: string | null; selectionProcess: string | null; applicationFee: string | null; importantDates: Record<string, string> | null; documentsRequired: string | null; howToApply: string | null; officialNotification: string | null; officialWebsite: string | null; applyLink: string | null; experience: string | null; startDate: string | null; lastDate: string | null; createdAt: string
   department: Department; category: Category; state: State | null
-  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string; role?: string | null } | null; createdById?: string | null
 }
 
 const WIZARD_STEPS = ["Basic info", "Details & content", "Links & dates", "Review"]
@@ -72,6 +72,7 @@ export default function AdminJobs() {
   const [scope, setScope] = useState<"mine" | "all">("mine")
   const [moderationFilter, setModerationFilter] = useState("")
   const [adminIdFilter, setAdminIdFilter] = useState("")
+  const [queueOnly, setQueueOnly] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -83,14 +84,16 @@ export default function AdminJobs() {
   const superView = isSuperAdmin(session?.user?.role)
   useEffect(() => {
     if (superView) {
+      // Full listing by default — super-admin (manual + bulk) uploads included.
       setScope("all")
-      setModerationFilter((m) => m || "PENDING")
+      setModerationFilter("")
+      setQueueOnly(false)
     }
   }, [superView])
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: JobItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-jobs", page, search, statusFilter, scope, moderationFilter, adminIdFilter],
-    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
+    queryKey: ["admin-jobs", page, search, statusFilter, scope, moderationFilter, adminIdFilter, queueOnly],
+    queryFn: () => fetcher(`/api/jobs?page=${page}&limit=10&search=${search}&status=${statusFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({
@@ -310,7 +313,7 @@ export default function AdminJobs() {
                 <SelectItem value="UPCOMING">Upcoming</SelectItem>
               </SelectContent>
             </Select>
-            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} />
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} queueOnly={queueOnly} onQueueOnlyChange={(v)=>{setQueueOnly(v); if (v) setModerationFilter("PENDING"); setPage(1)}} />
           </div>
           <BulkActionBar
             selectedCount={selected.size}
@@ -360,7 +363,7 @@ export default function AdminJobs() {
                           <TableCell><Badge className={getStatusColor(job.status)}>{job.status}</Badge></TableCell>
                           <TableCell className="whitespace-nowrap">{formatDate(job.lastDate) || "-"}</TableCell>
                           <TableCell className="tabular-nums">{job.totalVacancies ?? "N/A"}</TableCell>
-                          <TableCell><div><p className="whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{job.createdBy?.name || job.createdBy?.email || "-"}</p><AdminIdBadge id={job.createdBy?.id || job.createdById} /></div></TableCell>
+                          <TableCell><UploaderCell name={job.createdBy?.name} email={job.createdBy?.email} id={job.createdBy?.id || job.createdById} role={job.createdBy?.role} /></TableCell>
                           <TableCell><ModerationBadge value={job.moderation} /></TableCell>
                           <TableCell className="text-right">
                             <RowActions

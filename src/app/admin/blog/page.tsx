@@ -34,13 +34,13 @@ import {
 } from "@/components/ui/select"
 import { Plus, Pencil, Trash2, Search, Eye, EyeOff, Image, Send } from "lucide-react"
 import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { UploaderCell } from "@/components/admin/UploaderCell"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface BlogItem {
   id: string; title: string; slug: string; excerpt: string | null; content: string | null; author: string | null; image: string | null; tags: string | null; categoryId: string | null; category: { id: string; name: string; slug: string; color: string | null } | null; published: boolean; views: number; createdAt: string
-  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string; role?: string | null } | null; createdById?: string | null
 }
 
 interface BlogCategoryItem {
@@ -65,11 +65,14 @@ export default function AdminBlog() {
   const [scope, setScope] = useState<"mine" | "all">("mine")
   const [moderationFilter, setModerationFilter] = useState("")
   const [adminIdFilter, setAdminIdFilter] = useState("")
+  const [queueOnly, setQueueOnly] = useState(false)
   const superView = isSuperAdmin(session?.user?.role)
   useEffect(() => {
     if (superView) {
+      // Full listing by default — super-admin uploads included.
       setScope("all")
-      setModerationFilter((m) => m || "PENDING")
+      setModerationFilter("")
+      setQueueOnly(false)
     }
   }, [superView])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -77,8 +80,8 @@ export default function AdminBlog() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: postsData, isLoading } = useQuery<{ success: boolean; data: BlogItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-blog", page, search, scope, moderationFilter, adminIdFilter],
-    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
+    queryKey: ["admin-blog", page, search, scope, moderationFilter, adminIdFilter, queueOnly],
+    queryFn: () => fetcher(`/api/blog?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: categoriesData } = useQuery<{ success: boolean; data: BlogCategoryItem[] }>({
@@ -166,7 +169,7 @@ export default function AdminBlog() {
                 className="pl-9"
               />
             </div>
-            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} />
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} queueOnly={queueOnly} onQueueOnlyChange={(v) => { setQueueOnly(v); if (v) setModerationFilter("PENDING"); setPage(1) }} />
           </div>
         </CardHeader>
         <CardContent>
@@ -213,9 +216,7 @@ export default function AdminBlog() {
                         </TableCell>
                         <TableCell>{post.author || "ChayanJobs"}</TableCell>
                         <TableCell>
-                          <p className="text-sm">{post.createdBy?.name || "-"}</p>
-                          <p className="text-xs text-gray-400">{post.createdBy?.email || ""}</p>
-                          <AdminIdBadge id={post.createdBy?.id || post.createdById} />
+                          <UploaderCell name={post.createdBy?.name} email={post.createdBy?.email} id={post.createdBy?.id || post.createdById} role={post.createdBy?.role} compact />
                         </TableCell>
                         <TableCell>
                           {post.published ? (

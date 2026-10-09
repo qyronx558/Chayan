@@ -35,7 +35,7 @@ import { RowActions } from "@/components/admin/RowActions"
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog"
 import { BulkActionBar } from "@/components/admin/BulkActionBar"
 import { ScopeToolbar } from "@/components/admin/ScopeToolbar"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
+import { UploaderCell } from "@/components/admin/UploaderCell"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
 import { WizardSteps } from "@/components/admin/WizardSteps"
 import { FormSection } from "@/components/admin/FormSection"
@@ -47,7 +47,7 @@ interface Category { id: string; name: string }
 interface AnswerKeyItem {
   id: string; title: string; slug: string; description: string | null; jobId: string | null; pdfUrl: string | null; status: string | null; createdAt: string
   department: Department; category: Category
-  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string } | null; createdById?: string | null
+  moderation?: string | null; reviewNote?: string | null; createdBy?: { id: string; name: string | null; email: string; role?: string | null } | null; createdById?: string | null
 }
 
 const WIZARD_STEPS = ["Basic info", "Content & links", "Review"]
@@ -61,11 +61,14 @@ export default function AdminAnswerKeys() {
   const [scope, setScope] = useState<"mine" | "all">("mine")
   const [moderationFilter, setModerationFilter] = useState("")
   const [adminIdFilter, setAdminIdFilter] = useState("")
+  const [queueOnly, setQueueOnly] = useState(false)
   const superView = isSuperAdmin(session?.user?.role)
   useEffect(() => {
     if (superView) {
+      // Full listing by default — super-admin (manual + bulk) uploads included.
       setScope("all")
-      setModerationFilter((m) => m || "PENDING")
+      setModerationFilter("")
+      setQueueOnly(false)
     }
   }, [superView])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -78,8 +81,8 @@ export default function AdminAnswerKeys() {
   const [bulkDeleting, setBulkDeleting] = useState(false)
 
   const { data: keysData, isLoading } = useQuery<{ success: boolean; data: AnswerKeyItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-answer-keys", page, search, scope, moderationFilter, adminIdFilter],
-    queryFn: () => fetcher(`/api/answer-keys?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${scope === "all" ? "&onlyAdmins=true" : ""}`),
+    queryKey: ["admin-answer-keys", page, search, scope, moderationFilter, adminIdFilter, queueOnly],
+    queryFn: () => fetcher(`/api/answer-keys?page=${page}&limit=10&search=${search}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: deptsData } = useQuery<{ success: boolean; data: Department[] }>({ queryKey: ["admin-departments"], queryFn: () => fetcher("/api/departments") })
@@ -228,7 +231,7 @@ export default function AdminAnswerKeys() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input placeholder="Search answer keys..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="bg-gray-50 pl-9 dark:bg-gray-800" />
             </div>
-            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); if (s === "all") setModerationFilter((m) => m || "PENDING"); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} />
+            <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s) => { setScope(s); setPage(1) }} moderation={moderationFilter} onModerationChange={(m) => { setModerationFilter(m); setPage(1) }} adminId={adminIdFilter} onAdminIdChange={(v) => { setAdminIdFilter(v); setPage(1) }} queueOnly={queueOnly} onQueueOnlyChange={(v) => { setQueueOnly(v); if (v) setModerationFilter("PENDING"); setPage(1) }} />
           </div>
           <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
         </CardHeader>
@@ -255,11 +258,9 @@ export default function AdminAnswerKeys() {
                         <TableCell className="max-w-[250px] truncate font-medium">{k.title}</TableCell>
                         <TableCell className="whitespace-nowrap">{k.department.name}</TableCell>
                         <TableCell><Badge variant={k.status === "PUBLISHED" ? "default" : "secondary"}>{k.status || "Draft"}</Badge></TableCell>
-                        <TableCell>
-                          <p className="text-sm">{k.createdBy?.name || "-"}</p>
-                          <p className="text-xs text-gray-400">{k.createdBy?.email || ""}</p>
-                          <AdminIdBadge id={k.createdBy?.id || k.createdById} />
-                        </TableCell>
+                          <TableCell>
+                            <UploaderCell name={k.createdBy?.name} email={k.createdBy?.email} id={k.createdBy?.id || k.createdById} role={k.createdBy?.role} compact />
+                          </TableCell>
                         <TableCell><ModerationBadge value={k.moderation} /></TableCell>
                         <TableCell className="text-right">
                           <RowActions

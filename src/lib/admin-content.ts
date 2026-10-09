@@ -73,5 +73,5 @@ export function scopeErrorStatus(err: unknown): number {
 }
 
 export const CREATED_BY_SELECT = {
-  createdBy: { select: { id: true, name: true, email: true } },
+  createdBy: { select: { id: true, name: true, email: true, role: true } },
 } as const
