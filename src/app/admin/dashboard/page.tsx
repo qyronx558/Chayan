@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
   const hour = new Date().getHours()
   const updatedAt = dashboardQuery.dataUpdatedAt
   const mins = updatedAt ? Math.max(0, Math.floor((nowTick - updatedAt) / 60000)) : 0
-  const updatedLabel = !updatedAt ? "—" : mins < 1 ? "just now" : mins === 1 ? "1 min ago" : `${mins} min ago`
+  const updatedLabel = !updatedAt ? "-" : mins < 1 ? "just now" : mins === 1 ? "1 min ago" : `${mins} min ago`
 
   const handleRefresh = () => {
     dashboardQuery.refetch()
@@ -470,7 +470,7 @@ export default function AdminDashboardPage() {
             <div className="grid gap-4 lg:grid-cols-2 xl:gap-5">
               <DataCard
                 title="Reviewer feedback"
-                subtitle="Why items were sent back — fix and resubmit"
+                subtitle="Why items were sent back - fix and resubmit"
                 className="h-full"
               >
                 {feedbackQuery.isLoading && feedback.length === 0 ? (
@@ -478,7 +478,7 @@ export default function AdminDashboardPage() {
                 ) : feedback.length === 0 ? (
                   <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-500 dark:border-white/[0.06] dark:text-slate-400">
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                    No rejections — your uploads are clearing review.
+                    No rejections - your uploads are clearing review.
                   </div>
                 ) : (
                   <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">

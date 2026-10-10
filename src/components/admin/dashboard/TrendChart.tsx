@@ -80,7 +80,7 @@ export function TrendChart({
             )}
           >
             {change === null ? (
-              "— vs prev period"
+              "- vs prev period"
             ) : (
               <>
                 {change === 0 ? (

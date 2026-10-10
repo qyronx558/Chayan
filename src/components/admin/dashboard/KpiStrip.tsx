@@ -8,7 +8,7 @@ import { Sparkline } from "./Sparkline"
 
 function DeltaBadge({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">— vs prev</span>
+    return <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">- vs prev</span>
   }
   const flat = delta === 0
   return (

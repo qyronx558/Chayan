@@ -18,7 +18,7 @@ const SEGMENT_DOT: Record<string, string> = {
 }
 
 function formatReviewTime(hours: number | null): string {
-  if (hours === null) return "—"
+  if (hours === null) return "-"
   if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m`
   if (hours < 48) return `${hours}h`
   return `${Math.round((hours / 24) * 10) / 10}d`
@@ -73,7 +73,7 @@ export function PipelineBar({ pipeline }: { pipeline: PipelineDatum }) {
         <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Approval</p>
           <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-            {pipeline.approvalRate === null ? "—" : `${pipeline.approvalRate}%`}
+            {pipeline.approvalRate === null ? "-" : `${pipeline.approvalRate}%`}
           </p>
         </div>
         <div className="min-w-0">
@@ -88,7 +88,7 @@ export function PipelineBar({ pipeline }: { pipeline: PipelineDatum }) {
               </p>
             </>
           ) : (
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">—</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">-</p>
           )}
         </div>
       </div>

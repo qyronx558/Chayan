@@ -58,8 +58,16 @@ function fullMap(actions: readonly ListAction[]): Record<ListModuleKey, readonly
 }
 
 export const LIST_PERMISSIONS: Record<StaffRole, Record<ListModuleKey, readonly ListAction[]>> = {
-  ADMIN: fullMap(ADMIN_ACTIONS),
-  SUPER_ADMIN: fullMap(SUPER_ACTIONS),
+  ADMIN: {
+    ...fullMap(ADMIN_ACTIONS),
+    // PrivateJob has no bulk-import pipeline yet (company resolution is
+    // custom) - hide Import until the pipeline supports it.
+    PrivateJob: ADMIN_ACTIONS.filter((a) => a !== "import"),
+  },
+  SUPER_ADMIN: {
+    ...fullMap(SUPER_ACTIONS),
+    PrivateJob: SUPER_ACTIONS.filter((a) => a !== "import"),
+  },
 };
 
 export function staffRole(role?: string | null): StaffRole | null {
