@@ -14,12 +14,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate } from "@/lib/utils"
 import { isAdmin, isSuperAdmin } from "@/lib/roles"
 import { Trash2, Search, Eye, Download, Copy, ShieldAlert } from "lucide-react"
 import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
+import { TableFooter } from "@/components/admin/data-table/TableFooter"
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
 
 interface LogItem {
   id: string; action: string; entity: string; entityId: string; details: string | null; createdAt: string
@@ -58,16 +60,19 @@ export default function AdminLogs() {
   const [retention, setRetention] = useState("90")
   const [detail, setDetail] = useState<LogItem | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const superView = isSuperAdmin(session?.user?.role)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("logs", superView)
+  const { density, setDensity } = useDensity("logs")
 
   const queryUrl = useMemo(() => {
-    const p = new URLSearchParams({ page: String(page), limit: "20" })
+    const p = new URLSearchParams({ page: String(page), limit: String(pageSize) })
     if (actionFilter) p.set("action", actionFilter)
     if (entityFilter) p.set("entity", entityFilter)
     if (search) p.set("search", search)
     if (from) p.set("from", from)
     if (to) p.set("to", to)
     return `/api/logs?${p.toString()}`
-  }, [page, actionFilter, entityFilter, search, from, to])
+  }, [page, pageSize, actionFilter, entityFilter, search, from, to])
 
   const { data: logsData, isLoading } = useQuery<{ success: boolean; data: LogItem[]; pagination: { page: number; totalPages: number; total: number } }>({
     queryKey: ["admin-logs", queryUrl], queryFn: () => fetcher(queryUrl),
@@ -151,6 +156,9 @@ export default function AdminLogs() {
             <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1) }} className="w-40" />
             <Button variant="ghost" size="sm" onClick={resetFilters}>Reset</Button>
           </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <DensityToggle value={density} onChange={setDensity} />
+          </div>
           {superAdmin && (
             <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 p-2 text-sm">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
@@ -173,7 +181,8 @@ export default function AdminLogs() {
         <CardContent className="p-0">
           {isLoading ? <Skeleton className="h-64" /> : (
             <>
-              <Table>
+              <div className="saas-table-scroll">
+              <Table className="saas-table" data-density={density}>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Action</TableHead>
@@ -209,11 +218,9 @@ export default function AdminLogs() {
                   )}
                 </TableBody>
               </Table>
+              </div>
               {pagination && (
-                <div className="flex items-center justify-between p-4">
-                  <p className="text-sm text-gray-500">Page {pagination.page} of {pagination.totalPages} · {pagination.total} total</p>
-                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-                </div>
+                <TableFooter page={page} totalPages={pagination.totalPages} total={pagination.total} pageSize={pageSize} pageSizeOptions={pageSizeOptions} onPageChange={setPage} onPageSizeChange={(n) => { setPageSize(n); setPage(1) }} itemLabel="logs" />
               )}
             </>
           )}

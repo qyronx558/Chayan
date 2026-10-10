@@ -25,7 +25,6 @@ import {
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
-import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
 import { isAdmin, isSuperAdmin } from "@/lib/roles"
@@ -42,6 +41,9 @@ import { WizardSteps } from "@/components/admin/WizardSteps"
 import { FormSection } from "@/components/admin/FormSection"
 import { SmartContentField } from "@/components/admin/SmartContentField"
 import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
+import { TableFooter } from "@/components/admin/data-table/TableFooter"
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
 
 interface Company { id: string; name: string }
 interface PrivateJobItem {
@@ -73,9 +75,11 @@ export default function AdminPrivateJobs() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const superView = isSuperAdmin(session?.user?.role)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("private-jobs", superView)
+  const { density, setDensity } = useDensity("private-jobs")
   useEffect(() => {
     if (superView) {
-      // Full listing by default — super-admin uploads included.
+      // Full listing by default - super-admin uploads included.
       setScope("all")
       setModerationFilter("")
       setQueueOnly(false)
@@ -83,8 +87,8 @@ export default function AdminPrivateJobs() {
   }, [superView])
 
   const { data: jobsData, isLoading } = useQuery<{ success: boolean; data: PrivateJobItem[]; pagination: PaginationInfo }>({
-    queryKey: ["admin-private-jobs", page, search, typeFilter, scope, moderationFilter, adminIdFilter, queueOnly],
-    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=10&search=${search}&type=${typeFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
+    queryKey: ["admin-private-jobs", page, pageSize, search, typeFilter, scope, moderationFilter, adminIdFilter, queueOnly],
+    queryFn: () => fetcher(`/api/private-jobs?page=${page}&limit=${pageSize}&search=${search}&type=${typeFilter}&scope=${scope}${moderationFilter ? `&moderation=${moderationFilter}` : ""}${scope === "all" && adminIdFilter ? `&createdById=${encodeURIComponent(adminIdFilter)}` : ""}${queueOnly ? "&onlyAdmins=true" : ""}`),
   })
 
   const { data: companiesData } = useQuery<{ success: boolean; data: Company[] }>({
@@ -296,13 +300,16 @@ export default function AdminPrivateJobs() {
             </Select>
             <ScopeToolbar role={session?.user?.role} scope={scope} onScopeChange={(s)=>{setScope(s); setPage(1)}} moderation={moderationFilter} onModerationChange={(m)=>{setModerationFilter(m);setPage(1)}} adminId={adminIdFilter} onAdminIdChange={(v)=>{setAdminIdFilter(v);setPage(1)}} queueOnly={queueOnly} onQueueOnlyChange={(v)=>{setQueueOnly(v); if (v) setModerationFilter("PENDING"); setPage(1)}} />
           </div>
-          <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
+          <div className="flex flex-wrap items-center gap-2">
+            <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())} onDelete={handleBulkDelete} onExport={handleExport} deleting={bulkDeleting} />
+            <DensityToggle value={density} onChange={setDensity} />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? <div className="p-4"><Skeleton className="h-64" /></div> : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto saas-table-scroll">
+                <Table className="saas-table" data-density={density}>
                   <TableHeader>
                     <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 dark:bg-gray-800/40">
                       <TableHead className="w-10"><Checkbox checked={jobs.length > 0 && selected.size === jobs.length} onCheckedChange={toggleSelectAll} aria-label="Select all" /></TableHead>
@@ -319,9 +326,9 @@ export default function AdminPrivateJobs() {
                   <TableBody>
                     <AnimatePresence mode="popLayout">
                       {jobs.map((job: PrivateJobItem) => (
-                        <motion.tr key={job.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="border-b border-gray-100 transition-colors last:border-0 hover:bg-teal-50/40 dark:border-gray-800 dark:hover:bg-gray-800/50">
+                        <motion.tr key={job.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} data-selected={selected.has(job.id)} data-pending={job.moderation === "PENDING"} className="border-b border-gray-100 transition-colors last:border-0 hover:bg-teal-50/40 data-[selected=true]:bg-teal-50/70 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:data-[selected=true]:bg-teal-950/40">
                           <TableCell><Checkbox checked={selected.has(job.id)} onCheckedChange={() => toggleSelect(job.id)} aria-label={`Select ${job.title}`} /></TableCell>
-                          <TableCell className="max-w-[250px] truncate font-medium">{job.title}</TableCell>
+                          <TableCell className="cell-title max-w-[250px] truncate font-medium">{job.title}</TableCell>
                           <TableCell className="whitespace-nowrap">{job.company.name}</TableCell>
                           <TableCell><Badge variant="outline">{job.type.replace("_", " ")}</Badge></TableCell>
                           <TableCell><Badge variant={job.status === "ACTIVE" ? "default" : "secondary"}>{job.status}</Badge></TableCell>
@@ -348,10 +355,7 @@ export default function AdminPrivateJobs() {
                 </Table>
               </div>
               {pagination && (
-                <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 p-4 sm:flex-row dark:border-gray-800">
-                  <p className="text-sm text-gray-500">Total: {pagination.total} private jobs</p>
-                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-                </div>
+                <TableFooter page={page} totalPages={pagination.totalPages} total={pagination.total} pageSize={pageSize} pageSizeOptions={pageSizeOptions} onPageChange={setPage} onPageSizeChange={(n) => { setPageSize(n); setPage(1) }} itemLabel="private jobs" />
               )}
             </>
           )}

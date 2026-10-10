@@ -27,11 +27,13 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || ""
     const from = searchParams.get("from") || ""
     const to = searchParams.get("to") || ""
+    const mine = searchParams.get("mine") === "1"
     const skip = (page - 1) * limit
 
     const where: Prisma.LogWhereInput = {}
     if (action) where.action = action
     if (entity) where.entity = entity
+    if (mine && session.user.id) where.userId = session.user.id
     if (search) {
       where.OR = [
         { action: { contains: search, mode: "insensitive" } },

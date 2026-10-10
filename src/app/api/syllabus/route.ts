@@ -5,7 +5,8 @@ import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/admin-content"
-import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
+import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
+import { isListTab } from "@/lib/admin/access"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
@@ -18,6 +19,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || ""
     const categoryId = searchParams.get("categoryId") || ""
     const departmentId = searchParams.get("departmentId") || ""
+    const tab = searchParams.get("tab") || ""
+    const includeCounts = searchParams.get("includeCounts") === "1"
     const skip = (page - 1) * limit
 
     const where: Prisma.SyllabusWhereInput = {}
@@ -32,6 +35,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    if (tab && !isListTab(tab)) {
+      return NextResponse.json({ success: false, error: "Invalid tab" }, { status: 400 })
+    }
+
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -41,6 +48,23 @@ export async function GET(request: NextRequest) {
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
+
+    const baseWhere: Prisma.SyllabusWhereInput = { ...where }
+
+    const session = isAdminScope && (includeCounts || tab === "draft") ? await auth() : null
+
+    if (isAdminScope && tab && tab !== "all") {
+      if (tab === "published") where.moderation = "APPROVED"
+      else if (tab === "needs") where.moderation = "PENDING"
+      else if (tab === "rejected") where.moderation = "REJECTED"
+      else if (tab === "draft") {
+        if (!session?.user) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+        where.moderation = "PENDING"
+        where.createdById = session.user.id
+      }
+    }
 
     const [syllabusList, total] = await Promise.all([
       prisma.syllabus.findMany({
@@ -53,10 +77,24 @@ export async function GET(request: NextRequest) {
       prisma.syllabus.count({ where }),
     ])
 
+    let counts: { all: number; published: number; needsReview: number; draft: number; rejected: number } | undefined
+    if (isAdminScope && includeCounts) {
+      const mine = session?.user ? { createdById: session.user.id } : {}
+      const [all, published, needsReview, draft, rejected] = await Promise.all([
+        prisma.syllabus.count({ where: baseWhere }),
+        prisma.syllabus.count({ where: { ...baseWhere, moderation: "APPROVED" } }),
+        prisma.syllabus.count({ where: { ...baseWhere, moderation: "PENDING" } }),
+        prisma.syllabus.count({ where: { ...baseWhere, moderation: "PENDING", ...mine } }),
+        prisma.syllabus.count({ where: { ...baseWhere, moderation: "REJECTED" } }),
+      ])
+      counts = { all, published, needsReview, draft, rejected }
+    }
+
     const payload = {
       success: true,
       data: syllabusList,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      ...(counts ? { counts } : {}),
     }
     return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
@@ -106,12 +144,12 @@ export async function POST(request: NextRequest) {
     }
 
     const syllabus = await prisma.syllabus.create({ data })
-    await writeAuditLog({
+    await staffAudit({
       action: "CREATE",
       entity: "Syllabus",
       entityId: syllabus.id,
-      userId: session.user.id,
-      details: `Created by ${session.user.email} (${session.user.id}) moderation=${syllabus.moderation}`,
+      user: session.user,
+      note: `Created "${syllabus.title}" moderation=${syllabus.moderation}`,
     })
     revalidatePublicContent("syllabus", syllabus.slug)
 

@@ -140,6 +140,54 @@ main section div[class*="grid"] {
   display: none;
 }
 
+/* ---- SaaS admin tables: sticky header, density, row polish ---- */
+.saas-table-scroll {
+  max-height: min(70vh, 720px);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.saas-table-scroll > div.relative {
+  max-height: none;
+  overflow: visible;
+}
+.saas-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.saas-table-scroll thead tr {
+  background: var(--card);
+  box-shadow: 0 1px 0 var(--border);
+}
+.saas-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+.saas-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.saas-table tbody tr[data-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.saas-table tbody tr[data-pending="true"] {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.saas-table[data-density="compact"] tbody td {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  font-size: 0.8125rem;
+}
+.saas-table[data-density="compact"] .cell-title {
+  max-width: 220px;
+}
+.saas-table[data-density="comfortable"] .cell-title {
+  max-width: 300px;
+}
+@media (max-width: 640px) {
+  .saas-table-scroll {
+    max-height: none;
+  }
+}
+
 .ProseMirror {
   outline: none;
   min-height: 500px;

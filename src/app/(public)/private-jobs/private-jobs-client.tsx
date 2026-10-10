@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
+import { usePublicPageSize } from "@/lib/admin/usePageSize"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { JobRecommendations } from "@/components/jobs/JobRecommendations"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -53,6 +55,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
   const [fresherOnly, setFresherOnly] = useState(preset.fresher === "1")
   const [walkinOnly, setWalkinOnly] = useState(preset.walkin === "1")
   const [page, setPage] = useState(1)
+  const { pageSize, setPageSize, options } = usePublicPageSize("private-jobs")
 
   const [companies, setCompanies] = useState<FilterOption[]>([])
   const [locations, setLocations] = useState<string[]>([])
@@ -95,7 +98,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
       if (walkinOnly) params.set("walkin", "1")
       if (sort !== "new") params.set("sort", sort)
       params.set("page", String(page))
-      params.set("limit", "12")
+      params.set("limit", String(pageSize))
 
       const res = await fetch(`/api/private-jobs?${params}`, { signal })
       const json = await res.json()
@@ -111,7 +114,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, typeFilter, companyFilter, locationFilter, remoteFilter, skillFilter, fresherOnly, walkinOnly, sort, page])
+  }, [debouncedSearch, typeFilter, companyFilter, locationFilter, remoteFilter, skillFilter, fresherOnly, walkinOnly, sort, page, pageSize])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -326,9 +329,12 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
                 </motion.div>
               )})}
             </div>
-            {pagination && pagination.totalPages > 1 && (
-              <div className="mt-8">
-                <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={setPage} />
+            {pagination && pagination.total > options[0] && (
+              <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                <div className="flex flex-1 justify-center">
+                  <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={setPage} />
+                </div>
+                <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
               </div>
             )}
           </>

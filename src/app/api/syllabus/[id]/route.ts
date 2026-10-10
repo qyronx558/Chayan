@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
-import { writeAuditLog } from "@/lib/moderation"
+import { staffAudit } from "@/lib/moderation"
+import { requireAction } from "@/lib/admin/access"
 
 export async function GET(
   request: NextRequest,
@@ -84,12 +85,12 @@ export async function PUT(
 
     const updatedSyllabus = await prisma.syllabus.update({ where: { id }, data })
 
-    await writeAuditLog({
+    await staffAudit({
       action: "UPDATE",
       entity: "Syllabus",
       entityId: id,
-      userId: session.user.id,
-      details: `Updated by ${session.user.email} (${session.user.id})`,
+      user: session.user,
+      note: `Updated "${updatedSyllabus.title}"`,
     })
 
     return NextResponse.json({ success: true, data: updatedSyllabus })
@@ -114,13 +115,16 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
+    try {
+      requireAction(session.user.role, "Syllabus", "delete")
+    } catch {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     const { id } = await params
     const existing = await prisma.syllabus.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Syllabus not found" }, { status: 404 })
-    }
-    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
     // Bookmarks reference syllabus rows with no onDelete cascade - clear them first.
@@ -128,6 +132,13 @@ export async function DELETE(
       prisma.bookmark.deleteMany({ where: { syllabusId: id } }),
       prisma.syllabus.delete({ where: { id } }),
     ])
+    await staffAudit({
+      action: "DELETE",
+      entity: "Syllabus",
+      entityId: id,
+      user: session.user,
+      note: `Deleted "${existing.title}"`,
+    })
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

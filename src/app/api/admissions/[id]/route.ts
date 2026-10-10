@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { admissionSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
-import { writeAuditLog } from "@/lib/moderation"
+import { staffAudit } from "@/lib/moderation"
+import { requireAction } from "@/lib/admin/access"
 
 export async function GET(
   request: NextRequest,
@@ -86,12 +87,12 @@ export async function PUT(
 
     const admission = await prisma.admission.update({ where: { id }, data })
 
-    await writeAuditLog({
+    await staffAudit({
       action: "UPDATE",
       entity: "Admission",
       entityId: id,
-      userId: session.user.id,
-      details: `Updated by ${session.user.email} (${session.user.id})`,
+      user: session.user,
+      note: `Updated "${admission.title}"`,
     })
 
     return NextResponse.json({ success: true, data: admission })
@@ -116,16 +117,26 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
+    try {
+      requireAction(session.user.role, "Admission", "delete")
+    } catch {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     const { id } = await params
     const existing = await prisma.admission.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Admission not found" }, { status: 404 })
     }
-    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
-    }
 
     await prisma.admission.delete({ where: { id } })
+    await staffAudit({
+      action: "DELETE",
+      entity: "Admission",
+      entityId: id,
+      user: session.user,
+      note: `Deleted "${existing.title}"`,
+    })
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

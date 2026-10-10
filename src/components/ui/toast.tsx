@@ -6,10 +6,16 @@ import { cn } from "@/lib/utils"
 
 type ToastVariant = "default" | "destructive" | "success"
 
+export interface ToastActionButton {
+  label: string
+  onClick: () => void
+}
+
 interface Toast {
   id: string
   message: string
   variant: ToastVariant
+  action?: ToastActionButton
 }
 
 interface ToastState {
@@ -43,12 +49,12 @@ function genId() {
   return count.toString()
 }
 
-function toast(message: string, variant: ToastVariant = "default") {
+function toast(message: string, variant: ToastVariant = "default", action?: ToastActionButton) {
   const id = genId()
-  dispatch({ type: "ADD_TOAST", toast: { id, message, variant } })
+  dispatch({ type: "ADD_TOAST", toast: { id, message, variant, action } })
   setTimeout(() => {
     dispatch({ type: "REMOVE_TOAST", id })
-  }, 4000)
+  }, action ? 9000 : 4000)
   return id
 }
 
@@ -88,7 +94,15 @@ function Toaster() {
             variantStyles[t.variant]
           )}
         >
-          <p className="text-sm">{t.message}</p>
+          <p className="flex-1 text-sm">{t.message}</p>
+          {t.action && (
+            <button
+              onClick={() => { t.action?.onClick(); dismiss(t.id) }}
+              className="shrink-0 rounded-md bg-teal-700 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-teal-800"
+            >
+              {t.action.label}
+            </button>
+          )}
           <button
             onClick={() => dismiss(t.id)}
             className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm opacity-60 transition-opacity hover:opacity-100"

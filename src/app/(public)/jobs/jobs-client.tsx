@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
 import { SearchableFilter } from "@/components/jobs/SearchableFilter"
+import { usePublicPageSize } from "@/lib/admin/usePageSize"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 
 interface FilterOption {
   id: string
@@ -47,6 +49,7 @@ export function JobsClient() {
   const [search, setSearch] = useState(searchParams.get("search") ?? "")
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") ?? "")
   const [page, setPage] = useState(1)
+  const { pageSize, setPageSize, options } = usePublicPageSize("jobs")
 
   const [categories, setCategories] = useState<FilterOption[]>([])
   const [departments, setDepartments] = useState<FilterOption[]>([])
@@ -89,7 +92,7 @@ export function JobsClient() {
       if (selectedState) params.set("stateId", selectedState)
       if (selectedStatus) params.set("status", selectedStatus)
       params.set("page", String(page))
-      params.set("limit", "12")
+      params.set("limit", String(pageSize))
 
       const res = await fetch(`/api/jobs?${params}`, { signal })
       const json = await res.json()
@@ -105,7 +108,7 @@ export function JobsClient() {
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, selectedCategory, selectedDepartment, selectedState, selectedStatus, page])
+  }, [debouncedSearch, selectedCategory, selectedDepartment, selectedState, selectedStatus, page, pageSize])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -210,7 +213,7 @@ export function JobsClient() {
         </div>
 {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: Math.min(pageSize, 12) }).map((_, i) => (
               <JobCardSkeleton key={i} />
             ))}
           </div>
@@ -262,13 +265,16 @@ export function JobsClient() {
                 </motion.div>
               ))}
             </div>
-            {pagination && pagination.totalPages > 1 && (
-              <div className="mt-8">
-                <Pagination
-                  currentPage={pagination.page}
-                  totalPages={pagination.totalPages}
-                  onPageChange={setPage}
-                />
+            {pagination && pagination.total > options[0] && (
+              <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                <div className="flex flex-1 justify-center">
+                  <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    onPageChange={setPage}
+                  />
+                </div>
+                <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
               </div>
             )}
           </>

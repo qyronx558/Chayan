@@ -12,13 +12,19 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate } from "@/lib/utils"
 import { isSuperAdmin } from "@/lib/roles"
 import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
+import { AuditTimeline } from "@/components/admin/AuditTimeline"
+import { runBulk } from "@/lib/admin/bulk"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Search, CheckCircle2, XCircle } from "lucide-react"
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
+import { TableFooter } from "@/components/admin/data-table/TableFooter"
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 
 const ENTITIES = [
   { value: "Job", label: "Gov Jobs", endpoint: "/api/jobs" },
@@ -58,17 +64,23 @@ export default function AdminReview() {
   const [adminId, setAdminId] = useState("")
   const [rejectTarget, setRejectTarget] = useState<QueueItem | null>(null)
   const [rejectNote, setRejectNote] = useState("")
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkNote, setBulkNote] = useState("")
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [showBulkReject, setShowBulkReject] = useState(false)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("review", true)
+  const { density, setDensity } = useDensity("review")
 
   // Verification queue: ADMIN uploads only (never super-admin's own), pending first.
   // Reviewed items leave this queue automatically.
   const queueUrl =
-    `${entity.endpoint}?scope=all&onlyAdmins=true&page=${page}&limit=10` +
+    `${entity.endpoint}?scope=all&onlyAdmins=true&page=${page}&limit=${pageSize}` +
     `${search ? `&search=${encodeURIComponent(search)}` : ""}` +
     `${moderation ? `&moderation=${moderation}` : ""}` +
     `${adminId ? `&createdById=${encodeURIComponent(adminId)}` : ""}`
 
   const { data: queueData, isLoading } = useQuery<{ success: boolean; data: QueueItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["review-queue", entity.value, page, search, moderation, adminId],
+    queryKey: ["review-queue", entity.value, page, pageSize, search, moderation, adminId],
     queryFn: () => fetcher(queueUrl),
     enabled: status === "authenticated",
   })
@@ -108,6 +120,39 @@ export default function AdminReview() {
   const pagination = queueData?.pagination
   const pending = overviewData?.data.pendingQueue
   const admins = overviewData?.data.admins || []
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+  const toggleSelectAll = () => {
+    setSelected((prev) => (prev.size === items.length && items.length > 0 ? new Set() : new Set(items.map((i) => i.id))))
+  }
+  const bulkReview = async (action: "approve" | "reject", note?: string) => {
+    if (selected.size === 0) return
+    if (action === "reject" && !note?.trim()) {
+      toast("Bulk reject needs a note", "destructive")
+      return
+    }
+    setBulkBusy(true)
+    try {
+      const res = await runBulk(api, { module: entity.value, ids: [...selected], action, note })
+      setSelected(new Set())
+      setBulkNote("")
+      setShowBulkReject(false)
+      queryClient.invalidateQueries({ queryKey: ["review-queue"] })
+      queryClient.invalidateQueries({ queryKey: ["review-overview"] })
+      toast(action === "approve" ? `Approved ${res.ok} items` : `Rejected ${res.ok} items`, res.failed ? "destructive" : "success")
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Bulk review failed", "destructive")
+    } finally {
+      setBulkBusy(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -172,13 +217,46 @@ export default function AdminReview() {
               title="Unique Admin ID (cuid)"
             />
           </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <DensityToggle value={density} onChange={setDensity} />
+            <PageSizeSelect value={pageSize} options={pageSizeOptions} onChange={(n) => { setPageSize(n); setPage(1) }} />
+          </div>
+          {selected.size > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-sm dark:border-teal-900 dark:bg-teal-950/60">
+              <span className="font-medium">{selected.size} selected</span>
+              <Button size="sm" disabled={bulkBusy} onClick={() => bulkReview("approve")}>
+                <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> {bulkBusy ? "Working…" : "Bulk approve"}
+              </Button>
+              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => setShowBulkReject((v) => !v)}>
+                <XCircle className="mr-1 h-3.5 w-3.5" /> Bulk reject…
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>Clear</Button>
+              {showBulkReject && (
+                <div className="flex w-full items-center gap-2">
+                  <Input
+                    placeholder="Rejection reason (required, shared)…"
+                    value={bulkNote}
+                    onChange={(e) => setBulkNote(e.target.value)}
+                    className="bg-white"
+                  />
+                  <Button size="sm" variant="destructive" disabled={!bulkNote.trim() || bulkBusy} onClick={() => bulkReview("reject", bulkNote.trim())}>
+                    Confirm reject
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? <Skeleton className="h-64" /> : (
             <>
-              <Table>
+              <div className="overflow-x-auto saas-table-scroll">
+              <Table className="saas-table" data-density={density}>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox checked={items.length > 0 && selected.size === items.length} onCheckedChange={toggleSelectAll} aria-label="Select all" />
+                    </TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Uploaded by</TableHead>
                     <TableHead>Status</TableHead>
@@ -190,6 +268,9 @@ export default function AdminReview() {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
+                      <TableCell>
+                        <Checkbox checked={selected.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} aria-label={`Select ${item.title}`} />
+                      </TableCell>
                       <TableCell className="font-medium max-w-[260px] truncate" title={item.title}>
                         {item.title}
                         <span className="block truncate font-mono text-[11px] text-gray-400">/{item.slug}</span>
@@ -228,15 +309,22 @@ export default function AdminReview() {
                     </TableRow>
                   ))}
                   {items.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-gray-500">Queue is clear - nothing matches.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">Queue is clear - nothing matches.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
+              </div>
               {pagination && (
-                <div className="flex items-center justify-between p-4">
-                  <p className="text-sm text-gray-500">Total: {pagination.total} items</p>
-                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-                </div>
+                <TableFooter
+                  page={page}
+                  totalPages={pagination.totalPages}
+                  total={pagination.total}
+                  pageSize={pageSize}
+                  pageSizeOptions={pageSizeOptions}
+                  onPageChange={setPage}
+                  onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
+                  itemLabel="items"
+                />
               )}
             </>
           )}
@@ -283,6 +371,11 @@ export default function AdminReview() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Recent review decisions (audit)</CardTitle></CardHeader>
+        <CardContent><AuditTimeline limit={10} title="Reviews" /></CardContent>
+      </Card>
 
       <Dialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setRejectNote("") } }}>
         <DialogContent className="max-w-md">

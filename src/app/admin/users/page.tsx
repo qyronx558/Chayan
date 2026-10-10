@@ -18,12 +18,15 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Pagination } from "@/components/ui/pagination"
 import { toast } from "@/components/ui/toast"
 import { formatDate } from "@/lib/utils"
 import { isSuperAdmin } from "@/lib/roles"
 import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
 import { Search, Shield, ShieldOff, Trash2 } from "lucide-react"
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
+import { TableFooter } from "@/components/admin/data-table/TableFooter"
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 
 interface ContentCounts {
   bookmark: number; comments: number; jobs: number; privateJobs: number
@@ -53,10 +56,13 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [promoteTarget, setPromoteTarget] = useState<UserItem | null>(null)
+  const superView = isSuperAdmin(session?.user?.role)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("users", superView)
+  const { density, setDensity } = useDensity("users")
 
-  const queryUrl = `/api/users?page=${page}&limit=10&search=${encodeURIComponent(search)}${roleFilter ? `&role=${roleFilter}` : ""}`
+  const queryUrl = `/api/users?page=${page}&limit=${pageSize}&search=${encodeURIComponent(search)}${roleFilter ? `&role=${roleFilter}` : ""}`
   const { data: usersData, isLoading } = useQuery<{ success: boolean; data: UserItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-users", page, search, roleFilter],
+    queryKey: ["admin-users", page, pageSize, search, roleFilter],
     queryFn: () => fetcher(queryUrl),
   })
 
@@ -135,11 +141,16 @@ export default function AdminUsers() {
               </SelectContent>
             </Select>
           </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <DensityToggle value={density} onChange={setDensity} />
+            <PageSizeSelect value={pageSize} options={pageSizeOptions} onChange={(n) => { setPageSize(n); setPage(1) }} />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? <Skeleton className="h-64" /> : (
             <>
-              <Table>
+              <div className="overflow-x-auto saas-table-scroll">
+              <Table className="saas-table" data-density={density}>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
@@ -198,11 +209,18 @@ export default function AdminUsers() {
                   )}
                 </TableBody>
               </Table>
+              </div>
               {pagination && (
-                <div className="flex items-center justify-between p-4">
-                  <p className="text-sm text-gray-500">Total: {pagination.total} users</p>
-                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-                </div>
+                <TableFooter
+                  page={page}
+                  totalPages={pagination.totalPages}
+                  total={pagination.total}
+                  pageSize={pageSize}
+                  pageSizeOptions={pageSizeOptions}
+                  onPageChange={setPage}
+                  onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
+                  itemLabel="users"
+                />
               )}
             </>
           )}

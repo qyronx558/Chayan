@@ -12,8 +12,11 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pagination } from "@/components/ui/pagination"
 import { formatDate } from "@/lib/utils"
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
+import { TableFooter } from "@/components/admin/data-table/TableFooter"
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { isSuperAdmin } from "@/lib/roles"
 import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
 import { ModerationBadge } from "@/components/admin/ModerationBadge"
@@ -67,6 +70,8 @@ export default function AdminUploads() {
   const [search, setSearch] = useState("")
   const [adminId, setAdminId] = useState("")
   const [preview, setPreview] = useState<UploadItem | null>(null)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("uploads", true)
+  const { density, setDensity } = useDensity("uploads")
 
   const { data: overviewData } = useQuery<{ success: boolean; data: { admins: OverviewAdmin[] } }>({
     queryKey: ["uploads-admins"],
@@ -77,7 +82,7 @@ export default function AdminUploads() {
 
   // Read-only verification: ADMIN uploads only, never super-admin's own.
   const listUrl =
-    `${entity.endpoint}?scope=all&onlyAdmins=true&page=${page}&limit=10` +
+    `${entity.endpoint}?scope=all&onlyAdmins=true&page=${page}&limit=${pageSize}` +
     `${search ? `&search=${encodeURIComponent(search)}` : ""}` +
     `${adminId ? `&createdById=${encodeURIComponent(adminId)}` : ""}`
 
@@ -86,7 +91,7 @@ export default function AdminUploads() {
     data: UploadItem[]
     pagination: { page: number; totalPages: number; total: number }
   }>({
-    queryKey: ["admin-uploads", entity.value, page, search, adminId],
+    queryKey: ["admin-uploads", entity.value, page, pageSize, search, adminId],
     queryFn: () => fetcher(listUrl),
     enabled: status === "authenticated",
   })
@@ -143,6 +148,8 @@ export default function AdminUploads() {
               onChange={(e) => { setAdminId(e.target.value.trim()); setPage(1) }}
               title="Unique Admin ID (cuid)"
             />
+            <DensityToggle value={density} onChange={setDensity} />
+            <PageSizeSelect value={pageSize} options={pageSizeOptions} onChange={(n) => { setPageSize(n); setPage(1) }} />
           </div>
           {activeAdmin && (
             <p className="pt-2 text-sm text-gray-500">
@@ -155,7 +162,8 @@ export default function AdminUploads() {
         <CardContent className="p-0">
           {isLoading ? <Skeleton className="h-64" /> : (
             <>
-              <Table>
+              <div className="saas-table-scroll">
+              <Table className="saas-table" data-density={density}>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
@@ -191,11 +199,9 @@ export default function AdminUploads() {
                   )}
                 </TableBody>
               </Table>
+              </div>
               {pagination && (
-                <div className="flex items-center justify-between p-4">
-                  <p className="text-sm text-gray-500">Total: {pagination.total} items</p>
-                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-                </div>
+                <TableFooter page={page} totalPages={pagination.totalPages} total={pagination.total} pageSize={pageSize} pageSizeOptions={pageSizeOptions} onPageChange={setPage} onPageSizeChange={(n) => { setPageSize(n); setPage(1) }} itemLabel="uploads" />
               )}
             </>
           )}

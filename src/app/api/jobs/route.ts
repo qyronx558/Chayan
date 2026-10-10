@@ -7,7 +7,8 @@ import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { isAdmin } from "@/lib/roles"
 import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/admin-content"
-import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
+import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
+import { isListTab } from "@/lib/admin/access"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
@@ -22,6 +23,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || ""
     const qualification = searchParams.get("qualification") || ""
     const sort = searchParams.get("sort") || "latest"
+    const tab = searchParams.get("tab") || ""
+    const includeCounts = searchParams.get("includeCounts") === "1"
 
     const skip = (page - 1) * limit
 
@@ -35,6 +38,10 @@ export async function GET(request: NextRequest) {
         { success: false, error: e instanceof Error ? e.message : "Forbidden" },
         { status: scopeErrorStatus(e) }
       )
+    }
+
+    if (tab && !isListTab(tab)) {
+      return NextResponse.json({ success: false, error: "Invalid tab" }, { status: 400 })
     }
 
     if (search) {
@@ -51,6 +58,23 @@ export async function GET(request: NextRequest) {
     if (stateId) where.stateId = stateId
     if (status) where.status = status as "ACTIVE" | "EXPIRED" | "UPCOMING"
     if (qualification) where.education = { contains: qualification, mode: "insensitive" }
+
+    const baseWhere: Prisma.JobWhereInput = { ...where }
+
+    const session = isAdminScope && (includeCounts || tab === "draft") ? await auth() : null
+
+    if (isAdminScope && tab && tab !== "all") {
+      if (tab === "published") where.moderation = "APPROVED"
+      else if (tab === "needs") where.moderation = "PENDING"
+      else if (tab === "rejected") where.moderation = "REJECTED"
+      else if (tab === "draft") {
+        if (!session?.user) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+        where.moderation = "PENDING"
+        where.createdById = session.user.id
+      }
+    }
 
     let orderBy: Prisma.JobOrderByWithRelationInput = { createdAt: "desc" }
     switch (sort) {
@@ -84,6 +108,19 @@ export async function GET(request: NextRequest) {
       prisma.job.count({ where }),
     ])
 
+    let counts: { all: number; published: number; needsReview: number; draft: number; rejected: number } | undefined
+    if (isAdminScope && includeCounts) {
+      const mine = session?.user ? { createdById: session.user.id } : {}
+      const [all, published, needsReview, draft, rejected] = await Promise.all([
+        prisma.job.count({ where: baseWhere }),
+        prisma.job.count({ where: { ...baseWhere, moderation: "APPROVED" } }),
+        prisma.job.count({ where: { ...baseWhere, moderation: "PENDING" } }),
+        prisma.job.count({ where: { ...baseWhere, moderation: "PENDING", ...mine } }),
+        prisma.job.count({ where: { ...baseWhere, moderation: "REJECTED" } }),
+      ])
+      counts = { all, published, needsReview, draft, rejected }
+    }
+
     const payload = {
       success: true,
       data: jobs,
@@ -93,6 +130,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      ...(counts ? { counts } : {}),
     }
     return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
@@ -183,12 +221,12 @@ export async function POST(request: NextRequest) {
     }
 
     const job = await prisma.job.create({ data })
-    await writeAuditLog({
+    await staffAudit({
       action: "CREATE",
       entity: "Job",
       entityId: job.id,
-      userId: session.user.id,
-      details: `Created by ${session.user.email} (${session.user.id}) moderation=${job.moderation}`,
+      user: session.user,
+      note: `Created "${job.title}" moderation=${job.moderation}`,
     })
     revalidatePublicContent("job", job.slug)
 

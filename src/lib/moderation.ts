@@ -76,12 +76,40 @@ export async function writeAuditLog(args: {
   }
 }
 
+export interface StaffActor {
+  id?: string | null
+  email?: string | null
+  role?: string | null
+}
+
+export async function staffAudit(args: {
+  action: string
+  entity: string
+  entityId: string
+  user: StaffActor | null | undefined
+  note?: string | null
+}) {
+  const who = args.user?.email ?? args.user?.id ?? "system"
+  const role = args.user?.role ?? "UNKNOWN"
+  const details = args.note
+    ? `${args.note} - by ${who} (${role})`
+    : `by ${who} (${role})`
+  await writeAuditLog({
+    action: args.action,
+    entity: args.entity,
+    entityId: args.entityId,
+    userId: args.user?.id ?? null,
+    details,
+  })
+}
+
 export async function reviewContent(args: {
   entity: ReviewableEntity
   id: string
   action: "APPROVE" | "REJECT"
   note?: string | null
   reviewerId: string
+  reviewerRole?: string | null
 }) {
   const meta = REVIEWABLE_META[args.entity]
   const delegate = (prisma as unknown as Record<string, {
@@ -114,8 +142,8 @@ export async function reviewContent(args: {
     entityId: args.id,
     userId: args.reviewerId,
     details: args.note?.trim()
-      ? `${moderation} by ${args.reviewerId}: ${args.note.trim().slice(0, 500)}`
-      : `${moderation} by ${args.reviewerId}`,
+      ? `${moderation} by ${args.reviewerId}${args.reviewerRole ? ` (${args.reviewerRole})` : ""}: ${args.note.trim().slice(0, 500)}`
+      : `${moderation} by ${args.reviewerId}${args.reviewerRole ? ` (${args.reviewerRole})` : ""}`,
   })
 
   try {

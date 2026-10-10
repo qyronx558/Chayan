@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
         action,
         note: note ?? null,
         reviewerId: session.user.id,
+        reviewerRole: session.user.role,
       })
       return NextResponse.json({ success: true, data: updated })
     } catch (e) {

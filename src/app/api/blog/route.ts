@@ -5,7 +5,8 @@ import { blogPostSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { applyContentScope, scopeErrorStatus } from "@/lib/admin-content"
-import { defaultModerationForRole, writeAuditLog } from "@/lib/moderation"
+import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
+import { isListTab } from "@/lib/admin/access"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 
@@ -19,6 +20,8 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category") || ""
     const tag = searchParams.get("tag") || ""
     const sort = searchParams.get("sort") || "latest"
+    const tab = searchParams.get("tab") || ""
+    const includeCounts = searchParams.get("includeCounts") === "1"
     const skip = (page - 1) * limit
 
     const where: Prisma.BlogPostWhereInput = {}
@@ -52,6 +55,10 @@ export async function GET(request: NextRequest) {
       ]
     }
 
+    if (tab && !isListTab(tab)) {
+      return NextResponse.json({ success: false, error: "Invalid tab" }, { status: 400 })
+    }
+
     if (isOwnerScope && published === "true") where.published = true
     if (isOwnerScope && published === "false") where.published = false
 
@@ -61,6 +68,15 @@ export async function GET(request: NextRequest) {
 
     if (tag) {
       where.tags = { contains: tag, mode: "insensitive" }
+    }
+
+    const baseWhere: Prisma.BlogPostWhereInput = { ...where }
+
+    if (isOwnerScope && tab && tab !== "all") {
+      if (tab === "published") where.moderation = "APPROVED"
+      else if (tab === "needs") where.moderation = "PENDING"
+      else if (tab === "rejected") where.moderation = "REJECTED"
+      else if (tab === "draft") where.published = false
     }
 
     const [posts, total] = await Promise.all([
@@ -74,10 +90,23 @@ export async function GET(request: NextRequest) {
       prisma.blogPost.count({ where }),
     ])
 
+    let counts: { all: number; published: number; needsReview: number; draft: number; rejected: number } | undefined
+    if (isOwnerScope && includeCounts) {
+      const [all, publishedCount, needsReview, draft, rejected] = await Promise.all([
+        prisma.blogPost.count({ where: baseWhere }),
+        prisma.blogPost.count({ where: { ...baseWhere, moderation: "APPROVED" } }),
+        prisma.blogPost.count({ where: { ...baseWhere, moderation: "PENDING" } }),
+        prisma.blogPost.count({ where: { ...baseWhere, published: false } }),
+        prisma.blogPost.count({ where: { ...baseWhere, moderation: "REJECTED" } }),
+      ])
+      counts = { all, published: publishedCount, needsReview, draft, rejected }
+    }
+
     return NextResponse.json({
       success: true,
       data: posts,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      ...(counts ? { counts } : {}),
     })
   } catch (error) {
     return NextResponse.json(
@@ -126,12 +155,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    await writeAuditLog({
+    await staffAudit({
       action: "CREATE",
       entity: "Blog",
       entityId: post.id,
-      userId: session.user.id,
-      details: `Created by ${session.user.email} (${session.user.id}) moderation=${post.moderation}`,
+      user: session.user,
+      note: `Created "${post.title}" moderation=${post.moderation}`,
     })
 
     if (post.published && post.moderation === "APPROVED") {

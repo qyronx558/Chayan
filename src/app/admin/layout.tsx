@@ -9,7 +9,7 @@ import { isAdmin } from "@/lib/roles"
 
 function AdminLoading() {
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-slate-100 dark:bg-[#070d1a]">
+    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-slate-100 dark:bg-[#070d1a]">
       <div className="hidden w-[280px] shrink-0 flex-col gap-3 border-r border-slate-200 bg-white p-4 lg:flex dark:border-white/[0.06] dark:bg-[#0b1220]">
         <Skeleton className="h-10 w-40 rounded-xl" />
         <Skeleton className="h-16 w-full rounded-xl" />
@@ -56,11 +56,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-slate-100 text-slate-900 antialiased dark:bg-[#070d1a] dark:text-slate-100">
+    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-slate-100 text-slate-900 antialiased dark:bg-[#070d1a] dark:text-slate-100">
       <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main id="admin-main" className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-slate-100 dark:bg-[#070d1a]">
           <div className="mx-auto w-full max-w-[1400px] p-3 sm:p-5 lg:p-7">
             <div key={typeof window !== "undefined" ? window.location.pathname : "admin"}>
               {children}

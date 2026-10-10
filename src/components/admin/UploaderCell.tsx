@@ -12,7 +12,7 @@ interface UploaderCellProps {
 }
 
 /**
- * "Uploaded by" table cell — uploader name + SUPER/ADMIN role badge + Admin ID.
+ * "Uploaded by" table cell - uploader name + SUPER/ADMIN role badge + Admin ID.
  * Bulk-uploaded rows show the super-admin account with a SUPER badge.
  */
 export function UploaderCell({ name, email, id, role, compact = false }: UploaderCellProps) {

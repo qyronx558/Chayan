@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Pagination } from "@/components/ui/pagination"
+import { usePublicPageSize } from "@/lib/admin/usePageSize"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BlogCard } from "@/components/blog/BlogCard"
 
@@ -54,6 +56,7 @@ export function BlogClient() {
   const [sort, setSort] = useState<SortKey>("latest")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [page, setPage] = useState(1)
+  const { pageSize, setPageSize, options } = usePublicPageSize("blog")
 
   useEffect(() => {
     const t = setTimeout(() => { setSearch(input.trim()); setPage(1) }, 350)
@@ -77,7 +80,7 @@ export function BlogClient() {
       if (sort === "popular") params.set("sort", "popular")
       params.set("published", "true")
       params.set("page", String(page))
-      params.set("limit", "12")
+      params.set("limit", String(pageSize))
       const res = await fetch(`/api/blog?${params}`)
       const json = await res.json()
       if (json.success) {
@@ -95,7 +98,7 @@ export function BlogClient() {
     } finally {
       setLoading(false)
     }
-  }, [search, activeCategory, sort, page])
+  }, [search, activeCategory, sort, page, pageSize])
 
   useEffect(() => { fetchPosts() }, [fetchPosts])
 
@@ -326,8 +329,11 @@ export function BlogClient() {
               ))}
             </div>
           )}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="mt-8"><Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }) }} /></div>
+          {pagination && pagination.total > options[0] && (
+            <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
+              <div className="flex flex-1 justify-center"><Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }) }} /></div>
+              <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
+            </div>
           )}
         </div>
 

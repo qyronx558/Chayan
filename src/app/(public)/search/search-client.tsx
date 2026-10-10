@@ -18,6 +18,8 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { usePublicPageSize } from "@/lib/admin/usePageSize"
+import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { POPULAR_SEARCHES } from "@/lib/search-constants"
@@ -54,6 +56,7 @@ export function SearchClient() {
   const initialQ = searchParams.get("q") ?? ""
   const [query, setQuery] = React.useState(initialQ)
   const [category, setCategory] = React.useState("")
+  const { pageSize, setPageSize, options } = usePublicPageSize("search")
   const [items, setItems] = React.useState<UniversalSearchItem[]>([])
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState("")
@@ -70,7 +73,7 @@ export function SearchClient() {
       setLoading(true)
       setError("")
       try {
-        const params = new URLSearchParams({ limit: "12" })
+        const params = new URLSearchParams({ limit: String(pageSize) })
         if (q) params.set("q", q)
         if (category) params.set("category", category)
         const res = await fetch(`/api/search?${params.toString()}`, {
@@ -93,7 +96,7 @@ export function SearchClient() {
       clearTimeout(t)
       controller.abort()
     }
-  }, [searchParams, category])
+  }, [searchParams, category, pageSize])
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,6 +163,11 @@ export function SearchClient() {
           </Button>
         ))}
       </div>
+      {activeQ && (
+        <div className="mt-3 flex justify-center">
+          <PageSizeSelect value={pageSize} options={options} onChange={setPageSize} label="Results" />
+        </div>
+      )}
 
       {loading ? (
         <div className="mt-8 grid gap-3 sm:grid-cols-2">

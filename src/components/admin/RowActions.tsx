@@ -1,6 +1,6 @@
 "use client"
 
-import { Pencil, ExternalLink, Copy, Trash2, Repeat } from "lucide-react"
+import { Pencil, ExternalLink, Copy, Trash2, Repeat, CopyPlus, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface RowActionsProps {
@@ -12,6 +12,10 @@ interface RowActionsProps {
   onToggleStatus?: () => void
   toggling?: boolean
   onDelete: () => void
+  onClone?: () => void
+  cloning?: boolean
+  onQuickApprove?: () => void
+  approving?: boolean
 }
 
 function IconBtn({ title, onClick, children, danger, href }: { title: string; onClick?: () => void; children: React.ReactNode; danger?: boolean; href?: string }) {
@@ -33,12 +37,22 @@ function IconBtn({ title, onClick, children, danger, href }: { title: string; on
   )
 }
 
-export function RowActions({ onEdit, viewHref, onCopy, copied, toggleLabel, onToggleStatus, toggling, onDelete }: RowActionsProps) {
+export function RowActions({ onEdit, viewHref, onCopy, copied, toggleLabel, onToggleStatus, toggling, onDelete, onClone, cloning, onQuickApprove, approving }: RowActionsProps) {
   return (
     <div className="flex items-center justify-end gap-0.5">
       <IconBtn title="Edit" onClick={onEdit}>
         <Pencil className="h-4 w-4" />
       </IconBtn>
+      {onClone && (
+        <IconBtn title="Duplicate / clone" onClick={onClone}>
+          <CopyPlus className={cn("h-4 w-4 text-blue-600", cloning && "animate-pulse")} />
+        </IconBtn>
+      )}
+      {onQuickApprove && (
+        <IconBtn title="Quick approve" onClick={onQuickApprove}>
+          <CheckCircle2 className={cn("h-4 w-4 text-green-600", approving && "animate-spin")} />
+        </IconBtn>
+      )}
       {onToggleStatus && (
         <IconBtn title={toggleLabel ?? "Toggle status"} onClick={onToggleStatus}>
           <Repeat className={cn("h-4 w-4 text-teal-600", toggling && "animate-spin")} />

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { answerKeySchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
-import { writeAuditLog } from "@/lib/moderation"
+import { staffAudit } from "@/lib/moderation"
+import { requireAction } from "@/lib/admin/access"
 
 export async function GET(
   request: NextRequest,
@@ -79,12 +80,12 @@ export async function PUT(
     }
 
     const answerKey = await prisma.answerKey.update({ where: { id }, data })
-    await writeAuditLog({
+    await staffAudit({
       action: "UPDATE",
       entity: "AnswerKey",
       entityId: id,
-      userId: session.user.id,
-      details: `Updated by ${session.user.email} (${session.user.id})`,
+      user: session.user,
+      note: `Updated "${answerKey.title}"`,
     })
 
     return NextResponse.json({ success: true, data: answerKey })
@@ -109,16 +110,26 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
+    try {
+      requireAction(session.user.role, "AnswerKey", "delete")
+    } catch {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     const { id } = await params
     const existing = await prisma.answerKey.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Answer key not found" }, { status: 404 })
     }
-    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
-    }
 
     await prisma.answerKey.delete({ where: { id } })
+    await staffAudit({
+      action: "DELETE",
+      entity: "AnswerKey",
+      entityId: id,
+      user: session.user,
+      note: `Deleted "${existing.title}"`,
+    })
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

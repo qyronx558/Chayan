@@ -5,7 +5,8 @@ import { blogPostSchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
 import { revalidatePublicContent } from "@/lib/cache"
 import { Prisma } from "@prisma/client"
-import { writeAuditLog } from "@/lib/moderation"
+import { staffAudit } from "@/lib/moderation"
+import { requireAction } from "@/lib/admin/access"
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -62,12 +63,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data,
     })
 
-    await writeAuditLog({
+    await staffAudit({
       action: "UPDATE",
       entity: "Blog",
       entityId: post.id,
-      userId: session.user.id,
-      details: `Updated by ${session.user.email} (${session.user.id})`,
+      user: session.user,
+      note: `Updated "${post.title}"`,
     })
     revalidatePublicContent("blog", existing.slug)
     if (post.slug !== existing.slug) revalidatePublicContent("blog", post.slug)
@@ -88,16 +89,26 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
+    try {
+      requireAction(session.user.role, "Blog", "delete")
+    } catch {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
+    }
+
     const { slug } = await params
     const existing = await prisma.blogPost.findUnique({ where: { id: slug } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Blog post not found" }, { status: 404 })
     }
-    if (session.user.role === "ADMIN" && existing.createdById !== session.user.id) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
-    }
 
     await prisma.blogPost.delete({ where: { id: slug } })
+    await staffAudit({
+      action: "DELETE",
+      entity: "Blog",
+      entityId: slug,
+      user: session.user,
+      note: `Deleted "${existing.title}"`,
+    })
     revalidatePublicContent("blog", existing.slug)
     return NextResponse.json({ success: true, message: "Blog post deleted" })
   } catch (error) {
