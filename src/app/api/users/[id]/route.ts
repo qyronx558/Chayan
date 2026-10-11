@@ -197,7 +197,18 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Super admin cannot be deleted" }, { status: 403 })
     }
 
-    await prisma.user.delete({ where: { id } })
+    await prisma.$transaction([
+      prisma.user.delete({ where: { id } }),
+      prisma.log.create({
+        data: {
+          action: "DELETE",
+          entity: "User",
+          entityId: id,
+          userId: session.user.id,
+          details: `Deleted user ${existing.email} (${id}, role=${existing.role}) by super_admin=${session.user.email}`,
+        },
+      }),
+    ])
     return NextResponse.json({ success: true, message: "User deleted" })
   } catch (error) {
     return NextResponse.json(

@@ -1,405 +1,651 @@
-"use client"
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api, fetcher } from "@/lib/api"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/toast"
-import { formatDate } from "@/lib/utils"
-import { isSuperAdmin } from "@/lib/roles"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
-import { ModerationBadge } from "@/components/admin/ModerationBadge"
-import { AuditTimeline } from "@/components/admin/AuditTimeline"
-import { runBulk } from "@/lib/admin/bulk"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Search, CheckCircle2, XCircle } from "lucide-react"
-import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
-import { TableFooter } from "@/components/admin/data-table/TableFooter"
-import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
+"use client";
 
-const ENTITIES = [
-  { value: "Job", label: "Gov Jobs", endpoint: "/api/jobs" },
-  { value: "PrivateJob", label: "Private Jobs", endpoint: "/api/private-jobs" },
-  { value: "Result", label: "Results", endpoint: "/api/results" },
-  { value: "AdmitCard", label: "Admit Cards", endpoint: "/api/admit-cards" },
-  { value: "AnswerKey", label: "Answer Keys", endpoint: "/api/answer-keys" },
-  { value: "Admission", label: "Admissions", endpoint: "/api/admissions" },
-  { value: "Syllabus", label: "Syllabus", endpoint: "/api/syllabus" },
-  { value: "Blog", label: "Blog", endpoint: "/api/blog" },
-] as const
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+import { api, fetcher } from "@/lib/api";
+import { isSuperAdmin } from "@/lib/roles";
+import { ADMIN_PAGE_SIZES, type Density } from "@/lib/admin/usePageSize";
+import { formatDate, cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "@/components/ui/toast";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { StatusDot } from "@/components/admin/dashboard/StatusDot";
+import { TableFooter } from "@/components/admin/data-table/TableFooter";
+import { ExportMenu } from "@/components/admin/data-table/ExportMenu";
+import {
+  ListToolbar,
+  AuditDialog,
+  RejectDialog,
+  ActiveFilterPills,
+} from "@/components/admin/list/list-parts";
+import { T_CARD, T_PRIMARY, T_HEAD_CELL, initials } from "@/components/admin/list/tokens";
+import { ReviewDecisions } from "@/components/admin/ReviewDecisions";
+import {
+  CheckCircle2,
+  XCircle,
+  History,
+  Inbox,
+  ArrowRight,
+} from "lucide-react";
 
-interface QueueItem {
-  id: string
-  title: string
-  slug: string
-  moderation?: string | null
-  reviewNote?: string | null
-  createdAt: string
-  createdBy?: { id: string; name: string | null; email: string } | null
-  createdById?: string | null
+type QueueTab = "PENDING" | "APPROVED" | "REJECTED";
+
+interface QueueRow {
+  id: string;
+  title: string;
+  slug: string;
+  moderation: string | null;
+  reviewNote: string | null;
+  createdAt: string;
+  createdById: string | null;
+  createdBy: { id: string; name: string | null; email: string } | null;
+  module: string;
+  moduleLabel: string;
 }
 
-interface OverviewData {
-  admins: { adminId: string; name: string | null; email: string; role: string; total: number; pendingTotal: number; byType: Record<string, number> }[]
-  pendingQueue: Record<string, number>
+interface QueueResponse {
+  success: boolean;
+  data: QueueRow[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+  counts: { pending: number; approved: number; rejected: number };
+  modules: { key: string; label: string; count: number }[];
+}
+
+const DENSITY_KEY = "list:density:review";
+const SIZE_KEY = "admin:pageSize:review";
+
+function readDensity(): Density {
+  try {
+    return window.localStorage.getItem(DENSITY_KEY) === "compact" ? "compact" : "comfortable";
+  } catch {
+    return "comfortable";
+  }
+}
+
+function readSize(): number {
+  try {
+    const n = parseInt(window.localStorage.getItem(SIZE_KEY) || "25", 10);
+    return (ADMIN_PAGE_SIZES as readonly number[]).includes(n) ? n : 25;
+  } catch {
+    return 25;
+  }
 }
 
 export default function AdminReview() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const [entity, setEntity] = useState<(typeof ENTITIES)[number]>(ENTITIES[0])
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const [moderation, setModeration] = useState("PENDING")
-  const [adminId, setAdminId] = useState("")
-  const [rejectTarget, setRejectTarget] = useState<QueueItem | null>(null)
-  const [rejectNote, setRejectNote] = useState("")
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [bulkNote, setBulkNote] = useState("")
-  const [bulkBusy, setBulkBusy] = useState(false)
-  const [showBulkReject, setShowBulkReject] = useState(false)
-  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("review", true)
-  const { density, setDensity } = useDensity("review")
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const searchRef = useRef<HTMLInputElement | null>(null);
 
-  // Verification queue: ADMIN uploads only (never super-admin's own), pending first.
-  // Reviewed items leave this queue automatically.
-  const queueUrl =
-    `${entity.endpoint}?scope=all&onlyAdmins=true&page=${page}&limit=${pageSize}` +
-    `${search ? `&search=${encodeURIComponent(search)}` : ""}` +
-    `${moderation ? `&moderation=${moderation}` : ""}` +
-    `${adminId ? `&createdById=${encodeURIComponent(adminId)}` : ""}`
+  const [tab, setTab] = useState<QueueTab>("PENDING");
+  const [input, setInput] = useState("");
+  const [q, setQ] = useState("");
+  const [module, setModule] = useState("");
+  const [adminId, setAdminId] = useState("");
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(25);
+  const [density, setDensity] = useState<Density>("comfortable");
+  const [selection, setSelection] = useState<Set<string>>(new Set());
+  const [rejectIds, setRejectIds] = useState<string[] | null>(null);
+  const [rejecting, setRejecting] = useState(false);
+  const [working, setWorking] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
 
-  const { data: queueData, isLoading } = useQuery<{ success: boolean; data: QueueItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["review-queue", entity.value, page, pageSize, search, moderation, adminId],
-    queryFn: () => fetcher(queueUrl),
-    enabled: status === "authenticated",
-  })
+  useEffect(() => {
+    setDensity(readDensity());
+    setSize(readSize());
+  }, []);
 
-  const { data: overviewData } = useQuery<{ success: boolean; data: OverviewData }>({
-    queryKey: ["review-overview"],
-    queryFn: () => fetcher("/api/admin/overview"),
-    enabled: status === "authenticated",
-  })
+  useEffect(() => {
+    if (input === q) return;
+    const t = setTimeout(() => {
+      setQ(input);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [input, q]);
 
-  const reviewMutation = useMutation({
-    mutationFn: (input: { id: string; action: "APPROVE" | "REJECT"; note?: string }) =>
-      api.post("/api/admin/review", { entity: entity.value, ...input }),
-    onSuccess: (_d, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["review-queue"] })
-      queryClient.invalidateQueries({ queryKey: ["review-overview"] })
-      // Reviewed items must disappear from every admin upload section immediately.
-      queryClient.invalidateQueries({
-        predicate: (q) =>
-          typeof q.queryKey[0] === "string" &&
-          (q.queryKey[0].startsWith("admin-") || q.queryKey[0] === "review-overview"),
-      })
-      setRejectTarget(null)
-      setRejectNote("")
-      toast(
-        vars.action === "APPROVE" ? "Content approved & live - removed from pending queue" : "Content rejected - removed from pending queue",
-        "success"
-      )
-    },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+      if (e.key === "/" && !typing) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      } else if (e.key === "Escape") {
+        setSelection(new Set());
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
-  if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || !isSuperAdmin(session.user.role)) { router.push("/login"); return null }
-
-  const items = queueData?.data || []
-  const pagination = queueData?.pagination
-  const pending = overviewData?.data.pendingQueue
-  const admins = overviewData?.data.admins || []
-
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-  const toggleSelectAll = () => {
-    setSelected((prev) => (prev.size === items.length && items.length > 0 ? new Set() : new Set(items.map((i) => i.id))))
-  }
-  const bulkReview = async (action: "approve" | "reject", note?: string) => {
-    if (selected.size === 0) return
-    if (action === "reject" && !note?.trim()) {
-      toast("Bulk reject needs a note", "destructive")
-      return
-    }
-    setBulkBusy(true)
+  const setDensityPersist = (d: Density) => {
+    setDensity(d);
     try {
-      const res = await runBulk(api, { module: entity.value, ids: [...selected], action, note })
-      setSelected(new Set())
-      setBulkNote("")
-      setShowBulkReject(false)
-      queryClient.invalidateQueries({ queryKey: ["review-queue"] })
-      queryClient.invalidateQueries({ queryKey: ["review-overview"] })
-      toast(action === "approve" ? `Approved ${res.ok} items` : `Rejected ${res.ok} items`, res.failed ? "destructive" : "success")
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Bulk review failed", "destructive")
-    } finally {
-      setBulkBusy(false)
+      window.localStorage.setItem(DENSITY_KEY, d);
+    } catch {
+      
     }
+  };
+
+  const setSizePersist = (n: number) => {
+    setSize(n);
+    setPage(1);
+    try {
+      window.localStorage.setItem(SIZE_KEY, String(n));
+    } catch {
+      
+    }
+  };
+
+  const listUrl = useMemo(() => {
+    const p = new URLSearchParams();
+    p.set("moderation", tab);
+    p.set("page", String(page));
+    p.set("limit", String(size));
+    if (q) p.set("search", q);
+    if (module) p.set("module", module);
+    if (adminId) p.set("createdById", adminId);
+    return `/api/admin/queue?${p.toString()}`;
+  }, [tab, page, size, q, module, adminId]);
+
+  const queueQuery = useQuery<QueueResponse>({
+    queryKey: ["review-queue-v2", listUrl],
+    queryFn: () => fetcher<QueueResponse>(listUrl),
+    enabled: status === "authenticated" && !!session && isSuperAdmin(session.user.role),
+  });
+
+  const uploadersQuery = useQuery<{ success: boolean; data: { admins: { adminId: string; name: string | null; email: string }[] } }>({
+    queryKey: ["list-uploaders"],
+    queryFn: () => fetcher("/api/admin/overview"),
+    enabled: status === "authenticated" && !!session && isSuperAdmin(session.user.role),
+    staleTime: 60 * 1000,
+  });
+
+  if (status === "loading") {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-96" />
+      </div>
+    );
   }
+  if (!session || !isSuperAdmin(session.user.role)) {
+    router.push("/login");
+    return null;
+  }
+
+  const rows = queueQuery.data?.data ?? [];
+  const pagination = queueQuery.data?.pagination;
+  const counts = queueQuery.data?.counts;
+  const modules = queueQuery.data?.modules ?? [];
+  const pendingTotal = counts?.pending ?? 0;
+
+  const uploaderOptions = (uploadersQuery.data?.data.admins ?? []).map((a) => ({
+    id: a.adminId,
+    name: a.name ? `${a.name} · ${a.email}` : a.email,
+  }));
+
+  const moduleOptions = modules.map((m) => ({ id: m.key, name: `${m.label} (${m.count})` }));
+
+  const activeFilterCount = (module ? 1 : 0) + (adminId ? 1 : 0);
+  const pills = [
+    ...(module ? [{ key: "module", label: `Module: ${modules.find((m) => m.key === module)?.label ?? module}` }] : []),
+    ...(adminId
+      ? [{ key: "uploader", label: `Admin: ${uploaderOptions.find((o) => o.id === adminId)?.name ?? adminId.slice(0, 8)}` }]
+      : []),
+  ];
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["review-queue-v2"] });
+    queryClient.invalidateQueries({ queryKey: ["review-decisions"] });
+  };
+
+  const undoToPending = async (ids: string[], mod: string) => {
+    try {
+      await api.post("/api/admin/bulk", { module: mod, ids, action: "submit" });
+      invalidate();
+      toast("Moved back to pending", "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Undo failed", "destructive");
+    }
+  };
+
+  const doApprove = async (targets: QueueRow[]) => {
+    if (targets.length === 0) return;
+    setWorking(true);
+    try {
+      const byModule = new Map<string, string[]>();
+      for (const t of targets) {
+        const arr = byModule.get(t.module) ?? [];
+        arr.push(t.id);
+        byModule.set(t.module, arr);
+      }
+      let ok = 0;
+      for (const [mod, ids] of byModule) {
+        const res = await api.post("/api/admin/bulk", { module: mod, ids, action: "approve" });
+        ok += (res as { data?: { updated?: number } })?.data?.updated ?? ids.length;
+      }
+      setSelection(new Set());
+      invalidate();
+      const firstMod = targets[0].module;
+      toast(`Approved ${ok} item${ok === 1 ? "" : "s"} — now live`, "success", {
+        label: "Undo",
+        onClick: () => void undoToPending(targets.map((t) => t.id), firstMod),
+      });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Approve failed", "destructive");
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const doReject = async (ids: string[], note: string) => {
+    const targets = rows.filter((r) => ids.includes(r.id));
+    if (targets.length === 0) return;
+    setRejecting(true);
+    try {
+      const byModule = new Map<string, string[]>();
+      for (const t of targets) {
+        const arr = byModule.get(t.module) ?? [];
+        arr.push(t.id);
+        byModule.set(t.module, arr);
+      }
+      let ok = 0;
+      for (const [mod, mIds] of byModule) {
+        const res = await api.post("/api/admin/bulk", { module: mod, ids: mIds, action: "reject", note });
+        ok += (res as { data?: { updated?: number } })?.data?.updated ?? mIds.length;
+      }
+      setRejectIds(null);
+      setSelection(new Set());
+      invalidate();
+      const firstMod = targets[0].module;
+      toast(`Rejected ${ok} item${ok === 1 ? "" : "s"}`, "success", {
+        label: "Undo",
+        onClick: () => void undoToPending(targets.map((t) => t.id), firstMod),
+      });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Reject failed", "destructive");
+    } finally {
+      setRejecting(false);
+    }
+  };
+
+  const selectedRows = rows.filter((r) => selection.has(r.id));
+
+  const reviewNext = () => {
+    if (rows.length === 0) {
+      toast("Queue is clear — nothing pending", "success");
+      return;
+    }
+    const first = rows[0];
+    setSelection(new Set([first.id]));
+    document.getElementById("review-table")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    toast(`Selected “${first.title.slice(0, 60)}” for review`, "default");
+  };
+
+  const toggleAll = () => {
+    setSelection((prev) => (prev.size === rows.length && rows.length > 0 ? new Set() : new Set(rows.map((r) => r.id))));
+  };
+
+  const toggleOne = (id: string) => {
+    setSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const badge =
+    pendingTotal > 0 ? (
+      <Badge className="bg-amber-100 font-semibold text-amber-800 hover:bg-amber-100 dark:bg-amber-950/60 dark:text-amber-200">
+        {pendingTotal} pending
+      </Badge>
+    ) : (
+      <Badge className="bg-emerald-100 font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-200">
+        All clear
+      </Badge>
+    );
+
+  const tabs: { key: QueueTab; label: string; count: number | undefined }[] = [
+    { key: "PENDING", label: "Pending", count: counts?.pending },
+    { key: "APPROVED", label: "Approved", count: counts?.approved },
+    { key: "REJECTED", label: "Rejected", count: counts?.rejected },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Content Verification</h1>
-        <p className="text-sm text-gray-500">
-          Admin uploads only - your own super-admin uploads never appear here. Reviewed items leave the queue automatically.
-          Approve to publish, reject with feedback.
-        </p>
+    <div className="space-y-4">
+      <PageHeader
+        crumbs={[{ label: "Manage" }, { label: "Content verification" }]}
+        title="Content verification"
+        badge={badge}
+        description="Admin uploads only — approve to publish, reject with feedback."
+        actions={
+          <>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
+              <History className="mr-1.5 h-3.5 w-3.5" /> Audit trail
+            </Button>
+            <ExportMenu rows={rows as unknown as Record<string, unknown>[]} filename="verification-queue" variant="secondary" />
+            <Button type="button" size="sm" className={T_PRIMARY} onClick={reviewNext}>
+              Review next <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </>
+        }
+      />
+
+      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Status filter">
+        {tabs.map((t) => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => {
+                setTab(t.key);
+                setPage(1);
+                setSelection(new Set());
+              }}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors",
+                active
+                  ? "border-teal-700 bg-teal-700 text-white shadow-sm dark:border-teal-600 dark:bg-teal-600"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-teal-600/40 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:text-teal-300"
+              )}
+            >
+              {t.label}
+              <span
+                className={cn(
+                  "rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums",
+                  active ? "bg-white/25 text-white" : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400"
+                )}
+              >
+                {t.count ?? "…"}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {pending && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
-          <Card className="col-span-2 sm:col-span-4 lg:col-span-1">
-            <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold">{pending.total ?? 0}</p>
-              <p className="text-xs text-gray-500">Pending total</p>
-            </CardContent>
-          </Card>
-          {ENTITIES.map((e) => (
-            <Card key={e.value} className={entity.value === e.value ? "border-teal-500" : ""}>
-              <CardContent className="p-3 text-center">
-                <p className="text-xl font-bold">{pending[e.value] ?? 0}</p>
-                <p className="text-[11px] text-gray-500">{e.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+      {modules.length > 0 && (
+        <div className="flex flex-wrap gap-1.5" aria-label="Module filter">
+          <button
+            type="button"
+            onClick={() => {
+              setModule("");
+              setPage(1);
+            }}
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+              !module
+                ? "border-teal-700 bg-teal-700/10 text-teal-800 dark:border-teal-500/40 dark:text-teal-200"
+                : "border-slate-200 bg-white text-slate-500 hover:border-teal-600/40 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400"
+            )}
+          >
+            All modules
+          </button>
+          {modules.map((m) => {
+            const active = module === m.key;
+            return (
+              <button
+                key={m.key}
+                type="button"
+                onClick={() => {
+                  setModule(active ? "" : m.key);
+                  setPage(1);
+                }}
+                className={cn(
+                  "rounded-full border px-2.5 py-1 text-xs font-medium tabular-nums transition-colors",
+                  active
+                    ? "border-teal-700 bg-teal-700/10 text-teal-800 dark:border-teal-500/40 dark:text-teal-200"
+                    : "border-slate-200 bg-white text-slate-500 hover:border-teal-600/40 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400"
+                )}
+              >
+                {m.label} · {m.count}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={entity.value} onValueChange={(v) => { const found = ENTITIES.find((e) => e.value === v); if (found) { setEntity(found); setPage(1) } }}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Content type" />
-              </SelectTrigger>
-              <SelectContent>
-                {ENTITIES.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={moderation || "all"} onValueChange={(v) => { setModeration(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-[170px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PENDING">Pending review</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
-                <SelectItem value="all">All statuses</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="relative min-w-[200px] flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input placeholder="Search title or slug…" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="pl-9" />
-            </div>
-            <Input
-              className="w-[240px] font-mono text-xs"
-              placeholder="Filter by Admin ID…"
-              value={adminId}
-              onChange={(e) => { setAdminId(e.target.value.trim()); setPage(1) }}
-              title="Unique Admin ID (cuid)"
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <DensityToggle value={density} onChange={setDensity} />
-            <PageSizeSelect value={pageSize} options={pageSizeOptions} onChange={(n) => { setPageSize(n); setPage(1) }} />
-          </div>
-          {selected.size > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-sm dark:border-teal-900 dark:bg-teal-950/60">
-              <span className="font-medium">{selected.size} selected</span>
-              <Button size="sm" disabled={bulkBusy} onClick={() => bulkReview("approve")}>
-                <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> {bulkBusy ? "Working…" : "Bulk approve"}
-              </Button>
-              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => setShowBulkReject((v) => !v)}>
-                <XCircle className="mr-1 h-3.5 w-3.5" /> Bulk reject…
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>Clear</Button>
-              {showBulkReject && (
-                <div className="flex w-full items-center gap-2">
-                  <Input
-                    placeholder="Rejection reason (required, shared)…"
-                    value={bulkNote}
-                    onChange={(e) => setBulkNote(e.target.value)}
-                    className="bg-white"
+      <Card className={T_CARD}>
+        <div className="space-y-2.5 border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+          <ListToolbar
+            q={input}
+            onQ={setInput}
+            searchRef={searchRef}
+            placeholder="Search by title or slug…"
+            filters={{
+              defs: [{ key: "module", label: "Module", endpoint: "/api/admin/queue" }],
+              values: module ? { module } : {},
+              lookups: { module: moduleOptions },
+              showUploader: true,
+              uploaderOptions,
+              uploader: adminId,
+            }}
+            onFilter={(key, value) => {
+              if (key === "module") setModule(value);
+              setPage(1);
+            }}
+            onUploader={(value) => {
+              setAdminId(value);
+              setPage(1);
+            }}
+            onClearFilters={() => {
+              setModule("");
+              setAdminId("");
+              setPage(1);
+            }}
+            activeFilterCount={activeFilterCount}
+            density={density}
+            onDensity={setDensityPersist}
+          />
+          <ActiveFilterPills
+            pills={pills}
+            onRemove={(key) => {
+              if (key === "module") setModule("");
+              else setAdminId("");
+              setPage(1);
+            }}
+            onClear={() => {
+              setModule("");
+              setAdminId("");
+              setPage(1);
+            }}
+          />
+        </div>
+
+        <div id="review-table" className="overflow-x-auto saas-table-scroll">
+          <Table className="saas-table" data-density={density}>
+            <TableHeader className="sticky top-0 z-10">
+              <TableRow className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={rows.length > 0 && selection.size === rows.length ? true : selection.size > 0 ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                    aria-label="Select all rows on this page"
                   />
-                  <Button size="sm" variant="destructive" disabled={!bulkNote.trim() || bulkBusy} onClick={() => bulkReview("reject", bulkNote.trim())}>
-                    Confirm reject
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? <Skeleton className="h-64" /> : (
-            <>
-              <div className="overflow-x-auto saas-table-scroll">
-              <Table className="saas-table" data-density={density}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox checked={items.length > 0 && selected.size === items.length} onCheckedChange={toggleSelectAll} aria-label="Select all" />
-                    </TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Uploaded by</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Review note</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Verify</TableHead>
+                </TableHead>
+                <TableHead><span className={T_HEAD_CELL}>Item</span></TableHead>
+                <TableHead><span className={T_HEAD_CELL}>Uploaded by</span></TableHead>
+                <TableHead><span className={T_HEAD_CELL}>Created</span></TableHead>
+                <TableHead><span className="sr-only">Actions</span></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {queueQuery.isLoading && rows.length === 0 ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <TableRow key={`sk-${i}`}>
+                    <TableCell colSpan={5}><Skeleton className="h-9 w-full" /></TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <Checkbox checked={selected.has(item.id)} onCheckedChange={() => toggleSelect(item.id)} aria-label={`Select ${item.title}`} />
+                ))
+              ) : rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <div className="flex flex-col items-center gap-2 py-12 text-center">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
+                        <Inbox className="h-6 w-6 text-slate-400" />
+                      </span>
+                      <p className="font-semibold text-slate-700 dark:text-slate-200">
+                        {tab === "PENDING" ? "Queue is clear" : tab === "APPROVED" ? "No approved items" : "No rejected items"}
+                      </p>
+                      <p className="max-w-xs text-sm text-slate-400">
+                        {q || module || adminId
+                          ? "Try a different search or filter."
+                          : tab === "PENDING"
+                            ? "Every admin upload has been reviewed."
+                            : "Items will appear here after review decisions."}
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows.map((r) => {
+                  const selected = selection.has(r.id);
+                  const t = new Date(r.createdAt).getTime();
+                  return (
+                    <TableRow
+                      key={r.id}
+                      data-selected={selected}
+                      className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 data-[selected=true]:bg-teal-50/70 dark:border-white/[0.06] dark:hover:bg-white/[0.03] dark:data-[selected=true]:bg-teal-950/40"
+                    >
+                      <TableCell className={cn(density === "compact" && "py-2")}>
+                        <Checkbox checked={selected} onCheckedChange={() => toggleOne(r.id)} aria-label={`Select ${r.title}`} />
                       </TableCell>
-                      <TableCell className="font-medium max-w-[260px] truncate" title={item.title}>
-                        {item.title}
-                        <span className="block truncate font-mono text-[11px] text-gray-400">/{item.slug}</span>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-sm">{item.createdBy?.name || "Unknown"}</p>
-                        <p className="text-xs text-gray-400">{item.createdBy?.email || item.createdById || ""}</p>
-                        <AdminIdBadge id={item.createdBy?.id || item.createdById} />
-                      </TableCell>
-                      <TableCell><ModerationBadge value={item.moderation} /></TableCell>
-                      <TableCell className="max-w-[200px] truncate text-xs text-gray-500" title={item.reviewNote || ""}>
-                        {item.reviewNote || "-"}
-                      </TableCell>
-                      <TableCell className="text-xs text-gray-500">{formatDate(item.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            size="sm"
-                            onClick={() => reviewMutation.mutate({ id: item.id, action: "APPROVE" })}
-                            disabled={reviewMutation.isPending || item.moderation === "APPROVED"}
-                            title="Approve & publish"
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => { setRejectTarget(item); setRejectNote(item.reviewNote || "") }}
-                            disabled={reviewMutation.isPending || item.moderation === "REJECTED"}
-                            title="Reject with feedback"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" /> Reject
-                          </Button>
+                      <TableCell className={cn(density === "compact" && "py-2")}>
+                        <div className="min-w-0 max-w-[420px]">
+                          <p className="truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100" title={r.title}>
+                            {r.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
+                            {r.moduleLabel}
+                            {r.reviewNote ? `  •  ${r.reviewNote}` : ""}
+                          </p>
                         </div>
                       </TableCell>
+                      <TableCell className={cn(density === "compact" && "py-2")}>
+                        <span className="flex items-center gap-2" title={r.createdBy?.email ?? ""}>
+                          <Avatar className="h-7 w-7 shrink-0 border border-slate-200 dark:border-white/10">
+                            <AvatarFallback className="bg-teal-700 text-[10px] font-bold text-white dark:bg-teal-600">
+                              {initials(r.createdBy?.name, r.createdBy?.email)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="max-w-[140px] truncate text-[13px] text-slate-600 dark:text-slate-300">
+                            {r.createdBy?.name || r.createdBy?.email || "Unknown"}
+                          </span>
+                        </span>
+                      </TableCell>
+                      <TableCell className={cn(density === "compact" && "py-2")}>
+                        <span className="whitespace-nowrap text-[13px] tabular-nums text-slate-600 dark:text-slate-300" title={formatDate(r.createdAt)}>
+                          {Number.isNaN(t) ? "-" : formatDistanceToNow(new Date(t), { addSuffix: true })}
+                        </span>
+                      </TableCell>
+                      <TableCell className={cn("text-right", density === "compact" && "py-2")}>
+                        {tab === "PENDING" ? (
+                          <span className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                            <button
+                              type="button"
+                              title="Approve"
+                              disabled={working}
+                              onClick={() => void doApprove([r])}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-emerald-700 dark:text-slate-500 dark:hover:bg-white/[0.06]"
+                            >
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                            </button>
+                            <button
+                              type="button"
+                              title="Reject with note"
+                              disabled={working}
+                              onClick={() => setRejectIds([r.id])}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-amber-700 dark:text-slate-500 dark:hover:bg-white/[0.06]"
+                            >
+                              <XCircle className="h-4 w-4 text-amber-600" />
+                            </button>
+                          </span>
+                        ) : (
+                          <StatusDot value={r.moderation ?? tab} className="justify-end" />
+                        )}
+                      </TableCell>
                     </TableRow>
-                  ))}
-                  {items.length === 0 && (
-                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">Queue is clear - nothing matches.</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              </div>
-              {pagination && (
-                <TableFooter
-                  page={page}
-                  totalPages={pagination.totalPages}
-                  total={pagination.total}
-                  pageSize={pageSize}
-                  pageSizeOptions={pageSizeOptions}
-                  onPageChange={setPage}
-                  onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
-                  itemLabel="items"
-                />
+                  );
+                })
               )}
-            </>
-          )}
-        </CardContent>
+            </TableBody>
+          </Table>
+        </div>
+
+        {pagination && (
+          <TableFooter
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            pageSize={size}
+            pageSizeOptions={ADMIN_PAGE_SIZES}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={setSizePersist}
+            itemLabel="items"
+          />
+        )}
       </Card>
 
-      {admins.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Per-admin uploads (unique Admin ID)</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Admin</TableHead>
-                  <TableHead>Admin ID</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Pending</TableHead>
-                  <TableHead>Breakdown</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {admins.map((a) => (
-                  <TableRow key={a.adminId}>
-                    <TableCell>
-                      <p className="font-medium">{a.name || "N/A"}</p>
-                      <p className="text-xs text-gray-400">{a.email}</p>
-                    </TableCell>
-                    <TableCell><AdminIdBadge id={a.adminId} /></TableCell>
-                    <TableCell><Badge variant={a.role === "SUPER_ADMIN" ? undefined : "secondary"}>{a.role}</Badge></TableCell>
-                    <TableCell className="font-semibold">{a.total}</TableCell>
-                    <TableCell>
-                      <Badge className={a.pendingTotal > 0 ? "bg-amber-100 text-amber-800" : "bg-gray-100 text-gray-500"}>
-                        {a.pendingTotal} pending
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-gray-500">
-                      {Object.entries(a.byType).filter(([, n]) => (n as number) > 0).map(([t, n]) => `${t}:${n}`).join(" · ") || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      {selection.size > 0 && (
+        <div className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-3 py-2.5 shadow-xl backdrop-blur dark:border-white/10 dark:bg-[#0b1220]/95">
+          <span className="mr-1 text-[13px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+            {selection.size} selected
+          </span>
+          <Button type="button" size="sm" disabled={working} onClick={() => void doApprove(selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700">
+            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Approve
+          </Button>
+          <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => setRejectIds(selectedRows.map((r) => r.id))}>
+            <XCircle className="mr-1.5 h-3.5 w-3.5" /> Reject
+          </Button>
+          <Button type="button" size="sm" variant="ghost" disabled={working} onClick={() => setSelection(new Set())}>
+            Clear
+          </Button>
+        </div>
       )}
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Recent review decisions (audit)</CardTitle></CardHeader>
-        <CardContent><AuditTimeline limit={10} title="Reviews" /></CardContent>
+      <Card className={cn(T_CARD, "p-4 sm:p-5")}>
+        <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Recent review decisions</h2>
+        <div className="mt-2">
+          <ReviewDecisions limit={10} />
+        </div>
       </Card>
 
-      <Dialog open={!!rejectTarget} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setRejectNote("") } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Reject with feedback</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">
-            &ldquo;{rejectTarget?.title}&rdquo; will stay hidden from public until the admin fixes and resubmits.
-          </p>
-          <Input
-            placeholder="Quality issue - e.g. wrong dates, missing PDF, poor description…"
-            value={rejectNote}
-            onChange={(e) => setRejectNote(e.target.value)}
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setRejectTarget(null); setRejectNote("") }}>Cancel</Button>
-            <Button
-              variant="destructive"
-              disabled={!rejectNote.trim() || reviewMutation.isPending}
-              onClick={() => rejectTarget && reviewMutation.mutate({ id: rejectTarget.id, action: "REJECT", note: rejectNote.trim() })}
-            >
-              {reviewMutation.isPending ? "Saving…" : "Reject"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <RejectDialog
+        open={rejectIds !== null}
+        count={rejectIds?.length ?? 0}
+        pending={rejecting}
+        onCancel={() => setRejectIds(null)}
+        onConfirm={(note) => rejectIds && void doReject(rejectIds, note)}
+      />
+
+      <AuditDialog
+        open={auditOpen}
+        onOpenChange={setAuditOpen}
+        title="Content verification — audit trail"
+        entity=""
+        mine={false}
+      />
     </div>
-  )
+  );
 }

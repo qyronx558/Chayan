@@ -1,275 +1,458 @@
-"use client"
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api, fetcher } from "@/lib/api"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+import { api, fetcher } from "@/lib/api";
+import { isSuperAdmin } from "@/lib/roles";
+import { ADMIN_PAGE_SIZES, type Density } from "@/lib/admin/usePageSize";
+import { formatDate, cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table"
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select"
-import { toast } from "@/components/ui/toast"
-import { formatDate } from "@/lib/utils"
-import { isSuperAdmin } from "@/lib/roles"
-import { AdminIdBadge } from "@/components/admin/AdminIdBadge"
-import { Search, Shield, ShieldOff, Trash2 } from "lucide-react"
-import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
-import { TableFooter } from "@/components/admin/data-table/TableFooter"
-import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/toast";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { RolePill } from "@/components/admin/RolePill";
+import { AdminIdBadge } from "@/components/admin/AdminIdBadge";
+import { TableFooter } from "@/components/admin/data-table/TableFooter";
+import { DensityToggle } from "@/components/admin/data-table/DensityToggle";
+import { ExportMenu } from "@/components/admin/data-table/ExportMenu";
+import { AuditDialog, DeleteConfirm } from "@/components/admin/list/list-parts";
+import { T_CARD, T_HEAD_CELL, initials } from "@/components/admin/list/tokens";
+import { Search, History, Shield, ShieldOff, MoreHorizontal, Trash2, Inbox } from "lucide-react";
 
 interface ContentCounts {
-  bookmark: number; comments: number; jobs: number; privateJobs: number
-  results: number; admitCards: number; answerKeys: number; admissions: number
-  syllabi: number; blogPosts: number
+  bookmark: number;
+  comments: number;
+  jobs: number;
+  privateJobs: number;
+  results: number;
+  admitCards: number;
+  answerKeys: number;
+  admissions: number;
+  syllabi: number;
+  blogPosts: number;
 }
 
 interface UserItem {
-  id: string; name: string | null; email: string; role: string; image: string | null; createdAt: string
-  _count: ContentCounts
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  image: string | null;
+  createdAt: string;
+  _count: ContentCounts;
 }
 
-function totalUploads(c?: ContentCounts | null) {
-  if (!c) return 0
+interface UsersResponse {
+  success: boolean;
+  data: UserItem[];
+  pagination: { page: number; totalPages: number; total: number };
+}
+
+function totalUploads(c?: ContentCounts | null): number {
+  if (!c) return 0;
   return (
     (c.jobs || 0) + (c.privateJobs || 0) + (c.results || 0) + (c.admitCards || 0) +
     (c.answerKeys || 0) + (c.admissions || 0) + (c.syllabi || 0) + (c.blogPosts || 0)
-  )
+  );
 }
 
+const DENSITY_KEY = "list:density:users";
+const SIZE_KEY = "admin:pageSize:users";
+
 export default function AdminUsers() {
-  const { data: session, status, update } = useSession()
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const [roleFilter, setRoleFilter] = useState("")
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [promoteTarget, setPromoteTarget] = useState<UserItem | null>(null)
-  const superView = isSuperAdmin(session?.user?.role)
-  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("users", superView)
-  const { density, setDensity } = useDensity("users")
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const searchRef = useRef<HTMLInputElement | null>(null);
 
-  const queryUrl = `/api/users?page=${page}&limit=${pageSize}&search=${encodeURIComponent(search)}${roleFilter ? `&role=${roleFilter}` : ""}`
-  const { data: usersData, isLoading } = useQuery<{ success: boolean; data: UserItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-users", page, pageSize, search, roleFilter],
-    queryFn: () => fetcher(queryUrl),
-  })
+  const [input, setInput] = useState("");
+  const [q, setQ] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(25);
+  const [density, setDensity] = useState<Density>("comfortable");
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [changing, setChanging] = useState(false);
 
-  const updateRoleMutation = useMutation({
-    mutationFn: ({ id, role }: { id: string; role: string }) => api.put(`/api/users/${id}`, { role }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-users"] })
-      setPromoteTarget(null)
-      try { await update() } catch { /* session refresh best-effort */ }
-      toast("User role updated", "success")
-    },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/api/users/${id}`),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-users"] }); setDeleteId(null); toast("User deleted", "success") },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
-
-  if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || !isSuperAdmin(session.user.role)) { router.push("/login"); return null }
-
-  const users = usersData?.data || []
-  const pagination = usersData?.pagination
-
-  const requestToggleRole = (user: UserItem) => {
-    if (user.role === "SUPER_ADMIN") {
-      toast("Super admins cannot be demoted", "destructive")
-      return
+  useEffect(() => {
+    try {
+      const d = window.localStorage.getItem(DENSITY_KEY);
+      if (d === "compact" || d === "comfortable") setDensity(d);
+      const s = parseInt(window.localStorage.getItem(SIZE_KEY) || "25", 10);
+      if ((ADMIN_PAGE_SIZES as readonly number[]).includes(s)) setSize(s);
+    } catch {
+      
     }
-    if (user.id === session.user.id) {
-      toast("You cannot change your own role", "destructive")
-      return
-    }
-    // Single-button promote: one click opens a confirm, confirm performs the change.
-    setPromoteTarget(user)
+  }, []);
+
+  useEffect(() => {
+    if (input === q) return;
+    const t = setTimeout(() => {
+      setQ(input);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [input, q]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+      if (e.key === "/" && !typing) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const queryUrl = `/api/users?page=${page}&limit=${size}&search=${encodeURIComponent(q)}${roleFilter ? `&role=${roleFilter}` : ""}`;
+  const usersQuery = useQuery<UsersResponse>({
+    queryKey: ["admin-users-v2", queryUrl],
+    queryFn: () => fetcher<UsersResponse>(queryUrl),
+    enabled: status === "authenticated" && !!session && isSuperAdmin(session.user.role),
+  });
+
+  if (status === "loading") {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+  if (!session || !isSuperAdmin(session.user.role)) {
+    router.push("/login");
+    return null;
   }
 
-  const confirmToggleRole = () => {
-    if (!promoteTarget) return
-    const newRole = promoteTarget.role === "ADMIN" ? "USER" : "ADMIN"
-    updateRoleMutation.mutate({ id: promoteTarget.id, role: newRole })
-  }
+  const users = usersQuery.data?.data ?? [];
+  const pagination = usersQuery.data?.pagination;
+  const total = pagination?.total ?? users.length;
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin-users-v2"] });
+
+  const doRoleChange = async (user: UserItem, nextRole: "ADMIN" | "USER") => {
+    const prevRole = user.role;
+    if (prevRole === nextRole) return;
+    setChanging(true);
+    try {
+      await api.put(`/api/users/${user.id}`, { role: nextRole });
+      invalidate();
+      toast(`${user.email} is now ${nextRole === "ADMIN" ? "an admin" : "a user"}`, "success", {
+        label: "Undo",
+        onClick: () => void doRoleChange({ ...user, role: nextRole }, prevRole as "ADMIN" | "USER"),
+      });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Role change failed", "destructive");
+    } finally {
+      setChanging(false);
+    }
+  };
+
+  const doDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/users/${deleteTarget.id}`);
+      setDeleteTarget(null);
+      invalidate();
+      toast(`Deleted ${deleteTarget.email}`, "success");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Delete failed", "destructive");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const setDensityPersist = (d: Density) => {
+    setDensity(d);
+    try {
+      window.localStorage.setItem(DENSITY_KEY, d);
+    } catch {
+      
+    }
+  };
+
+  const setSizePersist = (n: number) => {
+    setSize(n);
+    setPage(1);
+    try {
+      window.localStorage.setItem(SIZE_KEY, String(n));
+    } catch {
+      
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Users & Roles</h1>
-          <p className="text-sm text-gray-500">Single-click promote to admin. Unique Admin ID is the user&apos;s permanent cuid.</p>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-wrap gap-2">
-            <div className="relative flex-1 max-w-sm min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                placeholder="Search name, email, or Admin ID…"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-                className="pl-9"
-              />
-            </div>
-            <Select value={roleFilter || "all"} onValueChange={(v) => { setRoleFilter(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All roles</SelectItem>
-                <SelectItem value="USER">Users</SelectItem>
-                <SelectItem value="ADMIN">Admins</SelectItem>
-                <SelectItem value="SUPER_ADMIN">Super admins</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <DensityToggle value={density} onChange={setDensity} />
-            <PageSizeSelect value={pageSize} options={pageSizeOptions} onChange={(n) => { setPageSize(n); setPage(1) }} />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? <Skeleton className="h-64" /> : (
+    <TooltipProvider>
+      <div className="space-y-4">
+        <PageHeader
+          crumbs={[{ label: "Manage" }, { label: "Users and roles" }]}
+          title="Users and roles"
+          badge={
+            <Badge variant="secondary" className="font-semibold tabular-nums">
+              {total} user{total === 1 ? "" : "s"}
+            </Badge>
+          }
+          description="Promote trusted users to admin — every change is audit-logged."
+          actions={
             <>
-              <div className="overflow-x-auto saas-table-scroll">
-              <Table className="saas-table" data-density={density}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Admin ID</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Activity</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name || "N/A"}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell><AdminIdBadge id={user.id} /></TableCell>
-                      <TableCell>
-                        {user.role === "SUPER_ADMIN" ? (
-                          <Badge className="bg-violet-100 text-violet-700">SUPER_ADMIN</Badge>
-                        ) : (
-                          <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{formatDate(user.createdAt)}</TableCell>
-                      <TableCell className="text-gray-500 text-xs">
-                        {totalUploads(user._count)} uploads · {user._count.bookmark} bookmarks · {user._count.comments} comments
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant={user.role === "ADMIN" ? "outline" : "default"}
-                            size="sm"
-                            onClick={() => requestToggleRole(user)}
-                            disabled={user.id === session.user.id || user.role === "SUPER_ADMIN" || updateRoleMutation.isPending}
-                            title={user.role === "ADMIN" ? "Remove admin" : user.role === "SUPER_ADMIN" ? "Super admin cannot be changed" : "Make admin"}
-                          >
-                            {user.role === "ADMIN" ? <ShieldOff className="h-4 w-4 mr-1" /> : <Shield className="h-4 w-4 mr-1" />}
-                            {user.role === "ADMIN" ? "Remove" : "Make admin"}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDeleteId(user.id)}
-                            disabled={user.id === session.user.id || user.role === "SUPER_ADMIN"}
-                            title={user.role === "SUPER_ADMIN" ? "Super admin cannot be deleted" : "Delete user"}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {users.length === 0 && (
-                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No users found</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              </div>
-              {pagination && (
-                <TableFooter
-                  page={page}
-                  totalPages={pagination.totalPages}
-                  total={pagination.total}
-                  pageSize={pageSize}
-                  pageSizeOptions={pageSizeOptions}
-                  onPageChange={setPage}
-                  onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
-                  itemLabel="users"
-                />
-              )}
+              <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
+                <History className="mr-1.5 h-3.5 w-3.5" /> Audit trail
+              </Button>
+              <ExportMenu rows={users as unknown as Record<string, unknown>[]} filename="users-roles" variant="secondary" />
             </>
-          )}
-        </CardContent>
-      </Card>
+          }
+        />
 
-      <Dialog open={!!promoteTarget} onOpenChange={(o) => { if (!o) setPromoteTarget(null) }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {promoteTarget?.role === "ADMIN" ? "Remove admin?" : "Make admin?"}
-            </DialogTitle>
-          </DialogHeader>
-          {promoteTarget && (
-            <div className="space-y-3 text-sm">
-              <p className="text-gray-600">
-                {promoteTarget.role === "ADMIN"
-                  ? "This admin will lose content-upload access immediately (takes effect on their next session refresh)."
-                  : "This user will gain content-upload access. Their uploads will require super-admin approval before going public."}
-              </p>
-              <div className="rounded-lg bg-gray-50 p-3 space-y-1">
-                <p><span className="text-gray-500">Name:</span> <span className="font-medium">{promoteTarget.name || "N/A"}</span></p>
-                <p><span className="text-gray-500">Email:</span> <span className="font-medium">{promoteTarget.email}</span></p>
-                <p className="flex items-center gap-2"><span className="text-gray-500">Admin ID:</span> <AdminIdBadge id={promoteTarget.id} /></p>
-                <p><span className="text-gray-500">Current role:</span> <Badge variant="secondary">{promoteTarget.role}</Badge></p>
-                <p><span className="text-gray-500">Uploads:</span> {totalUploads(promoteTarget._count)} items</p>
+        <Card className={T_CARD}>
+          <div className="border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-52 flex-1">
+                <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  ref={searchRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Search name, email, or admin ID…"
+                  className="bg-white pl-8 pr-10 dark:bg-white/[0.03]"
+                  aria-label="Search users"
+                />
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 sm:block dark:border-white/10 dark:bg-white/[0.05]">
+                  /
+                </kbd>
               </div>
-              <p className="text-xs text-gray-400">This change is written to Activity Logs with your super-admin identity.</p>
-              <div className="flex justify-end gap-2 pt-1">
-                <Button variant="outline" onClick={() => setPromoteTarget(null)}>Cancel</Button>
-                <Button onClick={confirmToggleRole} disabled={updateRoleMutation.isPending}>
-                  {updateRoleMutation.isPending ? "Saving…" : promoteTarget.role === "ADMIN" ? "Remove admin" : "Make admin"}
-                </Button>
+              <Select value={roleFilter || "ALL"} onValueChange={(v) => { setRoleFilter(v === "ALL" ? "" : v); setPage(1); }}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All roles</SelectItem>
+                  <SelectItem value="USER">Users</SelectItem>
+                  <SelectItem value="ADMIN">Admins</SelectItem>
+                  <SelectItem value="SUPER_ADMIN">Super admins</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="ml-auto">
+                <DensityToggle value={density} onChange={setDensityPersist} />
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Delete User</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? This will permanently delete the user and all their data.</p>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => deleteId && deleteMutation.mutate(deleteId)} disabled={deleteMutation.isPending}>Delete</Button>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+
+          <div className="overflow-x-auto saas-table-scroll">
+            <Table className="saas-table" data-density={density}>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+                  <TableHead><span className={T_HEAD_CELL}>User</span></TableHead>
+                  <TableHead><span className={T_HEAD_CELL}>Role</span></TableHead>
+                  <TableHead><span className={T_HEAD_CELL}>Admin ID</span></TableHead>
+                  <TableHead><span className={T_HEAD_CELL}>Activity</span></TableHead>
+                  <TableHead><span className="sr-only">Actions</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {usersQuery.isLoading && users.length === 0 ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <TableRow key={`sk-${i}`}>
+                      <TableCell colSpan={5}><Skeleton className="h-9 w-full" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <div className="flex flex-col items-center gap-2 py-12 text-center">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
+                          <Inbox className="h-6 w-6 text-slate-400" />
+                        </span>
+                        <p className="font-semibold text-slate-700 dark:text-slate-200">No users found</p>
+                        <p className="max-w-xs text-sm text-slate-400">Try a different search or role filter.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((u) => {
+                    const isSelf = u.id === session.user.id;
+                    const joined = new Date(u.createdAt).getTime();
+                    const uploads = totalUploads(u._count);
+                    return (
+                      <TableRow
+                        key={u.id}
+                        className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 dark:border-white/[0.06] dark:hover:bg-white/[0.03]"
+                      >
+                        <TableCell className={cn(density === "compact" && "py-2")}>
+                          <span className="flex items-center gap-2.5">
+                            <Avatar className="h-8 w-8 shrink-0 border border-slate-200 dark:border-white/10">
+                              <AvatarFallback className="bg-teal-700 text-[11px] font-bold text-white dark:bg-teal-600">
+                                {initials(u.name, u.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="min-w-0">
+                              <span className="block max-w-[200px] truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100">
+                                {u.name || "Unnamed"}
+                              </span>
+                              <span className="block max-w-[200px] truncate text-xs text-slate-400" title={u.email}>
+                                {u.email}
+                              </span>
+                            </span>
+                          </span>
+                        </TableCell>
+                        <TableCell className={cn(density === "compact" && "py-2")}>
+                          <RolePill role={u.role} />
+                        </TableCell>
+                        <TableCell className={cn(density === "compact" && "py-2")}>
+                          <AdminIdBadge id={u.id} />
+                        </TableCell>
+                        <TableCell className={cn(density === "compact" && "py-2")}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-default">
+                                <span className="block text-[13px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+                                  {uploads} upload{uploads === 1 ? "" : "s"}
+                                </span>
+                                <span className="block text-xs tabular-nums text-slate-400" title={formatDate(u.createdAt)}>
+                                  Joined {!Number.isNaN(joined) ? formatDistanceToNow(new Date(joined), { addSuffix: true }) : "—"}
+                                </span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">
+                                {uploads} uploads · {u._count.bookmark} bookmarks · {u._count.comments} comments
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell className={cn("text-right", density === "compact" && "py-2")}>
+                          {isSelf ? (
+                            <Badge variant="outline" className="font-semibold text-slate-500">
+                              You
+                            </Badge>
+                          ) : (
+                            <span className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                              {u.role === "SUPER_ADMIN" ? (
+                                <Badge variant="outline" className="font-semibold text-slate-400">
+                                  Locked
+                                </Badge>
+                              ) : (
+                                <>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant={u.role === "ADMIN" ? "outline" : "default"}
+                                    disabled={changing}
+                                    onClick={() => void doRoleChange(u, u.role === "ADMIN" ? "USER" : "ADMIN")}
+                                    className={u.role === "ADMIN" ? "" : "bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500"}
+                                  >
+                                    {u.role === "ADMIN" ? (
+                                      <>
+                                        <ShieldOff className="mr-1.5 h-3.5 w-3.5" /> Remove admin
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Shield className="mr-1.5 h-3.5 w-3.5" /> Make admin
+                                      </>
+                                    )}
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <button
+                                        type="button"
+                                        aria-label={`Actions for ${u.email}`}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
+                                      >
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-44">
+                                      <DropdownMenuItem
+                                        onClick={() => setDeleteTarget(u)}
+                                        className="text-red-600 focus:text-red-600 dark:text-red-400"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete user
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </>
+                              )}
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {pagination && (
+            <TableFooter
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              pageSize={size}
+              pageSizeOptions={ADMIN_PAGE_SIZES}
+              onPageChange={(p) => setPage(p)}
+              onPageSizeChange={setSizePersist}
+              itemLabel="users"
+            />
+          )}
+        </Card>
+
+        <DeleteConfirm
+          open={deleteTarget !== null}
+          title="Delete user"
+          message={`Permanently delete ${deleteTarget?.email ?? "this user"} and all of their data? This cannot be undone.`}
+          pending={deleting}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => void doDelete()}
+        />
+
+        <AuditDialog
+          open={auditOpen}
+          onOpenChange={setAuditOpen}
+          title="Users and roles — audit trail"
+          entity="User"
+          mine={false}
+        />
+      </div>
+    </TooltipProvider>
+  );
 }
