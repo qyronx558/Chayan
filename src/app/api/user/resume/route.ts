@@ -4,35 +4,35 @@ import { prisma } from "@/lib/prisma"
 import { parseResumeBuffer } from "@/lib/resume-parser"
 import { extractLocations } from "@/lib/skills"
 
+const ALLOWED = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+const MAX_SIZE = 5 * 1024 * 1024
+
+async function audit(actorId: string, role: string | undefined, summary: string) {
+  try {
+    const { writeAuditEvent } = await import("@/lib/audit")
+    await writeAuditEvent({ action: "UPDATE", entityType: "Resume", entityId: actorId, actorId, actorRole: role ?? "USER", summary, source: "API" })
+  } catch { undefined }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-
     const formData = await request.formData()
     const file = formData.get("file") as File | null
     if (!file) {
       return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 })
     }
-
-    const allowedTypes = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain",
-    ]
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ success: false, error: "Only PDF, DOCX, and TXT files are supported" }, { status: 400 })
+    if (!ALLOWED.includes(file.type)) {
+      return NextResponse.json({ success: false, error: "Only PDF and DOCX files are supported" }, { status: 400 })
     }
-
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_SIZE) {
       return NextResponse.json({ success: false, error: "File size must be under 5MB" }, { status: 400 })
     }
-
     const buffer = Buffer.from(await file.arrayBuffer())
     const parsed = await parseResumeBuffer(buffer, file.type)
-
     let userId = session.user.id
     let user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user && session.user.email) {
@@ -41,46 +41,29 @@ export async function POST(request: NextRequest) {
     }
     if (!user) {
       user = await prisma.user.create({
-        data: {
-          id: userId,
-          email: session.user.email || `user-${userId}@placeholder.local`,
-          name: session.user.name || "User",
-        },
+        data: { id: userId, email: session.user.email || `user-${userId}@placeholder.local`, name: session.user.name || "User" },
       })
     }
-
     const resume = await prisma.resume.upsert({
       where: { userId },
       update: {
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        rawText: parsed.rawText,
-        skills: JSON.stringify(parsed.skills),
-        education: parsed.education,
-        experience: String(parsed.experience),
+        fileName: file.name, fileType: file.type, fileSize: file.size,
+        rawText: parsed.rawText, skills: JSON.stringify(parsed.skills),
+        education: parsed.education, experience: String(parsed.experience),
       },
       create: {
-        userId,
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        rawText: parsed.rawText,
-        skills: JSON.stringify(parsed.skills),
-        education: parsed.education,
-        experience: String(parsed.experience),
+        userId, fileName: file.name, fileType: file.type, fileSize: file.size,
+        rawText: parsed.rawText, skills: JSON.stringify(parsed.skills),
+        education: parsed.education, experience: String(parsed.experience),
       },
     })
-
+    await audit(userId, session.user.role, `Resume uploaded (${file.name})`)
     return NextResponse.json({
       success: true,
       data: {
-        id: resume.id,
-        fileName: resume.fileName,
-        skills: parsed.skills,
-        experience: parsed.experience,
-        education: parsed.education,
-        locations: parsed.locations,
+        id: resume.id, fileName: resume.fileName, fileType: resume.fileType, fileSize: resume.fileSize,
+        skills: parsed.skills, experience: parsed.experience, education: parsed.education,
+        locations: parsed.locations, updatedAt: resume.updatedAt,
       },
     })
   } catch (error) {
@@ -94,43 +77,51 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-
     let userId = session.user.id
-    let user = await prisma.user.findUnique({ where: { id: userId } })
+    const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user && session.user.email) {
-      user = await prisma.user.findUnique({ where: { email: session.user.email } })
-      if (user) userId = user.id
+      const byEmail = await prisma.user.findUnique({ where: { email: session.user.email } })
+      if (byEmail) userId = byEmail.id
     }
-
-    const resume = await prisma.resume.findUnique({
-      where: { userId },
-    })
-
+    const resume = await prisma.resume.findUnique({ where: { userId } })
     if (!resume) {
       return NextResponse.json({ success: true, data: null })
     }
-
     return NextResponse.json({
       success: true,
       data: {
-        id: resume.id,
-        fileName: resume.fileName,
-        fileType: resume.fileType,
-        fileSize: resume.fileSize,
-        skills: JSON.parse(resume.skills || "[]"),
-        education: resume.education,
-        experience: resume.experience,
-        locations: extractLocations(resume.rawText),
-        createdAt: resume.createdAt,
-        updatedAt: resume.updatedAt,
+        id: resume.id, fileName: resume.fileName, fileType: resume.fileType, fileSize: resume.fileSize,
+        skills: JSON.parse(resume.skills || "[]"), education: resume.education, experience: resume.experience,
+        locations: extractLocations(resume.rawText), createdAt: resume.createdAt, updatedAt: resume.updatedAt,
       },
     })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch resume" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE() {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+    const existing = await prisma.resume.findUnique({ where: { userId: session.user.id } })
+    if (!existing) {
+      return NextResponse.json({ success: true, data: null })
+    }
+    await prisma.resume.delete({ where: { userId: session.user.id } })
+    await audit(session.user.id, session.user.role, `Resume removed (${existing.fileName})`)
+    return NextResponse.json({ success: true, data: null })
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : "Failed to remove resume" },
       { status: 500 }
     )
   }

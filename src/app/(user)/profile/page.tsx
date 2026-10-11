@@ -1,1064 +1,473 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { motion } from "framer-motion"
-import { z } from "zod"
-import {
-  Loader2,
-  User,
-  Shield,
-  Bell,
-  Eye,
-  EyeOff,
-  BadgeCheck,
-  Mail,
-  Phone,
-  CalendarDays,
-  ClipboardList,
-  Bookmark,
-  MessageSquare,
-  Briefcase,
-  ArrowRight,
-  KeyRound,
-  CheckCircle2,
-  Lock,
-  FileText,
-  Upload,
-  Award,
-  CheckCircle,
-  Circle,
-  Sparkles,
-  TrendingUp,
-  UserCheck,
-} from "lucide-react"
-import { cn, formatDate } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Bell, FileText, ListChecks, Shield, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
-import { Badge } from "@/components/ui/badge"
-import { AvatarUpload } from "@/components/profile/AvatarUpload"
+import { cn } from "@/lib/utils"
+import {
+  buildMilestones,
+  buildStrengthSteps,
+  isAdminRole,
+  normalizeProfileResponse,
+  strengthFromSteps,
+  type ProfileRecord,
+  type ProfileStats,
+} from "@/lib/profile"
+import { profileUpdateSchema, type ProfileUpdateInput } from "@/lib/profile-schemas"
+import { ProfileHeader } from "@/components/profile/ProfileHeader"
+import { StatsStrip } from "@/components/profile/StatsStrip"
+import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm"
+import { JobPreferences } from "@/components/profile/JobPreferences"
+import { RoleAccessCard } from "@/components/profile/RoleAccessCard"
+import { ProfileStrengthCard } from "@/components/profile/ProfileStrengthCard"
+import { AccountDetailsCard } from "@/components/profile/AccountDetailsCard"
+import { MilestonesCard } from "@/components/profile/MilestonesCard"
+import { ResumeCard, type ResumeState } from "@/components/profile/ResumeCard"
+import { PasswordForm } from "@/components/profile/PasswordForm"
+import { SessionList, type SessionItem, type SignInItem } from "@/components/profile/SessionList"
+import { NotificationMatrix } from "@/components/profile/NotificationMatrix"
+import { UnsavedChangesBar } from "@/components/profile/UnsavedChangesBar"
+import { TwoFactorCard } from "@/components/profile/TwoFactorCard"
+import { DeleteAccountCard } from "@/components/profile/DeleteAccountCard"
+import { ActivityList, type ActivityEvent } from "@/components/profile/ActivityList"
 
-const profileEditSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email"),
-  phone: z.string().optional(),
-})
+type TabKey = "profile" | "resume" | "security" | "notifications" | "activity"
 
-const passwordChangeSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(6, "New password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your new password"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  })
+const VALID_TABS: TabKey[] = ["profile", "resume", "security", "notifications", "activity"]
 
-type ProfileEditInput = z.infer<typeof profileEditSchema>
-type PasswordChangeInput = z.infer<typeof passwordChangeSchema>
-
-interface UserStats {
-  totalBookmarks: number
-  totalComments: number
-  savedJobs: number
-  totalApplications: number
-}
-
-interface ResumeInfo {
-  fileName: string
-  fileType: string
-  fileSize: number
-  skills: string[]
-  education: string | null
-  experience: string | null
-  locations: string[]
-  updatedAt: string
-}
-
-interface NotificationPrefs {
-  jobAlerts: boolean
-  resultAlerts: boolean
-  admitCardAlerts: boolean
-  privateJobAlerts: boolean
-  admissionAlerts: boolean
-  blogAlerts: boolean
-  syllabusAlerts: boolean
-  answerKeyAlerts: boolean
-  generalAlerts: boolean
-  phoneVerified: boolean
-}
-
-const PREFS_META: { key: keyof NotificationPrefs; label: string; description: string }[] = [
-  { key: "jobAlerts", label: "Job Alerts", description: "Get notified about new government job postings" },
-  { key: "privateJobAlerts", label: "Private Job Alerts", description: "Get notified about new private company jobs" },
-  { key: "resultAlerts", label: "Result Alerts", description: "Get notified when results are announced" },
-  { key: "admitCardAlerts", label: "Admit Card Alerts", description: "Get notified when admit cards are released" },
-  { key: "admissionAlerts", label: "Admission Alerts", description: "Get notified about new admission notifications" },
-  { key: "syllabusAlerts", label: "Syllabus Alerts", description: "Get notified when new syllabi are published" },
-  { key: "answerKeyAlerts", label: "Answer Key Alerts", description: "Get notified when answer keys are released" },
-  { key: "blogAlerts", label: "Blog Alerts", description: "Get notified about new blog posts" },
-  { key: "generalAlerts", label: "General Announcements", description: "Get notified about general site announcements" },
-]
-
-function roleLabelFor(role: string | null | undefined): string {
-  if (role === "SUPER_ADMIN") return "Administrator"
-  if (role === "ADMIN") return "Admin"
-  return "User"
-}
-
-export default function ProfilePage() {
+function ProfilePageInner() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [stats, setStats] = useState<UserStats>({
-    totalBookmarks: 0,
-    totalComments: 0,
-    savedJobs: 0,
-    totalApplications: 0,
-  })
-  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>({
-    jobAlerts: true,
-    resultAlerts: true,
-    admitCardAlerts: false,
-    privateJobAlerts: true,
-    admissionAlerts: true,
-    blogAlerts: true,
-    syllabusAlerts: true,
-    answerKeyAlerts: true,
-    generalAlerts: true,
-    phoneVerified: false,
-  })
-  const [prefsLoaded, setPrefsLoaded] = useState(false)
-  const [phoneVerification, setPhoneVerification] = useState<{
-    status: "idle" | "sent" | "verifying"
-    otpSent: boolean
-    message: string
-  }>({ status: "idle", otpSent: false, message: "" })
-  const [accountInfo, setAccountInfo] = useState<{
-    role?: string
-    createdAt?: string
-    emailVerified?: string | null
-    password: boolean
-    image: string | null
-  } | null>(null)
-  const [resume, setResume] = useState<ResumeInfo | null>(null)
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get("tab")
+  const activeTab: TabKey = tabParam && (VALID_TABS as string[]).includes(tabParam) ? (tabParam as TabKey) : "profile"
+
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [profile, setProfile] = useState<ProfileRecord | null>(null)
+  const [counts, setCounts] = useState({ applications: 0, bookmarks: 0, savedJobs: 0, comments: 0 })
+  const [adminStats, setAdminStats] = useState({ uploads: 0, approved: 0, pendingReview: 0 })
+  const [resume, setResume] = useState<ResumeState | null>(null)
   const [resumeLoading, setResumeLoading] = useState(true)
-  const [uploadingResume, setUploadingResume] = useState(false)
+  const [prefs, setPrefs] = useState<Record<string, boolean | string> | null>(null)
+  const [prefsLoading, setPrefsLoading] = useState(true)
+  const [twoFactor, setTwoFactor] = useState(false)
+  const [sessions, setSessions] = useState<SessionItem[]>([])
+  const [signIns, setSignIns] = useState<SignInItem[]>([])
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [events, setEvents] = useState<ActivityEvent[]>([])
+  const [eventsLoading, setEventsLoading] = useState(false)
 
-  const profileForm = useForm<ProfileEditInput>({
-    resolver: zodResolver(profileEditSchema),
-    values: {
-      name: session?.user?.name || "",
-      email: session?.user?.email || "",
-      phone: "",
-    },
+  const form = useForm<ProfileUpdateInput>({
+    resolver: zodResolver(profileUpdateSchema),
+    mode: "onChange",
+    defaultValues: { name: "", language: "English", phone: "", qualification: "", dateOfBirth: "", preferredStates: [], interestedCategories: [] },
   })
+  const { reset, handleSubmit, formState } = form
+  const dirty = formState.isDirty
+  const canSave = formState.isValid
 
-  const passwordForm = useForm<PasswordChangeInput>({
-    resolver: zodResolver(passwordChangeSchema),
-  })
+  const admin = isAdminRole(profile?.role ?? session?.user?.role)
+
+  const stats: ProfileStats = useMemo(
+    () => ({
+      applications: counts.applications,
+      bookmarks: counts.bookmarks,
+      savedJobs: counts.savedJobs,
+      comments: counts.comments,
+      uploads: adminStats.uploads,
+      approved: adminStats.approved,
+      pendingReview: adminStats.pendingReview,
+    }),
+    [counts, adminStats]
+  )
+
+  const steps = useMemo(() => buildStrengthSteps(profile, counts), [profile, counts])
+  const strength = useMemo(() => strengthFromSteps(steps), [steps])
+  const milestones = useMemo(() => buildMilestones(profile, counts), [profile, counts])
+
+  function setTab(next: TabKey) {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("tab", next)
+    router.replace(`/profile?${params.toString()}`, { scroll: false })
+  }
+
+  function applyProfile(p: ProfileRecord, c: { applications: number; bookmarks: number; savedJobs: number; comments: number }) {
+    setProfile(p)
+    setCounts(c)
+    reset(
+      {
+        name: p.name ?? "",
+        language: (p.language as ProfileUpdateInput["language"]) ?? "English",
+        phone: p.phone ?? "",
+        qualification: p.qualification ?? "",
+        dateOfBirth: p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "",
+        preferredStates: p.preferredStates ?? [],
+        interestedCategories: p.interestedCategories ?? [],
+      },
+      { keepDirty: false }
+    )
+  }
+
+  const fetchMe = useCallback(async () => {
+    const res = await fetch("/api/users/me")
+    const json = await res.json()
+    if (!res.ok || !json.success) throw new Error(json.error || "Failed to load profile")
+    const p = normalizeProfileResponse(json.data as Record<string, unknown>)
+    if (!p) throw new Error("Invalid profile response")
+    const c = (json.data as { counts?: { applications?: number; bookmarks?: number; savedJobs?: number; comments?: number } }).counts
+    const a = (json.data as { adminStats?: { uploads?: number; approved?: number; pendingReview?: number } }).adminStats
+    const nextCounts = {
+      applications: c?.applications ?? 0,
+      bookmarks: c?.bookmarks ?? 0,
+      savedJobs: c?.savedJobs ?? 0,
+      comments: c?.comments ?? 0,
+    }
+    if (a) setAdminStats({ uploads: a.uploads ?? 0, approved: a.approved ?? 0, pendingReview: a.pendingReview ?? 0 })
+    applyProfile(p, nextCounts)
+    const r = (json.data as { resume?: { fileName?: string; fileType?: string; fileSize?: number; updatedAt?: string } | null }).resume
+    if (r?.fileName) {
+      setResume({ fileName: r.fileName, fileType: r.fileType ?? "application/pdf", fileSize: r.fileSize ?? 0, updatedAt: (r.updatedAt as string) ?? new Date().toISOString() })
+    }
+    setResumeLoading(false)
+    return p
+  }, [reset])
+
+  const fetchPrefs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/notifications/preferences")
+      const json = await res.json()
+      if (res.ok && json.success) setPrefs(json.data as Record<string, boolean | string>)
+    } catch { undefined } finally {
+      setPrefsLoading(false)
+    }
+  }, [])
+
+  const fetchTwoFactor = useCallback(async () => {
+    try {
+      const res = await fetch("/api/users/me/two-factor")
+      const json = await res.json()
+      if (res.ok && json.success) setTwoFactor((json.data as { enabled?: boolean }).enabled === true)
+    } catch { undefined }
+  }, [])
+
+  const fetchSessions = useCallback(async () => {
+    setSessionsLoading(true)
+    try {
+      const [s, a] = await Promise.all([fetch("/api/users/me/sessions"), fetch("/api/users/me/activity")])
+      const sj = await s.json().catch(() => ({}))
+      if (s.ok && (sj as { success?: boolean }).success) setSessions((sj as { data?: SessionItem[] }).data ?? [])
+      const aj = await a.json().catch(() => ({}))
+      if (a.ok && (aj as { success?: boolean }).success) {
+        const d = (aj as { data?: { events?: ActivityEvent[]; signIns?: SignInItem[] } }).data
+        setEvents(d?.events ?? [])
+        setSignIns(d?.signIns ?? [])
+      }
+    } catch { undefined } finally {
+      setSessionsLoading(false)
+      setEventsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login")
       return
     }
-    if (status === "authenticated") {
-      setIsLoading(false)
-      setAvatarUrl(session?.user?.image || null)
-      fetchStats()
-      loadNotificationPrefs()
-      fetchAccountInfo()
-      fetchResume()
+    if (status !== "authenticated") return
+    let cancelled = false
+    setEventsLoading(true)
+    Promise.all([fetchMe().catch(() => null), fetchPrefs(), fetchTwoFactor(), fetchSessions()]).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => {
+      cancelled = true
     }
-  }, [status, router, session?.user?.image])
+  }, [status, router, fetchMe, fetchPrefs, fetchTwoFactor, fetchSessions])
 
-  async function fetchStats() {
-    try {
-      const res = await fetch("/api/stats")
-      if (res.ok) {
-        const json = await res.json()
-        if (json.success && json.data) {
-          setStats((prev) => ({ ...prev, ...json.data.userStats }))
-        }
-      }
-    } catch {
+  useEffect(() => {
+    const emailVerify = searchParams.get("emailVerify")
+    const emailConfirm = searchParams.get("emailConfirm")
+    if (emailVerify) {
+      fetch("/api/users/me/email-verify", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: emailVerify }) })
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.success) {
+            toast("Email verified", "success")
+            fetchMe().catch(() => undefined)
+          } else toast(j.error || "Verification failed", "destructive")
+        })
+        .catch(() => toast("Verification failed", "destructive"))
     }
-  }
+    if (emailConfirm) {
+      fetch("/api/users/me/email-change", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: emailConfirm }) })
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.success) {
+            toast("Email changed", "success")
+            fetchMe().catch(() => undefined)
+          } else toast(j.error || "Email change failed", "destructive")
+        })
+        .catch(() => toast("Email change failed", "destructive"))
+    }
+  }, [searchParams, fetchMe])
 
-  async function fetchAccountInfo() {
-    try {
-      const res = await fetch("/api/users/me")
-      if (res.ok) {
-        const json = await res.json()
-        if (json.success && json.data) {
-          setAccountInfo(json.data)
-          profileForm.setValue("phone", json.data.phone || "")
-        }
-      }
-    } catch {
+  useEffect(() => {
+    if (!dirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
     }
-  }
-
-  async function fetchResume() {
-    try {
-      const res = await fetch("/api/user/resume")
-      if (res.ok) {
-        const json = await res.json()
-        if (json.success && json.data) {
-          setResume(json.data)
-        }
-      }
-    } catch {
-    } finally {
-      setResumeLoading(false)
-    }
-  }
-
-  async function onUploadResume(file: File | undefined) {
-    if (!file) return
-    setUploadingResume(true)
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/user/resume", { method: "POST", body: formData })
-      const json = await res.json()
-      if (!res.ok) {
-        toast(json.error || "Failed to upload resume", "destructive")
-        return
-      }
-      setResume(json.data)
-      toast("Resume uploaded and analyzed", "success")
-    } catch {
-      toast("Failed to upload resume", "destructive")
-    } finally {
-      setUploadingResume(false)
-    }
-  }
-
-  async function loadNotificationPrefs() {
-    try {
-      const res = await fetch("/api/user/notifications/preferences")
-      if (res.ok) {
-        const json = await res.json()
-        if (json.success && json.data) {
-          setNotificationPrefs({
-            jobAlerts: json.data.jobAlerts,
-            resultAlerts: json.data.resultAlerts,
-            admitCardAlerts: json.data.admitCardAlerts,
-            privateJobAlerts: json.data.privateJobAlerts,
-            admissionAlerts: json.data.admissionAlerts,
-            blogAlerts: json.data.blogAlerts,
-            syllabusAlerts: json.data.syllabusAlerts,
-            answerKeyAlerts: json.data.answerKeyAlerts,
-            generalAlerts: json.data.generalAlerts,
-            phoneVerified: json.data.phoneVerified,
-          })
-        }
-      }
-    } catch {
-    } finally {
-      setPrefsLoaded(true)
-    }
-  }
-
-  async function saveNotificationPrefs() {
-    try {
-      const prefsToSave = {
-        jobAlerts: notificationPrefs.jobAlerts,
-        resultAlerts: notificationPrefs.resultAlerts,
-        admitCardAlerts: notificationPrefs.admitCardAlerts,
-        privateJobAlerts: notificationPrefs.privateJobAlerts,
-        admissionAlerts: notificationPrefs.admissionAlerts,
-        blogAlerts: notificationPrefs.blogAlerts,
-        syllabusAlerts: notificationPrefs.syllabusAlerts,
-        answerKeyAlerts: notificationPrefs.answerKeyAlerts,
-        generalAlerts: notificationPrefs.generalAlerts,
-      }
-      const res = await fetch("/api/user/notifications/preferences", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(prefsToSave),
-      })
-      if (res.ok) {
-        toast("Notification preferences saved", "success")
-      } else {
-        const err = await res.json().catch(() => ({}))
-        toast(err.error || "Failed to save preferences", "destructive")
-      }
-    } catch {
-      toast("Failed to save preferences", "destructive")
-    }
-  }
-
-  async function sendPhoneOTP() {
-    const phone = profileForm.getValues("phone")
-    if (!phone) {
-      toast("Please enter a phone number first", "destructive")
-      return
-    }
-
-    setPhoneVerification({ status: "sent", otpSent: true, message: "Sending OTP..." })
-    try {
-      const res = await fetch("/api/auth/phone-verify/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        setPhoneVerification({ status: "idle", otpSent: false, message: json.error || "Failed to send OTP" })
-        toast(json.error || "Failed to send OTP", "destructive")
-        return
-      }
-      setPhoneVerification({ status: "sent", otpSent: true, message: "OTP sent! Enter the 6-digit code." })
-      toast("OTP sent successfully", "success")
-    } catch {
-      setPhoneVerification({ status: "idle", otpSent: false, message: "Failed to send OTP" })
-      toast("Failed to send OTP", "destructive")
-    }
-  }
-
-  async function verifyPhoneOTP(otp: string) {
-    if (!otp || otp.length !== 6) {
-      toast("Please enter a valid 6-digit OTP", "destructive")
-      return
-    }
-
-    setPhoneVerification((prev) => ({ ...prev, status: "verifying", message: "Verifying OTP..." }))
-    try {
-      const res = await fetch("/api/auth/phone-verify/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        setPhoneVerification((prev) => ({ ...prev, status: "sent", message: json.error || "Invalid OTP" }))
-        toast(json.error || "Invalid OTP", "destructive")
-        return
-      }
-      setPhoneVerification({ status: "idle", otpSent: false, message: "Phone verified successfully!" })
-      toast("Phone number verified!", "success")
-      loadNotificationPrefs()
-      fetchAccountInfo()
-    } catch {
-      setPhoneVerification((prev) => ({ ...prev, status: "sent", message: "Verification failed" }))
-      toast("Verification failed", "destructive")
-    }
-  }
-
-  async function onSaveProfile(data: ProfileEditInput) {
-    setIsSaving(true)
-    try {
-      const res = await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-      if (!res.ok) {
-        const err = await res.json()
-        toast(err.error || "Failed to update profile", "destructive")
-        return
-      }
-      await update({ name: data.name })
-      toast("Profile updated successfully", "success")
-    } catch {
-      toast("Failed to update profile", "destructive")
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  async function onChangePassword(data: PasswordChangeInput) {
-    setIsChangingPassword(true)
-    try {
-      const res = await fetch("/api/users/me/password", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-        }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        toast(json.error || "Failed to change password", "destructive")
-        return
-      }
-      toast("Password changed successfully", "success")
-      passwordForm.reset()
-    } catch {
-      toast("Failed to change password", "destructive")
-    } finally {
-      setIsChangingPassword(false)
-    }
-  }
+    window.addEventListener("beforeunload", handler)
+    return () => window.removeEventListener("beforeunload", handler)
+  }, [dirty])
 
   async function onAvatarChange(url: string | null) {
-    setAvatarUrl(url)
-    await update({ image: url })
+    if (!profile) return
+    setProfile({ ...profile, avatarUrl: url })
+    await update({ image: url }).catch(() => undefined)
   }
 
-  if (isLoading) {
+  async function onSave(data: ProfileUpdateInput) {
+    setSaving(true)
+    try {
+      const res = await fetch("/api/users", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) })
+      const json = await res.json()
+      if (!res.ok) {
+        toast(json.error || "Failed to save changes", "destructive")
+        return
+      }
+      await update({ name: data.name }).catch(() => undefined)
+      await fetchMe().catch(() => undefined)
+      toast("Changes saved", "success")
+    } catch {
+      toast("Failed to save changes", "destructive")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function onDiscard() {
+    if (!profile) return
+    reset(
+      {
+        name: profile.name ?? "",
+        language: (profile.language as ProfileUpdateInput["language"]) ?? "English",
+        phone: profile.phone ?? "",
+        qualification: profile.qualification ?? "",
+        dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.slice(0, 10) : "",
+        preferredStates: profile.preferredStates ?? [],
+        interestedCategories: profile.interestedCategories ?? [],
+      },
+      { keepDirty: false }
+    )
+  }
+
+  const pendingJump = useRef<{ tab: TabKey; anchor: string } | null>(null)
+
+  function scrollToAnchor(anchor: string): boolean {
+    const el = document.getElementById(anchor)
+    if (!el) return false
+    el.scrollIntoView({ behavior: "smooth", block: "center" })
+    const input = el.querySelector("input, select, button") as HTMLElement | null
+    ;(input ?? (el as HTMLElement)).focus?.()
+    return true
+  }
+
+  function onJump(step: { targetTab?: string; targetAnchor?: string }) {
+    if (!step.targetAnchor) return
+    if (step.targetTab && (VALID_TABS as string[]).includes(step.targetTab)) {
+      const next = step.targetTab as TabKey
+      if (next !== activeTab) {
+        pendingJump.current = { tab: next, anchor: step.targetAnchor }
+        setTab(next)
+        return
+      }
+    }
+    if (!scrollToAnchor(step.targetAnchor)) {
+      pendingJump.current = { tab: activeTab, anchor: step.targetAnchor }
+    }
+  }
+
+  useEffect(() => {
+    const pending = pendingJump.current
+    if (!pending || pending.tab !== activeTab) return
+    let attempts = 0
+    let raf = 0
+    const tick = () => {
+      attempts += 1
+      if (scrollToAnchor(pending.anchor) || attempts >= 12) {
+        if (attempts >= 12 && !document.getElementById(pending.anchor)) {
+          toast("That section is not available for your account", "default")
+        }
+        pendingJump.current = null
+        return
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [activeTab])
+
+  async function handleEmailVerify() {
+    const res = await fetch("/api/users/me/email-verify", { method: "POST" })
+    const json = await res.json()
+    if (!res.ok) {
+      toast(json.error || "Could not send verification email", "destructive")
+      return
+    }
+    toast("Verification link sent to your email", "success")
+  }
+
+  async function handleSendPhoneCode(): Promise<{ sent: boolean; devCode: string | null }> {
+    const phone = form.getValues("phone") ?? ""
+    if (!phone) {
+      toast("Enter your mobile number first", "destructive")
+      return { sent: false, devCode: null }
+    }
+    const res = await fetch("/api/auth/phone-verify/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone }) })
+    const json = await res.json()
+    if (!res.ok) {
+      toast(json.error || "Could not send code", "destructive")
+      return { sent: false, devCode: null }
+    }
+    toast("Code sent by SMS", "success")
+    return { sent: true, devCode: typeof json.devCode === "string" ? json.devCode : null }
+  }
+
+  async function handleConfirmPhoneCode(code: string): Promise<boolean> {
+    const res = await fetch("/api/auth/phone-verify/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ otp: code }) })
+    const json = await res.json()
+    if (!res.ok) {
+      toast(json.error || "Invalid code", "destructive")
+      return false
+    }
+    toast("Phone verified", "success")
+    await fetchMe().catch(() => undefined)
+    return true
+  }
+
+  async function handleChangeEmail(next: string) {
+    const res = await fetch("/api/users/me/email-change", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newEmail: next }) })
+    const json = await res.json()
+    if (!res.ok) {
+      toast(json.error || "Could not request email change", "destructive")
+      return
+    }
+    toast(`Confirmation link sent to ${next}`, "success")
+  }
+
+  if (loading || !profile) {
     return (
-      <div className="container mx-auto max-w-5xl px-4 py-8">
-        <Skeleton className="mb-8 h-40 rounded-xl" />
-        <div className="grid gap-8 md:grid-cols-[300px_1fr]">
-          <Skeleton className="h-64 rounded-xl" />
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <Skeleton className="h-36 rounded-xl" />
+        <Skeleton className="mt-4 h-24 rounded-xl" />
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">
           <Skeleton className="h-96 rounded-xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-48 rounded-xl" />
+            <Skeleton className="h-48 rounded-xl" />
+          </div>
         </div>
       </div>
     )
   }
 
-  const initials = session?.user?.name
-    ? session.user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : "U"
-
-  const roleLabel = roleLabelFor(accountInfo?.role || session?.user?.role)
-
-  const completionChecks = [
-    { label: "Profile photo", done: !!avatarUrl },
-    { label: "Full name", done: !!session?.user?.name && session.user.name.trim().length >= 2 },
-    { label: "Phone number", done: !!profileForm.watch("phone") },
-    { label: "Email verified", done: !!accountInfo?.emailVerified },
-    { label: "Resume uploaded", done: !!resume },
-  ]
-  const completedCount = completionChecks.filter((c) => c.done).length
-  const completionPct = Math.round((completedCount / completionChecks.length) * 100)
-
-  const badges = [
-    {
-      label: "Verified Email",
-      done: !!accountInfo?.emailVerified,
-      icon: BadgeCheck,
-      color: "text-emerald-600",
-    },
-    {
-      label: "Career Tracker",
-      done: stats.totalApplications >= 1,
-      icon: TrendingUp,
-      color: "text-teal-600",
-    },
-    {
-      label: "Bookmarker",
-      done: stats.totalBookmarks >= 1,
-      icon: Bookmark,
-      color: "text-amber-600",
-    },
-    {
-      label: "Resume Ready",
-      done: !!resume,
-      icon: FileText,
-      color: "text-sky-600",
-    },
-    {
-      label: "Community Voice",
-      done: stats.totalComments >= 1,
-      icon: MessageSquare,
-      color: "text-violet-600",
-    },
-  ]
-  const unlockedBadges = badges.filter((b) => b.done).length
-
-  const statCards = [
-    {
-      label: "Applications",
-      value: stats.totalApplications,
-      icon: ClipboardList,
-      href: "/applications",
-      color: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-    },
-    {
-      label: "Bookmarks",
-      value: stats.totalBookmarks,
-      icon: Bookmark,
-      href: "/bookmarks",
-      color: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    },
-    {
-      label: "Saved Jobs",
-      value: stats.savedJobs,
-      icon: Briefcase,
-      href: "/bookmarks",
-      color: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-    },
-    {
-      label: "Comments",
-      value: stats.totalComments,
-      icon: MessageSquare,
-      href: "/blog",
-      color: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
-    },
+  const tabs: { key: TabKey; label: string; icon: typeof User; dot?: boolean }[] = [
+    { key: "profile", label: "Profile", icon: User },
+    { key: "resume", label: "Resume", icon: FileText },
+    { key: "security", label: "Security", icon: Shield, dot: !twoFactor },
+    { key: "notifications", label: "Notifications", icon: Bell },
+    ...(admin ? [{ key: "activity" as TabKey, label: "Activity", icon: ListChecks }] : []),
   ]
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-900 via-teal-700 to-emerald-600 shadow-md">
-          <div className="absolute -left-10 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -bottom-20 right-10 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-          <div
-            className="absolute inset-0 opacity-[0.07]"
-            style={{ backgroundImage: "repeating-linear-gradient(45deg, #fff 0 2px, transparent 2px 26px)" }}
+    <div className="mx-auto w-full max-w-5xl min-w-0 px-4 py-6 pb-24">
+      <ProfileHeader profile={profile} strengthPct={strength.pct} onAvatarChange={onAvatarChange} />
+      <div className="mt-4">
+        <StatsStrip admin={admin} stats={stats} />
+      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setTab(v as TabKey)} className="mt-4 w-full">
+        <TabsList className="no-scrollbar flex h-auto w-full items-center justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0 dark:border-white/10">
+          {tabs.map((t) => (
+            <TabsTrigger
+              key={t.key}
+              value={t.key}
+              className={cn(
+                "relative shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 data-[state=active]:border-teal-700 data-[state=active]:bg-transparent data-[state=active]:text-teal-700 data-[state=active]:shadow-none dark:text-slate-400 dark:data-[state=active]:text-teal-300"
+              )}
+            >
+              <span className="flex items-center gap-1.5">
+                <t.icon className="h-4 w-4" aria-hidden="true" />
+                {t.label}
+                {t.dot ? <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-label="Action needed" /> : null}
+              </span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value="profile" className="mt-4">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="min-w-0 space-y-4">
+              <PersonalInfoForm
+                form={form}
+                email={profile.email}
+                emailVerified={!!profile.emailVerifiedAt}
+                phoneVerified={!!profile.phoneVerifiedAt}
+                onRequestEmailVerify={handleEmailVerify}
+                onSendPhoneCode={handleSendPhoneCode}
+                onConfirmPhoneCode={handleConfirmPhoneCode}
+                onChangeEmail={handleChangeEmail}
+              />
+              {!admin ? <JobPreferences form={form} /> : <RoleAccessCard role={profile.role} sections={profile.editableSections} />}
+            </div>
+            <div className="min-w-0 space-y-4">
+              <ProfileStrengthCard pct={strength.pct} done={strength.done} total={strength.total} steps={steps} onJump={onJump} />
+              <AccountDetailsCard accountType={profile.role} signInMethod={profile.signInMethod} emailVerified={!!profile.emailVerifiedAt} memberSince={profile.memberSince} />
+              {!admin ? <MilestonesCard milestones={milestones} /> : null}
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="resume" className="mt-4">
+          <ResumeCard
+            resume={resume}
+            loading={resumeLoading}
+            onChanged={(next) => {
+              setResume(next)
+              fetchMe().catch(() => undefined)
+            }}
           />
-          <div className="relative flex flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:gap-6 sm:px-6 sm:py-8">
-            <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
-              <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-lg sm:h-28 sm:w-28">
-                  <AvatarImage src={avatarUrl || undefined} />
-                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-3xl font-semibold text-white">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <AvatarUpload src={avatarUrl} name={session?.user?.name || ""} onChange={onAvatarChange} />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h1 className="truncate text-xl font-bold text-white sm:text-2xl">{session?.user?.name}</h1>
-                  {accountInfo?.emailVerified && <BadgeCheck className="h-5 w-5 shrink-0 text-teal-200" />}
-                </div>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-teal-50">
-                  <span className="flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{session?.user?.email}</span>
-                  </span>
-                  {profileForm.watch("phone") && (
-                    <span className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5 shrink-0" />
-                      {profileForm.watch("phone")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex shrink-0 sm:ml-auto">
-              <Badge className="gap-1.5 border border-white/30 bg-white/15 px-3 py-1.5 text-white shadow-sm backdrop-blur hover:bg-white/25">
-                <Shield className="h-3.5 w-3.5" />
-                {roleLabel}
-              </Badge>
-            </div>
+        </TabsContent>
+        <TabsContent value="security" className="mt-4">
+          <div className="space-y-4">
+            <TwoFactorCard enabled={twoFactor} admin={admin} onChanged={setTwoFactor} />
+            <PasswordForm passwordChangedAt={profile.passwordChangedAt} hasPassword={profile.signInMethod === "Password"} onChanged={() => fetchMe().catch(() => undefined)} />
+            <SessionList sessions={sessions} signIns={signIns} loading={sessionsLoading} onRefresh={fetchSessions} />
+            <DeleteAccountCard admin={admin} />
           </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr]">
-          <div className="min-w-0 space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {statCards.map((stat) => (
-                    <Link
-                      key={stat.label}
-                      href={stat.href}
-                      className="group rounded-xl border border-gray-100 p-4 transition-colors hover:border-teal-200 hover:bg-teal-50/50 dark:border-gray-800 dark:hover:border-teal-900 dark:hover:bg-teal-950/40"
-                    >
-                      <div className={cn("mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg", stat.color)}>
-                        <stat.icon className="h-4.5 w-4.5" />
-                      </div>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                      <p className="text-xs text-gray-500">{stat.label}</p>
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Sparkles className="h-4 w-4 text-amber-500" />
-                  Profile Strength
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-gray-900 dark:text-white">{completionPct}% complete</span>
-                  <span className="text-xs text-gray-500">{completedCount}/{completionChecks.length} steps</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                  <motion.div
-                    className={cn(
-                      "h-full rounded-full bg-gradient-to-r transition-all",
-                      completionPct === 100 ? "from-emerald-500 to-teal-500" : "from-amber-400 to-orange-500"
-                    )}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${completionPct}%` }}
-                    transition={{ duration: 0.6 }}
-                  />
-                </div>
-                <div className="space-y-2 pt-1">
-                  {completionChecks.map((check) => (
-                    <div key={check.label} className="flex items-center gap-2 text-sm">
-                      {check.done ? (
-                        <CheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
-                      ) : (
-                        <Circle className="h-4 w-4 shrink-0 text-gray-300 dark:text-gray-600" />
-                      )}
-                      <span className={cn(check.done ? "text-gray-700 dark:text-gray-300" : "text-gray-400")}>
-                        {check.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Award className="h-4 w-4 text-amber-500" />
-                  Achievements
-                </CardTitle>
-                <CardDescription>
-                  {unlockedBadges}/{badges.length} unlocked
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2.5">
-                {badges.map((badge) => (
-                  <div
-                    key={badge.label}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm",
-                      badge.done
-                        ? "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40"
-                        : "border-gray-100 bg-gray-50/50 opacity-60 dark:border-gray-800 dark:bg-gray-900/40"
-                    )}
-                  >
-                    <badge.icon className={cn("h-4 w-4 shrink-0", badge.done ? badge.color : "text-gray-400")} />
-                    <span className={cn("font-medium", badge.done ? "text-gray-900 dark:text-white" : "text-gray-400")}>
-                      {badge.label}
-                    </span>
-                    {badge.done && <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />}
-                    {!badge.done && <Lock className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-300 dark:text-gray-600" />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Account Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Account type</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{roleLabel}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Sign-in method</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {accountInfo?.password ? "Password" : "Google"}
-                  </span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Email status</span>
-                  <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Verified
-                  </span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-gray-500">
-                    <CalendarDays className="h-4 w-4" />
-                    Member since
-                  </span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {accountInfo?.createdAt
-                      ? formatDate(new Date(accountInfo.createdAt), "MMM yyyy")
-                      : formatDate(new Date(), "MMM yyyy")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-6 w-full justify-start overflow-x-auto">
-              <TabsTrigger value="profile">
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="resume">
-                <FileText className="mr-2 h-4 w-4" />
-                Resume
-              </TabsTrigger>
-              <TabsTrigger value="security">
-                <Shield className="mr-2 h-4 w-4" />
-                Security
-              </TabsTrigger>
-              <TabsTrigger value="notifications">
-                <Bell className="mr-2 h-4 w-4" />
-                Notifications
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your personal details</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={profileForm.handleSubmit(onSaveProfile)} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-name">Full Name</Label>
-                      <Input
-                        id="profile-name"
-                        {...profileForm.register("name")}
-                        className={cn(profileForm.formState.errors.name && "border-red-500")}
-                      />
-                      {profileForm.formState.errors.name && (
-                        <p className="text-sm font-medium text-red-500">
-                          {profileForm.formState.errors.name.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-email">Email</Label>
-                      <Input
-                        id="profile-email"
-                        type="email"
-                        disabled
-                        {...profileForm.register("email")}
-                      />
-                      <p className="text-xs text-gray-400">Email cannot be changed</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-phone">Phone Number</Label>
-                      <Input
-                        id="profile-phone"
-                        type="tel"
-                        placeholder="+91 9876543210"
-                        {...profileForm.register("phone")}
-                        className="flex-1"
-                      />
-                      {phoneVerification.message && (
-                        <p className={`text-xs ${phoneVerification.status === "verifying" ? "text-blue-600" : phoneVerification.otpSent ? "text-emerald-600" : "text-gray-400"}`}>
-                          {phoneVerification.message}
-                        </p>
-                      )}
-                      {notificationPrefs.phoneVerified && (
-                        <p className="text-xs text-emerald-600 flex items-center gap-1">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Phone number verified
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-400">
-                        Used for SMS alerts on job notifications, results, and admit cards
-                      </p>
-                    </div>
-                    <Button type="submit" disabled={isSaving}>
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save Changes"
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="resume">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-teal-600" />
-                    My Resume
-                  </CardTitle>
-                  <CardDescription>
-                    Upload your resume and ChayanJobs analyzes it to power job recommendations and application insights.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                    className="hidden"
-                    id="resume-upload-input"
-                    onChange={(e) => {
-                      onUploadResume(e.target.files?.[0])
-                      e.target.value = ""
-                    }}
-                  />
-                  {resumeLoading ? (
-                    <Skeleton className="h-28 rounded-lg" />
-                  ) : resume ? (
-                    <div className="space-y-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-900 dark:bg-teal-950/40">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white">
-                            <FileText className="h-5 w-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="truncate font-semibold text-gray-900 dark:text-white">{resume.fileName}</p>
-                            <p className="text-xs text-gray-500">
-                              {(resume.fileSize / 1024).toFixed(1)} KB · updated{" "}
-                              {formatDate(new Date(resume.updatedAt), "dd MMM yyyy")}
-                            </p>
-                          </div>
-                        </div>
-                        <label htmlFor="resume-upload-input" className="cursor-pointer">
-                          <Button type="button" variant="outline" size="sm" asChild>
-                            <span className="flex items-center">
-                              <Upload className="mr-1.5 h-4 w-4" />
-                              Replace
-                            </span>
-                          </Button>
-                        </label>
-                      </div>
-
-                      {resume.skills.length > 0 && (
-                        <div>
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Extracted Skills</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {resume.skills.slice(0, 12).map((skill) => (
-                              <Badge key={skill} variant="secondary" className="text-xs">
-                                {skill}
-                              </Badge>
-                            ))}
-                            {resume.skills.length > 12 && (
-                              <Badge variant="secondary" className="text-xs text-gray-400">
-                                +{resume.skills.length - 12} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Experience</p>
-                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                            {resume.experience || "Not detected"}
-                          </p>
-                        </div>
-                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Education</p>
-                          <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {resume.education || "Not detected"}
-                          </p>
-                        </div>
-                        <div className="rounded-lg border border-gray-100 p-3 dark:border-gray-800">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Locations</p>
-                          <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {resume.locations.length > 0 ? resume.locations.slice(0, 4).join(", ") : "Not detected"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center rounded-xl border border-dashed border-gray-300 py-10 text-center dark:border-gray-700">
-                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-950">
-                        <Upload className="h-6 w-6" />
-                      </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">No resume uploaded yet</p>
-                      <p className="mt-1 max-w-sm text-sm text-gray-500">
-                        Upload a PDF, DOCX or TXT file (max 5MB). Your data stays private and is only used to personalize
-                        your experience.
-                      </p>
-                      <label htmlFor="resume-upload-input" className="mt-5 cursor-pointer">
-                        <Button type="button" disabled={uploadingResume} asChild>
-                          <span className="flex items-center">
-                            {uploadingResume ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Analyzing...
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload Resume
-                              </>
-                            )}
-                          </span>
-                        </Button>
-                      </label>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <KeyRound className="h-5 w-5 text-teal-600" />
-                    Change Password
-                  </CardTitle>
-                  <CardDescription>Update your account password</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {accountInfo && !accountInfo.password ? (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                      Your account uses Google sign-in and has no password set. Sign in with Google to access your
-                      account.
-                    </div>
-                  ) : (
-                    <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="current-password">Current Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="current-password"
-                            type={showCurrentPassword ? "text" : "password"}
-                            {...passwordForm.register("currentPassword")}
-                            className={cn(
-                              passwordForm.formState.errors.currentPassword && "border-red-500",
-                              "pr-10"
-                            )}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                        {passwordForm.formState.errors.currentPassword && (
-                          <p className="text-sm font-medium text-red-500">
-                            {passwordForm.formState.errors.currentPassword.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="new-password">New Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="new-password"
-                            type={showNewPassword ? "text" : "password"}
-                            {...passwordForm.register("newPassword")}
-                            className={cn(
-                              passwordForm.formState.errors.newPassword && "border-red-500",
-                              "pr-10"
-                            )}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                        {passwordForm.formState.errors.newPassword && (
-                          <p className="text-sm font-medium text-red-500">
-                            {passwordForm.formState.errors.newPassword.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirm-password">Confirm New Password</Label>
-                        <div className="relative">
-                          <Input
-                            id="confirm-password"
-                            type={showConfirmPassword ? "text" : "password"}
-                            {...passwordForm.register("confirmPassword")}
-                            className={cn(
-                              passwordForm.formState.errors.confirmPassword && "border-red-500",
-                              "pr-10"
-                            )}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                        {passwordForm.formState.errors.confirmPassword && (
-                          <p className="text-sm font-medium text-red-500">
-                            {passwordForm.formState.errors.confirmPassword.message}
-                          </p>
-                        )}
-                      </div>
-                      <Button type="submit" disabled={isChangingPassword}>
-                        {isChangingPassword ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Changing...
-                          </>
-                        ) : (
-                          "Change Password"
-                        )}
-                      </Button>
-                    </form>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="notifications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Choose what notifications you want to receive in the app</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">In-App Notifications</h3>
-                    <p className="mb-4 text-sm text-gray-500">Receive notifications in the bell icon on the website</p>
-                    {PREFS_META.map((pref, index) => (
-                      <div key={pref.key}>
-                        {index > 0 && <Separator className="mb-6" />}
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label className="text-base">{pref.label}</Label>
-                            <p className="text-sm text-gray-500">{pref.description}</p>
-                          </div>
-                          <Switch
-                            checked={notificationPrefs[pref.key]}
-                            onCheckedChange={(checked) =>
-                              setNotificationPrefs((prev) => ({ ...prev, [pref.key]: checked }))
-                            }
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button onClick={saveNotificationPrefs} disabled={!prefsLoaded}>
-                    Save Preferences
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </motion.div>
+        </TabsContent>
+        <TabsContent value="notifications" className="mt-4">
+          <NotificationMatrix admin={admin} initial={prefs} loading={prefsLoading} />
+        </TabsContent>
+        {admin ? (
+          <TabsContent value="activity" className="mt-4">
+            <ActivityList events={events} loading={eventsLoading} userId={profile.id} />
+          </TabsContent>
+        ) : null}
+      </Tabs>
+      <UnsavedChangesBar visible={dirty} saving={saving} canSave={canSave} onDiscard={onDiscard} onSave={handleSubmit(onSave)} />
     </div>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="mx-auto w-full max-w-5xl px-4 py-6"><Skeleton className="h-36 rounded-xl" /></div>}>
+      <ProfilePageInner />
+    </Suspense>
   )
 }

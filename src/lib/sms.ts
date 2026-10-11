@@ -73,6 +73,14 @@ function getConfig(): SMSConfig {
   return config
 }
 
+export function getSMSProviderName(): SMSProvider {
+  return getConfig().provider
+}
+
+export function isDevSmsMode(): boolean {
+  return process.env.NODE_ENV !== "production" && getSMSProviderName() === "console"
+}
+
 export async function sendSMS(phone: string, message: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
   const cfg = getConfig()
 

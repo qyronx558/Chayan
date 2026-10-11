@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { profileSchema, registerSchema } from "@/lib/validations"
+import { registerSchema } from "@/lib/validations"
+import { profileUpdateSchema } from "@/lib/profile-schemas"
+import { isSchemaMismatchError } from "@/lib/prisma-errors"
 import { hash } from "bcryptjs"
+
+const db = prisma as unknown as {
+  user: {
+    findUnique: (a: unknown) => Promise<Record<string, unknown> | null>
+    update: (a: unknown) => Promise<Record<string, unknown>>
+    create: (a: unknown) => Promise<Record<string, unknown>>
+    findMany: (a: unknown) => Promise<Record<string, unknown>[]>
+    count: (a: unknown) => Promise<number>
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,24 +26,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
     const { name, email, password } = validation.data
-
-    const existing = await prisma.user.findUnique({ where: { email } })
+    const existing = await db.user.findUnique({ where: { email } })
     if (existing) {
-      return NextResponse.json(
-        { success: false, error: "Email already registered" },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: "Email already registered" }, { status: 400 })
     }
-
     const hashedPassword = await hash(password, 12)
-
-    const user = await prisma.user.create({
+    const user = await db.user.create({
       data: { name, email, password: hashedPassword },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     })
-
     return NextResponse.json({ success: true, data: user }, { status: 201 })
   } catch (error) {
     return NextResponse.json(
@@ -50,15 +54,12 @@ export async function GET(request: NextRequest) {
     if (session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
-
     const { searchParams } = new URL(request.url)
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "10")))
     const search = searchParams.get("search") || ""
     const role = searchParams.get("role") || ""
     const skip = (page - 1) * limit
-
-    // Unique Admin ID = User.id (cuid). Search matches name, email, or id prefix/full.
     const searchOr = search
       ? [
           { name: { contains: search, mode: "insensitive" as const } },
@@ -66,52 +67,23 @@ export async function GET(request: NextRequest) {
           { id: { contains: search } },
         ]
       : []
-
     const where = {
       ...(searchOr.length > 0 ? { OR: searchOr } : {}),
       ...(role === "USER" || role === "ADMIN" || role === "SUPER_ADMIN" ? { role: role as "USER" | "ADMIN" | "SUPER_ADMIN" } : {}),
     }
-
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      db.user.findMany({
         where,
         select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          role: true,
-          phone: true,
-          emailVerified: true,
-          createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: {
-              bookmark: true,
-              comments: true,
-              jobs: true,
-              privateJobs: true,
-              results: true,
-              admitCards: true,
-              answerKeys: true,
-              admissions: true,
-              syllabi: true,
-              blogPosts: true,
-            },
-          },
+          id: true, name: true, email: true, image: true, role: true, phone: true,
+          emailVerified: true, createdAt: true, updatedAt: true,
+          _count: { select: { bookmark: true, comments: true, jobs: true, privateJobs: true, results: true, admitCards: true, answerKeys: true, admissions: true, syllabi: true, blogPosts: true } },
         },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
+        orderBy: { createdAt: "desc" }, skip, take: limit,
       }),
-      prisma.user.count({ where }),
+      db.user.count({ where }),
     ])
-
-    return NextResponse.json({
-      success: true,
-      data: users,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
+    return NextResponse.json({ success: true, data: users, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch users" },
@@ -123,41 +95,70 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
-
     const body = await request.json()
-    const validation = profileSchema.safeParse(body)
+    const validation = profileUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
-        { success: false, error: validation.error.issues[0].message },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
-
-    const updateData: Record<string, unknown> = {}
-    const { name, image, phone } = validation.data
-
-    if (name !== undefined && name !== null) updateData.name = name
-    if (image !== undefined && image !== null) updateData.image = image
-    if (phone !== undefined && phone !== null) updateData.phone = phone
-
-    const user = await prisma.user.update({
-      where: { id: session.user.id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        role: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
-
+    const existing = await db.user.findUnique({ where: { id: session.user.id } })
+    if (!existing) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
+    }
+    const data = validation.data
+    const prevPhone = (existing["phone"] as string | null) ?? null
+    const nextPhone = data.phone ?? null
+    const phoneChanged = (prevPhone ?? "") !== (nextPhone ?? "")
+    const updateData: Record<string, unknown> = {
+      name: data.name,
+      language: data.language,
+      qualification: data.qualification || null,
+      preferredStates: data.preferredStates ?? [],
+      interestedCategories: data.interestedCategories ?? [],
+    }
+    if (data.dateOfBirth) {
+      const dob = new Date(data.dateOfBirth)
+      if (!isNaN(dob.getTime())) updateData["dateOfBirth"] = dob
+    } else {
+      updateData["dateOfBirth"] = null
+    }
+    if (nextPhone !== undefined) {
+      updateData["phone"] = nextPhone
+      if (phoneChanged) {
+        updateData["phoneVerifiedAt"] = null
+        try {
+          await (prisma as unknown as { notificationPreference: { updateMany: (a: unknown) => Promise<unknown> } }).notificationPreference.updateMany({
+            where: { userId: session.user.id },
+            data: { phoneVerified: false },
+          })
+        } catch { undefined }
+      }
+    }
+    const select = { id: true, name: true, email: true, image: true, role: true, phone: true, createdAt: true, updatedAt: true }
+    let user: Record<string, unknown>
+    try {
+      user = await db.user.update({ where: { id: session.user.id }, data: updateData, select })
+    } catch (error) {
+      if (!isSchemaMismatchError(error)) throw error
+      const legacyData: Record<string, unknown> = { name: data.name }
+      if (nextPhone !== undefined) legacyData["phone"] = nextPhone
+      user = await db.user.update({ where: { id: session.user.id }, data: legacyData, select })
+    }
+    try {
+      const { writeAuditEvent } = await import("@/lib/audit")
+      await writeAuditEvent({
+        action: "UPDATE",
+        entityType: "User",
+        entityId: session.user.id,
+        actorId: session.user.id,
+        actorRole: session.user.role ?? "USER",
+        summary: phoneChanged ? "Profile updated, phone changed and verification reset" : "Profile updated",
+        diff: { after: { name: data.name, language: data.language, phoneChanged } },
+        source: "API",
+      })
+    } catch { undefined }
     return NextResponse.json({ success: true, data: user })
   } catch (error) {
     return NextResponse.json(
