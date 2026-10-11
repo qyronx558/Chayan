@@ -177,6 +177,8 @@ model User {
   rewardEnrollments      RewardEnrollment[]
   payoutAccount          PayoutAccount?
   payoutRequests         PayoutRequest[]
+  auditEvents            AuditEvent[]            @relation("AuditActor")
+  auditReviews           AuditEvent[]            @relation("AuditReviewer")
 
   @@index([email])
   @@index([role])
@@ -1144,6 +1146,26 @@ enum UserAgentClass {
   unknown_bot
 }
 
+enum AuditAction {
+  CREATE
+  BULK_CREATE
+  UPDATE
+  APPROVE
+  BULK_APPROVE
+  REJECT
+  DELETE
+  BULK_DELETE
+  ROLE_CHANGE
+  LOG_PURGE
+}
+
+enum AuditSource {
+  ADMIN_UI
+  API
+  BULK_IMPORT
+  CRAWLER
+}
+
 enum HealthStatus {
   ok
   warning
@@ -1303,4 +1325,86 @@ model IntegrationSetting {
   metrics     Json?
   connectedAt DateTime?
   updatedAt   DateTime @updatedAt
+}
+
+model AuditEvent {
+  id           String      @id @default(cuid())
+  createdAt    DateTime    @default(now())
+  action       AuditAction
+  entityType   String
+  entityId     String
+  actorId      String?
+  actorRole    String?
+  actor        User?       @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  summary      String
+  diff         Json?
+  source       AuditSource @default(ADMIN_UI)
+  ipAddress    String?
+  userAgent    String?
+  requestId    String?
+  flagged      Boolean     @default(false)
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?       @relation("AuditReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  note         String?
+  prevHash     String?
+  hash         String
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([entityType])
+  @@index([actorId])
+  @@index([flagged])
+  @@index([createdAt, action])
+  @@index([entityType, entityId])
+}
+
+model RetentionPolicy {
+  id                  String   @id @default(cuid())
+  keepDays            Int?
+  archiveBeforeDelete Boolean  @default(true)
+  legalHold           Boolean  @default(false)
+  updatedAt           DateTime @updatedAt
+  updatedById         String?
+}
+
+model ExportSchedule {
+  id         String   @id @default(cuid())
+  enabled    Boolean  @default(false)
+  frequency  String   @default("WEEKLY")
+  format     String   @default("CSV")
+  recipients String[] @default([])
+  updatedAt  DateTime @updatedAt
+}
+
+model AuditAlertRule {
+  id        String   @id @default(cuid())
+  name      String
+  condition Json
+  severity  String   @default("Warning")
+  channels  String[] @default([])
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled])
+}
+
+model AuditChannel {
+  id          String    @id @default(cuid())
+  type        String    @unique
+  config      Json?
+  connected   Boolean   @default(false)
+  connectedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+model LogArchive {
+  id         String   @id @default(cuid())
+  period     String
+  fileUrl    String
+  eventCount Int
+  checksum   String
+  createdAt  DateTime @default(now())
+  createdById String?
 }

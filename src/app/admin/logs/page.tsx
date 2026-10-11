@@ -1,285 +1,637 @@
-﻿"use client"
-export const dynamic = "force-dynamic"
-import { useMemo, useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api, fetcher } from "@/lib/api"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { toast } from "@/components/ui/toast"
-import { formatDate } from "@/lib/utils"
-import { isAdmin, isSuperAdmin } from "@/lib/roles"
-import { Trash2, Search, Eye, Download, Copy, ShieldAlert } from "lucide-react"
-import { exportToCsv, flattenForCsv } from "@/lib/admin-export"
-import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize"
-import { TableFooter } from "@/components/admin/data-table/TableFooter"
-import { DensityToggle } from "@/components/admin/data-table/DensityToggle"
+﻿"use client";
+export const dynamic = "force-dynamic";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, fetcher } from "@/lib/api";
+import { isSuperAdmin, isAdmin } from "@/lib/roles";
+import { useAdminPageSize, useDensity } from "@/lib/admin/usePageSize";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DataCard } from "@/components/admin/dashboard/DataCard";
+import { KpiStrip } from "@/components/admin/dashboard/KpiStrip";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "@/components/ui/toast";
+import { TableFooter } from "@/components/admin/data-table/TableFooter";
+import { EventToolbar } from "@/components/admin/audit/EventToolbar";
+import { FilterPanel } from "@/components/admin/audit/FilterPanel";
+import { ActiveFilterTokens } from "@/components/admin/audit/ActiveFilterTokens";
+import { SavedViews } from "@/components/admin/audit/SavedViews";
+import { EventList } from "@/components/admin/audit/EventList";
+import { InsightsPanel } from "@/components/admin/audit/InsightsPanel";
+import { RetentionPolicyCard, ScheduleCard, IntegrityCard } from "@/components/admin/audit/RetentionPolicyCard";
+import { PurgeDangerZone } from "@/components/admin/audit/PurgeDangerZone";
+import { AlertRuleList } from "@/components/admin/audit/AlertRuleList";
+import { ChannelCard } from "@/components/admin/audit/ChannelCard";
+import type {
+  AuditAlertRuleView,
+  AuditChannelView,
+  AuditEventView,
+  AuditFilters,
+  AuditInsights,
+  AuditKpi,
+  ExportScheduleState,
+  IntegrityState,
+  RetentionState,
+  RowDensity,
+} from "@/components/admin/audit/types";
+import { Activity, Users, ShieldAlert, XCircle, Download, Radio, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface LogItem {
-  id: string; action: string; entity: string; entityId: string; details: string | null; createdAt: string
-  user: { id: string; name: string | null; email: string } | null
+type TabKey = "events" | "insights" | "retention" | "alerts";
+
+function useUrlState() {
+  const sp = useSearchParams();
+  const router = useRouter();
+  const get = useCallback(() => ({
+    q: sp.get("q") || "",
+    action: sp.get("action") || "",
+    entity: sp.get("entity") || "",
+    actor: sp.get("actor") || "",
+    from: sp.get("from") || "",
+    to: sp.get("to") || "",
+    view: (sp.get("view") || "all") as AuditFilters["view"],
+    page: Math.max(1, parseInt(sp.get("page") || "1", 10) || 1),
+    tab: (sp.get("tab") || "events") as TabKey,
+    focus: sp.get("focus") || "",
+  }), [sp]);
+  const set = useCallback((patch: Record<string, string>) => {
+    const cur = new URLSearchParams(sp.toString());
+    for (const [k, v] of Object.entries(patch)) {
+      if (!v) cur.delete(k);
+      else cur.set(k, v);
+    }
+    router.replace(`?${cur.toString()}`, { scroll: false });
+  }, [sp, router]);
+  return { get, set };
 }
 
-const ACTIONS = ["CREATE", "UPDATE", "DELETE", "STATUS", "APPROVE", "REJECT", "ROLE_CHANGE", "LOGIN", "LOGOUT", "VIEW", "IMPORT"]
-const ENTITIES = ["Job", "PrivateJob", "Result", "AdmitCard", "AnswerKey", "Syllabus", "Admission", "Blog", "Notification", "User", "Featured", "Log"]
+function AuditPageInner() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { get: getUrl, set: setUrl } = useUrlState();
+  const url = getUrl();
+  const superView = isSuperAdmin(session?.user?.role);
+  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("audit-logs", superView);
+  const { density: storedDensity, setDensity: setStoredDensity } = useDensity("audit-logs");
+  const density: RowDensity = storedDensity === "compact" ? "compact" : "comfy";
+  const [filters, setFilters] = useState<AuditFilters>({ q: url.q, action: url.action, entity: url.entity, actor: url.actor, from: url.from, to: url.to, view: superView ? (url.view as AuditFilters["view"]) : "all" });
+  const [page, setPage] = useState(url.page);
+  const [tab, setTab] = useState<TabKey>(superView ? (["events", "insights", "retention", "alerts"].includes(url.tab) ? url.tab : "events") : "events");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [grouped, setGrouped] = useState(() => {
+    try {
+      return localStorage.getItem("audit:grouped") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [expandedId, setExpandedId] = useState<string | null>(url.focus || null);
+  const [groupOpen, setGroupOpen] = useState<Set<string>>(new Set());
+  const [live, setLive] = useState(false);
+  const [liveIds, setLiveIds] = useState<Set<string>>(new Set());
+  const [days, setDays] = useState(30);
+  const [savingPolicy, setSavingPolicy] = useState(false);
+  const [savingSchedule, setSavingSchedule] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [purging, setPurging] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-function badgeVariant(action: string) {
-  switch (action) {
-    case "CREATE": return "default" as const
-    case "APPROVE": return "default" as const
-    case "UPDATE": return "secondary" as const
-    case "DELETE": return "destructive" as const
-    case "REJECT": return "destructive" as const
-    case "ROLE_CHANGE": return "secondary" as const
-    case "STATUS": return "outline" as const
-    case "LOGIN":
-    case "LOGOUT": return "outline" as const
-    default: return "outline" as const
+  useEffect(() => {
+    const patch: Record<string, string> = {
+      q: filters.q, action: filters.action, entity: filters.entity, from: filters.from, to: filters.to,
+      view: filters.view, page: String(page), tab,
+    };
+    if (superView) patch.actor = filters.actor;
+    const t = setTimeout(() => setUrl(patch), 250);
+    return () => clearTimeout(t);
+  }, [filters, page, tab, superView, setUrl]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("audit:grouped", grouped ? "1" : "0");
+    } catch {
+    }
+  }, [grouped]);
+
+  const eventsUrl = useMemo(() => {
+    const p = new URLSearchParams({ page: String(page), limit: String(pageSize) });
+    if (filters.q) p.set("q", filters.q);
+    if (filters.action) p.set("action", filters.action);
+    if (filters.entity) p.set("entity", filters.entity);
+    if (superView && filters.actor) p.set("actor", filters.actor);
+    if (filters.from) p.set("from", filters.from);
+    if (filters.to) p.set("to", filters.to);
+    if (superView && filters.view !== "all") p.set("view", filters.view);
+    return `/api/admin/audit/events?${p.toString()}`;
+  }, [page, pageSize, filters, superView]);
+
+  const { data: eventsData, isLoading: eventsLoading } = useQuery<{ success: boolean; data: AuditEventView[]; pagination: { total: number; totalPages: number }; role: string }>({
+    queryKey: ["audit-events", eventsUrl],
+    queryFn: () => fetcher(eventsUrl),
+    enabled: status === "authenticated",
+  });
+
+  const { data: kpiData } = useQuery<{ success: boolean; data: { kpis: AuditKpi[]; total: number } }>({
+    queryKey: ["audit-kpis"],
+    queryFn: () => fetcher("/api/admin/audit/kpis?days=30"),
+    enabled: status === "authenticated" && superView && tab === "events",
+  });
+
+  const { data: integrityData } = useQuery<{ success: boolean; data: IntegrityState }>({
+    queryKey: ["audit-integrity"],
+    queryFn: () => fetcher("/api/admin/audit/integrity"),
+    enabled: status === "authenticated" && superView,
+  });
+
+  const { data: insightsData, isLoading: insightsLoading } = useQuery<{ success: boolean; data: AuditInsights }>({
+    queryKey: ["audit-insights", days],
+    queryFn: () => fetcher(`/api/admin/audit/insights?days=${days}`),
+    enabled: status === "authenticated" && superView && tab === "insights",
+  });
+
+  const { data: retentionData } = useQuery<{ success: boolean; data: RetentionState }>({
+    queryKey: ["audit-retention"],
+    queryFn: () => fetcher("/api/admin/audit/retention"),
+    enabled: status === "authenticated" && superView && tab === "retention",
+  });
+
+  const { data: scheduleData } = useQuery<{ success: boolean; data: ExportScheduleState }>({
+    queryKey: ["audit-schedule"],
+    queryFn: () => fetcher("/api/admin/audit/schedule"),
+    enabled: status === "authenticated" && superView && tab === "retention",
+  });
+
+  const { data: alertsData } = useQuery<{ success: boolean; data: { rules: AuditAlertRuleView[]; channels: AuditChannelView[]; onCount: number } }>({
+    queryKey: ["audit-alerts"],
+    queryFn: () => fetcher("/api/admin/audit/alerts"),
+    enabled: status === "authenticated" && superView && tab === "alerts",
+  });
+
+  useEffect(() => {
+    if (!live || status !== "authenticated") return;
+    const src = new EventSource("/api/admin/audit/stream");
+    src.onmessage = (ev) => {
+      try {
+        const payload = JSON.parse(ev.data) as { count?: number };
+        if (payload.count && payload.count > 0) {
+          queryClient.invalidateQueries({ queryKey: ["audit-events"] });
+          queryClient.invalidateQueries({ queryKey: ["audit-kpis"] });
+        }
+      } catch {
+      }
+    };
+    return () => src.close();
+  }, [live, status, queryClient]);
+
+  useEffect(() => {
+    if (eventsData?.data && eventsData.data.length > 0 && live) {
+      const newest = eventsData.data[0].id;
+      setLiveIds((prev) => {
+        if (prev.has(newest)) return prev;
+        const next = new Set(prev);
+        next.add(newest);
+        setTimeout(() => {
+          setLiveIds((p) => {
+            const n = new Set(p);
+            n.delete(newest);
+            return n;
+          });
+        }, 4000);
+        return next;
+      });
+    }
+  }, [eventsData, live]);
+
+  const eventAction = useMutation({
+    mutationFn: ({ id, op, note }: { id: string; op: string; note?: string }) =>
+      api.patch<{ success: boolean }>(`/api/admin/audit/events/${id}`, op === "note" ? { op, note } : { op }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["audit-events"] });
+      if (vars.op === "review") {
+        toast("Marked reviewed", "success", { label: "Undo", onClick: () => eventAction.mutate({ id: vars.id, op: "flag" }) });
+      } else if (vars.op === "flag" || vars.op === "flag-all") {
+        toast(vars.op === "flag-all" ? "Group flagged for review" : "Flagged for review", "success");
+      } else if (vars.op === "revert-role") {
+        toast("Role change reverted and logged", "success");
+      } else if (vars.op === "restore") {
+        toast("Items restored from trash and logged", "success");
+      }
+    },
+    onError: (err: Error) => toast(err.message, "destructive"),
+  });
+
+  if (status === "loading") return <Skeleton className="h-96 rounded-xl" />;
+  if (!session || !isAdmin(session.user.role)) {
+    router.push("/login");
+    return null;
   }
-}
 
-export default function AdminLogs() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const [page, setPage] = useState(1)
-  const [actionFilter, setActionFilter] = useState("")
-  const [entityFilter, setEntityFilter] = useState("")
-  const [search, setSearch] = useState("")
-  const [from, setFrom] = useState("")
-  const [to, setTo] = useState("")
-  const [clearDialogOpen, setClearDialogOpen] = useState(false)
-  const [retention, setRetention] = useState("90")
-  const [detail, setDetail] = useState<LogItem | null>(null)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const superView = isSuperAdmin(session?.user?.role)
-  const { pageSize, setPageSize, options: pageSizeOptions } = useAdminPageSize("logs", superView)
-  const { density, setDensity } = useDensity("logs")
+  const events = eventsData?.data || [];
+  const total = eventsData?.pagination.total || 0;
+  const totalPages = eventsData?.pagination.totalPages || 1;
+  const activeCount = [filters.action, filters.entity, superView ? filters.actor : "", filters.from || filters.to ? "date" : ""].filter(Boolean).length;
+  const counts: Record<string, number> = {
+    all: total,
+    "needs-review": kpiData?.data.kpis.find((k) => k.key === "sensitive")?.reviewCount ?? 0,
+    sensitive: kpiData?.data.kpis.find((k) => k.key === "sensitive")?.value ?? 0,
+    deletions: 0, approvals: 0, "role-changes": 0, imports: 0, flagged: kpiData?.data.kpis.find((k) => k.key === "sensitive")?.reviewCount ?? 0,
+  };
+  const kpis = (kpiData?.data.kpis || []).map((k) => ({
+    key: k.key, label: k.label, value: k.value, sub: k.sub, deltaPct: k.deltaPct,
+    spark: [k.value], needsAction: k.needsAction,
+  }));
 
-  const queryUrl = useMemo(() => {
-    const p = new URLSearchParams({ page: String(page), limit: String(pageSize) })
-    if (actionFilter) p.set("action", actionFilter)
-    if (entityFilter) p.set("entity", entityFilter)
-    if (search) p.set("search", search)
-    if (from) p.set("from", from)
-    if (to) p.set("to", to)
-    return `/api/logs?${p.toString()}`
-  }, [page, pageSize, actionFilter, entityFilter, search, from, to])
+  async function doExport(format: "CSV" | "JSON", onlySelected: boolean) {
+    setExporting(true);
+    try {
+      const p = new URLSearchParams({ format });
+      if (filters.q) p.set("q", filters.q);
+      if (filters.action) p.set("action", filters.action);
+      if (filters.entity) p.set("entity", filters.entity);
+      if (superView && filters.actor) p.set("actor", filters.actor);
+      if (filters.from) p.set("from", filters.from);
+      if (filters.to) p.set("to", filters.to);
+      if (onlySelected && selected.size > 0) p.set("ids", [...selected].join(","));
+      if (format === "JSON") {
+        const res = await api.get<{ success: boolean; data: AuditEventView[]; count: number }>(`/api/admin/audit/export?${p.toString()}`);
+        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `audit-events-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast(`Exported ${res.count} events`, "success");
+      } else {
+        const res = await fetch(`/api/admin/audit/export?${p.toString()}`);
+        if (!res.ok) throw new Error("Export failed");
+        const text = await res.text();
+        const blob = new Blob([text], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `audit-events-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast("Exported CSV", "success");
+      }
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Export failed", "destructive");
+    } finally {
+      setExporting(false);
+    }
+  }
 
-  const { data: logsData, isLoading } = useQuery<{ success: boolean; data: LogItem[]; pagination: { page: number; totalPages: number; total: number } }>({
-    queryKey: ["admin-logs", queryUrl], queryFn: () => fetcher(queryUrl),
-  })
+  function onFiltersChange(f: AuditFilters) {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    setFilters(f);
+    setPage(1);
+  }
 
-  const clearMutation = useMutation({
-    mutationFn: () => api.delete("/api/logs"),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-logs"] }); setClearDialogOpen(false); toast("All logs cleared", "success") },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
-  const retentionMutation = useMutation({
-    mutationFn: (days: string) => {
-      const cutoff = new Date()
-      cutoff.setDate(cutoff.getDate() - Number(days))
-      return api.delete(`/api/logs?before=${cutoff.toISOString()}`)
-    },
-    onSuccess: (res: unknown) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-logs"] })
-      const count = (res as { data?: { deleted?: number } })?.data?.deleted ?? 0
-      toast(`Deleted ${count} logs older than ${retention} days`, "success")
-    },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
-  const deleteOneMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/api/logs/${id}`),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-logs"] }); setDeleteId(null); toast("Log deleted", "success") },
-    onError: (err: Error) => toast(err.message, "destructive"),
-  })
-
-  if (status === "loading") return <Skeleton className="h-96" />
-  if (!session || !isAdmin(session.user.role)) { router.push("/login"); return null }
-  const superAdmin = isSuperAdmin(session.user.role)
-
-  const logs = logsData?.data || []
-  const pagination = logsData?.pagination
-  const resetFilters = () => { setActionFilter(""); setEntityFilter(""); setSearch(""); setFrom(""); setTo(""); setPage(1) }
+  const tabs: { key: TabKey; label: string; badge?: number }[] = superView
+    ? [
+        { key: "events", label: "Events" },
+        { key: "insights", label: "Insights" },
+        { key: "retention", label: "Retention and archive" },
+        { key: "alerts", label: "Alert rules", badge: alertsData?.data.onCount },
+      ]
+    : [{ key: "events", label: "My activity" }];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold">System Logs</h1>
-          <p className="text-sm text-gray-500">
-            {pagination ? `${pagination.total} total events` : ""} · every create / update / delete / approve / reject / role change from the 8 admin sections is recorded here
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => { exportToCsv(logs.map((l) => flattenForCsv(l as unknown as Record<string, unknown>)), "audit-logs"); toast(`Exported ${logs.length} logs`, "success") }}>
-            <Download className="mr-1 h-4 w-4" /> Export CSV
-          </Button>
-          {superAdmin && (
-            <Button variant="destructive" size="sm" onClick={() => setClearDialogOpen(true)}>
-              <Trash2 className="mr-1 h-4 w-4" /> Clear Logs
+    <div className="mx-auto w-full max-w-[1400px] space-y-4">
+      <PageHeader
+        crumbs={[{ label: "System" }, { label: "System logs" }]}
+        title="System logs"
+        badge={
+          superView ? (
+            <Badge variant="outline" className="inline-flex h-[26px] items-center gap-1.5 rounded-full border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold leading-none text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+              <span className="leading-none">{integrityData?.data.ok === false ? "Integrity issue" : "Integrity verified"}</span>
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="inline-flex h-[26px] items-center rounded-full px-2.5 text-xs font-semibold leading-none">Read only</Badge>
+          )
+        }
+        description="Append-only audit trail of every admin action. Tamper-evident, never edited or deleted inline."
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              className="h-9 px-3 text-sm leading-none"
+              aria-pressed={live}
+              onClick={() => setLive(!live)}
+            >
+              <span className={cn("mr-2 h-2 w-2 rounded-full", live ? "animate-pulse bg-emerald-500" : "bg-slate-300 dark:bg-white/20")} aria-hidden />
+              <Radio className="mr-1.5 h-4 w-4" />
+              <span className="leading-none">Live tail</span>
             </Button>
-          )}
-        </div>
-      </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-9 border-slate-200 bg-white px-3 text-sm leading-none dark:border-white/10 dark:bg-[#0b1220]" disabled={exporting}>
+                  <Download className="mr-1.5 h-4 w-4" />
+                  <span className="leading-none">{superView ? "Export" : "Export my activity"}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-44 p-1.5" align="end">
+                <button onClick={() => doExport("CSV", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:hover:bg-white/5">Export CSV</button>
+                <button onClick={() => doExport("JSON", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:hover:bg-white/5">Export JSON</button>
+              </PopoverContent>
+            </Popover>
+          </>
+        }
+      />
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col gap-3 xl:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input placeholder="Search details, entity, user email..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} className="pl-9" />
+      <Tabs value={tab} onValueChange={(v) => { setTab(v as TabKey); setPage(1); }}>
+        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0 dark:border-white/[0.06]">
+          {tabs.map((t) => (
+            <TabsTrigger
+              key={t.key}
+              value={t.key}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none border-b-2 border-transparent px-3 text-sm font-medium leading-none text-slate-500 data-[state=active]:border-teal-700 data-[state=active]:bg-transparent data-[state=active]:text-teal-800 data-[state=active]:shadow-none dark:text-slate-400 dark:data-[state=active]:text-teal-300"
+            >
+              <span className="leading-none">{t.label}</span>
+              {typeof t.badge === "number" ? (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-100 px-1 text-[11px] font-bold leading-none tabular-nums text-slate-600 dark:bg-white/10 dark:text-slate-300">{t.badge} on</span>
+              ) : null}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="events" className="mt-4 space-y-3">
+          {superView && kpis.length > 0 ? (
+            <KpiStrip kpis={kpis} icons={[Activity, Users, ShieldAlert, XCircle]} range={30} />
+          ) : null}
+          {!superView ? (
+            <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-white/[0.06] dark:bg-[#0b1220] dark:text-slate-300">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-teal-700 dark:text-teal-400" aria-hidden />
+              <span>You can see your own activity only.</span>
             </div>
-            <Select value={actionFilter || "all"} onValueChange={(v) => { setActionFilter(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="All Actions" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
-                {ACTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={entityFilter || "all"} onValueChange={(v) => { setEntityFilter(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-44"><SelectValue placeholder="All Entities" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Entities</SelectItem>
-                {ENTITIES.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1) }} className="w-40" />
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1) }} className="w-40" />
-            <Button variant="ghost" size="sm" onClick={resetFilters}>Reset</Button>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <DensityToggle value={density} onChange={setDensity} />
-          </div>
-          {superAdmin && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 p-2 text-sm">
-              <ShieldAlert className="h-4 w-4 text-amber-600" />
-              <span className="font-medium">Retention:</span>
-              <Select value={retention} onValueChange={setRetention}>
-                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">Older than 30d</SelectItem>
-                  <SelectItem value="90">Older than 90d</SelectItem>
-                  <SelectItem value="180">Older than 180d</SelectItem>
-                  <SelectItem value="365">Older than 1y</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button size="sm" variant="outline" onClick={() => retentionMutation.mutate(retention)} disabled={retentionMutation.isPending}>
-                {retentionMutation.isPending ? "Deleting..." : "Delete old logs"}
-              </Button>
+          ) : null}
+
+          <EventToolbar
+            filters={filters}
+            onFilters={onFiltersChange}
+            activeCount={activeCount}
+            filtersOpen={filtersOpen}
+            onFiltersOpen={setFiltersOpen}
+            density={density}
+            onDensity={(d) => setStoredDensity(d === "compact" ? "compact" : "comfortable")}
+            grouped={grouped}
+            onGrouped={setGrouped}
+            showActor={superView}
+            resultCount={total}
+          />
+
+          {filtersOpen ? (
+            <div className="sm:hidden">
+              <FilterPanel filters={filters} onChange={onFiltersChange} showActor={superView} resultCount={total} onClose={() => setFiltersOpen(false)} />
             </div>
-          )}
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? <Skeleton className="h-64" /> : (
-            <>
-              <div className="saas-table-scroll">
-              <Table className="saas-table" data-density={density}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Entity</TableHead>
-                    <TableHead>Entity ID</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Details</TableHead>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead className="text-right">View</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id} className="cursor-pointer hover:bg-gray-50" onClick={() => setDetail(log)}>
-                      <TableCell><Badge variant={badgeVariant(log.action)}>{log.action}</Badge></TableCell>
-                      <TableCell className="font-medium">{log.entity}</TableCell>
-                      <TableCell className="font-mono text-xs text-gray-500" title={log.entityId}>{log.entityId.substring(0, 8)}...</TableCell>
-                      <TableCell>{log.user ? log.user.name || log.user.email : "System"}</TableCell>
-                      <TableCell className="max-w-[260px] truncate text-gray-500">{log.details || "-"}</TableCell>
-                      <TableCell className="whitespace-nowrap">{formatDate(log.createdAt, "dd MMM yyyy HH:mm")}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" onClick={() => setDetail(log)}><Eye className="h-4 w-4" /></Button>
-                          {superAdmin && (
-                            <Button variant="ghost" size="icon" onClick={() => setDeleteId(log.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {logs.length === 0 && (
-                    <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No logs found - adjust filters, or perform a create/update/delete in Jobs, Results, Admit Cards, etc. to generate audit events.</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              </div>
-              {pagination && (
-                <TableFooter page={page} totalPages={pagination.totalPages} total={pagination.total} pageSize={pageSize} pageSizeOptions={pageSizeOptions} onPageChange={setPage} onPageSizeChange={(n) => { setPageSize(n); setPage(1) }} itemLabel="logs" />
+          ) : null}
+
+          <ActiveFilterTokens filters={filters} onChange={(f) => { setFilters(f); setPage(1); }} />
+
+          {superView ? (
+            <SavedViews value={filters.view} onChange={(v) => { setFilters({ ...filters, view: v }); setPage(1); }} counts={counts} />
+          ) : null}
+
+          {selected.size > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-white/[0.06] dark:bg-[#0b1220]" role="toolbar" aria-label="Bulk actions">
+              <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200">{selected.size} selected</span>
+              <span className="flex-1" />
+              <Button variant="outline" className="h-[30px] px-2.5 text-xs leading-none" onClick={() => doExport("CSV", true)}>Export selected</Button>
+              {superView ? (
+                <Button
+                  variant="outline"
+                  className="h-[30px] px-2.5 text-xs leading-none"
+                  onClick={() => {
+                    [...selected].forEach((id) => eventAction.mutate({ id, op: "flag" }));
+                    setSelected(new Set());
+                  }}
+                >
+                  Flag
+                </Button>
+              ) : null}
+              <Button variant="ghost" className="h-[30px] px-2.5 text-xs leading-none" onClick={() => setSelected(new Set())}>Clear</Button>
+            </div>
+          ) : null}
+
+          <EventList
+            events={events}
+            total={total}
+            loading={eventsLoading}
+            density={density}
+            grouped={superView && grouped}
+            selected={selected}
+            onSelect={(id, v) => {
+              setSelected((prev) => {
+                const next = new Set(prev);
+                if (v) next.add(id);
+                else next.delete(id);
+                return next;
+              });
+            }}
+            onSelectAll={(v) => setSelected(v ? new Set(events.map((e) => e.id)) : new Set())}
+            expandedId={expandedId}
+            onToggle={setExpandedId}
+            isSuper={superView}
+            groupOpen={groupOpen}
+            onGroupOpen={(key) => {
+              setGroupOpen((prev) => {
+                const next = new Set(prev);
+                if (next.has(key)) next.delete(key);
+                else next.add(key);
+                return next;
+              });
+            }}
+            onAction={(id, op, note) => eventAction.mutate({ id, op, note })}
+            onClearFilters={() => {
+              setFilters({ q: "", action: "", entity: "", actor: "", from: "", to: "", view: "all" });
+              setPage(1);
+            }}
+            liveIds={liveIds}
+          />
+
+          <TableFooter
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={pageSize}
+            pageSizeOptions={pageSizeOptions}
+            onPageChange={setPage}
+            onPageSizeChange={(n) => { setPageSize(n); setPage(1); }}
+            itemLabel="events"
+          />
+        </TabsContent>
+
+        {superView ? (
+          <TabsContent value="insights" className="mt-4">
+            <InsightsPanel
+              data={insightsData?.data || null}
+              loading={insightsLoading}
+              days={days}
+              onDays={setDays}
+              onReview={(f) => {
+                setFilters({
+                  q: f.q || "", action: f.action || "", entity: f.entity || "",
+                  actor: f.actor || "", from: f.from || "", to: f.to || "", view: "all",
+                });
+                setTab("events");
+                setPage(1);
+              }}
+            />
+          </TabsContent>
+        ) : null}
+
+        {superView ? (
+          <TabsContent value="retention" className="mt-4">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              {retentionData?.data ? (
+                <RetentionPolicyCard
+                  policy={retentionData.data}
+                  saving={savingPolicy}
+                  onSave={async (p) => {
+                    setSavingPolicy(true);
+                    try {
+                      await api.put("/api/admin/audit/retention", p);
+                      queryClient.invalidateQueries({ queryKey: ["audit-retention"] });
+                      toast("Retention policy saved and logged", "success");
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : "Save failed", "destructive");
+                    } finally {
+                      setSavingPolicy(false);
+                    }
+                  }}
+                />
+              ) : (
+                <DataCard title="Retention policy" subtitle="Loading"><Skeleton className="h-40" /></DataCard>
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <Sheet open={!!detail} onOpenChange={(o) => { if (!o) setDetail(null) }}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              {detail && <Badge variant={badgeVariant(detail.action)}>{detail.action}</Badge>} {detail?.entity}
-            </SheetTitle>
-            <SheetDescription>{detail && formatDate(detail.createdAt, "dd MMM yyyy HH:mm:ss")}</SheetDescription>
-          </SheetHeader>
-          {detail && (
-            <div className="mt-4 space-y-3 text-sm">
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">Entity ID</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <code className="flex-1 break-all rounded bg-gray-100 p-2 font-mono text-xs">{detail.entityId}</code>
-                  <Button size="icon" variant="outline" onClick={() => { navigator.clipboard.writeText(detail.entityId); toast("Copied", "success") }}><Copy className="h-4 w-4" /></Button>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">Actor</p>
-                <p className="mt-1 font-medium">{detail.user ? `${detail.user.name || "-"} (${detail.user.email})` : "System"}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-gray-400">Details</p>
-                <p className="mt-1 whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700">{detail.details || "-"}</p>
-              </div>
+              {scheduleData?.data ? (
+                <ScheduleCard
+                  schedule={scheduleData.data}
+                  saving={savingSchedule}
+                  onSave={async (s) => {
+                    setSavingSchedule(true);
+                    try {
+                      await api.put("/api/admin/audit/schedule", s);
+                      queryClient.invalidateQueries({ queryKey: ["audit-schedule"] });
+                      toast("Export schedule saved and logged", "success");
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : "Save failed", "destructive");
+                    } finally {
+                      setSavingSchedule(false);
+                    }
+                  }}
+                />
+              ) : (
+                <DataCard title="Scheduled export" subtitle="Loading"><Skeleton className="h-40" /></DataCard>
+              )}
+              <IntegrityCard
+                state={integrityData?.data || null}
+                verifying={verifying}
+                onVerify={async () => {
+                  setVerifying(true);
+                  try {
+                    const res = await api.post<{ success: boolean; data: IntegrityState }>("/api/admin/audit/integrity");
+                    queryClient.invalidateQueries({ queryKey: ["audit-integrity"] });
+                    toast(res.data.ok ? `Chain verified (${res.data.checked} events)` : `Mismatch at ${res.data.firstMismatchId}`, res.data.ok ? "success" : "destructive");
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : "Verify failed", "destructive");
+                  } finally {
+                    setVerifying(false);
+                  }
+                }}
+              />
+              <PurgeDangerZone
+                legalHold={retentionData?.data.legalHold ?? false}
+                working={purging}
+                onCount={async (d) => {
+                  const res = await api.get<{ success: boolean; data: { affected: number } }>(`/api/admin/audit/purge?days=${d}`);
+                  return res.data.affected;
+                }}
+                onPurge={async (d) => {
+                  setPurging(true);
+                  try {
+                    const res = await api.post<{ success: boolean; data: { deleted: number } }>("/api/admin/audit/purge", { days: d, confirm: "DELETE", archive: retentionData?.data.archiveBeforeDelete ?? true });
+                    queryClient.invalidateQueries({ queryKey: ["audit-events"] });
+                    queryClient.invalidateQueries({ queryKey: ["audit-retention"] });
+                    toast(`Purged ${res.data.deleted} events. Purge was logged.`, "success");
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : "Purge failed", "destructive");
+                  } finally {
+                    setPurging(false);
+                  }
+                }}
+              />
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+          </TabsContent>
+        ) : null}
 
-      <Dialog open={clearDialogOpen} onOpenChange={(o) => { if (!o) setClearDialogOpen(false) }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Clear All Logs</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? This will permanently delete <strong>all</strong> system logs. Prefer the retention rule (delete older than N days) to keep a recent audit trail. This action cannot be undone.</p>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setClearDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => clearMutation.mutate()} disabled={clearMutation.isPending}>
-              {clearMutation.isPending ? "Clearing..." : "Clear All Logs"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Delete Log Entry</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Delete this single audit entry? Super-admin only.</p>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => deleteId && deleteOneMutation.mutate(deleteId)} disabled={deleteOneMutation.isPending}>Delete</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {superView ? (
+          <TabsContent value="alerts" className="mt-4">
+            <div className="grid grid-cols-1 gap-3">
+              <AlertRuleList
+                rules={alertsData?.data.rules || []}
+                onToggle={async (id, enabled) => {
+                  const prev = alertsData?.data.rules;
+                  queryClient.setQueryData(["audit-alerts"], (old: unknown) => {
+                    const o = old as { success: boolean; data: { rules: AuditAlertRuleView[]; channels: AuditChannelView[]; onCount: number } };
+                    if (!o?.data) return o;
+                    return { ...o, data: { ...o.data, rules: o.data.rules.map((r) => (r.id === id ? { ...r, enabled } : r)) } };
+                  });
+                  try {
+                    await api.post("/api/admin/audit/alerts", { toggleId: id, enabled });
+                    queryClient.invalidateQueries({ queryKey: ["audit-alerts"] });
+                    if (!enabled) toast("Rule disabled", "success", { label: "Undo", onClick: () => api.post("/api/admin/audit/alerts", { toggleId: id, enabled: true }).then(() => queryClient.invalidateQueries({ queryKey: ["audit-alerts"] })) });
+                    else toast("Rule enabled", "success");
+                  } catch {
+                    queryClient.setQueryData(["audit-alerts"], (old: unknown) => {
+                      const o = old as { success: boolean; data: { rules: AuditAlertRuleView[] } };
+                      void prev;
+                      return o;
+                    });
+                    toast("Toggle failed", "destructive");
+                  }
+                }}
+                onCreate={async (r) => {
+                  try {
+                    await api.post("/api/admin/audit/alerts", r);
+                    queryClient.invalidateQueries({ queryKey: ["audit-alerts"] });
+                    toast("Alert rule created and logged", "success");
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : "Create failed", "destructive");
+                  }
+                }}
+              />
+              <ChannelCard
+                channels={alertsData?.data.channels || []}
+                onToggle={async (type, connect) => {
+                  try {
+                    await api.post("/api/admin/audit/alerts", { channelType: type, connect });
+                    queryClient.invalidateQueries({ queryKey: ["audit-alerts"] });
+                    toast(`${type} ${connect ? "connected" : "disconnected"}`, "success");
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : "Channel update failed", "destructive");
+                  }
+                }}
+              />
+            </div>
+          </TabsContent>
+        ) : null}
+      </Tabs>
     </div>
-  )
+  );
+}
+
+export default function AdminAuditLogsPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-96 rounded-xl" />}>
+      <AuditPageInner />
+    </Suspense>
+  );
 }

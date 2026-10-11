@@ -1,116 +1,68 @@
-import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { Prisma } from "@prisma/client"
-import { isAdmin } from "@/lib/roles"
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { isAdmin, isSuperAdmin } from "@/lib/roles";
+import { fetchAuditEvents, projectForRole } from "@/lib/audit";
+import { viewToActions } from "@/components/admin/audit/types";
+import type { AuditSavedView } from "@/components/admin/audit/types";
 
-/**
- * Activity Logs - the audit trail behind the super-admin panel.
- * - GET    ?page&limit&action&entity&search&from&to  (ADMIN and SUPER_ADMIN)
- * - DELETE ?before=ISO  retention purge, no param = clear all (SUPER_ADMIN only)
- */
+function bad(status: number, error: string) {
+  return NextResponse.json({ success: false, error }, { status });
+}
+
 export async function GET(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) return bad(401, "Unauthorized");
+  if (!isAdmin(session.user.role)) return bad(403, "Forbidden");
+  const superAdmin = isSuperAdmin(session.user.role);
+  const sp = new URL(request.url).searchParams;
+  const page = Math.max(1, parseInt(sp.get("page") || "1", 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(sp.get("limit") || "20", 10) || 20));
+  const view = (sp.get("view") || "all") as AuditSavedView;
+  let action = sp.get("action") || "";
+  if (view && view !== "all") {
+    if (view === "needs-review") {
+    } else if (view === "flagged") {
+    } else {
+      const mapped = viewToActions(view);
+      if (mapped.length > 0 && !action) action = mapped[0];
+    }
+  }
   try {
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-    if (!isAdmin(session.user.role)) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20")))
-    const action = searchParams.get("action") || ""
-    const entity = searchParams.get("entity") || ""
-    const search = searchParams.get("search") || ""
-    const from = searchParams.get("from") || ""
-    const to = searchParams.get("to") || ""
-    const mine = searchParams.get("mine") === "1"
-    const skip = (page - 1) * limit
-
-    const where: Prisma.LogWhereInput = {}
-    if (action) where.action = action
-    if (entity) where.entity = entity
-    if (mine && session.user.id) where.userId = session.user.id
-    if (search) {
-      where.OR = [
-        { action: { contains: search, mode: "insensitive" } },
-        { entity: { contains: search, mode: "insensitive" } },
-        { entityId: { contains: search } },
-        { details: { contains: search, mode: "insensitive" } },
-        { user: { email: { contains: search, mode: "insensitive" } } },
-        { user: { name: { contains: search, mode: "insensitive" } } },
-      ]
-    }
-    if (from || to) {
-      where.createdAt = {
-        ...(from ? { gte: new Date(from) } : {}),
-        ...(to ? { lte: new Date(to) } : {}),
-      }
-    }
-
-    const [logs, total] = await Promise.all([
-      prisma.log.findMany({
-        where,
-        include: { user: { select: { id: true, name: true, email: true } } },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-      }),
-      prisma.log.count({ where }),
-    ])
-
+    const result = await fetchAuditEvents({
+      q: sp.get("search") || sp.get("q") || "",
+      action,
+      entity: sp.get("entity") || "",
+      actor: superAdmin ? sp.get("actor") || "" : "",
+      from: sp.get("from") || "",
+      to: sp.get("to") || "",
+      flaggedOnly: view === "flagged",
+      needsReview: view === "needs-review",
+      sensitiveOnly: view === "sensitive",
+      page,
+      limit,
+      actorId: session.user.id,
+      forceMine: !superAdmin,
+    });
+    const data = superAdmin ? result.events : result.events.map((e) => projectForRole(e, session.user.role));
     return NextResponse.json({
       success: true,
-      data: logs,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to fetch logs" },
-      { status: 500 }
-    )
+      data,
+      pagination: { page, limit, total: result.total, totalPages: Math.max(1, Math.ceil(result.total / limit)) },
+      role: superAdmin ? "SUPER_ADMIN" : "ADMIN",
+    });
+  } catch {
+    return bad(500, "Failed to fetch audit events");
   }
 }
 
-export async function DELETE(request: NextRequest) {
-  try {
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-    if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ success: false, error: "Forbidden: super admin only" }, { status: 403 })
-    }
+export async function DELETE() {
+  return bad(403, "Audit events are append-only and cannot be cleared. Use the guarded purge in Retention.");
+}
 
-    const { searchParams } = new URL(request.url)
-    const before = searchParams.get("before") || ""
+export async function PATCH() {
+  return bad(403, "Audit events are append-only and cannot be edited.");
+}
 
-    const result = before
-      ? await prisma.log.deleteMany({ where: { createdAt: { lt: new Date(before) } } })
-      : await prisma.log.deleteMany()
-
-    await prisma.log.create({
-      data: {
-        action: "DELETE",
-        entity: "Log",
-        entityId: "retention",
-        userId: session.user.id,
-        details: before
-          ? `Purged ${result.count} logs older than ${before} by ${session.user.email}`
-          : `Cleared all logs (${result.count} entries) by ${session.user.email}`,
-      },
-    }).catch(() => {
-      // Never fail the purge because the audit write failed.
-    })
-
-    return NextResponse.json({ success: true, data: { deleted: result.count } })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to delete logs" },
-      { status: 500 }
-    )
-  }
+export async function PUT() {
+  return bad(403, "Audit events are append-only and cannot be edited.");
 }
