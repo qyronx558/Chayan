@@ -95,7 +95,7 @@ export function PrivateApplyRail(p: Props) {
               <span className="font-bold text-gray-800 dark:text-gray-100">{formatDate(p.lastDate)}</span>
             </p>
           ) : (
-            <p className="text-xs text-gray-500">No deadline — apply anytime</p>
+            <p className="text-xs text-gray-500">No deadline - apply anytime</p>
           )}
         </CardHeader>
         <CardContent className="space-y-2.5">

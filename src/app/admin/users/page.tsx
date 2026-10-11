@@ -232,7 +232,7 @@ export default function AdminUsers() {
               {total} user{total === 1 ? "" : "s"}
             </Badge>
           }
-          description="Promote trusted users to admin — every change is audit-logged."
+          description="Promote trusted users to admin - every change is audit-logged."
           actions={
             <>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
@@ -348,7 +348,7 @@ export default function AdminUsers() {
                                   {uploads} upload{uploads === 1 ? "" : "s"}
                                 </span>
                                 <span className="block text-xs tabular-nums text-slate-400" title={formatDate(u.createdAt)}>
-                                  Joined {!Number.isNaN(joined) ? formatDistanceToNow(new Date(joined), { addSuffix: true }) : "—"}
+                                  Joined {!Number.isNaN(joined) ? formatDistanceToNow(new Date(joined), { addSuffix: true }) : "-"}
                                 </span>
                               </span>
                             </TooltipTrigger>
@@ -448,7 +448,7 @@ export default function AdminUsers() {
         <AuditDialog
           open={auditOpen}
           onOpenChange={setAuditOpen}
-          title="Users and roles — audit trail"
+          title="Users and roles - audit trail"
           entity="User"
           mine={false}
         />

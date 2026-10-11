@@ -16,7 +16,7 @@ export function KpiStrip({ items, range }: { items: KpiItem[]; range: string }) 
               {k.display ?? k.value.toLocaleString("en-IN")}
             </span>
             {k.deltaPct === null ? (
-              <span className="text-[11px] font-medium text-slate-400">— vs prev</span>
+              <span className="text-[11px] font-medium text-slate-400">- vs prev</span>
             ) : (
               <span
                 className={cn(

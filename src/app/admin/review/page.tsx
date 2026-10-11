@@ -246,7 +246,7 @@ export default function AdminReview() {
       setSelection(new Set());
       invalidate();
       const firstMod = targets[0].module;
-      toast(`Approved ${ok} item${ok === 1 ? "" : "s"} — now live`, "success", {
+      toast(`Approved ${ok} item${ok === 1 ? "" : "s"} - now live`, "success", {
         label: "Undo",
         onClick: () => void undoToPending(targets.map((t) => t.id), firstMod),
       });
@@ -292,7 +292,7 @@ export default function AdminReview() {
 
   const reviewNext = () => {
     if (rows.length === 0) {
-      toast("Queue is clear — nothing pending", "success");
+      toast("Queue is clear - nothing pending", "success");
       return;
     }
     const first = rows[0];
@@ -337,7 +337,7 @@ export default function AdminReview() {
         crumbs={[{ label: "Manage" }, { label: "Content verification" }]}
         title="Content verification"
         badge={badge}
-        description="Admin uploads only — approve to publish, reject with feedback."
+        description="Admin uploads only - approve to publish, reject with feedback."
         actions={
           <>
             <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
@@ -642,7 +642,7 @@ export default function AdminReview() {
       <AuditDialog
         open={auditOpen}
         onOpenChange={setAuditOpen}
-        title="Content verification — audit trail"
+        title="Content verification - audit trail"
         entity=""
         mine={false}
       />

@@ -354,7 +354,7 @@ async function audienceSection(range: AnalyticsRangeKey, now: Date, overview: Ov
     { key: "visitors", label: "Unique visitors", value: visitorsCur, sub: "distinct sessions", deltaPct: deltaPct(visitorsCur, visitorsPrev), spark: sparkFromBuckets(overview.trend[1]?.buckets.map((b) => b.current) ?? []) },
     { key: "human", label: "Human traffic share", value: humanShare, display: `${humanShare}%`, sub: `${botCur.toLocaleString("en-IN")} bot hits filtered`, deltaPct: null, spark: overview.trend[1] ? sparkFromBuckets(overview.trend[1].buckets.map((b) => b.current)) : [] },
     { key: "returning", label: "Returning visitors", value: returning, sub: visitorsCur > 0 ? `${Math.round((returning / visitorsCur) * 1000) / 10}% of visitors` : "no sessions yet", deltaPct: null, spark: [] },
-    { key: "time", label: "Time on page", value: avgTimeOnPageSec ?? 0, display: avgTimeOnPageSec === null ? "—" : `${avgTimeOnPageSec}s`, sub: "median LCP session", deltaPct: null, spark: [] },
+    { key: "time", label: "Time on page", value: avgTimeOnPageSec ?? 0, display: avgTimeOnPageSec === null ? "-" : `${avgTimeOnPageSec}s`, sub: "median LCP session", deltaPct: null, spark: [] },
   ];
 
   return {
@@ -609,7 +609,7 @@ async function monitoringSection(range: AnalyticsRangeKey, now: Date, overview: 
     { key: "uptime", label: "Uptime", value: 99.9, display: "99.9%", sub: "last 30 days", deltaPct: null, spark: perf.map((p) => 100 - p.errors).slice(-12) },
     { key: "latency", label: "API latency p95", value: p95, display: `${p95}ms`, sub: "edge + origin", deltaPct: null, spark: perf.map((p) => p.latency ?? 0).slice(-12) },
     { key: "errors", label: "Error rate", value: Math.round((errTotal / reqTotal) * 10000) / 100, display: `${Math.round((errTotal / reqTotal) * 10000) / 100}%`, sub: `${errTotal} errors`, deltaPct: deltaPct(errTotal, prevErr), spark: perf.map((p) => p.errors).slice(-12) },
-    { key: "crawler", label: "Crawler success", value: lastRun ? 100 : 0, display: lastRun ? "100%" : "—", sub: lastRun?.startedAt ? new Date(lastRun.startedAt).toLocaleDateString("en-IN") : "no runs yet", deltaPct: null, spark: [] },
+    { key: "crawler", label: "Crawler success", value: lastRun ? 100 : 0, display: lastRun ? "100%" : "-", sub: lastRun?.startedAt ? new Date(lastRun.startedAt).toLocaleDateString("en-IN") : "no runs yet", deltaPct: null, spark: [] },
     { key: "issues", label: "Open issues", value: openIssues, sub: `${health.filter((h) => h.status === "critical").length} critical`, deltaPct: null, spark: [] },
   ];
 

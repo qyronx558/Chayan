@@ -27,7 +27,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
                   return (
                     <span
                       key={hour}
-                      title={`${d} ${hour}:00 — ${v} visits`}
+                      title={`${d} ${hour}:00 - ${v} visits`}
                       className={cn("h-4 rounded-[3px]", t === 0 ? "bg-slate-100 dark:bg-white/[0.06]" : t < 0.25 ? "bg-teal-100 dark:bg-teal-950" : t < 0.5 ? "bg-teal-300 dark:bg-teal-800" : t < 0.75 ? "bg-teal-500" : "bg-teal-700")}
                     />
                   );

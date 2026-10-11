@@ -31,7 +31,7 @@ interface Props {
 /**
  * Private equivalent of gov JobQuickSummary.
  * Same position in the detail layout (right after nav pills, before tables),
- * same calm visual language — only the rows are private-specific.
+ * same calm visual language - only the rows are private-specific.
  */
 export function PrivateQuickSummary(p: Props) {
   const [pageUrl, setPageUrl] = useState("")

@@ -205,7 +205,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
 
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
-      {/* ── Header / Hero — same shape as gov, private sky/teal accent ── */}
+      {/* ── Header / Hero - same shape as gov, private sky/teal accent ── */}
       <header className="relative overflow-hidden rounded-2xl border border-sky-200/70 bg-gradient-to-r from-sky-50 via-white to-teal-50 shadow-lg dark:border-gray-700 dark:from-[#0a1628] dark:via-gray-950 dark:to-[#06231f]">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500" />
         <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 flex h-56 w-56 items-center justify-center">
@@ -560,7 +560,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
                 <CardContent>
                   <p className="text-lg font-extrabold text-gray-900 dark:text-white">{salary}</p>
                   <p className="mt-1 text-xs text-amber-700/80 dark:text-amber-400/80">
-                    {job.salaryMin && job.salaryMax ? "Monthly CTC range as listed by employer." : "As listed by employer — confirm in-hand, probation and incentives before joining."}
+                    {job.salaryMin && job.salaryMax ? "Monthly CTC range as listed by employer." : "As listed by employer - confirm in-hand, probation and incentives before joining."}
                   </p>
                 </CardContent>
               </Card>
@@ -703,7 +703,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
           <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40">
             <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
             <div className="text-sm text-gray-700 dark:text-gray-300">
-              <p className="font-semibold text-amber-800 dark:text-amber-300">Stay safe — trust score {score}/100 ({trust.label})</p>
+              <p className="font-semibold text-amber-800 dark:text-amber-300">Stay safe - trust score {score}/100 ({trust.label})</p>
               <p className="mt-0.5">
                 {trust.reasons.length > 0 ? `${trust.reasons.join(" · ")}. ` : ""}
                 Never pay registration/security deposits. Verify role, salary and venue from the{" "}

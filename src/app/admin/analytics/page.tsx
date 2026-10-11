@@ -109,7 +109,7 @@ function MineView({ range }: { range: AnalyticsRangeKey }) {
           )}
         </DataCard>
         <DataCard title="Reviewer feedback" subtitle="Fix and resubmit" className="h-full">
-          {d.feedback.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No rejections — your uploads are clearing review.</p> : (
+          {d.feedback.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No rejections - your uploads are clearing review.</p> : (
             <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
               {d.feedback.map((f) => (
                 <li key={f.id} className="py-2.5 first:pt-0 last:pb-0">
@@ -164,7 +164,7 @@ function Dashboard() {
 
   const updatedAt = q.dataUpdatedAt;
   const mins = updatedAt ? Math.max(0, Math.floor((nowTick - updatedAt) / 60000)) : 0;
-  const updatedLabel = !updatedAt ? "—" : mins < 1 ? "just now" : mins === 1 ? "1 min ago" : `${mins} min ago`;
+  const updatedLabel = !updatedAt ? "-" : mins < 1 ? "just now" : mins === 1 ? "1 min ago" : `${mins} min ago`;
 
   const refresh = () => {
     q.refetch();
@@ -191,7 +191,7 @@ function Dashboard() {
   };
 
   const exportPdf = () => {
-    toast("Opening print view — choose Save as PDF", "success");
+    toast("Opening print view - choose Save as PDF", "success");
     setTimeout(() => window.print(), 300);
   };
 
@@ -274,7 +274,7 @@ function Dashboard() {
       await queryClient.invalidateQueries({ queryKey: ["admin-analytics"] });
       toast("Integration connected", "success");
     } catch {
-      toast("Connect failed — run DB migration", "destructive");
+      toast("Connect failed - run DB migration", "destructive");
     } finally {
       setConnecting(false);
     }
@@ -364,7 +364,7 @@ function Dashboard() {
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={refresh} title="Refresh analytics" aria-label="Refresh analytics">
           <RefreshCw className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")} />
         </Button>
-        {q.isError ? <span className="text-rose-600">Could not refresh — showing cached data.</span> : null}
+        {q.isError ? <span className="text-rose-600">Could not refresh - showing cached data.</span> : null}
       </div>
 
       <div className="border-b border-slate-200 dark:border-white/[0.06]" role="tablist" aria-label="Analytics sections">
@@ -439,7 +439,7 @@ function Dashboard() {
             <div className="space-y-4">
               <KpiStrip items={data.audience.kpis} range={range} />
               <div className="grid gap-4 lg:grid-cols-2">
-                <Donut title="Traffic quality" subtitle="Human vs search engines vs unknown bots — bots are filtered from visitor counts" slices={data.audience.quality.map((s, i) => ({ key: String(i), label: s.label, value: s.value }))} />
+                <Donut title="Traffic quality" subtitle="Human vs search engines vs unknown bots - bots are filtered from visitor counts" slices={data.audience.quality.map((s, i) => ({ key: String(i), label: s.label, value: s.value }))} />
                 <Donut title="Devices" subtitle="Sessions by device class" slices={data.audience.devices} />
               </div>
               <Funnel steps={data.audience.funnel} />
@@ -525,7 +525,7 @@ function Dashboard() {
                   )}
                 </DataCard>
                 <DataCard title="Searches with zero results" subtitle="Create content to fill these gaps" className="h-full">
-                  {data.content.zeroSearches.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No zero-result searches — coverage looks good.</p> : (
+                  {data.content.zeroSearches.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No zero-result searches - coverage looks good.</p> : (
                     <ul className="space-y-2">
                       {data.content.zeroSearches.map((s) => (
                         <li key={s.term} className="flex items-center justify-between gap-2 text-sm">
@@ -600,7 +600,7 @@ function Dashboard() {
                   action={<Button size="sm" variant="ghost" asChild><Link href="/admin/logs">Audit trail <ExternalLink className="ml-1 h-3.5 w-3.5" /></Link></Button>}
                 >
                   {data.monitoring.activity.length === 0 ? (
-                    <p className="flex items-center gap-2 py-6 text-sm text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Quiet period — no security events.</p>
+                    <p className="flex items-center gap-2 py-6 text-sm text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Quiet period - no security events.</p>
                   ) : (
                     <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                       {data.monitoring.activity.map((e) => (

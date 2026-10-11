@@ -158,7 +158,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
           Full-time, part-time, internships, and contract positions from top companies - with trust scores, tracking and prep.
         </p>
 
-        {/* ── Search row — same structure as gov JobsClient ── */}
+        {/* ── Search row - same structure as gov JobsClient ── */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
           <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -195,7 +195,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
           )}
         </div>
 
-        {/* ── Filter grid — same grid positions as gov (1 / 2 / 4 cols) ── */}
+        {/* ── Filter grid - same grid positions as gov (1 / 2 / 4 cols) ── */}
         <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
           <Select value={companyFilter} onValueChange={(v) => { setCompanyFilter(v === "all" ? "" : v); setPage(1) }}>
             <SelectTrigger className="w-full">

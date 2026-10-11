@@ -20,7 +20,7 @@ interface PrivateJob {
   company: Company; createdAt: string; updatedAt?: string | null
 }
 
-/** Back-compat wrapper — full gov-parity layout lives in PrivateJobDetailContent. */
+/** Back-compat wrapper - full gov-parity layout lives in PrivateJobDetailContent. */
 export function PrivateJobDetail({ job }: { job: PrivateJob }) {
   return <PrivateJobDetailContent job={job} />
 }

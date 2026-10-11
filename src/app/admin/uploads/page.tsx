@@ -209,7 +209,7 @@ export default function AdminUploads() {
             <Lock className="h-3 w-3" /> View only
           </Badge>
         }
-        description="Every admin upload in one place — read-only. Use Content verification for moderation."
+        description="Every admin upload in one place - read-only. Use Content verification for moderation."
         actions={
           <>
             <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
@@ -439,7 +439,7 @@ export default function AdminUploads() {
                   <span className="font-semibold">Reviewer note: </span>{preview.reviewNote}
                 </div>
               )}
-              <p className="text-xs text-slate-400">Read-only — no edits, approvals, or deletions can be made from this page.</p>
+              <p className="text-xs text-slate-400">Read-only - no edits, approvals, or deletions can be made from this page.</p>
             </div>
           )}
         </DialogContent>
@@ -448,7 +448,7 @@ export default function AdminUploads() {
       <AuditDialog
         open={auditOpen}
         onOpenChange={setAuditOpen}
-        title="Admin uploads — audit trail"
+        title="Admin uploads - audit trail"
         entity=""
         mine={false}
       />

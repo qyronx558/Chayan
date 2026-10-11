@@ -170,7 +170,7 @@ export default function AdminTeam() {
               {meta?.employees ?? allRows.length} employee{(meta?.employees ?? allRows.length) === 1 ? "" : "s"}
             </Badge>
           }
-          description={`Who ships what — uploads across ${meta?.modules ?? 6} modules in the last ${meta?.days ?? 30} days.`}
+          description={`Who ships what - uploads across ${meta?.modules ?? 6} modules in the last ${meta?.days ?? 30} days.`}
           actions={
             <>
               <Button type="button" variant="ghost" size="sm" onClick={() => setAuditOpen(true)}>
@@ -340,7 +340,7 @@ export default function AdminTeam() {
                         </TableCell>
                         <TableCell className={cn(density === "compact" && "py-2")}>
                           {mixTotal === 0 ? (
-                            <span className="text-xs text-slate-400">—</span>
+                            <span className="text-xs text-slate-400">-</span>
                           ) : (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -393,7 +393,7 @@ export default function AdminTeam() {
         <AuditDialog
           open={auditOpen}
           onOpenChange={setAuditOpen}
-          title="Team performance — audit trail"
+          title="Team performance - audit trail"
           entity=""
           mine={false}
         />
