@@ -1137,3 +1137,170 @@ model JobClick {
   @@index([privateJobId])
   @@index([privateJobId, kind, day])
 }
+
+enum UserAgentClass {
+  human
+  search_bot
+  unknown_bot
+}
+
+enum HealthStatus {
+  ok
+  warning
+  critical
+}
+
+enum AlertChannel {
+  Email
+  Telegram
+}
+
+model PageViewEvent {
+  id            String         @id @default(cuid())
+  path          String
+  entityType    String?
+  entityId      String?
+  referrer      String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  deviceType    String         @default("desktop")
+  state         String?
+  userAgent     String?
+  userAgentClass UserAgentClass @default(human)
+  botVerified   Boolean        @default(false)
+  hashedIp      String?
+  sessionId     String?
+  userId        String?
+  durationMs    Int?
+  createdAt     DateTime       @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([entityType, entityId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([userAgentClass])
+  @@index([state])
+}
+
+model SearchQuery {
+  id          String   @id @default(cuid())
+  term        String
+  resultCount Int      @default(0)
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  @@index([term])
+  @@index([createdAt])
+  @@index([resultCount])
+}
+
+model OutboundClick {
+  id        String   @id @default(cuid())
+  jobId     String?
+  targetUrl String
+  sessionId String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([createdAt])
+}
+
+model WebVitalEvent {
+  id        String   @id @default(cuid())
+  metric    String
+  value     Float
+  path      String?
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([metric, createdAt])
+  @@index([path])
+}
+
+model CrawlerRun {
+  id        String    @id @default(cuid())
+  source    String    @default("internal")
+  startedAt DateTime  @default(now())
+  finishedAt DateTime?
+  imported  Int       @default(0)
+  errors    Int       @default(0)
+  detail    String?
+
+  @@index([startedAt])
+}
+
+model HealthCheckResult {
+  key       String       @id
+  status    HealthStatus @default(ok)
+  detail    String?
+  checkedAt DateTime     @default(now())
+}
+
+model AlertRule {
+  id        String         @id @default(cuid())
+  metric    String
+  threshold Float
+  channels  AlertChannel[] @default([])
+  enabled   Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  events    AlertEvent[]
+
+  @@index([metric])
+  @@index([enabled])
+}
+
+model AlertEvent {
+  id        String   @id @default(cuid())
+  ruleId    String
+  metric    String
+  value     Float
+  threshold Float
+  channels  AlertChannel[] @default([])
+  sentAt    DateTime @default(now())
+  rule      AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([sentAt])
+}
+
+model AnalyticsDay {
+  date            DateTime @id @default(now())
+  views           Int      @default(0)
+  visitors        Int      @default(0)
+  humanShare      Float    @default(1)
+  botShare        Float    @default(0)
+  signups         Int      @default(0)
+  jobsPublished   Int      @default(0)
+  latencyP95      Float?
+  errorRate       Float    @default(0)
+  requests        Int      @default(0)
+  errors          Int      @default(0)
+  avgTimeOnPageMs Int?
+
+  @@index([date])
+}
+
+model AnalyticsModuleDay {
+  id          String   @id @default(cuid())
+  date        DateTime
+  module      String
+  items       Int      @default(0)
+  views       Int      @default(0)
+  viewsPerItem Float   @default(0)
+
+  @@unique([date, module])
+  @@index([module, date])
+}
+
+model IntegrationSetting {
+  key         String   @id
+  connected   Boolean  @default(false)
+  config      Json?
+  metrics     Json?
+  connectedAt DateTime?
+  updatedAt   DateTime @updatedAt
+}

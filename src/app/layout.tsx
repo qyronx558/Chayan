@@ -9,6 +9,7 @@ import { ConditionalChrome } from "@/components/layout/ConditionalChrome"
 import { HideOnAdmin } from "@/components/layout/HideOnAdmin"
 import { SpotlightTour } from "@/components/onboarding/SpotlightTour"
 import { ActivityTracker } from "@/components/layout/ActivityTracker"
+import { Tracker } from "@/components/analytics/Tracker"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
@@ -117,6 +118,9 @@ export default function RootLayout({
             <SpotlightTour />
           </HideOnAdmin>
           <ActivityTracker />
+          <Suspense fallback={null}>
+            <Tracker />
+          </Suspense>
           <HideOnAdmin>
             <CookieConsent />
           </HideOnAdmin>

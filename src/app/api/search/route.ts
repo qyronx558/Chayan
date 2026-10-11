@@ -91,6 +91,13 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
+    const totalCount =
+      jobs.length + results.length + admitCards.length + answerKeys.length + privateJobs.length + blogs.length;
+    if (q.trim()) {
+      (prisma as unknown as { searchQuery: { create: (a: unknown) => Promise<unknown> } }).searchQuery
+        .create({ data: { term: q.trim().toLowerCase().slice(0, 200), resultCount: totalCount } })
+        .catch(() => null);
+    }
     return NextResponse.json(
       {
         success: true,
