@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, AlertCircle, Calendar, Clock3, ArrowRight, X, Eye, Flame, LayoutGrid, Rows3, Sparkles, Rss, Briefcase } from "lucide-react"
@@ -10,11 +10,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Pagination } from "@/components/ui/pagination"
-import { usePublicPageSize } from "@/lib/admin/usePageSize"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BlogCard } from "@/components/blog/BlogCard"
+import {
+  useInfiniteScroll,
+  appendUnique,
+  PUBLIC_INFINITE_LIMIT as LIMIT,
+} from "@/hooks/useInfiniteScroll"
+import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface BlogCategory {
   id: string
@@ -47,19 +50,22 @@ export function BlogClient() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [popular, setPopular] = useState<BlogPost[]>([])
   const [categories, setCategories] = useState<BlogCategory[]>([])
-  const [pagination, setPagination] = useState<{ page: number; total: number; totalPages: number } | null>(null)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState("")
+  const [loadMoreError, setLoadMoreError] = useState("")
   const [input, setInput] = useState("")
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [sort, setSort] = useState<SortKey>("latest")
   const [view, setView] = useState<"grid" | "list">("grid")
-  const [page, setPage] = useState(1)
-  const { pageSize, setPageSize, options } = usePublicPageSize("blog")
+  const pageRef = useRef(1)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const t = setTimeout(() => { setSearch(input.trim()); setPage(1) }, 350)
+    const t = setTimeout(() => { setSearch(input.trim()) }, 350)
     return () => clearTimeout(t)
   }, [input])
 
@@ -70,37 +76,80 @@ export function BlogClient() {
       .catch(() => {})
   }, [])
 
-  const fetchPosts = useCallback(async () => {
-    setLoading(true)
-    setError("")
+  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
+    if (replace) {
+      setLoading(true)
+      setError("")
+    } else {
+      setLoadingMore(true)
+      setLoadMoreError("")
+    }
     try {
       const params = new URLSearchParams()
       if (search) params.set("search", search)
       if (activeCategory) params.set("category", activeCategory)
       if (sort === "popular") params.set("sort", "popular")
       params.set("published", "true")
-      params.set("page", String(page))
-      params.set("limit", String(pageSize))
-      const res = await fetch(`/api/blog?${params}`)
+      params.set("page", String(pageNum))
+      params.set("limit", String(LIMIT))
+      const res = await fetch(`/api/blog?${params}`, { signal })
       const json = await res.json()
+      if (signal.aborted) return
       if (json.success) {
         let data: BlogPost[] = json.data
         if (sort === "quick") {
           data = [...data].sort((a, b) => getReadingTimeMinutes(a.content) - getReadingTimeMinutes(b.content))
         }
-        setPosts(data)
-        setPagination(json.pagination)
-      } else {
+        setPosts((prev) => (replace ? data : appendUnique(prev, data)))
+        setTotal(json.pagination.total ?? 0)
+        setHasMore(pageNum < (json.pagination.totalPages ?? 1))
+        pageRef.current = pageNum
+      } else if (replace) {
         setError(json.error || "Failed to fetch posts")
+      } else {
+        setLoadMoreError(json.error || "Failed to load more. Please retry.")
       }
     } catch {
-      setError("Failed to load blog posts.")
+      if (signal.aborted) return
+      if (replace) setError("Failed to load blog posts.")
+      else setLoadMoreError("Failed to load more. Please retry.")
     } finally {
-      setLoading(false)
+      if (!signal.aborted) {
+        if (replace) setLoading(false)
+        else setLoadingMore(false)
+      }
     }
-  }, [search, activeCategory, sort, page, pageSize])
+  }, [search, activeCategory, sort])
 
-  useEffect(() => { fetchPosts() }, [fetchPosts])
+  useEffect(() => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    pageRef.current = 1
+    setHasMore(false)
+    fetchPage(1, true, controller.signal)
+    return () => controller.abort()
+  }, [fetchPage])
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(pageRef.current + 1, false, controller.signal)
+  }, [loading, loadingMore, hasMore, fetchPage])
+
+  const retryInitial = useCallback(() => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(1, true, controller.signal)
+  }, [fetchPage])
+
+  const sentinelRef = useInfiniteScroll({
+    hasMore,
+    isLoading: loading || loadingMore,
+    onLoadMore: loadMore,
+  })
 
   useEffect(() => {
     fetch("/api/blog?sort=popular&published=true&limit=5")
@@ -110,8 +159,14 @@ export function BlogClient() {
   }, [])
 
   const isFiltered = Boolean(search || activeCategory)
-  const [featured, ...secondary] = useMemo(() => (isFiltered || sort !== "latest" ? [] : posts), [posts, isFiltered, sort])
-  const gridPosts = useMemo(() => (featured && !isFiltered && sort === "latest" && page === 1 ? posts.slice(1) : posts), [posts, featured, isFiltered, sort, page])
+  const featured = useMemo(
+    () => (isFiltered || sort !== "latest" || posts.length === 0 ? undefined : posts[0]),
+    [posts, isFiltered, sort]
+  )
+  const gridPosts = useMemo(
+    () => (featured ? posts.slice(1) : posts),
+    [posts, featured]
+  )
 
   const tagCloud = useMemo(() => {
     const map = new Map<string, number>()
@@ -130,7 +185,7 @@ export function BlogClient() {
           <div className="min-w-0 max-w-2xl">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <Badge className="bg-[#B08D57] font-bold text-[#1A1408]"><Sparkles className="mr-1 h-3 w-3" /> Blog</Badge>
-              {pagination?.total ? <Badge className="bg-white/10 text-slate-200">{pagination.total} articles</Badge> : null}
+              {total ? <Badge className="bg-white/10 text-slate-200">{total} articles</Badge> : null}
               <Link href="/rss/blog" className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 hover:bg-white/20">
                 <Rss className="h-3 w-3" /> RSS
               </Link>
@@ -161,7 +216,7 @@ export function BlogClient() {
           <div className="relative mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-5">
             <button
               type="button"
-              onClick={() => { setActiveCategory(null); setPage(1) }}
+              onClick={() => { setActiveCategory(null) }}
               className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${!activeCategory ? "bg-[#F2EDE0] text-[#101E33]" : "bg-white/5 text-slate-300 hover:bg-white/15"}`}
             >
               All Topics
@@ -170,7 +225,7 @@ export function BlogClient() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => { setActiveCategory(activeCategory === cat.slug ? null : cat.slug); setPage(1) }}
+                onClick={() => { setActiveCategory(activeCategory === cat.slug ? null : cat.slug) }}
                 className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${activeCategory === cat.slug ? "bg-[#F2EDE0] text-[#101E33]" : "bg-white/5 text-slate-300 hover:bg-white/15"}`}
               >
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.color || "#B08D57" }} />
@@ -202,7 +257,7 @@ export function BlogClient() {
       )}
 
       {/* - Featured: photographic scrim only (no color gradient wash) - */}
-      {featured && page === 1 && (
+      {featured && (
         <section className="mb-8 grid gap-5 lg:grid-cols-2" aria-label="Featured article">
           <Link href={`/blog/${featured.slug}`} className="group relative min-h-[280px] overflow-hidden rounded-2xl shadow-md sm:min-h-[340px]">
             {featured.image ? (
@@ -226,7 +281,7 @@ export function BlogClient() {
             </div>
           </Link>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {secondary.slice(0, 4).map((post) => (
+            {posts.slice(1, 5).map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`} className="group flex gap-3 rounded-2xl border border-gray-200 bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-[#B08D57]/60 hover:shadow-lg dark:border-gray-700 dark:bg-gray-900">
                 {post.image ? (
                   <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-100">
@@ -249,7 +304,7 @@ export function BlogClient() {
       {/* ── Toolbar ── */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-gray-500" role="status">
-          {loading ? "Loading articles…" : <>Showing <b className="text-gray-900 dark:text-gray-100">{gridPosts.length}</b> of <b className="text-gray-900 dark:text-gray-100">{pagination?.total ?? 0}</b> articles</>}
+          {loading ? "Loading articles…" : <>Showing <b className="text-gray-900 dark:text-gray-100">{posts.length}</b> of <b className="text-gray-900 dark:text-gray-100">{total}</b> articles</>}
         </p>
         <div className="flex items-center gap-2">
           <div className="flex rounded-full border border-gray-200 bg-white p-1 text-xs font-bold dark:border-gray-700 dark:bg-gray-900" role="tablist" aria-label="Sort articles">
@@ -259,7 +314,7 @@ export function BlogClient() {
                 type="button"
                 role="tab"
                 aria-selected={sort === k}
-                onClick={() => { setSort(k); setPage(1) }}
+                onClick={() => { setSort(k) }}
                 className={`rounded-full px-3 py-1.5 transition-colors ${sort === k ? "bg-[#101E33] text-[#F2EDE0] shadow" : "text-gray-500 hover:text-gray-900 dark:text-gray-400"}`}
               >
                 {k === "latest" ? "Latest" : k === "popular" ? "Most read" : "Quick reads"}
@@ -291,14 +346,14 @@ export function BlogClient() {
               <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
               <h3 className="mb-2 text-lg font-semibold">Something went wrong</h3>
               <p className="mb-4 text-sm text-gray-500">{error}</p>
-              <Button onClick={fetchPosts}>Try Again</Button>
+              <Button onClick={retryInitial}>Try Again</Button>
             </CardContent></Card>
           ) : gridPosts.length === 0 ? (
             <Card><CardContent className="flex flex-col items-center py-16">
               <Search className="mb-4 h-12 w-12 text-gray-300" />
               <h3 className="mb-2 text-lg font-semibold">No articles found</h3>
               <p className="mb-4 text-sm text-gray-500">Try a different search or category.</p>
-              <Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null); setPage(1) }}>Clear filters</Button>
+              <Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>
             </CardContent></Card>
           ) : view === "grid" ? (
             <div className="grid gap-6 sm:grid-cols-2">
@@ -329,11 +384,27 @@ export function BlogClient() {
               ))}
             </div>
           )}
-          {pagination && pagination.total > options[0] && (
-            <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
-              <div className="flex flex-1 justify-center"><Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }) }} /></div>
-              <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
-            </div>
+          {!loading && !error && gridPosts.length > 0 && (
+            <>
+              {loadingMore && (
+                <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <Card key={i}><CardContent className="p-5"><Skeleton className="mb-3 aspect-video w-full rounded-xl" /><Skeleton className="mb-2 h-5 w-full" /><Skeleton className="h-4 w-2/3" /></CardContent></Card>
+                  ))}
+                </div>
+              )}
+              <InfiniteListFooter
+                sentinelRef={sentinelRef}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                loadMoreError={loadMoreError}
+                onLoadMore={loadMore}
+                onRetry={loadMore}
+                loadedCount={posts.length}
+                total={total}
+                label="articles"
+              />
+            </>
           )}
         </div>
 

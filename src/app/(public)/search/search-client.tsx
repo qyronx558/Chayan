@@ -18,8 +18,6 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { usePublicPageSize } from "@/lib/admin/usePageSize"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { POPULAR_SEARCHES } from "@/lib/search-constants"
@@ -56,7 +54,9 @@ export function SearchClient() {
   const initialQ = searchParams.get("q") ?? ""
   const [query, setQuery] = React.useState(initialQ)
   const [category, setCategory] = React.useState("")
-  const { pageSize, setPageSize, options } = usePublicPageSize("search")
+  // Fixed batch size (numbered pager + Rows selector removed; universal
+  // search API caps `limit` at 20 and has no page/skip support).
+  const pageSize = 12
   const [items, setItems] = React.useState<UniversalSearchItem[]>([])
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState("")
@@ -164,9 +164,9 @@ export function SearchClient() {
         ))}
       </div>
       {activeQ && (
-        <div className="mt-3 flex justify-center">
-          <PageSizeSelect value={pageSize} options={options} onChange={setPageSize} label="Results" />
-        </div>
+        <p className="mt-3 text-center text-xs text-gray-400">
+          Showing top {total} matches across jobs, results, admit cards and more
+        </p>
       )}
 
       {loading ? (

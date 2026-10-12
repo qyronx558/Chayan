@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { Search, AlertCircle, Download, Calendar, IndianRupee, X, GraduationCap } from "lucide-react"
 import { SectionHero } from "@/components/layout/SectionHero"
@@ -11,9 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Pagination } from "@/components/ui/pagination"
-import { usePublicPageSize } from "@/lib/admin/usePageSize"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
+import {
+  useInfiniteScroll,
+  appendUnique,
+  PUBLIC_INFINITE_LIMIT as LIMIT,
+} from "@/hooks/useInfiniteScroll"
+import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface AdmissionData {
   id: string
@@ -28,57 +31,92 @@ interface AdmissionData {
   department: { id: string; name: string; slug: string }
 }
 
-interface PaginationData {
-  page: number
-  total: number
-  totalPages: number
-}
-
 export function AdmissionsClient() {
   const [items, setItems] = useState<AdmissionData[]>([])
-  const [pagination, setPagination] = useState<PaginationData | null>(null)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState("")
+  const [loadMoreError, setLoadMoreError] = useState("")
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const { pageSize, setPageSize, options } = usePublicPageSize("admissions")
+  const pageRef = useRef(1)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
     return () => clearTimeout(timer)
   }, [search])
 
-  const fetchItems = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true)
-    setError("")
+  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
+    if (replace) {
+      setLoading(true)
+      setError("")
+    } else {
+      setLoadingMore(true)
+      setLoadMoreError("")
+    }
     try {
       const params = new URLSearchParams()
       if (debouncedSearch) params.set("search", debouncedSearch)
-      params.set("page", String(page))
-      params.set("limit", String(pageSize))
+      params.set("page", String(pageNum))
+      params.set("limit", String(LIMIT))
 
       const res = await fetch(`/api/admissions?${params}`, { signal })
       const json = await res.json()
+      if (signal.aborted) return
       if (json.success) {
-        setItems(json.data)
-        setPagination(json.pagination)
-      } else {
+        setItems((prev) => (replace ? json.data : appendUnique(prev, json.data)))
+        setTotal(json.pagination.total ?? 0)
+        setHasMore(pageNum < (json.pagination.totalPages ?? 1))
+        pageRef.current = pageNum
+      } else if (replace) {
         setError(json.error || "Failed to fetch admissions")
+      } else {
+        setLoadMoreError(json.error || "Failed to load more. Please retry.")
       }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return
-      setError("Failed to fetch admissions. Please try again.")
+    } catch {
+      if (signal.aborted) return
+      if (replace) setError("Failed to fetch admissions. Please try again.")
+      else setLoadMoreError("Failed to load more. Please retry.")
     } finally {
-      setLoading(false)
+      if (!signal.aborted) {
+        if (replace) setLoading(false)
+        else setLoadingMore(false)
+      }
     }
-  }, [debouncedSearch, page, pageSize])
+  }, [debouncedSearch])
 
   useEffect(() => {
+    abortRef.current?.abort()
     const controller = new AbortController()
-    fetchItems(controller.signal)
+    abortRef.current = controller
+    pageRef.current = 1
+    setHasMore(false)
+    fetchPage(1, true, controller.signal)
     return () => controller.abort()
-  }, [fetchItems])
+  }, [fetchPage])
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(pageRef.current + 1, false, controller.signal)
+  }, [loading, loadingMore, hasMore, fetchPage])
+
+  const retryInitial = useCallback(() => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(1, true, controller.signal)
+  }, [fetchPage])
+
+  const sentinelRef = useInfiniteScroll({
+    hasMore,
+    isLoading: loading || loadingMore,
+    onLoadMore: loadMore,
+  })
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -88,7 +126,7 @@ export function AdmissionsClient() {
           badge="Admissions"
           title="Admissions"
           subtitle="Latest government admission notifications for various courses and programs."
-          count={pagination?.total}
+          count={total}
         />
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -97,13 +135,13 @@ export function AdmissionsClient() {
             <Input
               placeholder="Search admissions..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              onChange={(e) => { setSearch(e.target.value) }}
               className="pl-10 pr-10"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => { setSearch(""); setPage(1) }}
+                onClick={() => { setSearch("") }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-4 w-4" />
@@ -114,7 +152,7 @@ export function AdmissionsClient() {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: LIMIT }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
           </div>
@@ -124,7 +162,7 @@ export function AdmissionsClient() {
               <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
               <h3 className="mb-2 text-lg font-semibold text-gray-900">Something went wrong</h3>
               <p className="mb-4 text-sm text-gray-500">{error}</p>
-              <Button onClick={() => fetchItems()}>Try Again</Button>
+              <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
         ) : items.length === 0 ? (
@@ -140,15 +178,16 @@ export function AdmissionsClient() {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {items.length} of {pagination?.total ?? 0} admissions
+              Showing {items.length} of {total} admissions
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35 }}
                 >
                   <ContentCard
                   icon={GraduationCap}
@@ -181,18 +220,24 @@ export function AdmissionsClient() {
                 </motion.div>
               ))}
             </div>
-            {pagination && pagination.total > options[0] && (
-              <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
-                <div className="flex flex-1 justify-center">
-                  <Pagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    onPageChange={setPage}
-                  />
-                </div>
-                <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
+            {loadingMore && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <ContentCardSkeleton key={i} />
+                ))}
               </div>
             )}
+            <InfiniteListFooter
+              sentinelRef={sentinelRef}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
+              loadMoreError={loadMoreError}
+              onLoadMore={loadMore}
+              onRetry={loadMore}
+              loadedCount={items.length}
+              total={total}
+              label="admissions"
+            />
           </>
         )}
       </motion.div>

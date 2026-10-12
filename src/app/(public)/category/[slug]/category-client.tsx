@@ -1,16 +1,19 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Search, AlertCircle, Loader2, X, ArrowLeft } from "lucide-react"
+import { Search, AlertCircle, X, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Pagination } from "@/components/ui/pagination"
-import { usePublicPageSize } from "@/lib/admin/usePageSize"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
+import {
+  useInfiniteScroll,
+  appendUnique,
+  PUBLIC_INFINITE_LIMIT as LIMIT,
+} from "@/hooks/useInfiniteScroll"
+import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface CategoryInfo {
   id: string
@@ -33,58 +36,93 @@ interface JobData {
   status: "ACTIVE" | "EXPIRED" | "UPCOMING"
 }
 
-interface PaginationData {
-  page: number
-  total: number
-  totalPages: number
-}
-
 export function CategoryClient({ category }: { category: CategoryInfo }) {
   const [jobs, setJobs] = useState<JobData[]>([])
-  const [pagination, setPagination] = useState<PaginationData | null>(null)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState("")
+  const [loadMoreError, setLoadMoreError] = useState("")
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const { pageSize, setPageSize, options } = usePublicPageSize("category")
+  const pageRef = useRef(1)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
     return () => clearTimeout(timer)
   }, [search])
 
-  const fetchJobs = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true)
-    setError("")
+  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
+    if (replace) {
+      setLoading(true)
+      setError("")
+    } else {
+      setLoadingMore(true)
+      setLoadMoreError("")
+    }
     try {
       const params = new URLSearchParams()
       params.set("categoryId", category.id)
       if (debouncedSearch) params.set("search", debouncedSearch)
-      params.set("page", String(page))
-      params.set("limit", String(pageSize))
+      params.set("page", String(pageNum))
+      params.set("limit", String(LIMIT))
 
       const res = await fetch(`/api/jobs?${params}`, { signal })
       const json = await res.json()
+      if (signal.aborted) return
       if (json.success) {
-        setJobs(json.data)
-        setPagination(json.pagination)
-      } else {
+        setJobs((prev) => (replace ? json.data : appendUnique(prev, json.data)))
+        setTotal(json.pagination.total ?? 0)
+        setHasMore(pageNum < (json.pagination.totalPages ?? 1))
+        pageRef.current = pageNum
+      } else if (replace) {
         setError(json.error || "Failed to fetch jobs")
+      } else {
+        setLoadMoreError(json.error || "Failed to load more. Please retry.")
       }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return
-      setError("Failed to fetch jobs. Please try again.")
+    } catch {
+      if (signal.aborted) return
+      if (replace) setError("Failed to fetch jobs. Please try again.")
+      else setLoadMoreError("Failed to load more. Please retry.")
     } finally {
-      setLoading(false)
+      if (!signal.aborted) {
+        if (replace) setLoading(false)
+        else setLoadingMore(false)
+      }
     }
-  }, [debouncedSearch, page, pageSize, category.id])
+  }, [debouncedSearch, category.id])
 
   useEffect(() => {
+    abortRef.current?.abort()
     const controller = new AbortController()
-    fetchJobs(controller.signal)
+    abortRef.current = controller
+    pageRef.current = 1
+    setHasMore(false)
+    fetchPage(1, true, controller.signal)
     return () => controller.abort()
-  }, [fetchJobs])
+  }, [fetchPage])
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(pageRef.current + 1, false, controller.signal)
+  }, [loading, loadingMore, hasMore, fetchPage])
+
+  const retryInitial = useCallback(() => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(1, true, controller.signal)
+  }, [fetchPage])
+
+  const sentinelRef = useInfiniteScroll({
+    hasMore,
+    isLoading: loading || loadingMore,
+    onLoadMore: loadMore,
+  })
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -108,13 +146,13 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
             <Input
               placeholder="Search jobs..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              onChange={(e) => { setSearch(e.target.value) }}
               className="pl-10 pr-10"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => { setSearch(""); setPage(1) }}
+                onClick={() => { setSearch("") }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-4 w-4" />
@@ -125,7 +163,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: LIMIT }).map((_, i) => (
               <JobCardSkeleton key={i} />
             ))}
           </div>
@@ -135,7 +173,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
               <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
               <h3 className="mb-2 text-lg font-semibold text-gray-900">Something went wrong</h3>
               <p className="mb-4 text-sm text-gray-500">{error}</p>
-              <Button onClick={() => fetchJobs()}>Try Again</Button>
+              <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
         ) : jobs.length === 0 ? (
@@ -147,7 +185,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
                 {search ? "Try adjusting your search." : `No ${category.name} jobs available right now. Check back later.`}
               </p>
               {search && (
-                <Button variant="outline" onClick={() => { setSearch(""); setPage(1) }}>
+                <Button variant="outline" onClick={() => { setSearch("") }}>
                   Clear Search
                 </Button>
               )}
@@ -156,15 +194,16 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {jobs.length} of {pagination?.total ?? 0} jobs
+              Showing {jobs.length} of {total} jobs
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
                 <motion.div
                   key={job.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35 }}
                 >
                   <JobCard
                     id={job.id}
@@ -181,18 +220,24 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
                 </motion.div>
               ))}
             </div>
-            {pagination && pagination.total > options[0] && (
-              <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
-                <div className="flex flex-1 justify-center">
-                  <Pagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    onPageChange={setPage}
-                  />
-                </div>
-                <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
+            {loadingMore && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <JobCardSkeleton key={i} />
+                ))}
               </div>
             )}
+            <InfiniteListFooter
+              sentinelRef={sentinelRef}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
+              loadMoreError={loadMoreError}
+              onLoadMore={loadMore}
+              onRetry={loadMore}
+              loadedCount={jobs.length}
+              total={total}
+              label="jobs"
+            />
           </>
         )}
       </motion.div>

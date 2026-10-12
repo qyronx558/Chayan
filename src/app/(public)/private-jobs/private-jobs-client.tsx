@@ -1,19 +1,22 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Search, AlertCircle, Filter, X, Building2, Wifi, Sparkles, Flag, Briefcase } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Pagination } from "@/components/ui/pagination"
 import { ContentCardSkeleton } from "@/components/ui/content-card"
-import { usePublicPageSize } from "@/lib/admin/usePageSize"
-import { PageSizeSelect } from "@/components/admin/data-table/PageSizeSelect"
 import { PrivateJobCard } from "@/components/private/PrivateJobCard"
 import { JobRecommendations } from "@/components/jobs/JobRecommendations"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  useInfiniteScroll,
+  appendUnique,
+  PUBLIC_INFINITE_LIMIT as LIMIT,
+} from "@/hooks/useInfiniteScroll"
+import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface Company { id: string; name: string; logo?: string | null; verifiedStatus?: string }
 
@@ -28,7 +31,6 @@ interface PrivateJobData {
   company: Company; createdAt: string
 }
 
-interface PaginationData { page: number; total: number; totalPages: number }
 interface FilterOption { id: string; name: string }
 
 const typeLabels: Record<string, string> = {
@@ -37,9 +39,12 @@ const typeLabels: Record<string, string> = {
 
 export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: string; walkin?: string } }) {
   const [jobs, setJobs] = useState<PrivateJobData[]>([])
-  const [pagination, setPagination] = useState<PaginationData | null>(null)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState("")
+  const [loadMoreError, setLoadMoreError] = useState("")
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
@@ -50,8 +55,8 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
   const [sort, setSort] = useState("new")
   const [fresherOnly, setFresherOnly] = useState(preset.fresher === "1")
   const [walkinOnly, setWalkinOnly] = useState(preset.walkin === "1")
-  const [page, setPage] = useState(1)
-  const { pageSize, setPageSize, options } = usePublicPageSize("private-jobs")
+  const pageRef = useRef(1)
+  const abortRef = useRef<AbortController | null>(null)
 
   const [companies, setCompanies] = useState<FilterOption[]>([])
   const [locations, setLocations] = useState<string[]>([])
@@ -77,13 +82,18 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
     return () => clearTimeout(timer)
   }, [search])
 
-  const fetchJobs = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true)
-    setError("")
+  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
+    if (replace) {
+      setLoading(true)
+      setError("")
+    } else {
+      setLoadingMore(true)
+      setLoadMoreError("")
+    }
     try {
       const params = new URLSearchParams()
       if (debouncedSearch) params.set("search", debouncedSearch)
@@ -95,35 +105,67 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
       if (fresherOnly) params.set("fresher", "1")
       if (walkinOnly) params.set("walkin", "1")
       if (sort !== "new") params.set("sort", sort)
-      params.set("page", String(page))
-      params.set("limit", String(pageSize))
+      params.set("page", String(pageNum))
+      params.set("limit", String(LIMIT))
 
       const res = await fetch(`/api/private-jobs?${params}`, { signal })
       const json = await res.json()
+      if (signal.aborted) return
       if (json.success) {
-        setJobs(json.data)
-        setPagination(json.pagination)
-      } else {
+        setJobs((prev) => (replace ? json.data : appendUnique(prev, json.data)))
+        setTotal(json.pagination.total ?? 0)
+        setHasMore(pageNum < (json.pagination.totalPages ?? 1))
+        pageRef.current = pageNum
+      } else if (replace) {
         setError(json.error || "Failed to fetch private jobs")
+      } else {
+        setLoadMoreError(json.error || "Failed to load more. Please retry.")
       }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return
-      setError("Failed to fetch private jobs. Please try again.")
+    } catch {
+      if (signal.aborted) return
+      if (replace) setError("Failed to fetch private jobs. Please try again.")
+      else setLoadMoreError("Failed to load more. Please retry.")
     } finally {
-      setLoading(false)
+      if (!signal.aborted) {
+        if (replace) setLoading(false)
+        else setLoadingMore(false)
+      }
     }
-  }, [debouncedSearch, typeFilter, companyFilter, locationFilter, remoteFilter, skillFilter, fresherOnly, walkinOnly, sort, page, pageSize])
+  }, [debouncedSearch, typeFilter, companyFilter, locationFilter, remoteFilter, skillFilter, fresherOnly, walkinOnly, sort])
 
   useEffect(() => {
+    abortRef.current?.abort()
     const controller = new AbortController()
-    fetchJobs(controller.signal)
+    abortRef.current = controller
+    pageRef.current = 1
+    setHasMore(false)
+    fetchPage(1, true, controller.signal)
     return () => controller.abort()
-  }, [fetchJobs])
+  }, [fetchPage])
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(pageRef.current + 1, false, controller.signal)
+  }, [loading, loadingMore, hasMore, fetchPage])
+
+  const retryInitial = useCallback(() => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    fetchPage(1, true, controller.signal)
+  }, [fetchPage])
+
+  const sentinelRef = useInfiniteScroll({
+    hasMore,
+    isLoading: loading || loadingMore,
+    onLoadMore: loadMore,
+  })
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    setPage(1)
-    setDebouncedSearch(search)
+    setDebouncedSearch(search.trim())
   }
 
   const clearFilters = () => {
@@ -137,7 +179,6 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
     setFresherOnly(false)
     setWalkinOnly(false)
     setSort("new")
-    setPage(1)
   }
 
   const hasActiveFilters = debouncedSearch || typeFilter || companyFilter || locationFilter || remoteFilter || skillFilter || fresherOnly || walkinOnly || sort !== "new"
@@ -171,7 +212,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
             {search && (
               <button
                 type="button"
-                onClick={() => { setSearch(""); setPage(1) }}
+                onClick={() => { setSearch("") }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-4 w-4" />
@@ -197,7 +238,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
 
         {/* ── Filter grid - same grid positions as gov (1 / 2 / 4 cols) ── */}
         <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
-          <Select value={companyFilter} onValueChange={(v) => { setCompanyFilter(v === "all" ? "" : v); setPage(1) }}>
+          <Select value={companyFilter} onValueChange={(v) => { setCompanyFilter(v === "all" ? "" : v) }}>
             <SelectTrigger className="w-full">
               <Building2 className="mr-1 h-3.5 w-3.5 shrink-0 text-gray-400" />
               <SelectValue placeholder="All Companies" />
@@ -210,7 +251,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
             </SelectContent>
           </Select>
 
-          <Select value={locationFilter} onValueChange={(v) => { setLocationFilter(v === "all" ? "" : v); setPage(1) }}>
+          <Select value={locationFilter} onValueChange={(v) => { setLocationFilter(v === "all" ? "" : v) }}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="All Locations" />
             </SelectTrigger>
@@ -222,7 +263,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
             </SelectContent>
           </Select>
 
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v === "all" ? "" : v); setPage(1) }}>
+          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v === "all" ? "" : v) }}>
             <SelectTrigger className="w-full">
               <Briefcase className="mr-1 h-3.5 w-3.5 shrink-0 text-gray-400" />
               <SelectValue placeholder="All Types" />
@@ -235,7 +276,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
             </SelectContent>
           </Select>
 
-          <Select value={remoteFilter} onValueChange={(v) => { setRemoteFilter(v === "all" ? "" : v); setPage(1) }}>
+          <Select value={remoteFilter} onValueChange={(v) => { setRemoteFilter(v === "all" ? "" : v) }}>
             <SelectTrigger className="w-full">
               <Wifi className="mr-1 h-3.5 w-3.5 shrink-0 text-gray-400" />
               <SelectValue placeholder="Work mode" />
@@ -250,7 +291,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
           </Select>
 
           {skills.length > 0 && (
-            <Select value={skillFilter} onValueChange={(v) => { setSkillFilter(v === "all" ? "" : v); setPage(1) }}>
+            <Select value={skillFilter} onValueChange={(v) => { setSkillFilter(v === "all" ? "" : v) }}>
               <SelectTrigger className="w-full">
                 <Sparkles className="mr-1 h-3.5 w-3.5 shrink-0 text-gray-400" />
                 <SelectValue placeholder="Skill" />
@@ -262,7 +303,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
             </Select>
           )}
 
-          <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1) }}>
+          <Select value={sort} onValueChange={(v) => { setSort(v) }}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
@@ -274,8 +315,8 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
           </Select>
 
           <div className="flex items-center gap-2">
-            <Button variant={fresherOnly ? "default" : "outline"} size="sm" onClick={() => { setFresherOnly(!fresherOnly); setPage(1) }}>Freshers</Button>
-            <Button variant={walkinOnly ? "default" : "outline"} size="sm" onClick={() => { setWalkinOnly(!walkinOnly); setPage(1) }}>Walk-in</Button>
+            <Button variant={fresherOnly ? "default" : "outline"} size="sm" onClick={() => { setFresherOnly(!fresherOnly) }}>Freshers</Button>
+            <Button variant={walkinOnly ? "default" : "outline"} size="sm" onClick={() => { setWalkinOnly(!walkinOnly) }}>Walk-in</Button>
           </div>
         </div>
 
@@ -285,7 +326,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: Math.min(pageSize, 12) }).map((_, i) => (
+            {Array.from({ length: LIMIT }).map((_, i) => (
               <ContentCardSkeleton key={i} />
             ))}
           </div>
@@ -295,7 +336,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
               <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
               <h3 className="mb-2 text-lg font-semibold text-gray-900">Something went wrong</h3>
               <p className="mb-4 text-sm text-gray-500">{error}</p>
-              <Button onClick={() => fetchJobs()}>Try Again</Button>
+              <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
         ) : jobs.length === 0 ? (
@@ -312,15 +353,16 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {jobs.length} of {pagination?.total ?? 0} private jobs
+              Showing {jobs.length} of {total} private jobs
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
                 <motion.div
                   key={job.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35 }}
                 >
                   <PrivateJobCard
                     id={job.id}
@@ -344,18 +386,24 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
                 </motion.div>
               ))}
             </div>
-            {pagination && pagination.total > options[0] && (
-              <div className="mt-8 flex flex-col items-center justify-between gap-3 sm:flex-row">
-                <div className="flex flex-1 justify-center">
-                  <Pagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    onPageChange={setPage}
-                  />
-                </div>
-                <PageSizeSelect value={pageSize} options={options} onChange={(n) => { setPageSize(n); setPage(1) }} />
+            {loadingMore && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <ContentCardSkeleton key={i} />
+                ))}
               </div>
             )}
+            <InfiniteListFooter
+              sentinelRef={sentinelRef}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
+              loadMoreError={loadMoreError}
+              onLoadMore={loadMore}
+              onRetry={loadMore}
+              loadedCount={jobs.length}
+              total={total}
+              label="private jobs"
+            />
           </>
         )}
       </motion.div>

@@ -1,15 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Search, Eye, TrendingUp, Clock, ChevronDown, ChevronUp, Loader2, FileText, ExternalLink } from "lucide-react"
+import { Search, Eye, TrendingUp, Clock, FileText, ExternalLink } from "lucide-react"
 import { formatDate, truncate } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
+import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 function recordView(id: string) {
   fetch(`/api/notifications/${id}/view`, { method: "POST" }).catch(() => {})
@@ -49,7 +51,8 @@ export function NotificationsClient({ notifications: initialNotifications, categ
   const [selectedCategory, setSelectedCategory] = useState("")
   const [page, setPage] = useState(1)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(notifications.length >= 20)
+  const [hasMore, setHasMore] = useState(initialNotifications.length >= 20)
+  const [loadMoreError, setLoadMoreError] = useState("")
   const perPage = 10
 
   const filteredNotifications = useMemo(() => {
@@ -79,10 +82,19 @@ export function NotificationsClient({ notifications: initialNotifications, categ
   const paginatedNotifications = filteredNotifications.slice(0, page * perPage)
   const hasMoreFiltered = filteredNotifications.length > paginatedNotifications.length
 
-  async function loadMore() {
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore) return
+    // More locally-filtered items to reveal — no network needed.
+    if (hasMoreFiltered) {
+      setPage((p) => p + 1)
+      return
+    }
+    if (!hasMore) return
     setIsLoadingMore(true)
+    setLoadMoreError("")
     try {
-      const res = await fetch(`/api/notifications?page=${Math.ceil((page * perPage) / 10) + 1}&limit=10`)
+      const serverPage = Math.floor(notifications.length / 10) + 1
+      const res = await fetch(`/api/notifications?page=${serverPage}&limit=10`)
       if (res.ok) {
         const json = await res.json()
         if (json.success && json.data.length > 0) {
@@ -96,13 +108,22 @@ export function NotificationsClient({ notifications: initialNotifications, categ
         } else {
           setHasMore(false)
         }
+      } else {
+        setLoadMoreError("Failed to load more. Please retry.")
       }
     } catch {
-      setHasMore(false)
+      setLoadMoreError("Failed to load more. Please retry.")
     } finally {
       setIsLoadingMore(false)
     }
-  }
+  }, [isLoadingMore, hasMoreFiltered, hasMore, notifications.length])
+
+  // Amazon-style: auto-reveal next batch on scroll, button stays as fallback.
+  const sentinelRef = useInfiniteScroll({
+    hasMore: hasMore || hasMoreFiltered,
+    isLoading: isLoadingMore,
+    onLoadMore: loadMore,
+  })
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -152,6 +173,10 @@ export function NotificationsClient({ notifications: initialNotifications, categ
           ))}
         </div>
 
+        <div className="mb-4 text-sm text-gray-500">
+          Showing {paginatedNotifications.length} of {filteredNotifications.length}{hasMore ? "+" : ""} notifications
+        </div>
+
         {paginatedNotifications.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-16">
@@ -167,9 +192,10 @@ export function NotificationsClient({ notifications: initialNotifications, categ
             {paginatedNotifications.map((notification, index) => (
               <motion.div
                 key={notification.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.3, delay: Math.min(index % 10 * 0.03, 0.3) }}
               >
                 <Card
                   className="cursor-pointer border-gray-200 transition-colors hover:border-teal-200"
@@ -225,22 +251,19 @@ export function NotificationsClient({ notifications: initialNotifications, categ
         )}
 
         {(hasMore || hasMoreFiltered) && (
-          <div className="mt-8 text-center">
-            <Button variant="outline" onClick={loadMore} disabled={isLoadingMore}>
-              {isLoadingMore ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  Load More
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
+          <InfiniteListFooter
+            sentinelRef={sentinelRef}
+            hasMore={hasMore || hasMoreFiltered}
+            loadingMore={isLoadingMore}
+            loadMoreError={loadMoreError}
+            onLoadMore={loadMore}
+            onRetry={loadMore}
+            loadedCount={paginatedNotifications.length}
+            total={filteredNotifications.length}
+            label="notifications"
+          />
         )}
+        <div className={cn(!(hasMore || hasMoreFiltered) && "hidden")} aria-hidden="true" />
       </motion.div>
     </div>
   )
