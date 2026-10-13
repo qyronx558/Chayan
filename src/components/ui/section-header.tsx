@@ -11,6 +11,8 @@ interface SectionHeaderProps {
   viewAllLabel?: string
   iconClassName?: string
   className?: string
+  /** Extra control rendered beside View All (e.g. Latest/Trending tabs). */
+  action?: React.ReactNode
 }
 
 export function SectionHeader({
@@ -21,6 +23,7 @@ export function SectionHeader({
   viewAllLabel = "View All",
   iconClassName,
   className,
+  action,
 }: SectionHeaderProps) {
   return (
     <div className={cn("mb-6 flex min-w-0 flex-wrap items-center justify-between gap-3", className)}>
@@ -47,6 +50,7 @@ export function SectionHeader({
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       )}
+      {action}
     </div>
   )
 }

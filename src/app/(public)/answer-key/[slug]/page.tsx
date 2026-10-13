@@ -67,6 +67,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
       />
 <DocumentDetail
         kind="answer-key"
+        tracking={{ entityType: "ANSWER_KEY", entityId: answerKey.id }}
         title={answerKey.title}
         department={answerKey.department.name}
         category={answerKey.category.name}

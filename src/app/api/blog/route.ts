@@ -9,6 +9,8 @@ import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
+import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
+import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,6 +79,25 @@ export async function GET(request: NextRequest) {
       else if (tab === "needs") where.moderation = "PENDING"
       else if (tab === "rejected") where.moderation = "REJECTED"
       else if (tab === "draft") where.published = false
+    }
+
+    if (sort === "trending" && !isOwnerScope) {
+      const [pool, total] = await Promise.all([
+        prisma.blogPost.findMany({
+          where,
+          include: { category: true, createdBy: { select: { id: true, name: true, email: true } } },
+          orderBy: { createdAt: "desc" },
+          take: CANDIDATE_POOL_SIZE,
+        }),
+        prisma.blogPost.count({ where }),
+      ])
+      const { ranked, fallback, windowDays } = await rankCandidateList("blog", pool as unknown as AnyItem[])
+      return NextResponse.json({
+        success: true,
+        data: ranked.slice(skip, skip + limit).map((r) => r.item),
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        trending: { fallback, windowDays },
+      })
     }
 
     const [posts, total] = await Promise.all([

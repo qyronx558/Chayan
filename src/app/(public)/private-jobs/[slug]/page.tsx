@@ -3,6 +3,8 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { PrivateJobDetail } from "./private-job-detail"
+import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
+import { PrivateJobViewTracker } from "@/components/private/PrivateJobViewTracker"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -83,6 +85,8 @@ export default async function PrivateJobPage({ params }: Props) {
       />
 
       <PrivateJobDetail job={JSON.parse(JSON.stringify(job))} />
+      <PrivateJobViewTracker jobId={job.id} />
+      <EntityViewTracker entityType="PRIVATE_JOB" entityId={job.id} />
 
       <DiscussionSection postType="PRIVATE_JOB" postId={job.id} path={`/private-jobs/${job.slug}`} />
 

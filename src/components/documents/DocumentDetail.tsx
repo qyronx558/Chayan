@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { AshokaChakra } from "@/components/layout/AshokaChakra"
+import { EntityViewTracker, type TrackedEntityType } from "@/components/analytics/EntityViewTracker"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { JobFollowBell } from "@/components/jobs/JobFollowBell"
 import { DocumentInsightStrip, type PrimaryDateMode } from "@/components/documents/DocumentInsightStrip"
@@ -73,6 +74,8 @@ interface DocumentDetailProps {
   windowStart?: string | null
   /** ISO publish timestamp for the verify card. */
   publishedAt?: string | null
+  /** Entity attribution for the trending engine (fires enriched page-view). */
+  tracking?: { entityType: TrackedEntityType; entityId: string } | null
 }
 
 const KIND_CONFIG: Record<DocumentKind, { badge: string; badgeClass: string; icon: typeof FileText; subtitle: string; listHref: string; listLabel: string }> = {
@@ -123,6 +126,7 @@ export function DocumentDetail({
   primaryDateMode = "date",
   windowStart = null,
   publishedAt = null,
+  tracking = null,
 }: DocumentDetailProps) {
   const config = KIND_CONFIG[kind]
   const [now, setNow] = useState(() => Date.now())
@@ -200,6 +204,9 @@ export function DocumentDetail({
 
   return (
     <div className="space-y-6 [scroll-behavior:smooth]">
+      {tracking ? (
+        <EntityViewTracker entityType={tracking.entityType} entityId={tracking.entityId} />
+      ) : null}
       {/* ── Header / Hero - Tricolour + KPI strip ─────── */}
       <header className="relative overflow-hidden rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50 via-white to-green-50 shadow-lg dark:border-gray-700 dark:from-[#231303] dark:via-gray-950 dark:to-[#071a0e]">
         {/* top tricolour strip with slow flow */}

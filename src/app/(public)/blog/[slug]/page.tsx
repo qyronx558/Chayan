@@ -12,6 +12,7 @@ import { PrintButton } from "@/components/blog/PrintButton"
 import { ShareButtons } from "@/components/blog/ShareButtons"
 import { ShareRail } from "@/components/blog/ShareRail"
 import { ViewTracker } from "@/components/blog/ViewTracker"
+import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { TableOfContents } from "@/components/blog/TableOfContents"
 import { BLOG_PROSE_CLASSES, prepareArticleHtml, getReadingTimeMinutes, extractTakeaways, extractFaq } from "@/lib/blog-prose"
@@ -147,6 +148,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
       <div className="container mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <ReadingProgress />
         <ViewTracker slug={post.slug} />
+        <EntityViewTracker entityType="BLOG" entityId={post.id} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
         {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}

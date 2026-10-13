@@ -49,7 +49,7 @@ export function PopularExams({ className }: { className?: string }) {
       try {
         setLoading(true)
         setError("")
-        const res = await fetch("/api/exams")
+        const res = await fetch("/api/exams?sort=trending")
         const json = await res.json()
         if (!json.success) throw new Error(json.error || "Failed to fetch exams")
         setExams(json.data)

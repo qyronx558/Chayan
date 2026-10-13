@@ -67,6 +67,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
       />
 <DocumentDetail
         kind="admission"
+        tracking={{ entityType: "ADMISSION", entityId: admission.id }}
         title={admission.title}
         department={admission.department.name}
         category={admission.category.name}

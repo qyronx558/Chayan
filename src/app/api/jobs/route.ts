@@ -10,6 +10,8 @@ import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/ad
 import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
+import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,8 +95,34 @@ export async function GET(request: NextRequest) {
       case "name_desc":
         orderBy = { title: "desc" }
         break
+      case "trending":
+        orderBy = { createdAt: "desc" }
+        break
       default:
         orderBy = { createdAt: "desc" }
+    }
+
+    // Popularity ranking: score a recency pool in-memory, then paginate.
+    // Pool is capped (see CANDIDATE_POOL_SIZE) so deep pages fall back to
+    // recency order beyond the pool - home only ever needs page 1.
+    if (sort === "trending" && !isAdminScope) {
+      const [pool, total] = await Promise.all([
+        prisma.job.findMany({
+          where,
+          include: { department: true, category: true, state: true },
+          orderBy,
+          take: CANDIDATE_POOL_SIZE,
+        }),
+        prisma.job.count({ where }),
+      ])
+      const { ranked, fallback, windowDays } = await rankCandidateList("jobs", pool as unknown as AnyItem[])
+      const payload = {
+        success: true,
+        data: ranked.slice(skip, skip + limit).map((r) => r.item),
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        trending: { fallback, windowDays },
+      }
+      return publicApiResponse(payload)
     }
 
     const [jobs, total] = await Promise.all([

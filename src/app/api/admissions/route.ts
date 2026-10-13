@@ -10,6 +10,8 @@ import { isListTab } from "@/lib/admin/access"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
+import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +23,7 @@ export async function GET(request: NextRequest) {
     const departmentId = searchParams.get("departmentId") || ""
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
+    const sort = searchParams.get("sort") || "latest"
     const skip = (page - 1) * limit
 
     const where: Prisma.AdmissionWhereInput = {}
@@ -64,6 +67,26 @@ export async function GET(request: NextRequest) {
         where.moderation = "PENDING"
         where.createdById = session.user.id
       }
+    }
+
+    if (sort === "trending" && !isAdminScope) {
+      const [pool, total] = await Promise.all([
+        prisma.admission.findMany({
+          where,
+          include: { department: true, category: true },
+          orderBy: { createdAt: "desc" },
+          take: CANDIDATE_POOL_SIZE,
+        }),
+        prisma.admission.count({ where }),
+      ])
+      const { ranked, fallback, windowDays } = await rankCandidateList("admissions", pool as unknown as AnyItem[])
+      const payload = {
+        success: true,
+        data: ranked.slice(skip, skip + limit).map((r) => r.item),
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        trending: { fallback, windowDays },
+      }
+      return publicApiResponse(payload)
     }
 
     const [admissions, total] = await Promise.all([

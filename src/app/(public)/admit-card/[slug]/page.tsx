@@ -67,6 +67,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
       />
 <DocumentDetail
         kind="admit-card"
+        tracking={{ entityType: "ADMIT_CARD", entityId: admitCard.id }}
         title={admitCard.title}
         department={admitCard.department.name}
         category={admitCard.category.name}

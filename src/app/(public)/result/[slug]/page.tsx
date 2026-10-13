@@ -78,6 +78,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
       />
 <DocumentDetail
         kind="result"
+        tracking={{ entityType: "RESULT", entityId: result.id }}
         title={result.title}
         department={result.department.name}
         category={result.category.name}

@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowRight, Download, Calendar, FileCheck2 } from "lucide-react"
+import { ArrowRight, Download, Calendar, FileCheck2, Flame } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { cn, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
 import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { SectionTabs } from "@/components/home/SectionTabs"
+import { useHomeSection } from "@/components/home/use-home-section"
 
 interface Result {
   id: string
@@ -21,32 +22,25 @@ interface Result {
   slug: string
 }
 
-export function LatestResults() {
-  const [results, setResults] = useState<Result[]>([])
-  const [loading, setLoading] = useState(true)
+const toResult = (item: Record<string, unknown>): Result => ({
+  id: item.id as string,
+  title: item.title as string,
+  department: (item.department as { name: string })?.name ?? "",
+  resultDate: item.resultDate as string,
+  createdAt: item.createdAt as string,
+  description: item.description as string | null | undefined,
+  pdfUrl: item.pdfUrl as string | undefined,
+  slug: item.slug as string,
+})
 
-  useEffect(() => {
-    fetch("/api/results?limit=9")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setResults(
-            data.data.map((item: Record<string, unknown>) => ({
-              id: item.id as string,
-              title: item.title as string,
-              department: (item.department as { name: string })?.name ?? "",
-              resultDate: item.resultDate as string,
-              createdAt: item.createdAt as string,
-              description: item.description as string | null | undefined,
-              pdfUrl: item.pdfUrl as string | undefined,
-              slug: item.slug as string,
-            }))
-          )
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+export function LatestResults() {
+  const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
+    "/api/results?limit=9",
+    "/api/results?limit=9&sort=trending"
+  )
+
+  const results = ((tab === "trending" ? trending : latest) ?? []).map(toResult)
+  const busy = tab === "trending" ? trendingLoading && trending === null : loading
 
   return (
     <section className={cn("py-16")}>
@@ -55,11 +49,16 @@ export function LatestResults() {
           icon={FileCheck2}
           iconClassName="from-emerald-600 to-teal-800"
           title="Latest Results"
-          subtitle="Recently published examination results"
+          subtitle={
+            tab === "trending" && trendingMeta && !trendingMeta.fallback
+              ? `Most viewed over the last ${trendingMeta.windowDays} days`
+              : "Recently published examination results"
+          }
           viewAllHref="/results"
+          action={<SectionTabs tab={tab} onChange={selectTab} />}
         />
 
-        {loading ? (
+        {busy ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
@@ -72,33 +71,39 @@ export function LatestResults() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((result) => (
-              <ContentCard
-                key={result.id}
-                icon={FileCheck2}
-                iconClassName="from-emerald-600 to-teal-800"
-                badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{result.department}</Badge>}
-                statusBadge={<span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Result</span>}
-                title={result.title}
-                description={result.description}
-                meta={[
-                  { icon: Calendar, text: result.resultDate ? `Result: ${formatDate(result.resultDate)}` : `Released: ${formatDate(result.createdAt)}` },
-                ]}
-                href={`/result/${result.slug}`}
-                ctaLabel="View Result"
-                footer={
-                  <div className="flex items-center gap-1">
-                    <BookmarkButton resultId={result.id} />
-                    {result.pdfUrl ? (
-                      <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                        <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer">
-                          <Download className="h-3.5 w-3.5" />
-                          PDF
-                        </a>
-                      </Button>
-                    ) : null}
-                  </div>
-                }
-              />
+              <div key={result.id} className="relative">
+                {tab === "trending" && (
+                  <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    <Flame className="h-3 w-3" /> Trending
+                  </span>
+                )}
+                <ContentCard
+                  icon={FileCheck2}
+                  iconClassName="from-emerald-600 to-teal-800"
+                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{result.department}</Badge>}
+                  statusBadge={<span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Result</span>}
+                  title={result.title}
+                  description={result.description}
+                  meta={[
+                    { icon: Calendar, text: result.resultDate ? `Result: ${formatDate(result.resultDate)}` : `Released: ${formatDate(result.createdAt)}` },
+                  ]}
+                  href={`/result/${result.slug}`}
+                  ctaLabel="View Result"
+                  footer={
+                    <div className="flex items-center gap-1">
+                      <BookmarkButton resultId={result.id} />
+                      {result.pdfUrl ? (
+                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
+                          <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5" />
+                            PDF
+                          </a>
+                        </Button>
+                      ) : null}
+                    </div>
+                  }
+                />
+              </div>
             ))}
           </div>
         )}

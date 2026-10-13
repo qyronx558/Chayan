@@ -67,6 +67,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
       />
 <DocumentDetail
         kind="syllabus"
+        tracking={{ entityType: "SYLLABUS", entityId: syllabus.id }}
         title={syllabus.title}
         department={syllabus.department.name}
         category={syllabus.category.name}

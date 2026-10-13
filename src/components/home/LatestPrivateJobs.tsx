@@ -1,14 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, ChevronUp, MapPin, IndianRupee, Briefcase, Building2 } from "lucide-react"
+import { ArrowRight, ChevronDown, ChevronUp, MapPin, IndianRupee, Briefcase, Building2, Flame } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SectionHeader } from "@/components/ui/section-header"
 import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { SectionTabs } from "@/components/home/SectionTabs"
+import { useHomeSection } from "@/components/home/use-home-section"
 
 interface Company {
   id: string
@@ -33,20 +35,14 @@ interface PrivateJob {
 }
 
 export function LatestPrivateJobs({ className }: { className?: string }) {
-  const [jobs, setJobs] = useState<PrivateJob[]>([])
-  const [loading, setLoading] = useState(true)
+  const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
+    "/api/private-jobs?limit=8&status=ACTIVE",
+    "/api/private-jobs?limit=8&status=ACTIVE&sort=trending"
+  )
   const [showAll, setShowAll] = useState(false)
 
-  useEffect(() => {
-    fetch("/api/private-jobs?limit=8&status=ACTIVE")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setJobs(data.data)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
+  const jobs = ((tab === "trending" ? trending : latest) ?? []) as unknown as PrivateJob[]
+  const busy = tab === "trending" ? trendingLoading && trending === null : loading
   const displayed = showAll ? jobs : jobs.slice(0, 4)
 
   return (
@@ -56,11 +52,16 @@ export function LatestPrivateJobs({ className }: { className?: string }) {
           icon={Building2}
           iconClassName="from-sky-600 to-blue-800"
           title="Latest Private Jobs"
-          subtitle="Top opportunities from leading companies"
+          subtitle={
+            tab === "trending" && trendingMeta && !trendingMeta.fallback
+              ? `Most viewed over the last ${trendingMeta.windowDays} days`
+              : "Top opportunities from leading companies"
+          }
           viewAllHref="/private-jobs"
+          action={<SectionTabs tab={tab} onChange={(t) => { selectTab(t); setShowAll(false) }} />}
         />
 
-        {loading ? (
+        {busy ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <ContentCardSkeleton key={i} />
@@ -73,22 +74,28 @@ export function LatestPrivateJobs({ className }: { className?: string }) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {displayed.map((job) => (
-              <ContentCard
-                key={job.id}
-                icon={Building2}
-                iconClassName="from-sky-600 to-blue-800"
-                badge={<span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">{job.company.name}</span>}
-                statusBadge={<Badge variant="secondary" className="px-1.5 py-0.5 text-[10px]">{job.type.replace("_", " ")}</Badge>}
-                title={job.title}
-                meta={[
-                  ...(job.location ? [{ icon: MapPin, text: job.location }] : []),
-                  ...(job.salary ? [{ icon: IndianRupee, text: job.salary }] : []),
-                  ...(job.experience ? [{ icon: Briefcase, text: job.experience }] : []),
-                ]}
-                href={`/private-jobs/${job.slug}`}
-                ctaLabel="Apply Now"
-                footer={<BookmarkButton privateJobId={job.id} />}
-              />
+              <div key={job.id} className="relative">
+                {tab === "trending" && (
+                  <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    <Flame className="h-3 w-3" /> Trending
+                  </span>
+                )}
+                <ContentCard
+                  icon={Building2}
+                  iconClassName="from-sky-600 to-blue-800"
+                  badge={<span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">{job.company.name}</span>}
+                  statusBadge={<Badge variant="secondary" className="px-1.5 py-0.5 text-[10px]">{job.type.replace("_", " ")}</Badge>}
+                  title={job.title}
+                  meta={[
+                    ...(job.location ? [{ icon: MapPin, text: job.location }] : []),
+                    ...(job.salary ? [{ icon: IndianRupee, text: job.salary }] : []),
+                    ...(job.experience ? [{ icon: Briefcase, text: job.experience }] : []),
+                  ]}
+                  href={`/private-jobs/${job.slug}`}
+                  ctaLabel="Apply Now"
+                  footer={<BookmarkButton privateJobId={job.id} />}
+                />
+              </div>
             ))}
           </div>
         )}

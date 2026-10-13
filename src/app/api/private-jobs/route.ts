@@ -11,6 +11,8 @@ import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
+import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
 
 export async function GET(request: NextRequest) {
@@ -91,6 +93,26 @@ export async function GET(request: NextRequest) {
       sort === "salary" ? [{ salaryMax: "desc" as const }, { createdAt: "desc" as const }] :
       sort === "trust" ? [{ trustScore: "desc" as const }, { createdAt: "desc" as const }] :
       [{ createdAt: "desc" as const }]
+
+    if (sort === "trending" && !isAdminScope) {
+      const [pool, total] = await Promise.all([
+        prisma.privateJob.findMany({
+          where,
+          include: { company: true },
+          orderBy,
+          take: CANDIDATE_POOL_SIZE,
+        }),
+        prisma.privateJob.count({ where }),
+      ])
+      const { ranked, fallback, windowDays } = await rankCandidateList("private-jobs", pool as unknown as AnyItem[])
+      const payload = {
+        success: true,
+        data: ranked.slice(skip, skip + limit).map((r) => r.item),
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        trending: { fallback, windowDays },
+      }
+      return publicApiResponse(payload)
+    }
 
     const [items, total] = await Promise.all([
       prisma.privateJob.findMany({

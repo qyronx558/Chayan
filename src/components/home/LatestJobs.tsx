@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, ChevronUp, Briefcase } from "lucide-react"
+import { ArrowRight, ChevronDown, ChevronUp, Briefcase, Flame } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
+import { SectionTabs } from "@/components/home/SectionTabs"
+import { useHomeSection } from "@/components/home/use-home-section"
 
 interface Job {
   id: string
@@ -25,35 +27,27 @@ interface LatestJobsProps {
   className?: string
 }
 
+const toJob = (job: Record<string, unknown>): Job => ({
+  id: job.id as string,
+  title: job.title as string,
+  department: (job.department as { name: string })?.name ?? "",
+  location: (job.location as string) ?? null,
+  totalVacancies: (job.totalVacancies as number) ?? null,
+  lastDateToApply: (job.lastDate as string) ?? null,
+  salary: (job.salary as string) ?? null,
+  status: job.status as "ACTIVE" | "EXPIRED" | "UPCOMING",
+  slug: job.slug as string,
+})
+
 export function LatestJobs({ className }: LatestJobsProps) {
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [loading, setLoading] = useState(true)
+  const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
+    "/api/jobs?limit=8&status=ACTIVE",
+    "/api/jobs?limit=8&status=ACTIVE&sort=trending"
+  )
   const [showAll, setShowAll] = useState(false)
 
-  useEffect(() => {
-    fetch("/api/jobs?limit=8&status=ACTIVE")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setJobs(
-            data.data.map((job: Record<string, unknown>) => ({
-              id: job.id as string,
-              title: job.title as string,
-              department: (job.department as { name: string })?.name ?? "",
-              location: (job.location as string) ?? null,
-              totalVacancies: (job.totalVacancies as number) ?? null,
-              lastDateToApply: (job.lastDate as string) ?? null,
-              salary: (job.salary as string) ?? null,
-              status: job.status as "ACTIVE" | "EXPIRED" | "UPCOMING",
-              slug: job.slug as string,
-            }))
-          )
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
+  const jobs = ((tab === "trending" ? trending : latest) ?? []).map(toJob)
+  const busy = tab === "trending" ? trendingLoading && trending === null : loading
   const displayedJobs = showAll ? jobs : jobs.slice(0, 4)
 
   return (
@@ -63,11 +57,16 @@ export function LatestJobs({ className }: LatestJobsProps) {
           icon={Briefcase}
           iconClassName="from-[#1e3a5f] via-blue-800 to-blue-700"
           title="Latest Government Jobs"
-          subtitle="Recent job notifications from central and state governments"
+          subtitle={
+            tab === "trending" && trendingMeta && !trendingMeta.fallback
+              ? `Most viewed over the last ${trendingMeta.windowDays} days`
+              : "Recent job notifications from central and state governments"
+          }
           viewAllHref="/jobs"
+          action={<SectionTabs tab={tab} onChange={(t) => { selectTab(t); setShowAll(false) }} />}
         />
 
-        {loading ? (
+        {busy ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <JobCardSkeleton key={i} />
@@ -76,7 +75,12 @@ export function LatestJobs({ className }: LatestJobsProps) {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {displayedJobs.map((job) => (
-              <div key={job.id}>
+              <div key={job.id} className="relative">
+                {tab === "trending" && (
+                  <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    <Flame className="h-3 w-3" /> Trending
+                  </span>
+                )}
                 <JobCard {...job} />
               </div>
             ))}
