@@ -28,6 +28,7 @@ import { TrustBadge } from "@/components/private/TrustBadge"
 import { EmployerMonitorButton } from "@/components/private/EmployerMonitorButton"
 import { PrepKit } from "@/components/private/PrepKit"
 import { JobTimeline } from "@/components/jobs/JobTimeline"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { JobDocumentsChecklist } from "@/components/jobs/JobDocumentsChecklist"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
@@ -682,14 +683,13 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
                 {job.company.description && <p className="text-gray-600 dark:text-gray-300">{job.company.description}</p>}
                 <div className="mt-3 flex flex-wrap gap-3">
                   {job.company.website && (
-                    <a
-                      href={job.company.website.startsWith("http") ? job.company.website : `https://${job.company.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <SmartExternalLink
+                      href={job.company.website}
+                      linkTitle={`${job.company.name} - official website`}
                       className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-700"
                     >
                       <ExternalLink className="h-4 w-4" /> Visit {job.company.name} Website
-                    </a>
+                    </SmartExternalLink>
                   )}
                   {job.company.slug && (
                     <Link href={`/companies/${job.company.slug}`} className="text-sm font-semibold text-sky-700 hover:underline">All jobs at {job.company.name} →</Link>
@@ -708,13 +708,13 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
                 {trust.reasons.length > 0 ? `${trust.reasons.join(" · ")}. ` : ""}
                 Never pay registration/security deposits. Verify role, salary and venue from the{" "}
                 {job.proofUrl ? (
-                  <a href={job.proofUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-amber-700 underline dark:text-amber-400">
+                  <SmartExternalLink href={job.proofUrl} linkTitle="Official posting proof" className="font-medium text-amber-700 underline dark:text-amber-400">
                     official posting proof
-                  </a>
+                  </SmartExternalLink>
                 ) : job.company.website ? (
-                  <a href={job.company.website.startsWith("http") ? job.company.website : `https://${job.company.website}`} target="_blank" rel="noopener noreferrer" className="font-medium text-amber-700 underline dark:text-amber-400">
+                  <SmartExternalLink href={job.company.website} linkTitle={`${job.company.name} - official website`} className="font-medium text-amber-700 underline dark:text-amber-400">
                     company website
-                  </a>
+                  </SmartExternalLink>
                 ) : (
                   "company website"
                 )}{" "}
@@ -727,9 +727,9 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
           <div className="flex flex-wrap gap-3 pt-2">
             {job.proofUrl && (
               <Button variant="outline" size="lg" asChild>
-                <a href={job.proofUrl} target="_blank" rel="noopener noreferrer">
+                <SmartExternalLink href={job.proofUrl} linkTitle="Official posting proof">
                   <FileText className="mr-2 h-5 w-5" /> View Official Proof
-                </a>
+                </SmartExternalLink>
               </Button>
             )}
             {canApply ? (

@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { PrivateTracker } from "@/components/private/PrivateTracker"
 import { TrustBadge } from "@/components/private/TrustBadge"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 
 interface RailSection {
   id: string
@@ -115,9 +116,9 @@ export function PrivateApplyRail(p: Props) {
           ) : null}
           {p.proofUrl ? (
             <Button variant="outline" className="w-full" asChild>
-              <a href={p.proofUrl} target="_blank" rel="noopener noreferrer">
+              <SmartExternalLink href={p.proofUrl} linkTitle="Official posting proof">
                 <FileText className="mr-2 h-4 w-4" /> Official Posting Proof
-              </a>
+              </SmartExternalLink>
             </Button>
           ) : null}
           <div className="flex gap-2">
@@ -182,14 +183,13 @@ export function PrivateApplyRail(p: Props) {
           </dl>
           <div className="flex flex-wrap gap-1.5 pt-1">
             {p.companyWebsite ? (
-              <a
-                href={p.companyWebsite.startsWith("http") ? p.companyWebsite : `https://${p.companyWebsite}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <SmartExternalLink
+                href={p.companyWebsite}
+                linkTitle={`${p.company} - official website`}
                 className="font-semibold text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-300"
               >
                 Open company website ↗
-              </a>
+              </SmartExternalLink>
             ) : null}
             <a
               href="#discussion"

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 
 interface RailSection {
   id: string
@@ -105,9 +106,9 @@ export function JobApplyRail(p: Props) {
           ) : null}
           {p.officialNotification ? (
             <Button variant="outline" className="w-full" asChild>
-              <a href={p.officialNotification} target="_blank" rel="noopener noreferrer">
+              <SmartExternalLink href={p.officialNotification} linkTitle={`${p.title} - official notification`}>
                 <FileText className="mr-2 h-4 w-4" /> Official Notification
-              </a>
+              </SmartExternalLink>
             </Button>
           ) : null}
           <div className="flex gap-2">
@@ -167,9 +168,9 @@ export function JobApplyRail(p: Props) {
           </dl>
           <div className="flex flex-wrap gap-1.5 pt-1">
             {p.officialWebsite ? (
-              <a href={p.officialWebsite.startsWith("http") ? p.officialWebsite : `https://${p.officialWebsite}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-green-700 underline underline-offset-2 hover:text-green-800 dark:text-green-300">
+              <SmartExternalLink href={p.officialWebsite} linkTitle={`${p.title} - official website`} className="font-semibold text-green-700 underline underline-offset-2 hover:text-green-800 dark:text-green-300">
                 Open official website ↗
-              </a>
+              </SmartExternalLink>
             ) : null}
             <a href="#discussion" onClick={(e) => { e.preventDefault(); document.getElementById("discussion")?.scrollIntoView({ behavior: "smooth" }) }} className="inline-flex items-center gap-1 font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400">
               <Flag className="h-3 w-3" /> Report an error

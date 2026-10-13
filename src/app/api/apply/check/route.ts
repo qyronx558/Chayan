@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { normalizeExternalUrl, getExternalHostname, headersBlockFraming } from "@/lib/apply-room"
+import { normalizeExternalUrl, getExternalHostname, headersBlockFraming, headersIndicatePdf } from "@/lib/apply-room"
 
 /**
  * GET /api/apply/check?url=<external-url>
@@ -60,12 +60,16 @@ export async function GET(req: NextRequest) {
     }
 
     const blocked = headersBlockFraming(res.headers)
+    const contentType = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase() || null
+    const isPdf = headersIndicatePdf(res.headers, normalized)
     return NextResponse.json({
       ok: true,
       hostname,
       frameable: !blocked,
       proxyable: true,
       status: res.status,
+      contentType,
+      isPdf,
     })
   } catch {
     return NextResponse.json({

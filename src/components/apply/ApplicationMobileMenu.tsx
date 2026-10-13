@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, Flag, Info, MoreVertical, RefreshCw, Share2 } from "lucide-react"
+import { Download, ExternalLink, Flag, Info, MoreVertical, RefreshCw, Share2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,9 @@ interface ApplicationMobileMenuProps {
   onReload: () => void
   onShare: () => void
   onReport: () => void
+  downloadUrl?: string | null
+  downloadFilename?: string
+  onDownload?: () => void
 }
 
 /**
@@ -29,6 +32,9 @@ export function ApplicationMobileMenu({
   onReload,
   onShare,
   onReport,
+  downloadUrl,
+  downloadFilename,
+  onDownload,
 }: ApplicationMobileMenuProps) {
   return (
     <DropdownMenu>
@@ -50,6 +56,14 @@ export function ApplicationMobileMenu({
           <RefreshCw className="mr-2 h-4 w-4" />
           Reload website
         </DropdownMenuItem>
+        {downloadUrl ? (
+          <DropdownMenuItem asChild>
+            <a href={downloadUrl} download={downloadFilename || "document.pdf"} onClick={onDownload}>
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </a>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild>
           <a href={officialUrl} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="mr-2 h-4 w-4" />

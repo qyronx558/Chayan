@@ -23,6 +23,7 @@ import { JobDocumentsChecklist } from "@/components/jobs/JobDocumentsChecklist"
 import { JobSelectionStepper } from "@/components/jobs/JobSelectionStepper"
 import { JobApplyRail } from "@/components/jobs/JobApplyRail"
 import { RichTextView } from "@/components/shared/RichTextView"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { containsHtml } from "@/lib/blog-prose"
 import { feeKpi, stepify, windowProgress } from "@/lib/job-insights"
 
@@ -537,9 +538,13 @@ export function JobDetailContent({
               <p className="font-semibold text-amber-800 dark:text-amber-300">Important Note</p>
               <p className="mt-0.5">
                 This is not a government website. Always verify all details (fees, dates, eligibility) from the{" "}
-                <a href={officialWebsite || "#"} target="_blank" rel="noopener noreferrer" className="font-medium text-amber-700 underline dark:text-amber-400">
-                  official notification
-                </a>{" "}
+                {officialWebsite ? (
+                  <SmartExternalLink href={officialWebsite} linkTitle={`${title} - official notification`} className="font-medium text-amber-700 underline dark:text-amber-400">
+                    official notification
+                  </SmartExternalLink>
+                ) : (
+                  <span className="font-medium text-amber-700 dark:text-amber-400">official notification</span>
+                )}{" "}
                 before applying. We recommend applying only through the official website.
               </p>
             </div>
@@ -549,9 +554,9 @@ export function JobDetailContent({
           <div className="flex flex-wrap gap-3 pt-2">
             {officialNotification && (
               <Button variant="outline" size="lg" asChild>
-                <a href={officialNotification} target="_blank" rel="noopener noreferrer">
+                <SmartExternalLink href={officialNotification} linkTitle={`${title} - official notification`}>
                   <FileText className="mr-2 h-5 w-5" /> Download Official Notification
-                </a>
+                </SmartExternalLink>
               </Button>
             )}
             {canApply ? (

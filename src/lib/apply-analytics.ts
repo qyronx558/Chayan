@@ -15,6 +15,17 @@ export type ApplyAnalyticsEvent =
   | "sidebar_collapsed"
   | "job_info_opened"
   | "report_issue_clicked"
+  | "browse_opened"
+  | "browser_navigate"
+  | "browser_tab_opened"
+  | "browser_tab_closed"
+  | "proxy_preview_shown"
+  | "proxy_preview_retry"
+  | "pdf_preview_shown"
+  | "pdf_download_clicked"
+  | "interstitial_shown"
+  | "continue_clicked"
+  | "returned_to_chayanjobs"
 
 export function trackApplyEvent(event: ApplyAnalyticsEvent, payload: ApplyAnalyticsPayload): void {
   if (typeof window === "undefined") return

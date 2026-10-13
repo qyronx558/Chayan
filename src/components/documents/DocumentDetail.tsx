@@ -22,6 +22,7 @@ import { JobFollowBell } from "@/components/jobs/JobFollowBell"
 import { DocumentInsightStrip, type PrimaryDateMode } from "@/components/documents/DocumentInsightStrip"
 import { DocumentSideRail } from "@/components/documents/DocumentSideRail"
 import { RichTextView } from "@/components/shared/RichTextView"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { containsHtml } from "@/lib/blog-prose"
 import { feeKpi, windowProgress } from "@/lib/job-insights"
 
@@ -421,12 +422,13 @@ export function DocumentDetail({
                             </span>
                           </TableCell>
                           <TableCell>
-                            <a
+                            <SmartExternalLink
                               href={item.href}
+                              linkTitle={item.value}
                               className="inline-flex items-center gap-1 font-medium text-green-700 hover:text-orange-600 dark:text-green-400 dark:hover:text-orange-300"
                             >
                               {item.value} <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
+                            </SmartExternalLink>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useActiveSection } from "@/components/shared/useActiveSection"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 
 interface RailSection {
   id: string
@@ -131,9 +132,9 @@ export function DocumentSideRail(p: Props) {
               <div key={l.label} className="flex justify-between gap-2">
                 <dt className="shrink-0 text-gray-500">{l.label}</dt>
                 <dd className="truncate text-right">
-                  <a href={l.href} className="font-semibold text-green-700 underline-offset-2 hover:underline dark:text-green-300">
+                  <SmartExternalLink href={l.href} linkTitle={l.value} className="font-semibold text-green-700 underline-offset-2 hover:underline dark:text-green-300">
                     {l.value}
-                  </a>
+                  </SmartExternalLink>
                 </dd>
               </div>
             ))}

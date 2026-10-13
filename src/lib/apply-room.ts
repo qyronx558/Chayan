@@ -16,7 +16,15 @@ export function isSafeExternalUrl(raw: string | null | undefined): boolean {
     // Allow protocol-relative URLs by assuming https
     const normalized = value.startsWith("//") ? `https:${value}` : value
     const url = new URL(normalized)
-    return url.protocol === "http:" || url.protocol === "https:"
+    if (url.protocol === "http:" || url.protocol === "https:") return true
+  } catch {
+    // Fall through to bare-domain check below.
+  }
+  // Bare domains like "upsc.gov.in/apply" -> assume https (no spaces allowed).
+  if (/\s/.test(value)) return false
+  try {
+    const url = new URL(`https://${value}`)
+    return (url.protocol === "http:" || url.protocol === "https:") && url.hostname.includes(".")
   } catch {
     return false
   }
@@ -69,4 +77,64 @@ export function headersBlockFraming(headers: Headers): boolean {
   if (value.includes("'none'")) return true
   if (value === "'self'" || value.startsWith("'self' ")) return true
   return false
+}
+
+/** True when response headers look like a PDF document. */
+export function headersIndicatePdf(headers: Headers, url?: string): boolean {
+  const ct = (headers.get("content-type") || "").toLowerCase()
+  if (ct.includes("application/pdf")) return true
+  if (ct.includes("octet-stream") && url && /\.pdf(\?|#|$)/i.test(url)) return true
+  if (url && /\.pdf(\?|#|$)/i.test(url) && !ct.includes("text/html")) return true
+  return false
+}
+
+/**
+ * Heuristic: does raw user input look like a URL (vs a search query)?
+ * Accepts absolute http(s), protocol-relative, and bare domains like
+ * "ssc.gov.in" or "upsc.gov.in/apply". Everything else is a search.
+ */
+export function looksLikeUrl(raw: string | null | undefined): boolean {
+  if (!raw) return false
+  const value = raw.trim()
+  if (!value || /\s/.test(value)) return false
+  if (/^(javascript|data|vbscript|file|blob|mailto|tel|sms|ftp):/i.test(value)) return false
+  if (/^(https?:)?\/\//i.test(value)) return isSafeExternalUrl(value)
+  // bare domain with dot + optional path, e.g. ssc.gov.in/result
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(:\d+)?(\/\S*)?$/i.test(value)) return true
+  return false
+}
+
+/** Build the universal in-app browser URL: /browse?url=&title=&from= */
+export function buildBrowseUrl(
+  url: string,
+  opts?: { title?: string | null; from?: string | null; download?: boolean }
+): string {
+  const params = new URLSearchParams()
+  params.set("url", url)
+  if (opts?.title) params.set("title", opts.title)
+  if (opts?.from) params.set("from", opts.from)
+  if (opts?.download) params.set("download", "1")
+  return `/browse?${params.toString()}`
+}
+
+/** Build the proxied PDF viewer URL served from ChayanJobs origin. */
+export function buildDocProxyUrl(url: string, download = false): string {
+  return `/api/doc?url=${encodeURIComponent(url)}${download ? "&download=1" : ""}`
+}
+
+/** Build the proxied HTML preview URL served from ChayanJobs origin. */
+export function buildHtmlProxyUrl(url: string): string {
+  return `/api/proxy?url=${encodeURIComponent(url)}`
+}
+
+/** Sanitize a slug/title into a safe download filename (ascii, no traversal). */
+export function sanitizeDownloadFilename(raw: string | null | undefined, fallback = "document.pdf"): string {
+  const base = (raw || "").trim().replace(/\.pdf$/i, "").slice(0, 80) || "document"
+  const safe = base
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80) || "document"
+  return `${safe}.pdf`
 }

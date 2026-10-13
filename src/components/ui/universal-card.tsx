@@ -14,7 +14,7 @@ export interface UniversalMeta {
   highlight?: boolean
 }
 
-/** Legacy alias — prefer UniversalMeta */
+/** Legacy alias - prefer UniversalMeta */
 export type ContentCardMeta = UniversalMeta
 
 export interface UniversalCardProps {
@@ -28,7 +28,7 @@ export interface UniversalCardProps {
   description?: string | null
   /** max 3 rendered */
   metadata?: UniversalMeta[]
-  /** primary CTA — label defaults to theme */
+  /** primary CTA - label defaults to theme */
   primaryCtaLabel?: string
   primaryCtaUrl?: string
   /** right-side actions */
@@ -39,9 +39,9 @@ export interface UniversalCardProps {
   variant?: "compact" | "standard" | "wide"
   className?: string
   /** ── legacy ContentCard props (kept for compat; icon props are ignored) ── */
-  /** @deprecated card icons removed — prop ignored */
+  /** @deprecated card icons removed - prop ignored */
   icon?: LucideIcon
-  /** @deprecated card icons removed — prop ignored */
+  /** @deprecated card icons removed - prop ignored */
   iconClassName?: string
   badge?: React.ReactNode
   statusBadge?: React.ReactNode
@@ -160,7 +160,7 @@ export function UniversalCard({
 
       {/* Main content */}
       <div className={cn("flex flex-1 flex-col", variant === "compact" ? "px-4" : "px-5")}>
-        <Link href={ctaHref} aria-label={`${ctaText} — ${title}`} className="focus-visible:outline-none">
+        <Link href={ctaHref} aria-label={`${ctaText} - ${title}`} className="focus-visible:outline-none">
           <h3
             className={cn(
               "line-clamp-2 break-words font-bold leading-snug text-slate-900",
@@ -203,12 +203,12 @@ export function UniversalCard({
         {metaItems.length === 0 && <div className="mt-auto" />}
       </div>
 
-      {/* Bottom action bar — always bottom-aligned */}
+      {/* Bottom action bar - always bottom-aligned */}
       <div className={cn(variant === "compact" ? "px-4 pb-4" : "px-5 pb-5")}>
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
           <Link
             href={ctaHref}
-            aria-label={`${ctaText} — ${title}`}
+            aria-label={`${ctaText} - ${title}`}
             className={cn(
               "inline-flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-semibold transition-all",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",

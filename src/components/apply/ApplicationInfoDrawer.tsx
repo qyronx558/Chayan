@@ -27,6 +27,11 @@ interface ApplicationInfoDrawerProps {
   aboutCopy?: string
   /** Overrides the footer CTA label (used by document viewers). */
   ctaLabel?: string
+  /** When set (PDF mode), footer CTA downloads from ChayanJobs origin. */
+  downloadUrl?: string | null
+  downloadFilename?: string
+  onDownload?: () => void
+  onApply?: () => void
 }
 
 /**
@@ -47,6 +52,10 @@ export function ApplicationInfoDrawer({
   onReport,
   aboutCopy,
   ctaLabel = "Apply Now",
+  downloadUrl,
+  downloadFilename,
+  onDownload,
+  onApply,
 }: ApplicationInfoDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -98,15 +107,28 @@ export function ApplicationInfoDrawer({
         </div>
 
         <div className="space-y-2 border-t border-gray-100 px-5 py-4 dark:border-gray-800">
-          <a
-            href={officialUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
-          >
-            {ctaLabel}
-            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </a>
+          {downloadUrl ? (
+            <a
+              href={downloadUrl}
+              download={downloadFilename || "document.pdf"}
+              onClick={onDownload}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            >
+              {ctaLabel}
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          ) : (
+            <a
+              href={officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onApply}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            >
+              {ctaLabel}
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          )}
           <button
             type="button"
             onClick={onReport}

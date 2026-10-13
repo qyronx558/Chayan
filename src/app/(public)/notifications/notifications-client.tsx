@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
+import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 
 function recordView(id: string) {
   fetch(`/api/notifications/${id}/view`, { method: "POST" }).catch(() => {})
@@ -84,7 +85,7 @@ export function NotificationsClient({ notifications: initialNotifications, categ
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore) return
-    // More locally-filtered items to reveal — no network needed.
+    // More locally-filtered items to reveal - no network needed.
     if (hasMoreFiltered) {
       setPage((p) => p + 1)
       return
@@ -220,9 +221,9 @@ export function NotificationsClient({ notifications: initialNotifications, categ
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       {notification.officialUrl && (
                         <Button size="sm" variant="outline" asChild>
-                          <a href={notification.officialUrl} target="_blank" rel="noopener noreferrer">
+                          <SmartExternalLink href={notification.officialUrl} linkTitle={notification.title}>
                             <FileText className="mr-1.5 h-4 w-4" /> Official Link
-                          </a>
+                          </SmartExternalLink>
                         </Button>
                       )}
                       {notification.href && (

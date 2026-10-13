@@ -14,7 +14,7 @@ interface InfiniteListFooterProps {
   onRetry?: () => void
   loadedCount: number
   total: number
-  /** e.g. "jobs", "results" — used in the end-of-list message. */
+  /** e.g. "jobs", "results" - used in the end-of-list message. */
   label?: string
 }
 
@@ -36,7 +36,7 @@ export function InfiniteListFooter({
 }: InfiniteListFooterProps) {
   return (
     <div className="mt-8 flex flex-col items-center gap-3" aria-live="polite">
-      {/* Invisible trigger — auto-loads next batch like Amazon product lists */}
+      {/* Invisible trigger - auto-loads next batch like Amazon product lists */}
       <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />
 
       {loadMoreError && !loadingMore && (

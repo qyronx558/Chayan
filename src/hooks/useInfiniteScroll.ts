@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 interface UseInfiniteScrollOptions {
   /** Whether more pages exist. Observer disconnects when false. */
   hasMore: boolean
-  /** True while initial load or append is in flight — suppresses re-trigger. */
+  /** True while initial load or append is in flight - suppresses re-trigger. */
   isLoading: boolean
   /** Called when the sentinel scrolls into view (auto-load next batch). */
   onLoadMore: () => void

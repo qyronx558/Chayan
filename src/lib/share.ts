@@ -25,7 +25,7 @@ export async function shareOrCopy(opts: {
       return "shared"
     }
   } catch {
-    // user dismissed native sheet — not an error
+    // user dismissed native sheet - not an error
     return "dismissed"
   }
 
