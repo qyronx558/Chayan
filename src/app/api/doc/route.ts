@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
       "Cache-Control": "private, max-age=300",
       "Content-Security-Policy": "frame-ancestors 'self'",
       "X-Content-Type-Options": "nosniff",
-      "Accept-Ranges": "bytes",
+      // NOTE: no Accept-Ranges — the full body is buffered server-side,
+      // so advertising range support would confuse download resume.
     }
     if (wantDownload) {
       headers["Content-Disposition"] = `attachment; filename="${filename}"`

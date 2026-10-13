@@ -18,6 +18,7 @@ import type { ApplicationShellProps } from "@/components/apply/application-types
 import { isDocumentApplication } from "@/components/apply/application-types"
 import { trackApplyEvent } from "@/lib/apply-analytics"
 import { buildDocProxyUrl, buildHtmlProxyUrl, getExternalHostname, normalizeExternalUrl } from "@/lib/apply-room"
+import { downloadPdfFile } from "@/lib/download-pdf"
 
 type FrameStatus = "checking" | "allowed" | "blocked" | "unknown"
 type ViewMode = "direct" | "preview"
@@ -261,10 +262,21 @@ export function ApplicationShell(props: ApplicationShellProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
   }, [analyticsBase])
 
-  const handleDownload = useCallback(() => {
-    trackApplyEvent("pdf_download_clicked", analyticsBase)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
-  }, [analyticsBase])
+  const handleDownload = useCallback((e?: { preventDefault(): void }) => {
+    // Stop the anchor's same-tab navigation: the helper downloads via blob
+    // (stays in place) and only opens a new tab if the proxy fails.
+    e?.preventDefault();
+    trackApplyEvent("pdf_download_clicked", analyticsBase);
+    if (!downloadUrl) return;
+    void (async () => {
+      const result = await downloadPdfFile({
+        proxyUrl: downloadUrl,
+        directUrl: currentUrl,
+        filename: downloadFilename,
+      });
+      if (result === "direct") trackApplyEvent("official_site_opened", analyticsBase);
+    })();
+  }, [analyticsBase, downloadUrl, currentUrl, downloadFilename])
 
   const handleNavigate = useCallback((url: string) => {
     navigateActive(url)
