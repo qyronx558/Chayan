@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Search, AlertCircle, Calendar, Download, X, Ticket } from "lucide-react"
+import { Search, AlertCircle, Calendar, X, Ticket } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { SectionHero } from "@/components/layout/SectionHero"
-import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import { formatDate } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   useInfiniteScroll,
@@ -147,9 +149,9 @@ export function AdmitCardsClient() {
           </div>
         </div>
 {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={moduleTheme.admitCard.listGrid}>
             {Array.from({ length: LIMIT }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -161,52 +163,31 @@ export function AdmitCardsClient() {
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
-        ) : items.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <Search className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No admit cards found</h3>
-              <p className="text-sm text-gray-500">
-                Try adjusting your search or check back later.
-              </p>
-            </CardContent>
-          </Card>
+        ) : filterValidItems(items).length === 0 ? (
+          <UniversalCardEmpty title="No admit cards found" hint="Try adjusting your search or check back later." />
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {items.length} of {total} admit cards
+              Showing {filterValidItems(items).length} of {total} admit cards
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
+            <div className={moduleTheme.admitCard.listGrid}>
+              {filterValidItems(items).map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.35 }}
+                  className="h-full"
                 >
-                  <ContentCard
-                  icon={Ticket}
-                  iconClassName="from-violet-600 to-purple-800"
-                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{item.department.name}</Badge>}
-                  statusBadge={<span className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">Admit Card</span>}
-                  title={item.title}
-                  meta={item.examDate ? [{ icon: Calendar, text: `Exam: ${formatDate(item.examDate)}` }] : []}
-                  href={`/admit-card/${item.slug}`}
-                  ctaLabel="View Details"
-                  footer={
-                    <div className="flex items-center gap-1">
-                      <BookmarkButton admitCardId={item.id} />
-                      {item.downloadUrl && (
-                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                          <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-3.5 w-3.5" />
-                            Download
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  }
+                  <UniversalCard
+                  module="admitCard"
+                  title={cleanTitle(item.title)}
+                  organization={item.department.name}
+                  metadata={item.examDate ? [{ icon: Calendar, text: `Exam: ${formatDate(item.examDate)}` }] : []}
+                  primaryCtaUrl={`/admit-card/${item.slug}`}
+                  save={<BookmarkButton admitCardId={item.id} />}
+                  share={<CardShareButton title={cleanTitle(item.title)} url={`/admit-card/${item.slug}`} />}
                 />
                 </motion.div>
               ))}
@@ -214,7 +195,7 @@ export function AdmitCardsClient() {
             {loadingMore && (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <ContentCardSkeleton key={i} />
+                  <UniversalCardSkeleton key={i} />
                 ))}
               </div>
             )}
@@ -225,7 +206,7 @@ export function AdmitCardsClient() {
               loadMoreError={loadMoreError}
               onLoadMore={loadMore}
               onRetry={loadMore}
-              loadedCount={items.length}
+              loadedCount={filterValidItems(items).length}
               total={total}
               label="admit cards"
             />

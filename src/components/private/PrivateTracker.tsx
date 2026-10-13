@@ -22,6 +22,7 @@ export const PRIVATE_STATUSES: { value: PrivateStatus; label: string; icon: type
 ]
 
 export function PrivateTracker({ privateJobId, variant = "full", className = "", onChange }: { privateJobId: string; variant?: "compact" | "full"; className?: string; onChange?: (s: PrivateStatus | null) => void }) {
+  void variant
   const { data: session } = useSession()
   const router = useRouter()
   const [status, setStatus] = useState<PrivateStatus | null>(null)
@@ -70,28 +71,28 @@ export function PrivateTracker({ privateJobId, variant = "full", className = "",
     } finally { setLoading(false) }
   }
 
-  if (checking) return <div className={cn("h-9 w-32 animate-pulse rounded-md bg-gray-100", className)} />
+  if (checking) return <div className={cn("h-8 w-24 animate-pulse rounded-lg bg-slate-100", className)} />
   const info = PRIVATE_STATUSES.find((s) => s.value === status)
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size={variant === "compact" ? "sm" : "default"} disabled={loading} className={cn("gap-2 font-semibold shadow-sm", status ? cn("border-transparent text-white", info?.active) : "", className)}>
-          {info ? <info.icon className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {info ? info.label : "Track Application"}
-          <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+        <Button variant="outline" size="sm" disabled={loading} aria-label={info ? `Tracking: ${info.label}. Change status` : "Track this job"} className={cn("h-8 gap-1.5 rounded-lg border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-500 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-1", status && cn("border-transparent text-white hover:text-white", info?.active), className)}>
+          {info ? <info.icon className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {info ? info.label : "Track"}
+          <ChevronDown className="h-3 w-3 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel className="text-xs text-gray-500">Private pipeline</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent align="end" sideOffset={6} className="w-48 rounded-[14px] border-slate-200 bg-white p-1.5 shadow-xl">
+        <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Private pipeline</DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-slate-100" />
         {PRIVATE_STATUSES.map((s) => (
-          <DropdownMenuItem key={s.value} onClick={() => update(s.value)} className={cn("gap-2 text-sm", status === s.value && "bg-gray-50 font-semibold")}>
-            <s.icon className={cn("h-4 w-4", s.color)} /> {s.label}
-            {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-gray-400" />}
+          <DropdownMenuItem key={s.value} onClick={() => update(s.value)} className={cn("gap-2 rounded-lg px-2 py-2 text-[13px] focus:bg-slate-50", status === s.value && "bg-slate-50 font-semibold")}>
+            <s.icon className={cn("h-4 w-4", s.color)} aria-hidden /> {s.label}
+            {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-slate-400" aria-hidden />}
           </DropdownMenuItem>
         ))}
-        {status && (<><DropdownMenuSeparator /><DropdownMenuItem onClick={stop} className="gap-2 text-sm text-red-600"><Trash2 className="h-4 w-4" /> Stop tracking</DropdownMenuItem></>)}
+        {status && (<><DropdownMenuSeparator className="bg-slate-100" /><DropdownMenuItem onClick={stop} className="gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-red-600 focus:bg-red-50 focus:text-red-600"><Trash2 className="h-4 w-4" aria-hidden /> Stop tracking</DropdownMenuItem></>)}
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -1,21 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import {
   Calendar,
   MapPin,
-  IndianRupee,
   Users,
-  Share2,
-  Clock3,
 } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
-import { cn, formatDate, formatSalary, getStatusColor } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ContentCard } from "@/components/ui/content-card"
+import { cn, formatDate } from "@/lib/utils"
+import { UniversalCard, UniversalCardSkeleton } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { cleanTitle } from "@/lib/card-helpers"
 
 interface JobCardProps {
   id: string
@@ -49,110 +44,42 @@ export function JobCard({
   slug,
   className,
 }: JobCardProps) {
-  const [isSharing, setIsSharing] = useState(false)
   const isLastDateUrgent = lastDateToApply
     ? new Date(lastDateToApply).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000 &&
       new Date(lastDateToApply) > new Date()
     : false
 
-  const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (navigator.share) {
-      try {
-        setIsSharing(true)
-        await navigator.share({
-          title,
-          text: `Apply for ${title} - ${department}`,
-          url: `/apply/${slug}`,
-        })
-      } catch {
-      } finally {
-        setIsSharing(false)
-      }
-    } else {
-      await navigator.clipboard.writeText(`${window.location.origin}/apply/${slug}`)
-    }
-  }
+  const meta = [
+    ...(totalVacancies != null
+      ? [{ icon: Users, text: `${totalVacancies} ${totalVacancies === 1 ? "Vacancy" : "Vacancies"}` }]
+      : []),
+    ...(lastDateToApply
+      ? [{ icon: Calendar, text: formatDate(lastDateToApply), highlight: isLastDateUrgent }]
+      : []),
+    ...(location
+      ? [{ icon: MapPin, text: location }]
+      : salary
+        ? [{ icon: MapPin, text: salary }]
+        : []),
+  ].slice(0, 3)
 
   return (
     <div className={cn("h-full", className)}>
-      <ContentCard
-        badge={
-          <Badge
-            variant="secondary"
-            className="max-w-[60%] truncate bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-50"
-          >
-            {department}
-          </Badge>
-        }
-        statusBadge={
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
-              getStatusColor(status)
-            )}
-          >
-            {status === "UPCOMING" && <Clock3 className="h-3 w-3" />}
-            {statusLabel[status]}
-          </span>
-        }
-        title={title}
-        meta={[
-          ...(location ? [{ icon: MapPin, text: location }] : []),
-          ...(totalVacancies != null ? [{ icon: Users, text: `${totalVacancies} Vacanc${totalVacancies === 1 ? "y" : "ies"}` }] : []),
-          ...(lastDateToApply
-            ? [{ icon: Calendar, text: formatDate(lastDateToApply), highlight: isLastDateUrgent }]
-            : []),
-          { icon: IndianRupee, text: formatSalary(salary) },
-        ]}
-        href={`/apply/${slug}`}
-        ctaLabel="Apply Now"
-        footer={
-          <div className="flex items-center gap-2">
-            <ApplicationTracker jobId={id} />
-            <BookmarkButton
-              jobId={id}
-              className="h-8 w-8 border border-gray-200 bg-white text-gray-500 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 border-gray-200 bg-white text-gray-500 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-              onClick={handleShare}
-              disabled={isSharing}
-              aria-label="Share"
-            >
-              <Share2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        }
+      <UniversalCard
+        module="government"
+        title={cleanTitle(title)}
+        organization={department}
+        status={statusLabel[status]}
+        metadata={meta}
+        primaryCtaUrl={`/apply/${slug}`}
+        track={<ApplicationTracker jobId={id} />}
+        save={<BookmarkButton jobId={id} />}
+        share={<CardShareButton title={cleanTitle(title)} url={`/apply/${slug}`} text={`Apply for ${cleanTitle(title)} - ${department}`} />}
       />
     </div>
   )
 }
 
 export function JobCardSkeleton() {
-  return (
-    <Card className="overflow-hidden border-gray-200 bg-white">
-      <CardContent className="p-0">
-        <div className="flex items-center gap-1.5 p-5 pb-3">
-          <div className="h-5 w-20 animate-pulse rounded-full bg-gray-100" />
-          <div className="h-5 w-14 animate-pulse rounded-full bg-gray-100" />
-        </div>
-        <div className="px-5">
-          <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
-          <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-gray-100" />
-        </div>
-        <div className="flex gap-1.5 px-5 pt-4">
-          <div className="h-6 w-20 animate-pulse rounded-md bg-gray-100" />
-          <div className="h-6 w-24 animate-pulse rounded-md bg-gray-100" />
-          <div className="h-6 w-24 animate-pulse rounded-md bg-gray-100" />
-        </div>
-        <div className="p-5">
-          <div className="h-7 w-24 animate-pulse rounded-lg bg-gray-100" />
-        </div>
-      </CardContent>
-    </Card>
-  )
+  return <UniversalCardSkeleton />
 }

@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Search, AlertCircle, Download, Calendar, IndianRupee, X, GraduationCap } from "lucide-react"
+import { Search, AlertCircle, Calendar, IndianRupee, X, GraduationCap } from "lucide-react"
 import { SectionHero } from "@/components/layout/SectionHero"
 import { formatDate } from "@/lib/utils"
-import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
+import { CardShareButton } from "@/components/ui/card-actions"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   useInfiniteScroll,
@@ -118,6 +120,8 @@ export function AdmissionsClient() {
     onLoadMore: loadMore,
   })
 
+  const visibleItems = filterValidItems(items)
+
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -151,9 +155,9 @@ export function AdmissionsClient() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={moduleTheme.admission.listGrid}>
             {Array.from({ length: LIMIT }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -165,65 +169,47 @@ export function AdmissionsClient() {
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
-        ) : items.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <Search className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No admissions found</h3>
-              <p className="text-sm text-gray-500">
-                Try adjusting your search or check back later.
-              </p>
-            </CardContent>
-          </Card>
+        ) : visibleItems.length === 0 ? (
+          <UniversalCardEmpty
+            title="No admissions found"
+            hint="Try adjusting your search or check back later."
+          />
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {items.length} of {total} admissions
+              Showing {visibleItems.length} of {total} admissions
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
+            <div className={moduleTheme.admission.listGrid}>
+              {visibleItems.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.35 }}
+                  className="h-full"
                 >
-                  <ContentCard
-                  icon={GraduationCap}
-                  iconClassName="from-cyan-600 to-sky-800"
-                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{item.department.name}</Badge>}
-                  statusBadge={<span className="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-[11px] font-semibold text-cyan-700">Admission</span>}
-                  title={item.title}
-                  description={item.description}
-                  meta={[
-                    ...(item.lastDate ? [{ icon: Calendar, text: `Last: ${formatDate(item.lastDate)}`, highlight: true }] : []),
-                    ...(item.startDate ? [{ icon: Calendar, text: `Start: ${formatDate(item.startDate)}` }] : []),
-                    ...(item.applicationFee ? [{ icon: IndianRupee, text: `Fee: ${item.applicationFee}` }] : []),
-                  ]}
-                  href={`/admission/${item.slug}`}
-                  ctaLabel="View Details"
-                  footer={
-                    <div className="flex items-center gap-2">
-                      <ApplicationTracker jobId={item.id} type="admission" />
-                      {item.pdfUrl ? (
-                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                          <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-3.5 w-3.5" />
-                            PDF
-                          </a>
-                        </Button>
-                      ) : null}
-                    </div>
-                  }
-                />
+                  <UniversalCard
+                    module="admission"
+                    title={cleanTitle(item.title)}
+                    organization={item.department.name}
+                    description={item.description}
+                    metadata={[
+                      ...(item.lastDate ? [{ icon: Calendar, text: `Last: ${formatDate(item.lastDate)}`, highlight: true }] : []),
+                      ...(item.startDate ? [{ icon: Calendar, text: `Start: ${formatDate(item.startDate)}` }] : []),
+                      ...(item.applicationFee ? [{ icon: IndianRupee, text: `Fee: ${item.applicationFee}` }] : []),
+                    ]}
+                    primaryCtaUrl={`/admission/${item.slug}`}
+                    track={<ApplicationTracker jobId={item.id} type="admission" />}
+                    share={<CardShareButton title={cleanTitle(item.title)} url={`/admission/${item.slug}`} />}
+                  />
                 </motion.div>
               ))}
             </div>
             {loadingMore && (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className={`mt-6 ${moduleTheme.admission.listGrid}`}>
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <ContentCardSkeleton key={i} />
+                  <UniversalCardSkeleton key={i} />
                 ))}
               </div>
             )}
@@ -234,7 +220,7 @@ export function AdmissionsClient() {
               loadMoreError={loadMoreError}
               onLoadMore={loadMore}
               onRetry={loadMore}
-              loadedCount={items.length}
+              loadedCount={visibleItems.length}
               total={total}
               label="admissions"
             />

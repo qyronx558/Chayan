@@ -118,36 +118,34 @@ export function ApplicationTracker({
             size="sm"
             disabled={loading}
             className={cn(
-              "h-8 gap-1.5 px-2.5 text-[11px] font-semibold shadow-sm",
-              tracked
-                ? cn("border-transparent text-white", info?.active || "bg-teal-600 text-white")
-                : "border-gray-200 bg-white text-gray-500 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-teal-700",
+              "h-8 gap-1.5 rounded-lg border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-500 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+              tracked && cn("border-transparent text-white hover:text-white", info?.active || "bg-slate-600"),
               className
             )}
-            aria-label="Application status"
+            aria-label={tracked && info ? `Tracking: ${info.label}. Change status` : "Track this job"}
           >
             {tracked && info ? <info.icon className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             {tracked && info ? info.short : "Track"}
             <ChevronDown className="h-3 w-3 opacity-60" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-44">
-          <DropdownMenuLabel className="text-xs text-gray-500">Application Status</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="end" sideOffset={6} className="w-48 rounded-[14px] border-slate-200 bg-white p-1.5 shadow-xl">
+          <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Application status</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-slate-100" />
           {TRACKER_STATUSES.map((s) => (
             <DropdownMenuItem
               key={s.value}
               onClick={() => updateStatus(s.value)}
-              className={cn("gap-2 text-sm", status === s.value && "bg-gray-50 font-semibold dark:bg-gray-800")}
+              className={cn("gap-2 rounded-lg px-2 py-2 text-[13px] focus:bg-slate-50", status === s.value && "bg-slate-50 font-semibold")}
             >
-              <s.icon className={cn("h-4 w-4", s.color)} />
+              <s.icon className={cn("h-4 w-4", s.color)} aria-hidden />
               {s.label}
-              {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-gray-400" />}
+              {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-slate-400" aria-hidden />}
             </DropdownMenuItem>
           ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={stopTracking} className="gap-2 text-sm text-red-600 focus:text-red-600">
-            <Trash2 className="h-4 w-4" />
+          <DropdownMenuSeparator className="bg-slate-100" />
+          <DropdownMenuItem onClick={stopTracking} className="gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-red-600 focus:bg-red-50 focus:text-red-600">
+            <Trash2 className="h-4 w-4" aria-hidden />
             Stop Tracking
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -163,37 +161,36 @@ export function ApplicationTracker({
           size="sm"
           disabled={loading}
           className={cn(
-            "gap-2 shadow-sm",
-            tracked
-              ? cn("border-transparent font-semibold text-white", info?.active || "bg-teal-600 text-white")
-              : "border-orange-300 bg-white/90 font-semibold text-gray-800 backdrop-blur hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white",
+            "h-8 gap-1.5 rounded-lg border-slate-200 bg-white px-2.5 text-[12px] font-semibold text-slate-600 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+            tracked && cn("border-transparent text-white hover:text-white", info?.active || "bg-slate-600"),
             className
           )}
+          aria-label={tracked && info ? `Tracking: ${info.label}. Change status` : "Track application"}
         >
           {tracked && info ? <info.icon className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {tracked && info ? info.label : "Track Application"}
+          {tracked && info ? info.label : "Track"}
           <ChevronDown className="h-3.5 w-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel className="text-xs text-gray-500">Application Status</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent align="end" sideOffset={6} className="w-48 rounded-[14px] border-slate-200 bg-white p-1.5 shadow-xl">
+        <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Application status</DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-slate-100" />
         {TRACKER_STATUSES.map((s) => (
           <DropdownMenuItem
             key={s.value}
             onClick={() => updateStatus(s.value)}
-            className={cn("gap-2 text-sm", status === s.value && "bg-gray-50 font-semibold dark:bg-gray-800")}
+            className={cn("gap-2 rounded-lg px-2 py-2 text-[13px] focus:bg-slate-50", status === s.value && "bg-slate-50 font-semibold")}
           >
-            <s.icon className={cn("h-4 w-4", s.color)} />
+            <s.icon className={cn("h-4 w-4", s.color)} aria-hidden />
             {s.label}
-            {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-gray-400" />}
+            {status === s.value && <CheckCheck className="ml-auto h-3.5 w-3.5 text-slate-400" aria-hidden />}
           </DropdownMenuItem>
         ))}
         {tracked && (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={stopTracking} className="gap-2 text-sm text-red-600 focus:text-red-600">
-              <Trash2 className="h-4 w-4" />
+            <DropdownMenuSeparator className="bg-slate-100" />
+            <DropdownMenuItem onClick={stopTracking} className="gap-2 rounded-lg px-2 py-2 text-[13px] font-medium text-red-600 focus:bg-red-50 focus:text-red-600">
+              <Trash2 className="h-4 w-4" aria-hidden />
               Stop Tracking
             </DropdownMenuItem>
           </>

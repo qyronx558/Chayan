@@ -7,7 +7,9 @@ import { Search, AlertCircle, Filter, X, Building2, Wifi, Sparkles, Flag, Briefc
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { filterValidItems } from "@/lib/card-helpers"
 import { PrivateJobCard } from "@/components/private/PrivateJobCard"
 import { JobRecommendations } from "@/components/jobs/JobRecommendations"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -162,6 +164,8 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
     isLoading: loading || loadingMore,
     onLoadMore: loadMore,
   })
+
+  const visibleJobs = filterValidItems(jobs)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -325,9 +329,9 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={moduleTheme.privateJob.listGrid}>
             {Array.from({ length: LIMIT }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -339,30 +343,26 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
-        ) : jobs.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <Briefcase className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No private jobs found</h3>
-              <p className="mb-4 text-sm text-gray-500">
-                Try adjusting your search or filter criteria.
-              </p>
-              {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
-            </CardContent>
-          </Card>
+        ) : visibleJobs.length === 0 ? (
+          <UniversalCardEmpty
+            title="No private jobs found"
+            hint="Try adjusting your search or filter criteria."
+            action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+          />
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {jobs.length} of {total} private jobs
+              Showing {visibleJobs.length} of {total} private jobs
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {jobs.map((job) => (
+            <div className={moduleTheme.privateJob.listGrid}>
+              {visibleJobs.map((job) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.35 }}
+                  className="h-full"
                 >
                   <PrivateJobCard
                     id={job.id}
@@ -382,14 +382,15 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
                     isFresherFriendly={job.isFresherFriendly}
                     isWalkIn={job.isWalkIn}
                     status={job.status}
+                    variant="standard"
                   />
                 </motion.div>
               ))}
             </div>
             {loadingMore && (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className={`mt-6 ${moduleTheme.privateJob.listGrid}`}>
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <ContentCardSkeleton key={i} />
+                  <UniversalCardSkeleton key={i} />
                 ))}
               </div>
             )}
@@ -400,7 +401,7 @@ export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: 
               loadMoreError={loadMoreError}
               onLoadMore={loadMore}
               onRetry={loadMore}
-              loadedCount={jobs.length}
+              loadedCount={visibleJobs.length}
               total={total}
               label="private jobs"
             />

@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { BlogCard } from "@/components/blog/BlogCard"
+import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import {
   useInfiniteScroll,
   appendUnique,
@@ -164,7 +166,7 @@ export function BlogClient() {
     [posts, isFiltered, sort]
   )
   const gridPosts = useMemo(
-    () => (featured ? posts.slice(1) : posts),
+    () => filterValidItems(featured ? posts.slice(1) : posts),
     [posts, featured]
   )
 
@@ -336,9 +338,9 @@ export function BlogClient() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div>
           {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className={moduleTheme.blog.listGrid}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i}><CardContent className="p-5"><Skeleton className="mb-3 aspect-video w-full rounded-xl" /><Skeleton className="mb-2 h-5 w-full" /><Skeleton className="h-4 w-2/3" /></CardContent></Card>
+                <UniversalCardSkeleton key={i} />
               ))}
             </div>
           ) : error ? (
@@ -349,47 +351,58 @@ export function BlogClient() {
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent></Card>
           ) : gridPosts.length === 0 ? (
-            <Card><CardContent className="flex flex-col items-center py-16">
-              <Search className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold">No articles found</h3>
-              <p className="mb-4 text-sm text-gray-500">Try a different search or category.</p>
-              <Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>
-            </CardContent></Card>
+            <UniversalCardEmpty
+              title="No articles found"
+              hint="Try a different search or category."
+              action={<Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>}
+            />
           ) : view === "grid" ? (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className={moduleTheme.blog.listGrid}>
               {gridPosts.map((post) => (
-                <BlogCard key={post.id} post={{ ...post, readingTime: getReadingTimeMinutes(post.content) }} />
+                <div key={post.id} className="h-full">
+                  <UniversalCard
+                    module="blog"
+                    title={cleanTitle(post.title)}
+                    organization={post.category?.name}
+                    description={post.excerpt}
+                    metadata={[
+                      { icon: Calendar, text: formatDate(post.createdAt) },
+                      { icon: Clock3, text: `${getReadingTimeMinutes(post.content)} min read` },
+                      { icon: Eye, text: `${formatCompact(post.views)} views` },
+                    ]}
+                    primaryCtaUrl={`/blog/${post.slug}`}
+                    share={<CardShareButton title={cleanTitle(post.title)} url={`/blog/${post.slug}`} />}
+                  />
+                </div>
               ))}
             </div>
           ) : (
             <div className="space-y-4">
               {gridPosts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`} className="group flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-[#B08D57]/60 hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-                  {post.image ? (
-                    <span className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-28 sm:w-44">
-                      <Image src={post.image} alt="" fill sizes="200px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </span>
-                  ) : null}
-                  <span className="min-w-0 flex-1">
-                    {post.category && <span className="text-[11px] font-bold uppercase tracking-wide text-[#1B3A5C]">{post.category.name}</span>}
-                    <span className="line-clamp-2 block font-bold leading-snug text-gray-900 group-hover:text-[#1B3A5C] dark:text-gray-100">{post.title}</span>
-                    {post.excerpt && <span className="mt-1 line-clamp-2 block text-sm text-gray-500">{post.excerpt}</span>}
-                    <span className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{formatDate(post.createdAt)}</span>
-                      <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{getReadingTimeMinutes(post.content)} min</span>
-                      <span className="flex items-center gap-1" title={`${post.views.toLocaleString("en-IN")} views`}><Eye className="h-3.5 w-3.5" />{formatCompact(post.views)}</span>
-                    </span>
-                  </span>
-                </Link>
+                <UniversalCard
+                  key={post.id}
+                  module="blog"
+                  variant="wide"
+                  title={cleanTitle(post.title)}
+                  organization={post.category?.name}
+                  description={post.excerpt}
+                  metadata={[
+                    { icon: Calendar, text: formatDate(post.createdAt) },
+                    { icon: Clock3, text: `${getReadingTimeMinutes(post.content)} min read` },
+                    { icon: Eye, text: `${formatCompact(post.views)} views` },
+                  ]}
+                  primaryCtaUrl={`/blog/${post.slug}`}
+                  share={<CardShareButton title={cleanTitle(post.title)} url={`/blog/${post.slug}`} />}
+                />
               ))}
             </div>
           )}
           {!loading && !error && gridPosts.length > 0 && (
             <>
               {loadingMore && (
-                <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                <div className={`mt-6 ${moduleTheme.blog.listGrid}`}>
                   {Array.from({ length: 2 }).map((_, i) => (
-                    <Card key={i}><CardContent className="p-5"><Skeleton className="mb-3 aspect-video w-full rounded-xl" /><Skeleton className="mb-2 h-5 w-full" /><Skeleton className="h-4 w-2/3" /></CardContent></Card>
+                    <UniversalCardSkeleton key={i} />
                   ))}
                 </div>
               )}

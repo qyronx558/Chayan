@@ -1,12 +1,14 @@
 "use client"
 
 import { formatDate } from "@/lib/utils"
-import { Newspaper, Calendar, Clock3, Flame, Eye } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Calendar, Clock3, Flame, Eye } from "lucide-react"
 import { SectionHeader } from "@/components/ui/section-header"
-import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCard, UniversalCardSkeleton } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { moduleTheme } from "@/components/ui/module-theme"
 import { SectionTabs } from "@/components/home/SectionTabs"
 import { useHomeSection } from "@/components/home/use-home-section"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 
 const readingTime = (content?: string | null): number => {
   if (!content) return 2
@@ -41,8 +43,9 @@ export function LatestBlog() {
     "/api/blog?limit=8&sort=trending"
   )
 
-  const posts = ((tab === "trending" ? trending : latest) ?? []).map(toPost)
+  const posts = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toPost))
   const busy = tab === "trending" ? trendingLoading && trending === null : loading
+  const theme = moduleTheme.blog
 
   if (!busy && posts.length === 0) return null
 
@@ -50,8 +53,8 @@ export function LatestBlog() {
     <section className="py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          icon={Newspaper}
-          iconClassName="from-amber-500 to-orange-700"
+          icon={theme.icon}
+          iconClassName={theme.iconBg}
           title="From the Blog"
           subtitle={
             tab === "trending" && trendingMeta && !trendingMeta.fallback
@@ -64,46 +67,34 @@ export function LatestBlog() {
         />
 
         {busy ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={theme.homeGrid}>
             {Array.from({ length: 8 }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={theme.homeGrid}>
             {posts.map((post) => (
-              <div key={post.id} className="relative">
+              <div key={post.id} className="relative h-full">
                 {tab === "trending" && (
                   <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                     <Flame className="h-3 w-3" /> Trending
                   </span>
                 )}
-                <ContentCard
-                  icon={Newspaper}
-                  iconClassName="from-amber-500 to-orange-700"
-                  badge={
-                    post.category ? (
-                      <Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">
-                        {post.category.name}
-                      </Badge>
-                    ) : undefined
-                  }
-                  statusBadge={
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                      Article
-                    </span>
-                  }
-                  title={post.title}
+                <UniversalCard
+                  module="blog"
+                  title={cleanTitle(post.title)}
+                  organization={post.category?.name}
                   description={post.excerpt}
-                  meta={[
+                  metadata={[
                     { icon: Calendar, text: formatDate(post.createdAt) },
                     { icon: Clock3, text: `${readingTime(post.content)} min read` },
                     ...(typeof post.views === "number" && post.views > 0
                       ? [{ icon: Eye, text: `${post.views.toLocaleString("en-IN")} views` }]
                       : []),
                   ]}
-                  href={`/blog/${post.slug}`}
-                  ctaLabel="Read More"
+                  primaryCtaUrl={`/blog/${post.slug}`}
+                  share={<CardShareButton title={cleanTitle(post.title)} url={`/blog/${post.slug}`} />}
                 />
               </div>
             ))}

@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Search, AlertCircle, Calendar, Download, FileCheck2, X } from "lucide-react"
+import { Search, AlertCircle, Calendar, FileCheck2, X } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { SectionHero } from "@/components/layout/SectionHero"
-import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import { formatDate } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   useInfiniteScroll,
@@ -151,9 +153,9 @@ export function ResultsClient() {
           </div>
         </div>
 {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={moduleTheme.result.listGrid}>
             {Array.from({ length: LIMIT }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
@@ -165,53 +167,32 @@ export function ResultsClient() {
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
-        ) : results.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <Search className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No results found</h3>
-              <p className="text-sm text-gray-500">
-                Try adjusting your search or check back later for new results.
-              </p>
-            </CardContent>
-          </Card>
+        ) : filterValidItems(results).length === 0 ? (
+          <UniversalCardEmpty title="No results found" hint="Try adjusting your search or check back later for new results." />
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {results.length} of {total} results
+              Showing {filterValidItems(results).length} of {total} results
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((result) => (
+            <div className={moduleTheme.result.listGrid}>
+              {filterValidItems(results).map((result) => (
                 <motion.div
                   key={result.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.35 }}
+                  className="h-full"
                 >
-                  <ContentCard
-                  icon={FileCheck2}
-                  iconClassName="from-emerald-600 to-teal-800"
-                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{result.department.name}</Badge>}
-                  statusBadge={<span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Result</span>}
-                  title={result.title}
+                  <UniversalCard
+                  module="result"
+                  title={cleanTitle(result.title)}
+                  organization={result.department.name}
                   description={result.description}
-                  meta={result.resultDate ? [{ icon: Calendar, text: formatDate(result.resultDate) }] : []}
-                  href={`/result/${result.slug}`}
-                  ctaLabel="View Result"
-                  footer={
-                    <div className="flex items-center gap-1">
-                      <BookmarkButton resultId={result.id} />
-                      {result.pdfUrl && (
-                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                          <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-3.5 w-3.5" />
-                            PDF
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  }
+                  metadata={result.resultDate ? [{ icon: Calendar, text: formatDate(result.resultDate) }] : []}
+                  primaryCtaUrl={`/result/${result.slug}`}
+                  save={<BookmarkButton resultId={result.id} />}
+                  share={<CardShareButton title={cleanTitle(result.title)} url={`/result/${result.slug}`} />}
                 />
                 </motion.div>
               ))}
@@ -219,7 +200,7 @@ export function ResultsClient() {
             {loadingMore && (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <ContentCardSkeleton key={i} />
+                  <UniversalCardSkeleton key={i} />
                 ))}
               </div>
             )}
@@ -230,7 +211,7 @@ export function ResultsClient() {
               loadMoreError={loadMoreError}
               onLoadMore={loadMore}
               onRetry={loadMore}
-              loadedCount={results.length}
+              loadedCount={filterValidItems(results).length}
               total={total}
               label="results"
             />

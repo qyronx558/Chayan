@@ -24,7 +24,7 @@ export function BookmarkButton({
   privateJobId,
   syllabusId,
   size = "icon",
-  variant = "ghost",
+  variant = "outline",
   className = "",
 }: BookmarkButtonProps) {
   const { data: session } = useSession()
@@ -95,7 +95,13 @@ export function BookmarkButton({
     }
   }
 
-  if (checking) return <div className={`h-8 w-8 ${className}`} />
+  if (checking)
+    return (
+      <div
+        aria-hidden
+        className={`h-8 w-8 animate-pulse rounded-lg border border-slate-200 bg-slate-50 ${className}`}
+      />
+    )
 
   return (
     <Button
@@ -103,8 +109,9 @@ export function BookmarkButton({
       size={size}
       disabled={loading}
       onClick={handleToggle}
-      className={className}
-      aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+      className={`h-8 w-8 rounded-lg border-slate-200 bg-white text-slate-500 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${className}`}
+      aria-label={isBookmarked ? "Saved. Remove bookmark" : "Save this item"}
+      title={isBookmarked ? "Saved" : "Save"}
     >
       {isBookmarked ? (
         <BookmarkCheck className="h-4 w-4 text-yellow-500" />

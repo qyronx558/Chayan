@@ -1,15 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Download, Calendar, FileCheck2, Flame } from "lucide-react"
+import { ArrowRight, Calendar, Flame } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { cn, formatDate } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
-import { ContentCard, ContentCardSkeleton } from "@/components/ui/content-card"
+import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
+import { CardShareButton } from "@/components/ui/card-actions"
+import { moduleTheme } from "@/components/ui/module-theme"
 import { SectionTabs } from "@/components/home/SectionTabs"
 import { useHomeSection } from "@/components/home/use-home-section"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 
 interface Result {
   id: string
@@ -18,7 +19,6 @@ interface Result {
   resultDate: string
   createdAt: string
   description?: string | null
-  pdfUrl?: string
   slug: string
 }
 
@@ -29,7 +29,6 @@ const toResult = (item: Record<string, unknown>): Result => ({
   resultDate: item.resultDate as string,
   createdAt: item.createdAt as string,
   description: item.description as string | null | undefined,
-  pdfUrl: item.pdfUrl as string | undefined,
   slug: item.slug as string,
 })
 
@@ -39,15 +38,16 @@ export function LatestResults() {
     "/api/results?limit=9&sort=trending"
   )
 
-  const results = ((tab === "trending" ? trending : latest) ?? []).map(toResult)
+  const results = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toResult))
   const busy = tab === "trending" ? trendingLoading && trending === null : loading
+  const theme = moduleTheme.result
 
   return (
     <section className={cn("py-16")}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          icon={FileCheck2}
-          iconClassName="from-emerald-600 to-teal-800"
+          icon={theme.icon}
+          iconClassName={theme.iconBg}
           title="Latest Results"
           subtitle={
             tab === "trending" && trendingMeta && !trendingMeta.fallback
@@ -59,49 +59,38 @@ export function LatestResults() {
         />
 
         {busy ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <ContentCardSkeleton key={i} />
+          <div className={theme.homeGrid}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <UniversalCardSkeleton key={i} />
             ))}
           </div>
         ) : results.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-gray-500">No results published yet.</p>
-          </div>
+          <UniversalCardEmpty title="No results published yet" hint="Check back soon for newly declared examination results." />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={theme.homeGrid}>
             {results.map((result) => (
-              <div key={result.id} className="relative">
+              <div key={result.id} className="relative h-full">
                 {tab === "trending" && (
                   <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                     <Flame className="h-3 w-3" /> Trending
                   </span>
                 )}
-                <ContentCard
-                  icon={FileCheck2}
-                  iconClassName="from-emerald-600 to-teal-800"
-                  badge={<Badge variant="secondary" className="max-w-[65%] truncate bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-600">{result.department}</Badge>}
-                  statusBadge={<span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Result</span>}
-                  title={result.title}
+                <UniversalCard
+                  module="result"
+                  title={cleanTitle(result.title)}
+                  organization={result.department}
                   description={result.description}
-                  meta={[
-                    { icon: Calendar, text: result.resultDate ? `Result: ${formatDate(result.resultDate)}` : `Released: ${formatDate(result.createdAt)}` },
+                  metadata={[
+                    {
+                      icon: Calendar,
+                      text: result.resultDate
+                        ? `Result: ${formatDate(result.resultDate)}`
+                        : `Released: ${formatDate(result.createdAt)}`,
+                    },
                   ]}
-                  href={`/result/${result.slug}`}
-                  ctaLabel="View Result"
-                  footer={
-                    <div className="flex items-center gap-1">
-                      <BookmarkButton resultId={result.id} />
-                      {result.pdfUrl ? (
-                        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" asChild>
-                          <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-3.5 w-3.5" />
-                            PDF
-                          </a>
-                        </Button>
-                      ) : null}
-                    </div>
-                  }
+                  primaryCtaUrl={`/result/${result.slug}`}
+                  save={<BookmarkButton resultId={result.id} />}
+                  share={<CardShareButton title={cleanTitle(result.title)} url={`/result/${result.slug}`} />}
                 />
               </div>
             ))}

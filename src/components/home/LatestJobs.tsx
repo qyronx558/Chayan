@@ -9,6 +9,9 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
 import { SectionTabs } from "@/components/home/SectionTabs"
 import { useHomeSection } from "@/components/home/use-home-section"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { UniversalCardEmpty } from "@/components/ui/universal-card"
+import { filterValidItems } from "@/lib/card-helpers"
 
 interface Job {
   id: string
@@ -46,9 +49,10 @@ export function LatestJobs({ className }: LatestJobsProps) {
   )
   const [showAll, setShowAll] = useState(false)
 
-  const jobs = ((tab === "trending" ? trending : latest) ?? []).map(toJob)
+  const jobs = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toJob))
   const busy = tab === "trending" ? trendingLoading && trending === null : loading
   const displayedJobs = showAll ? jobs : jobs.slice(0, 4)
+  const grid = moduleTheme.government.homeGrid
 
   return (
     <section className={cn("py-16", className)}>
@@ -67,13 +71,15 @@ export function LatestJobs({ className }: LatestJobsProps) {
         />
 
         {busy ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={grid}>
             {Array.from({ length: 4 }).map((_, i) => (
               <JobCardSkeleton key={i} />
             ))}
           </div>
+        ) : jobs.length === 0 ? (
+          <UniversalCardEmpty title="No government jobs right now" hint="New notifications will appear here as soon as they are published." />
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={grid}>
             {displayedJobs.map((job) => (
               <div key={job.id} className="relative">
                 {tab === "trending" && (

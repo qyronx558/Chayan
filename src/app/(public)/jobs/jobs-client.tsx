@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
+import { UniversalCardEmpty } from "@/components/ui/universal-card"
+import { moduleTheme } from "@/components/ui/module-theme"
+import { filterValidItems } from "@/lib/card-helpers"
 import { SearchableFilter } from "@/components/jobs/SearchableFilter"
 import {
   useInfiniteScroll,
@@ -248,7 +251,7 @@ export function JobsClient() {
           </select>
         </div>
 {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={moduleTheme.government.listGrid}>
             {Array.from({ length: LIMIT }).map((_, i) => (
               <JobCardSkeleton key={i} />
             ))}
@@ -262,30 +265,26 @@ export function JobsClient() {
               <Button onClick={retryInitial}>Try Again</Button>
             </CardContent>
           </Card>
-        ) : jobs.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <Search className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No jobs found</h3>
-              <p className="mb-4 text-sm text-gray-500">
-                Try adjusting your search or filter criteria.
-              </p>
-              {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
-            </CardContent>
-          </Card>
+        ) : filterValidItems(jobs).length === 0 ? (
+          <UniversalCardEmpty
+            title="No jobs found"
+            hint="Try adjusting your search or filter criteria."
+            action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+          />
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {jobs.length} of {total} jobs
+              Showing {filterValidItems(jobs).length} of {total} jobs
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {jobs.map((job) => (
+            <div className={moduleTheme.government.listGrid}>
+              {filterValidItems(jobs).map((job) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.35 }}
+                  className="h-full"
                 >
                   <JobCard
                     id={job.id}
