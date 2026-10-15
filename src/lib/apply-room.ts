@@ -88,6 +88,18 @@ export function headersIndicatePdf(headers: Headers, url?: string): boolean {
   return false
 }
 
+/** True when a URL points at a PDF file (served via /api/doc, not /api/proxy). */
+export function looksLikePdfUrl(raw: string | null | undefined): boolean {
+  if (!raw) return false
+  const value = raw.trim()
+  if (!value) return false
+  try {
+    return /\.pdf$/i.test(new URL(value).pathname)
+  } catch {
+    return /\.pdf(\?|#|$)/i.test(value)
+  }
+}
+
 /**
  * Heuristic: does raw user input look like a URL (vs a search query)?
  * Accepts absolute http(s), protocol-relative, and bare domains like
@@ -129,12 +141,12 @@ export function buildHtmlProxyUrl(url: string): string {
 
 /** Sanitize a slug/title into a safe download filename (ascii, no traversal). */
 export function sanitizeDownloadFilename(raw: string | null | undefined, fallback = "document.pdf"): string {
-  const base = (raw || "").trim().replace(/\.pdf$/i, "").slice(0, 80) || "document"
+  const base = (raw || "").trim().replace(/\.pdf$/i, "").slice(0, 80)
   const safe = base
     .toLowerCase()
     .replace(/[^a-z0-9-_]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
-    .slice(0, 80) || "document"
-  return `${safe}.pdf`
+    .slice(0, 80)
+  return safe ? `${safe}.pdf` : fallback
 }

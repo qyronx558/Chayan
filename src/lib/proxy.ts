@@ -67,7 +67,33 @@ function resolveWebUrl(href: string, officialUrl: string): URL | null {
   }
 }
 
-/** Remove meta CSP headers and rewrite links so same-site browsing stays inside ChayanJobs preview. */
+/** True for links that point at a PDF file (served via /api/doc, not /api/proxy). */
+function isPdfLink(url: URL): boolean {
+  return /\.pdf$/i.test(url.pathname)
+}
+
+/**
+ * Click interceptor injected into every proxied page. Because /api/proxy is
+ * same-origin, this script CAN see link clicks (impossible in a direct
+ * cross-origin iframe) and hands them to the ChayanJobs shell, which opens
+ * them as tabs INSIDE the browser — never a raw outside page.
+ * No-JS fallback still works: same-site links are pre-rewritten to /api/proxy
+ * (in-frame) and cross-site links to /browse with target=_top (full-page shell).
+ */
+const CJ_FRAME_SCRIPT =
+  `<script data-cj-frame="1">(function(){` +
+  `function u(a){var r=a.getAttribute('href')||'';if(!r||r.charCodeAt(0)===35)return null;` +
+  `if(/^(javascript|data|vbscript|mailto|tel|sms|ftp|file|blob):/i.test(r))return null;` +
+  `try{var b=new URL(r,document.baseURI).href;if(!/^https?:/i.test(b))return null;return b;}catch(e){return null;}}` +
+  `function h(e){var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;` +
+  `var t=u(a);if(!t)return;` +
+  `var n=e.ctrlKey||e.metaKey||e.shiftKey||e.button===1||((a.getAttribute('target')||'').toLowerCase()==='_blank');` +
+  `e.preventDefault();try{e.stopPropagation();}catch(_){}` +
+  `try{window.parent.postMessage({type:'cj-open-tab',url:t,newTab:!!n},window.location.origin);}catch(_){}}` +
+  `document.addEventListener('click',h,true);document.addEventListener('auxclick',h,true);` +
+  `})();</script>`
+
+/** Remove meta CSP headers and rewrite links so every click stays inside ChayanJobs. */
 export function rewriteHtmlForPreview(html: string, officialUrl: string): string {
   let out = html
   const official = new URL(officialUrl)
@@ -80,36 +106,49 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
   out = out.replace(/top\s*\.\s*location/gi, "__ChayanJobs_blocked_top_location")
   out = out.replace(/parent\s*\.\s*location/gi, "__ChayanJobs_blocked_parent_location")
 
-  // Base without target: relative resources resolve to the official site,
-  // link clicks stay inside the preview frame unless marked _blank below.
+  // Base without target: relative resources resolve to the official site.
+  // The injected frame script upgrades every click into a ChayanJobs tab.
   const baseTag = `<base href="${officialUrl}">`
   if (/<head[^>]*>/i.test(out)) {
-    out = out.replace(/<head[^>]*>/i, (m) => `${m}${baseTag}`)
+    out = out.replace(/<head[^>]*>/i, (m) => `${m}${baseTag}${CJ_FRAME_SCRIPT}`)
   } else if (/<html[^>]*>/i.test(out)) {
-    out = out.replace(/<html[^>]*>/i, (m) => `${m}<head>${baseTag}</head>`)
+    out = out.replace(/<html[^>]*>/i, (m) => `${m}<head>${baseTag}${CJ_FRAME_SCRIPT}</head>`)
   } else {
-    out = `<head>${baseTag}</head>${out}`
+    out = `<head>${baseTag}${CJ_FRAME_SCRIPT}</head>${out}`
   }
 
-  // Same-site links route through the preview so browsing stays on ChayanJobs.
-  // Cross-site links open in a new tab on the real address.
+  // Same-site pages route through the preview (in-frame, tab-upgraded by the
+  // frame script). Same-site PDFs route through the in-app PDF viewer.
+  // Cross-site links route to the full /browse shell with target=_top so the
+  // user still lands inside ChayanJobs (auto-opened as a new tab there).
+  // Nothing opens as a raw outside page from here; forms keep _blank below.
   out = out.replace(/<a\b[^>]*>/gi, (tag) => {
     const hrefMatch = tag.match(/href\s*=\s*(["'])(.*?)\1/i)
     if (!hrefMatch) return tag
-    if (/\/api\/proxy\?url=/i.test(hrefMatch[2])) return tag
+    if (/\/api\/(proxy|doc)\?url=/i.test(hrefMatch[2])) return tag
     const resolved = resolveWebUrl(hrefMatch[2], officialUrl)
     if (!resolved) return tag
     if (resolved.hostname.toLowerCase() === official.hostname.toLowerCase()) {
-      const proxied = `/api/proxy?url=${encodeURIComponent(resolved.toString())}`
+      const proxied = isPdfLink(resolved)
+        ? `/api/doc?url=${encodeURIComponent(resolved.toString())}`
+        : `/api/proxy?url=${encodeURIComponent(resolved.toString())}`
       let next = tag.replace(hrefMatch[0], `href="${proxied}"`)
-      // Stay inside the preview frame.
+      // Stay inside the preview frame (the frame script upgrades to tabs).
       next = next.replace(/\s+target\s*=\s*(["'])[^"']*\1/i, "")
       return next
     }
-    if (!/\s+target\s*=/i.test(tag)) {
-      return tag.replace(/<a\b/i, `<a target="_blank" rel="noopener noreferrer"`)
+    const browseHref = `/browse?url=${encodeURIComponent(resolved.toString())}`
+    let next = tag.replace(hrefMatch[0], `href="${browseHref}"`)
+    // Break out of the frame into the full ChayanJobs browser shell.
+    if (/\s+target\s*=/i.test(next)) {
+      next = next.replace(/target\s*=\s*(["'])[^"']*\1/i, `target="_top"`)
+    } else {
+      next = next.replace(/<a\b/i, `<a target="_top"`)
     }
-    return tag
+    if (!/\s+rel\s*=/i.test(next)) {
+      next = next.replace(/<a\b/i, `<a rel="noopener"`)
+    }
+    return next
   })
 
   // Forms submit to the official site in a new tab, never through ChayanJobs,

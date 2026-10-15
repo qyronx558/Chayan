@@ -17,7 +17,7 @@ import { useBrowserTabs } from "@/components/browse/useBrowserTabs"
 import type { ApplicationShellProps } from "@/components/apply/application-types"
 import { isDocumentApplication } from "@/components/apply/application-types"
 import { trackApplyEvent } from "@/lib/apply-analytics"
-import { buildDocProxyUrl, buildHtmlProxyUrl, getExternalHostname, normalizeExternalUrl } from "@/lib/apply-room"
+import { buildDocProxyUrl, buildHtmlProxyUrl, getExternalHostname, looksLikePdfUrl, normalizeExternalUrl } from "@/lib/apply-room"
 import { downloadPdfFile } from "@/lib/download-pdf"
 
 type FrameStatus = "checking" | "allowed" | "blocked" | "unknown"
@@ -67,7 +67,12 @@ export function ApplicationShell(props: ApplicationShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [frameStatus, setFrameStatus] = useState<FrameStatus>("checking")
   const [checkIsPdf, setCheckIsPdf] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>("direct")
+  // Readable document pages start in the proxied preview: same-origin, so
+  // every in-page click is caught and opened as a ChayanJobs tab (impossible
+  // in a direct cross-origin iframe). Interactive apply portals start direct.
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    isDocumentApplication(type) && !looksLikePdfUrl(officialUrl) ? "preview" : "direct"
+  )
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [slowLoad, setSlowLoad] = useState(false)
@@ -87,6 +92,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
   )
   const openedTracked = useRef(false)
   const previewTracked = useRef<string | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   const isDocument = isDocumentApplication(type)
   const isPdf = (activeTab?.kind === "pdf") || checkIsPdf || (isDocument && /\.pdf(\?|#|$)/i.test(currentUrl))
@@ -156,7 +162,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
   // Reset per-tab view state when switching tabs / navigating.
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- tab switch must reset view state */
-    setViewMode("direct")
+    setViewMode(isDocument && !looksLikePdfUrl(currentUrl) ? "preview" : "direct")
     setIframeLoaded(false)
     setBlocked(false)
     setSlowLoad(false)
@@ -165,6 +171,30 @@ export function ApplicationShell(props: ApplicationShellProps) {
     if (currentUrl) runFrameCheck(currentUrl)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab identity change
   }, [activeId, currentUrl])
+
+  // Link clicks inside proxied pages arrive here from the injected frame
+  // script and open as tabs INSIDE ChayanJobs: normal click navigates the
+  // current tab, Ctrl/middle/_blank opens a new inside tab. Origin + source
+  // are verified so only our own frame can drive navigation.
+  useEffect(() => {
+    const onFrameMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return
+      if (!iframeRef.current || e.source !== iframeRef.current.contentWindow) return
+      const data = e.data as { type?: unknown; url?: unknown; newTab?: unknown } | null
+      if (!data || data.type !== "cj-open-tab" || typeof data.url !== "string") return
+      const normalized = normalizeExternalUrl(data.url)
+      if (!normalized) return
+      if (data.newTab === true) {
+        const t = openTab(normalized, { switchTo: true })
+        if (t) trackApplyEvent("browser_tab_opened", analyticsBase)
+      } else {
+        navigateActive(normalized)
+        trackApplyEvent("browser_navigate", analyticsBase)
+      }
+    }
+    window.addEventListener("message", onFrameMessage)
+    return () => window.removeEventListener("message", onFrameMessage)
+  }, [openTab, navigateActive, analyticsBase])
 
   // New destination arrived via props (e.g. /browse?url= changed) ->
   // open it as a tab INSIDE the browser instead of replacing the page.
@@ -415,6 +445,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
                 title={title}
                 iframeKey={iframeKey}
                 isPdf={viewMode === "preview" ? isPdf : activeTab?.kind === "pdf"}
+                iframeRef={iframeRef}
                 onLoad={handleIframeLoad}
                 onError={handleIframeError}
               />

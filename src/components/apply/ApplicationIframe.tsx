@@ -1,10 +1,14 @@
 "use client"
 
+import type { RefObject } from "react"
+
 interface ApplicationIframeProps {
   src: string
   title: string
   iframeKey: number
   isPdf?: boolean
+  /** Shell attaches this to verify postMessage events come from this frame. */
+  iframeRef?: RefObject<HTMLIFrameElement | null>
   onLoad: () => void
   onError: () => void
 }
@@ -15,7 +19,7 @@ interface ApplicationIframeProps {
  * PDFs render via the browser's native viewer; iOS gets an
  * <object> fallback with the same src since Safari iframes PDFs poorly.
  */
-export function ApplicationIframe({ src, title, iframeKey, isPdf, onLoad, onError }: ApplicationIframeProps) {
+export function ApplicationIframe({ src, title, iframeKey, isPdf, iframeRef, onLoad, onError }: ApplicationIframeProps) {
   if (isPdf) {
     return (
       <object
@@ -26,6 +30,7 @@ export function ApplicationIframe({ src, title, iframeKey, isPdf, onLoad, onErro
         className="block h-full w-full border-0 bg-white"
       >
         <iframe
+          ref={iframeRef}
           src={src}
           title={title}
           onLoad={onLoad}
@@ -41,6 +46,7 @@ export function ApplicationIframe({ src, title, iframeKey, isPdf, onLoad, onErro
   return (
     <iframe
       key={`apply-live-${iframeKey}`}
+      ref={iframeRef}
       src={src}
       title={title}
       onLoad={onLoad}
