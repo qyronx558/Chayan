@@ -36,6 +36,7 @@ import { formatDate, slugify } from "@/lib/utils";
 import { WizardSteps } from "@/components/admin/WizardSteps";
 import { FormSection } from "@/components/admin/FormSection";
 import { SmartContentField } from "@/components/admin/SmartContentField";
+import { SearchableRelationSelect } from "@/components/admin/SearchableRelationSelect";
 import type { FormDialogProps } from "@/components/admin/list/types";
 import type { PrivateJobRow } from "./config";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -224,13 +225,22 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
                         </>
                       ) : (
                         <>
-                          <Select onValueChange={(v) => { if (v === "__new__") { setNewCompanyMode(true); field.onChange("") } else field.onChange(v) }} value={field.value ?? ""}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger></FormControl>
-                            <SelectContent>
-                              {companies.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                              <SelectItem value="__new__">+ Add New Company</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <SearchableRelationSelect
+                              value={field.value ?? ""}
+                              onChange={(id) => { if (id) field.onChange(id); }}
+                              options={companies}
+                              label="Company"
+                              endpoint="/api/companies"
+                              placeholder="Select company"
+                              searchPlaceholder="Search companies..."
+                              onCreateNew={(name) => {
+                                setNewCompanyMode(true);
+                                field.onChange("");
+                                form.setValue("companyName", name);
+                              }}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </>
                       )}

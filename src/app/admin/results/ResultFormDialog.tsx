@@ -36,6 +36,7 @@ import { formatDate, slugify } from "@/lib/utils";
 import { WizardSteps } from "@/components/admin/WizardSteps";
 import { FormSection } from "@/components/admin/FormSection";
 import { SmartContentField } from "@/components/admin/SmartContentField";
+import { SearchableRelationSelect } from "@/components/admin/SearchableRelationSelect";
 import type { FormDialogProps } from "@/components/admin/list/types";
 import type { ResultRow } from "./config";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -152,19 +153,35 @@ export function ResultFormDialog({ row, open, onOpenChange, lookups, onSaved }: 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField control={form.control} name="departmentId" render={({ field }) => (
                     <FormItem><FormLabel>Department</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                        <SelectContent>{departments.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}</SelectContent>
-                      </Select>
+                      <FormControl>
+                        <SearchableRelationSelect
+                          value={field.value}
+                          onChange={(id) => field.onChange(id ?? "")}
+                          options={departments}
+                          label="Department"
+                          endpoint="/api/departments"
+                          placeholder="Select department"
+                          searchPlaceholder="Search departments..."
+                          invalidateKeys={[["admin-departments"]]}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="categoryId" render={({ field }) => (
                     <FormItem><FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                        <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                      </Select>
+                      <FormControl>
+                        <SearchableRelationSelect
+                          value={field.value}
+                          onChange={(id) => field.onChange(id ?? "")}
+                          options={categories}
+                          label="Category"
+                          endpoint="/api/categories"
+                          placeholder="Select category"
+                          searchPlaceholder="Search categories..."
+                          invalidateKeys={[["admin-categories"]]}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />

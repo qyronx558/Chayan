@@ -30,6 +30,7 @@ import {
 import { toast } from "@/components/ui/toast"
 import { formatDate, slugify } from "@/lib/utils"
 import { isAdmin } from "@/lib/roles"
+import { SearchableRelationSelect } from "@/components/admin/SearchableRelationSelect"
 import { Plus, Pencil, Trash2, TrendingUp, ExternalLink } from "lucide-react"
 
 interface NotificationItem {
@@ -247,16 +248,18 @@ export default function AdminNotifications() {
               <FormField control={form.control} name="categoryId" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <SearchableRelationSelect
+                      value={field.value}
+                      onChange={(id) => field.onChange(id ?? "")}
+                      options={(categories || []).map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
+                      label="Category"
+                      endpoint="/api/categories"
+                      placeholder="Select a category"
+                      searchPlaceholder="Search categories..."
+                      invalidateKeys={[["admin-notification-categories"], ["admin-categories"]]}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
