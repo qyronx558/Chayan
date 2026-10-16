@@ -7,6 +7,7 @@ import { isAdmin } from "@/lib/roles"
 import { Prisma } from "@prisma/client"
 import { writeAuditLog } from "@/lib/moderation"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
+import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,8 +50,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
-    const { companyId, companyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
-    const company = companyName ? await findOrCreateCompany(companyName) : companyId ? await prisma.company.findUnique({ where: { id: companyId } }) : null
+    const { companyId: rawCompanyId, companyName: rawCompanyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
+    const normalizedCompanyId = normalizeOptionalId(rawCompanyId)
+    const normalizedCompanyName = typeof rawCompanyName === "string" ? rawCompanyName.trim() || undefined : undefined
+    const company = normalizedCompanyName
+      ? await findOrCreateCompany(normalizedCompanyName)
+      : normalizedCompanyId
+        ? await prisma.company.findUnique({ where: { id: normalizedCompanyId } })
+        : null
+    if ((normalizedCompanyId || normalizedCompanyName) && !company) {
+      const missing = await findMissingRelation({ companyId: normalizedCompanyId })
+      if (missing) return missingRelationResponse(missing)
+      return NextResponse.json({ success: false, error: "Selected Company no longer exists. Please refresh and select again." }, { status: 400 })
+    }
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,
@@ -66,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ...(isWalkIn !== undefined && isWalkIn !== null ? { isWalkIn } : {}),
       ...(skills !== undefined ? { skills: skills ?? [] } : {}),
       trustScore: trust.score,
-      ...(company || companyId ? { company: { connect: { id: company ? company.id : companyId! } } } : {}),
+      ...(company ? { company: { connect: { id: company.id } } } : {}),
     }
 
     if (session.user.role === "ADMIN") {
@@ -91,6 +103,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, data: job })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to update private job" },
       { status: 500 }

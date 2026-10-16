@@ -7,6 +7,7 @@ import { isAdmin } from "@/lib/roles"
 import { revalidatePublicContent } from "@/lib/cache"
 import { staffAudit } from "@/lib/moderation"
 import { requireAction } from "@/lib/admin/access"
+import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(
   request: NextRequest,
@@ -66,9 +67,9 @@ export async function PUT(
     const {
       title,
       slug,
-      departmentId,
-      categoryId,
-      stateId,
+      departmentId: rawDepartmentId,
+      categoryId: rawCategoryId,
+      stateId: rawStateId,
       advertisementNo,
       totalVacancies,
       salary,
@@ -89,6 +90,20 @@ export async function PUT(
       startDate,
       lastDate,
     } = validation.data
+
+    const departmentId = normalizeRequiredId(rawDepartmentId)
+    const categoryId = normalizeRequiredId(rawCategoryId)
+    const stateId = normalizeOptionalId(rawStateId)
+
+    if (!departmentId) {
+      return NextResponse.json({ success: false, error: "Department is required" }, { status: 400 })
+    }
+    if (!categoryId) {
+      return NextResponse.json({ success: false, error: "Category is required" }, { status: 400 })
+    }
+
+    const missing = await findMissingRelation({ departmentId, categoryId, stateId })
+    if (missing) return missingRelationResponse(missing)
 
     const data: Prisma.JobUpdateInput = {
       title,
@@ -133,6 +148,8 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: job })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to update job" },
       { status: 500 }

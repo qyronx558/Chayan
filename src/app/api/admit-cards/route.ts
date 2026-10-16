@@ -10,6 +10,7 @@ import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/ad
 import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 
@@ -147,7 +148,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, slug, description, departmentId, categoryId, jobId, examDate, downloadUrl, status } = validation.data
+    const { title, slug, description, departmentId: rawDepartmentId, categoryId: rawCategoryId, jobId: rawJobId, examDate, downloadUrl, status: rawStatus } = validation.data
+
+    const departmentId = normalizeRequiredId(rawDepartmentId)
+    const categoryId = normalizeRequiredId(rawCategoryId)
+    const jobId = normalizeOptionalId(rawJobId)
+    const status = normalizeOptionalText(rawStatus)
+
+    if (!departmentId) {
+      return NextResponse.json({ success: false, error: "Department is required" }, { status: 400 })
+    }
+    if (!categoryId) {
+      return NextResponse.json({ success: false, error: "Category is required" }, { status: 400 })
+    }
+
+    const missing = await findMissingRelation({ departmentId, categoryId, jobId })
+    if (missing) return missingRelationResponse(missing)
 
     const data: Prisma.AdmitCardCreateInput = {
       title,
@@ -184,6 +200,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: admitCard }, { status: 201 })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to create admit card" },
       { status: 500 }

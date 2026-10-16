@@ -61,10 +61,10 @@ function toFormValues(row: ResultRow): ResultInput {
     description: row.description,
     departmentId: row.department.id,
     categoryId: row.category.id,
-    jobId: row.jobId,
+    jobId: typeof row.jobId === "string" ? row.jobId.trim() || null : (row.jobId ?? null),
     pdfUrl: row.pdfUrl,
     resultDate: row.resultDate ? new Date(row.resultDate) : null,
-    status: row.status,
+    status: typeof row.status === "string" ? row.status.trim() || null : (row.status ?? null),
   };
 }
 
@@ -107,8 +107,13 @@ export function ResultFormDialog({ row, open, onOpenChange, lookups, onSaved }: 
   });
 
   const onSubmit = (data: ResultInput) => {
-    if (row) updateMutation.mutate(data);
-    else createMutation.mutate(data);
+    const clean = {
+      ...data,
+      jobId: typeof data.jobId === "string" ? (data.jobId.trim() || null) : (data.jobId ?? null),
+      status: typeof data.status === "string" ? (data.status.trim() && data.status !== "__draft" ? data.status : null) : (data.status ?? null),
+    };
+    if (row) updateMutation.mutate(clean);
+    else createMutation.mutate(clean);
   };
 
   const nextStep = async () => {
@@ -181,9 +186,9 @@ export function ResultFormDialog({ row, open, onOpenChange, lookups, onSaved }: 
                 </div>
                 <FormField control={form.control} name="status" render={({ field }) => (
                   <FormItem><FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={(v) => field.onChange(v === "__draft" ? null : v)} value={field.value ?? "__draft"}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                      <SelectContent><SelectItem value=" ">Draft</SelectItem><SelectItem value="PUBLISHED">Published</SelectItem></SelectContent>
+                      <SelectContent><SelectItem value="__draft">Draft</SelectItem><SelectItem value="PUBLISHED">Published</SelectItem></SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>

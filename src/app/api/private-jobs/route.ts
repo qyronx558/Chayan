@@ -14,6 +14,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
+import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(request: NextRequest) {
   try {
@@ -166,8 +167,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const { companyId, companyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
+    const { companyId: rawCompanyId, companyName: rawCompanyName, skills, isFresherFriendly, isWalkIn, ...rest } = validation.data
+    const companyId = normalizeOptionalId(rawCompanyId)
+    const companyName = typeof rawCompanyName === "string" ? rawCompanyName.trim() || undefined : undefined
+    if (!companyId && !companyName) {
+      return NextResponse.json({ success: false, error: "Select an existing company or enter a new company name" }, { status: 400 })
+    }
     const company = companyName ? await findOrCreateCompany(companyName) : await prisma.company.findUnique({ where: { id: companyId! } })
+    if (!company) {
+      const missing = await findMissingRelation({ companyId })
+      if (missing) return missingRelationResponse(missing)
+      return NextResponse.json({ success: false, error: "Selected Company no longer exists. Please refresh and select again." }, { status: 400 })
+    }
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,
@@ -187,7 +198,7 @@ export async function POST(request: NextRequest) {
         ...(session.user.role === "SUPER_ADMIN"
           ? { reviewedById: session.user.id, reviewedAt: new Date() }
           : {}),
-        company: { connect: { id: company ? company.id : companyId } },
+        company: { connect: { id: company.id } },
         createdBy: { connect: { id: session.user.id } },
       },
     })
@@ -208,6 +219,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to create private job" },
       { status: 500 }

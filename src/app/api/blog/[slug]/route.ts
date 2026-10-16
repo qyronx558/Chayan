@@ -7,6 +7,7 @@ import { revalidatePublicContent } from "@/lib/cache"
 import { Prisma } from "@prisma/client"
 import { staffAudit } from "@/lib/moderation"
 import { requireAction } from "@/lib/admin/access"
+import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -22,7 +23,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const { title, slug: postSlug, excerpt, content, author, image, tags, categoryId, published } = validation.data
+    const { title, slug: postSlug, excerpt, content, author, image, tags, categoryId: rawCategoryId, published } = validation.data
+
+    const categoryId = normalizeOptionalId(rawCategoryId)
+    if (categoryId) {
+      const missing = await findMissingRelation({ blogCategoryId: categoryId })
+      if (missing) return missingRelationResponse(missing)
+    }
 
     const existing = await prisma.blogPost.findUnique({ where: { id: slug } })
     if (!existing) {
@@ -47,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ...(author !== undefined && author !== null ? { author } : {}),
       ...(image !== undefined && image !== null ? { image } : {}),
       ...(tags !== undefined && tags !== null ? { tags } : {}),
-      ...(categoryId !== undefined && categoryId !== null ? { categoryId } : {}),
+      ...(categoryId ? { category: { connect: { id: categoryId } } } : { category: { disconnect: true } }),
       published,
     }
 
@@ -75,6 +82,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, data: post })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to update blog post" },
       { status: 500 }

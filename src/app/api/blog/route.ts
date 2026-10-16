@@ -11,6 +11,7 @@ import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(request: NextRequest) {
   try {
@@ -150,7 +151,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const { title, slug, excerpt, content, author, image, tags, categoryId, published } = validation.data
+    const { title, slug, excerpt, content, author, image, tags, categoryId: rawCategoryId, published } = validation.data
+
+    const categoryId = normalizeOptionalId(rawCategoryId)
+    if (categoryId) {
+      const missing = await findMissingRelation({ blogCategoryId: categoryId })
+      if (missing) return missingRelationResponse(missing)
+    }
 
     const existing = await prisma.blogPost.findUnique({ where: { slug } })
     if (existing) {
@@ -191,6 +198,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: post }, { status: 201 })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to create blog post" },
       { status: 500 }

@@ -10,6 +10,7 @@ import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/ad
 import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
 import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 
@@ -192,9 +193,9 @@ export async function POST(request: NextRequest) {
     const {
       title,
       slug,
-      departmentId,
-      categoryId,
-      stateId,
+      departmentId: rawDepartmentId,
+      categoryId: rawCategoryId,
+      stateId: rawStateId,
       advertisementNo,
       totalVacancies,
       salary,
@@ -215,6 +216,22 @@ export async function POST(request: NextRequest) {
       startDate,
       lastDate,
     } = validation.data
+
+    // Normalize ids: admin selects use " " / "none" sentinels for "None" —
+    // those (and any whitespace-only value) must become null, never connect.
+    const departmentId = normalizeRequiredId(rawDepartmentId)
+    const categoryId = normalizeRequiredId(rawCategoryId)
+    const stateId = normalizeOptionalId(rawStateId)
+
+    if (!departmentId) {
+      return NextResponse.json({ success: false, error: "Department is required" }, { status: 400 })
+    }
+    if (!categoryId) {
+      return NextResponse.json({ success: false, error: "Category is required" }, { status: 400 })
+    }
+
+    const missing = await findMissingRelation({ departmentId, categoryId, stateId })
+    if (missing) return missingRelationResponse(missing)
 
     const data: Prisma.JobCreateInput = {
       title,
@@ -266,6 +283,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (error) {
+    const friendly = prismaRelationErrorResponse(error)
+    if (friendly) return friendly
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to create job" },
       { status: 500 }

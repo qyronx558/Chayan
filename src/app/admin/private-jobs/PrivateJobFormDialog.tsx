@@ -224,7 +224,7 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
                         </>
                       ) : (
                         <>
-                          <Select onValueChange={(v) => { if (v === "__new__") { setNewCompanyMode(true); field.onChange("") } else field.onChange(v) }} value={field.value}>
+                          <Select onValueChange={(v) => { if (v === "__new__") { setNewCompanyMode(true); field.onChange("") } else field.onChange(v) }} value={field.value ?? ""}>
                             <FormControl><SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger></FormControl>
                             <SelectContent>
                               {companies.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}

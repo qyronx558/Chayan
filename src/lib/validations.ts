@@ -1,5 +1,27 @@
 import { z } from "zod"
 
+// Radix Select cannot use "" as an item value, so admin forms historically
+// used " " / "none" / "__none" / "__draft" sentinels for "None"/"Draft".
+// Normalize all of those (plus any whitespace-only string) to null so they
+// never reach `prisma.xxx.connect({ id })` and cause P2025
+// ("No 'State' record(s) … was found for a nested connect").
+const emptyToNull = (v: unknown) => {
+  if (v === null || v === undefined) return v
+  if (typeof v !== "string") return v
+  const t = v.trim()
+  if (!t) return null
+  const low = t.toLowerCase()
+  if (low === "none" || t === "__none" || t === "__draft") return null
+  return t
+}
+
+const optionalId = z.preprocess(emptyToNull, z.string().nullable().optional())
+const optionalText = z.preprocess(emptyToNull, z.string().nullable().optional())
+const requiredId = z.preprocess(
+  (v: unknown) => (typeof v === "string" ? v.trim() : v),
+  z.string().min(1, "Selection is required")
+)
+
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
@@ -20,9 +42,9 @@ export const registerSchema = z
 export const jobSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  stateId: z.string().nullable().optional(),
+  departmentId: requiredId,
+  categoryId: requiredId,
+  stateId: optionalId,
   advertisementNo: z.string().nullable().optional(),
   totalVacancies: z.coerce.number().int().positive().nullable().optional(),
   salary: z.string().nullable().optional(),
@@ -60,60 +82,60 @@ export const resultSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().nullable().optional(),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  jobId: z.string().nullable().optional(),
+  departmentId: requiredId,
+  categoryId: requiredId,
+  jobId: optionalId,
   pdfUrl: z.string().nullable().optional(),
   resultDate: z.coerce.date().nullable().optional(),
-  status: z.string().nullable().optional(),
+  status: optionalText,
 })
 
 export const admitCardSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().nullable().optional(),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  jobId: z.string().nullable().optional(),
+  departmentId: requiredId,
+  categoryId: requiredId,
+  jobId: optionalId,
   examDate: z.coerce.date().nullable().optional(),
   downloadUrl: z.string().nullable().optional(),
-  status: z.string().nullable().optional(),
+  status: optionalText,
 })
 
 export const answerKeySchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().nullable().optional(),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  jobId: z.string().nullable().optional(),
+  departmentId: requiredId,
+  categoryId: requiredId,
+  jobId: optionalId,
   pdfUrl: z.string().nullable().optional(),
-  status: z.string().nullable().optional(),
+  status: optionalText,
 })
 
 export const admissionSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().nullable().optional(),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
+  departmentId: requiredId,
+  categoryId: requiredId,
   startDate: z.coerce.date().nullable().optional(),
   lastDate: z.coerce.date().nullable().optional(),
   applicationFee: z.string().nullable().optional(),
   pdfUrl: z.string().nullable().optional(),
-  status: z.string().nullable().optional(),
+  status: optionalText,
 })
 
 export const syllabusSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().nullable().optional(),
-  departmentId: z.string().min(1, "Department is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  jobId: z.string().nullable().optional(),
+  departmentId: requiredId,
+  categoryId: requiredId,
+  jobId: optionalId,
   pdfUrl: z.string().nullable().optional(),
   subjects: z.string().nullable().optional(),
-  status: z.string().nullable().optional(),
+  status: optionalText,
 })
 
 export const notificationSchema = z.object({
@@ -238,7 +260,7 @@ export const blogPostSchema = z.object({
   author: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
   tags: z.string().nullable().optional(),
-  categoryId: z.string().nullable().optional(),
+  categoryId: optionalId,
   published: z.boolean().default(false),
 })
 
@@ -248,9 +270,9 @@ export const privateJobSchema = z
   .object({
     title: z.string().min(1, "Title is required"),
     slug: z.string().min(1, "Slug is required"),
-    companyId: z.string().optional(),
+    companyId: optionalId,
     companyName: z
-      .preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), z.string().trim().min(1, "Company name is required").optional()),
+      .preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : typeof v === "string" ? v.trim() || undefined : v), z.string().trim().min(1, "Company name is required").optional()),
     type: z.enum(["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT"]),
     category: z.string().nullable().optional(),
     description: z.string().nullable().optional(),

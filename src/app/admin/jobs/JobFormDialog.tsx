@@ -139,8 +139,15 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
   });
 
   const onSubmit = (data: JobInput) => {
-    if (row) updateMutation.mutate(data);
-    else createMutation.mutate(data);
+    const stateId =
+      typeof data.stateId === "string"
+        ? data.stateId.trim() && data.stateId.trim() !== "__none"
+          ? data.stateId.trim()
+          : null
+        : (data.stateId ?? null);
+    const clean = { ...data, stateId };
+    if (row) updateMutation.mutate(clean);
+    else createMutation.mutate(clean);
   };
 
   const nextStep = async () => {
@@ -202,9 +209,9 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
                   )} />
                   <FormField control={form.control} name="stateId" render={({ field }) => (
                     <FormItem><FormLabel>State (optional)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <Select onValueChange={(v) => field.onChange(v === "__none" ? null : v)} value={field.value ?? "__none"}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger></FormControl>
-                        <SelectContent><SelectItem value=" ">None</SelectItem>{states.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                        <SelectContent><SelectItem value="__none">None</SelectItem>{states.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
