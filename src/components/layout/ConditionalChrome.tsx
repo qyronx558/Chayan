@@ -35,6 +35,10 @@ export function isEmployerPath(pathname: string | null): boolean {
   return pathname === "/employer" || pathname.startsWith("/employer/")
 }
 
+export function isStandaloneContactPath(pathname: string | null): boolean {
+  return pathname === "/contact"
+}
+
 /**
  * Hides the normal site Header/Footer on Application Mode routes so the
  * official website gets ~90–96% of useful screen area, and on Admin routes
@@ -67,6 +71,14 @@ export function ConditionalChrome({
     return (
       <div className="flex h-[100dvh] flex-col overflow-hidden">
         <main className="min-h-0 flex-1">{children}</main>
+      </div>
+    )
+  }
+
+  if (isStandaloneContactPath(pathname)) {
+    return (
+      <div className="flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip">
+        <main className="w-full min-w-0 flex-1 overflow-x-clip">{children}</main>
       </div>
     )
   }

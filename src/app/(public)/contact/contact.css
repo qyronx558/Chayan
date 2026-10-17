@@ -1,0 +1,83 @@
+.contact-scope {
+  --cp-bg: #ffffff;
+  --cp-ink: #0d1117;
+  --cp-muted: #656d76;
+  --cp-faint: #8b949e;
+  --cp-border: #e4e7eb;
+  --cp-soft: #f6f8fa;
+  --cp-field: #ffffff;
+  --cp-link: #0f766e;
+  --cp-btn: #0d1117;
+  --cp-btn-ink: #ffffff;
+  background: var(--cp-bg);
+  color: var(--cp-ink);
+  scroll-behavior: smooth;
+}
+
+.dark .contact-scope {
+  --cp-bg: #0d1117;
+  --cp-ink: #e6edf3;
+  --cp-muted: #8b949e;
+  --cp-faint: #6e7681;
+  --cp-border: #30363d;
+  --cp-soft: #161b22;
+  --cp-field: #0d1117;
+  --cp-link: #2dd4bf;
+  --cp-btn: #e6edf3;
+  --cp-btn-ink: #0d1117;
+}
+
+.contact-scope :focus-visible {
+  outline: 2px solid var(--cp-link);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.contact-scope .cp-honeypot {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.contact-scope .cp-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.22s ease-out, opacity 0.22s ease-out;
+}
+
+.contact-scope .cp-faq-answer[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.contact-scope .cp-faq-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.contact-scope .cp-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-scope {
+    scroll-behavior: auto;
+  }
+  .contact-scope *,
+  .contact-scope *::before,
+  .contact-scope *::after {
+    animation: none;
+    transition: none;
+  }
+  .contact-scope .cp-faq-answer {
+    transition: none;
+  }
+}

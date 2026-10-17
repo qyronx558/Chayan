@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { cache } from "react"
 import { prisma } from "@/lib/prisma"
 import { formatCompact, formatDate, getBaseUrl, timeAgo } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
@@ -25,23 +26,22 @@ import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
 export const revalidate = 3600
 
-export async function generateStaticParams() {
-  try {
-    const posts = await prisma.blogPost.findMany({
-      where: { published: true },
-      select: { slug: true },
-      orderBy: { views: "desc" },
-      take: 50,
-    })
-    return posts.map((p) => ({ slug: p.slug }))
-  } catch {
-    return []
-  }
+// Generate articles on their first request, then use the one-hour ISR cache.
+// Builds must not enumerate and render live database records.
+export function generateStaticParams(): { slug: string }[] {
+  return []
 }
+
+const getPublishedPost = cache((slug: string) =>
+  prisma.blogPost.findUnique({
+    where: { slug, published: true },
+    include: { category: true },
+  })
+)
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const post = await prisma.blogPost.findUnique({ where: { slug }, include: { category: true } })
+  const post = await getPublishedPost(slug)
   if (!post) return { title: "Post Not Found" }
 
   const baseUrl = getBaseUrl()
@@ -73,10 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = await prisma.blogPost.findUnique({
-    where: { slug },
-    include: { category: true },
-  })
+  const post = await getPublishedPost(slug)
   if (!post || !post.published) notFound()
 
   const [relatedPosts, prevPost, nextPost] = await Promise.all([

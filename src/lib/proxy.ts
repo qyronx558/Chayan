@@ -76,7 +76,7 @@ function isPdfLink(url: URL): boolean {
  * Click interceptor injected into every proxied page. Because /api/proxy is
  * same-origin, this script CAN see link clicks (impossible in a direct
  * cross-origin iframe) and hands them to the ChayanJobs shell, which opens
- * them as tabs INSIDE the browser — never a raw outside page.
+ * them as tabs INSIDE the browser - never a raw outside page.
  * No-JS fallback still works: same-site links are pre-rewritten to /api/proxy
  * (in-frame) and cross-site links to /browse with target=_top (full-page shell).
  */

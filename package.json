@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "npm run db:generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:contact": "tsx --test tests/contact.test.ts",
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy"
   },

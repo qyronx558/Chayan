@@ -1490,3 +1490,30 @@ model LogArchive {
   createdAt  DateTime @default(now())
   createdById String?
 }
+
+model ContactTicket {
+  id        String   @id @default(cuid())
+  topic     String
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+  notifiedAt DateTime?
+  autoRepliedAt DateTime?
+  deliveryAttempts Int @default(0)
+  nextAttemptAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([topic, createdAt])
+  @@index([nextAttemptAt])
+}
+
+model ContactRateLimit {
+  key String @id
+  count Int @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

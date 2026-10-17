@@ -2,8 +2,8 @@
  * Bulletproof PDF download for the ChayanJobs in-app browser.
  *
  * Strategy: try the same-origin proxy first (clean filename, user never
- * leaves the tab). If the proxy fails for ANY reason — gov server blocks
- * datacenter IPs, timeout, non-PDF response — fall back to the official
+ * leaves the tab). If the proxy fails for ANY reason - gov server blocks
+ * datacenter IPs, timeout, non-PDF response - fall back to the official
  * URL in a new tab where Chrome's native viewer/download takes over.
  * The user gets the file in any case; never a dead "Site wasn't available".
  */
@@ -13,7 +13,7 @@ export type PdfDownloadResult = "proxied" | "direct" | "failed";
 interface DownloadPdfArgs {
   /** Same-origin /api/doc?download=1 URL (clean filename). */
   proxyUrl: string;
-  /** Official file URL — guaranteed fallback. */
+  /** Official file URL - guaranteed fallback. */
   directUrl: string;
   filename: string;
   /** Bound the proxy attempt so the fallback kicks in promptly. */
@@ -55,7 +55,7 @@ export async function downloadPdfFile({
     }
     return "proxied";
   } catch {
-    // Fallback: official file in a new tab — Chrome handles it natively.
+    // Fallback: official file in a new tab - Chrome handles it natively.
     try {
       const win = window.open(directUrl, "_blank", "noopener,noreferrer");
       if (!win) {

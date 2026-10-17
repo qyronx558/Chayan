@@ -163,8 +163,9 @@ export async function GET(request: NextRequest) {
     }
     return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
   } catch (error) {
+    console.error("[jobs] Failed to fetch jobs:", error)
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to fetch jobs" },
+      { success: false, error: "Unable to load jobs. Please try again shortly." },
       { status: 500 }
     )
   }
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
       lastDate,
     } = validation.data
 
-    // Normalize ids: admin selects use " " / "none" sentinels for "None" —
+    // Normalize ids: admin selects use " " / "none" sentinels for "None" -
     // those (and any whitespace-only value) must become null, never connect.
     const departmentId = normalizeRequiredId(rawDepartmentId)
     const categoryId = normalizeRequiredId(rawCategoryId)

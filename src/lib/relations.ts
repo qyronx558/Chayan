@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 /**
  * Normalizes an optional relation id coming from admin forms / API payloads.
  * - `null` / `undefined` / `""` / whitespace-only (`" "`, `"  "`) → `null`
- *   (Radix Select uses `" "` / `"none"` sentinels for "None" — those must
+ *   (Radix Select uses `" "` / `"none"` sentinels for "None" - those must
  *   never reach `prisma.xxx.connect({ id })`).
  * - otherwise returns the trimmed id.
  */

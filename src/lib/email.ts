@@ -261,69 +261,133 @@ export async function sendCompanyVerificationOtp(email: string, otp: string, com
   return { success: true, id: data?.id }
 }
 
+export type ContactEmailOptions = {
+  to?: string
+  topicLabel?: string
+  reference?: string
+}
+
+function escapeContactHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]!)
+}
+
 export async function sendContactEmail(
   name: string,
   email: string,
   subject: string,
-  message: string
+  message: string,
+  options: ContactEmailOptions = {}
 ) {
+  const to = options.to || "contact@chayanjobs.com"
+  const safeName = escapeContactHtml(name)
+  const safeSubject = escapeContactHtml(subject)
+  const safeMessage = escapeContactHtml(message)
+  const safeEmail = escapeContactHtml(email)
+  const heading = options.topicLabel ? `New ${escapeContactHtml(options.topicLabel)} message` : "New Contact Message"
+  const subheading = options.reference
+    ? `Reference ${options.reference} · Received via the ChayanJobs contact page`
+    : "Received via ChayanJobs website contact form"
+
   if (!resend) {
-    console.log(`[Email Mock] Contact form from ${name} <${email}>: ${subject}`)
-    return { success: true, mocked: true }
+    return { success: false, error: "Contact email delivery is not configured" }
   }
 
   const { data, error } = await resend.emails.send({
     from: `ChayanJobs Contact <${fromEmail}>`,
-    to: "contact@chayanjobs.com",
+    to,
     replyTo: email,
-    subject: `[ChayanJobs Contact] ${subject}`,
+    subject: options.reference ? `[${options.reference}] ${subject}` : `[ChayanJobs Contact] ${subject}`,
+    text: `Reference: ${options.reference || "N/A"}\nFrom: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
     html: `
       <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <div style="background:linear-gradient(135deg,#1e3a5f,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
-          <div style="font-size:20px;font-weight:700;color:#fff">New Contact Message</div>
-          <div style="font-size:13px;color:#99f6e4;margin-top:4px">Received via ChayanJobs website contact form</div>
+        <div style="background:#0d1117;border-radius:8px 8px 0 0;padding:24px 28px">
+          <div style="font-size:20px;font-weight:700;color:#fff">${heading}</div>
+          <div style="font-size:13px;color:#9aa4b2;margin-top:4px">${subheading}</div>
         </div>
-        <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px 28px">
+        <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;padding:24px 28px">
           <table style="width:100%;border-collapse:collapse">
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">From</td>
+              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">From</td>
             </tr>
             <tr>
-              <td style="padding:12px 0 24px 0;font-size:16px;font-weight:600;color:#111827">${name}</td>
+              <td style="padding:12px 0 24px 0;font-size:16px;font-weight:600;color:#111827">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Email</td>
+              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Email</td>
             </tr>
             <tr>
               <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">
-                <a href="mailto:${email}" style="color:#0d9488;text-decoration:none">${email}</a>
+                <a href="mailto:${safeEmail}" style="color:#0f766e;text-decoration:none">${safeEmail}</a>
               </td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Subject</td>
+              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Subject</td>
             </tr>
             <tr>
-              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">${subject}</td>
+              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">${safeSubject}</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Message</td>
+              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Message</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:15px;color:#374151;line-height:1.7;white-space:pre-wrap">${message}</td>
+              <td style="padding:12px 0;font-size:15px;color:#374151;line-height:1.7;white-space:pre-wrap">${safeMessage}</td>
             </tr>
           </table>
           <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e5e7eb">
-            <div style="font-size:12px;color:#999">You can reply directly to this email to respond to ${name}.</div>
+            <div style="font-size:12px;color:#999">You can reply directly to this email to respond to ${safeName}.</div>
           </div>
         </div>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
         <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
       </div>
     `,
-  })
+  }, options.reference ? { idempotencyKey: `contact-team/${options.reference}` } : undefined)
 
   if (error) {
-    console.error("Failed to send contact email:", error)
+    console.error("Failed to send contact email:", error.name)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, id: data?.id }
+}
+
+export async function sendContactAutoReply(
+  to: string,
+  name: string,
+  reference: string,
+  topicLabel: string,
+  replyTime: string
+) {
+  const safeName = escapeContactHtml(name.split(" ")[0] || "there")
+
+  if (!resend) {
+    return { success: false, error: "Contact email delivery is not configured" }
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: `ChayanJobs Support <${fromEmail}>`,
+    to,
+    subject: `We received your message [${reference}]`,
+    text: `Thanks ${name}, your message has been saved. Reference: ${reference}. We usually reply ${replyTime} on business days (Monday to Saturday, IST).`,
+    html: `
+      <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:28px">
+          <div style="font-size:18px;font-weight:700;color:#0d1117">Thanks ${safeName}, we got your message</div>
+          <p style="color:#374151;font-size:14px;line-height:1.7">Your ${topicLabel.toLowerCase()} request is with the right team. Your reference number is <strong>${reference}</strong> — please include it in any follow-up.</p>
+          <p style="color:#374151;font-size:14px;line-height:1.7">We usually reply ${replyTime} on business days (Monday to Saturday, IST).</p>
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb">
+            <p style="color:#656d76;font-size:12px;line-height:1.6;margin:0">ChayanJobs will never ask for your password, OTP, or payment over email. This mailbox does not receive replies.</p>
+          </div>
+        </div>
+        <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
+      </div>
+    `,
+  }, { idempotencyKey: `contact-reply/${reference}` })
+
+  if (error) {
+    console.error("Failed to send contact auto-reply:", error.name)
     return { success: false, error: error.message }
   }
 

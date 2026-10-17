@@ -32,8 +32,8 @@ export function getOrgAlias(name: string | null | undefined): string {
 export function cleanTitle(title: string | null | undefined): string {
   if (!title) return ""
   return title
-    .replace(/\s*[|–—-]\s*chayanjobs(\s+blog)?\s*$/i, "")
-    .replace(/\s*[|–—-]\s*chayan\s*jobs(\s+blog)?\s*$/i, "")
+    .replace(/\s*[|\u2013\u2014-]\s*chayanjobs(\s+blog)?\s*$/i, "")
+    .replace(/\s*[|\u2013\u2014-]\s*chayan\s*jobs(\s+blog)?\s*$/i, "")
     .replace(/\s+/g, " ")
     .trim()
 }
