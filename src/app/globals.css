@@ -83,6 +83,26 @@ body {
   max-width: 100vw;
 }
 
+/* Lock the viewport without making body a new scroll container for sticky headers. */
+html:has(body[data-scroll-locked]) {
+  overflow-y: hidden;
+}
+
+html body[data-scroll-locked] {
+  overflow: clip !important;
+}
+
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  /* The root gutter already reserves scrollbar space during Radix scroll locks. */
+  html body[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
+}
+
 body {
   @apply bg-background text-foreground;
   min-width: 0;
