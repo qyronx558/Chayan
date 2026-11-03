@@ -67,3 +67,4 @@ Desktop.ini
 report.json
 lighthouse-perf.json
 .vercel
+.env*
