@@ -17,7 +17,7 @@ concurrency:
 jobs:
   migrate:
     runs-on: ubuntu-latest
-    environment: production
+    environment: Production
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +27,15 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Validate DATABASE_URL secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::The DATABASE_URL secret is not set for this repository/environment. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
 
       - name: Baseline an existing schema
         if: ${{ inputs.baseline_existing_schema }}
