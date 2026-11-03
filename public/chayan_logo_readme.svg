@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 220" role="img" aria-label="ChayanJobs logo">
+  <title>ChayanJobs</title>
+  <rect x="0.5" y="0.5" width="679" height="219" rx="24" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="48" y="54" width="112" height="112" rx="26" fill="#0f766e"/>
+  <path d="M78 116 L102 140 L152 80" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="196" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="56" font-weight="700" fill="#0f172a">ChayanJobs</text>
+  <text x="198" y="158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="18" font-weight="400" fill="#64748b">select right. serve right.</text>
+</svg>
