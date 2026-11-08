@@ -20,8 +20,8 @@ interface RowActionsProps {
 
 function IconBtn({ title, onClick, children, danger, href }: { title: string; onClick?: () => void; children: React.ReactNode; danger?: boolean; href?: string }) {
   const cls = cn(
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-    danger && "hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground dark:text-muted-foreground dark:hover:bg-ink dark:hover:text-paper",
+    danger && "hover:bg-paper-2 hover:text-brick dark:hover:bg-paper-2 dark:hover:text-brick"
   )
   if (href) {
     return (
@@ -45,17 +45,17 @@ export function RowActions({ onEdit, viewHref, onCopy, copied, toggleLabel, onTo
       </IconBtn>
       {onClone && (
         <IconBtn title="Duplicate / clone" onClick={onClone}>
-          <CopyPlus className={cn("h-4 w-4 text-blue-600", cloning && "animate-pulse")} />
+          <CopyPlus className={cn("h-4 w-4 text-brick", cloning && "animate-pulse")} />
         </IconBtn>
       )}
       {onQuickApprove && (
         <IconBtn title="Quick approve" onClick={onQuickApprove}>
-          <CheckCircle2 className={cn("h-4 w-4 text-green-600", approving && "animate-spin")} />
+          <CheckCircle2 className={cn("h-4 w-4 text-foreground", approving && "animate-spin")} />
         </IconBtn>
       )}
       {onToggleStatus && (
         <IconBtn title={toggleLabel ?? "Toggle status"} onClick={onToggleStatus}>
-          <Repeat className={cn("h-4 w-4 text-teal-600", toggling && "animate-spin")} />
+          <Repeat className={cn("h-4 w-4 text-brick", toggling && "animate-spin")} />
         </IconBtn>
       )}
       {viewHref && (
@@ -65,7 +65,7 @@ export function RowActions({ onEdit, viewHref, onCopy, copied, toggleLabel, onTo
       )}
       {onCopy && (
         <IconBtn title={copied ? "Copied!" : "Copy public link"} onClick={onCopy}>
-          <Copy className={cn("h-4 w-4", copied && "text-green-600")} />
+          <Copy className={cn("h-4 w-4", copied && "text-foreground")} />
         </IconBtn>
       )}
       <IconBtn title="Delete" danger onClick={onDelete}>

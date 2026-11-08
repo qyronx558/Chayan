@@ -143,10 +143,10 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         <section className="mt-12">
           <div className="mb-6 flex items-end justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Related Jobs</h2>
-              <p className="mt-0.5 text-sm text-gray-500">More openings from {job.department.name}</p>
+              <h2 className="text-xl font-bold text-foreground dark:text-paper">Related Jobs</h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">More openings from {job.department.name}</p>
             </div>
-            <Link href="/jobs" className="shrink-0 text-sm font-semibold text-orange-700 hover:underline dark:text-orange-300">
+            <Link href="/jobs" className="shrink-0 text-sm font-semibold text-brick hover:underline dark:text-brick">
               View all jobs →
             </Link>
           </div>
@@ -157,14 +157,14 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
               const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
               return (
               <Link key={rj.id} href={`/apply/${rj.slug}`}>
-                <Card className="group h-full border-gray-200 transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-gray-700">
+                <Card className="group h-full border-rule transition-all hover:-translate-y-0.5 hover:border-rule dark:border-ink">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                          <Badge variant="secondary" className="bg-blue-50 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">{rj.department.name}</Badge>
+                          <Badge variant="secondary" className="bg-paper-3 text-xs text-brick dark:bg-paper-3 dark:text-brick">{rj.department.name}</Badge>
                           {rjDays !== null && rjDays >= 0 && rjDays <= 7 ? (
-                            <Badge className="bg-red-100 text-[11px] text-red-700 dark:bg-red-950 dark:text-red-300">Only {rjDays}d left</Badge>
+                            <Badge className="bg-paper-2 text-[11px] text-brick dark:bg-paper-2 dark:text-brick">Only {rjDays}d left</Badge>
                           ) : rjDays !== null && rjDays > 7 ? (
                             <Badge variant="outline" className="text-[11px]">{rjDays}d left</Badge>
                           ) : null}
@@ -172,14 +172,14 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
                             <Badge variant="outline" className="text-[11px]">{rj.totalVacancies.toLocaleString("en-IN")} posts</Badge>
                           ) : null}
                         </div>
-                        <CardTitle className="text-base leading-snug group-hover:text-orange-700 dark:group-hover:text-orange-300">{rj.title}</CardTitle>
+                        <CardTitle className="text-base leading-snug group-hover:text-brick dark:group-hover:text-brick">{rj.title}</CardTitle>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                    <div className="space-y-1 text-sm text-muted-foreground dark:text-muted-foreground">
                       {rj.location && <p>📍 {rj.location}</p>}
-                      {rj.lastDate && <p>🗓 Last Date: <span className={rjUrgent ? "font-bold text-red-600" : "font-medium"}>{formatDate(rj.lastDate)}</span></p>}
+                      {rj.lastDate && <p>🗓 Last Date: <span className={rjUrgent ? "font-bold text-brick" : "font-medium"}>{formatDate(rj.lastDate)}</span></p>}
                       {rj.totalVacancies && <p>👥 Vacancies: {rj.totalVacancies.toLocaleString("en-IN")}</p>}
                     </div>
                   </CardContent>

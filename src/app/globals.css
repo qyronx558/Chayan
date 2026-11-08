@@ -1,50 +1,83 @@
+/* Hallmark v2.0.0 · theme: Newsprint · shape: Broadsheet Front / Index-First · genre: editorial · job: find and apply for a government job · posture: restrained · nav: masthead over a bar · footer: mast · hero: Banner, masthead + search ledger · signature: the live listings set as an agate newspaper index · contrast: paper oklch(94% .011 92) on ink oklch(17% .012 60) */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: V, the legacy utility palette forced a global material remap; fixed with a full warm-paper ink override rather than spot recolours */
+/* Hallmark · redesign: public site · keeps routes, data wiring and content · drops gradient tiles, cards-on-cards, tracked-caps labels, one-colour-per-module accents */
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.005 260);
-  --foreground: oklch(0.14 0.03 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0.03 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0.03 260);
-  --primary: oklch(0.28 0.09 260);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.94 0.01 260);
-  --secondary-foreground: oklch(0.28 0.09 260);
-  --muted: oklch(0.94 0.01 260);
-  --muted-foreground: oklch(0.55 0.02 260);
-  --accent: oklch(0.78 0.15 75);
-  --accent-foreground: oklch(0.14 0.04 260);
-  --destructive: oklch(0.58 0.24 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.9 0.01 260);
-  --input: oklch(0.9 0.01 260);
-  --ring: oklch(0.28 0.09 260);
-  --radius: 0.5rem;
+  /* Newsprint material */
+  --color-paper: oklch(94% 0.011 92);
+  --color-paper-2: oklch(90.5% 0.015 88);
+  --color-paper-3: oklch(87% 0.017 86);
+  --color-ink: oklch(17% 0.012 60);
+  --color-ink-2: oklch(27% 0.012 58);
+  --color-muted-ink: oklch(44% 0.014 60);
+  --color-rule: oklch(68% 0.016 75);
+  --color-rule-2: oklch(34% 0.012 60);
+  --color-brick: oklch(44% 0.13 32);
+  --color-brick-ink: oklch(95% 0.012 90);
+  --color-focus: oklch(48% 0.17 32);
+
+  --font-display: var(--font-zilla), ui-serif, Georgia, serif;
+  --font-body: var(--font-spectral), ui-serif, Georgia, serif;
+  --font-outlier: var(--font-franklin), ui-sans-serif, system-ui, sans-serif;
+
+  /* semantic tokens used across the app */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-paper);
+  --secondary: var(--color-paper-2);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper-2);
+  --muted-foreground: var(--color-muted-ink);
+  --accent: var(--color-brick);
+  --accent-foreground: var(--color-brick-ink);
+  --destructive: oklch(42% 0.15 28);
+  --destructive-foreground: var(--color-paper);
+  --border: var(--color-rule);
+  --input: var(--color-rule);
+  --ring: var(--color-focus);
+  --radius: 0px;
 }
 
 .dark {
-  --background: oklch(0.13 0.02 260);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.16 0.02 260);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.16 0.02 260);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.97 0 0);
-  --primary-foreground: oklch(0.13 0.02 260);
-  --secondary: oklch(0.24 0.02 260);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.24 0.02 260);
-  --muted-foreground: oklch(0.65 0.02 260);
-  --accent: oklch(0.7 0.15 75);
-  --accent-foreground: oklch(0.13 0.02 260);
-  --destructive: oklch(0.58 0.24 27);
-  --destructive-foreground: oklch(0.97 0 0);
-  --border: oklch(0.24 0.02 260);
-  --input: oklch(0.24 0.02 260);
-  --ring: oklch(0.55 0.05 260);
+  --color-paper: oklch(15% 0.008 60);
+  --color-paper-2: oklch(19% 0.010 62);
+  --color-paper-3: oklch(23% 0.012 62);
+  --color-ink: oklch(93% 0.012 90);
+  --color-ink-2: oklch(84% 0.012 82);
+  --color-muted-ink: oklch(68% 0.014 74);
+  --color-rule: oklch(38% 0.012 62);
+  --color-rule-2: oklch(62% 0.014 70);
+  --color-brick: oklch(66% 0.12 34);
+  --color-brick-ink: oklch(16% 0.012 60);
+  --color-focus: oklch(70% 0.16 34);
+
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper-2);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper-2);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-paper);
+  --secondary: var(--color-paper-3);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper-3);
+  --muted-foreground: var(--color-muted-ink);
+  --accent: var(--color-brick);
+  --accent-foreground: var(--color-brick-ink);
+  --destructive: oklch(58% 0.15 28);
+  --destructive-foreground: var(--color-paper);
+  --border: var(--color-rule);
+  --input: var(--color-rule);
+  --ring: var(--color-focus);
 }
 
 @theme inline {
@@ -67,10 +100,440 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-paper: var(--color-paper);
+  --color-paper-2: var(--color-paper-2);
+  --color-paper-3: var(--color-paper-3);
+  --color-ink: var(--color-ink);
+  --color-ink-2: var(--color-ink-2);
+  --color-rule: var(--color-rule);
+  --color-rule-2: var(--color-rule-2);
+  --color-brick: var(--color-brick);
+  --color-brick-ink: var(--color-brick-ink);
+
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-outlier);
+  --font-display: var(--font-display);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-inner: none;
+}
+
+/*
+ * Newsprint material remap. The public site was built on Tailwind's stock
+ * swatch; every colour scale is re-cut here into warm paper, warm ink and a
+ * single dried-brick signal so the whole tree inherits one material without a
+ * file-by-file repaint. No purple, no cool blue, no emerald, no pure black.
+ */
+@theme {
+  --color-stone-50: oklch(97.5% 0.008 92);
+  --color-stone-100: oklch(94% 0.011 92);
+  --color-stone-200: oklch(90.5% 0.015 88);
+  --color-stone-300: oklch(87% 0.017 86);
+  --color-stone-400: oklch(62% 0.016 75);
+  --color-stone-500: oklch(44% 0.014 60);
+  --color-stone-600: oklch(36% 0.013 58);
+  --color-stone-700: oklch(27% 0.012 58);
+  --color-stone-800: oklch(22% 0.012 58);
+  --color-stone-900: oklch(17% 0.012 60);
+  --color-stone-950: oklch(12% 0.010 58);
+
+  --color-slate-50: oklch(97.5% 0.008 92);
+  --color-slate-100: oklch(94% 0.011 92);
+  --color-slate-200: oklch(90.5% 0.015 88);
+  --color-slate-300: oklch(87% 0.017 86);
+  --color-slate-400: oklch(62% 0.016 75);
+  --color-slate-500: oklch(44% 0.014 60);
+  --color-slate-600: oklch(36% 0.013 58);
+  --color-slate-700: oklch(27% 0.012 58);
+  --color-slate-800: oklch(22% 0.012 58);
+  --color-slate-900: oklch(17% 0.012 60);
+  --color-slate-950: oklch(12% 0.010 58);
+
+  --color-gray-50: oklch(97.5% 0.008 92);
+  --color-gray-100: oklch(94% 0.011 92);
+  --color-gray-200: oklch(90.5% 0.015 88);
+  --color-gray-300: oklch(87% 0.017 86);
+  --color-gray-400: oklch(62% 0.016 75);
+  --color-gray-500: oklch(44% 0.014 60);
+  --color-gray-600: oklch(36% 0.013 58);
+  --color-gray-700: oklch(27% 0.012 58);
+  --color-gray-800: oklch(22% 0.012 58);
+  --color-gray-900: oklch(17% 0.012 60);
+  --color-gray-950: oklch(12% 0.010 58);
+
+  --color-zinc-50: oklch(97.5% 0.008 92);
+  --color-zinc-100: oklch(94% 0.011 92);
+  --color-zinc-200: oklch(90.5% 0.015 88);
+  --color-zinc-300: oklch(87% 0.017 86);
+  --color-zinc-400: oklch(62% 0.016 75);
+  --color-zinc-500: oklch(44% 0.014 60);
+  --color-zinc-600: oklch(36% 0.013 58);
+  --color-zinc-700: oklch(27% 0.012 58);
+  --color-zinc-800: oklch(22% 0.012 58);
+  --color-zinc-900: oklch(17% 0.012 60);
+  --color-zinc-950: oklch(12% 0.010 58);
+
+  --color-neutral-50: oklch(97.5% 0.008 92);
+  --color-neutral-100: oklch(94% 0.011 92);
+  --color-neutral-200: oklch(90.5% 0.015 88);
+  --color-neutral-300: oklch(87% 0.017 86);
+  --color-neutral-400: oklch(62% 0.016 75);
+  --color-neutral-500: oklch(44% 0.014 60);
+  --color-neutral-600: oklch(36% 0.013 58);
+  --color-neutral-700: oklch(27% 0.012 58);
+  --color-neutral-800: oklch(22% 0.012 58);
+  --color-neutral-900: oklch(17% 0.012 60);
+  --color-neutral-950: oklch(12% 0.010 58);
+
+  /* cool families folded into the warm ink ramp */
+  --color-blue-50: oklch(97.5% 0.008 92);
+  --color-blue-100: oklch(94% 0.011 92);
+  --color-blue-200: oklch(90.5% 0.015 88);
+  --color-blue-300: oklch(87% 0.017 86);
+  --color-blue-400: oklch(62% 0.016 75);
+  --color-blue-500: oklch(44% 0.014 60);
+  --color-blue-600: oklch(34% 0.013 58);
+  --color-blue-700: oklch(27% 0.012 58);
+  --color-blue-800: oklch(22% 0.012 58);
+  --color-blue-900: oklch(17% 0.012 60);
+  --color-blue-950: oklch(12% 0.010 58);
+
+  --color-indigo-50: oklch(97.5% 0.008 92);
+  --color-indigo-100: oklch(94% 0.011 92);
+  --color-indigo-200: oklch(90.5% 0.015 88);
+  --color-indigo-300: oklch(87% 0.017 86);
+  --color-indigo-400: oklch(62% 0.016 75);
+  --color-indigo-500: oklch(44% 0.014 60);
+  --color-indigo-600: oklch(34% 0.013 58);
+  --color-indigo-700: oklch(27% 0.012 58);
+  --color-indigo-800: oklch(22% 0.012 58);
+  --color-indigo-900: oklch(17% 0.012 60);
+  --color-indigo-950: oklch(12% 0.010 58);
+
+  --color-sky-50: oklch(97.5% 0.008 92);
+  --color-sky-100: oklch(94% 0.011 92);
+  --color-sky-200: oklch(90.5% 0.015 88);
+  --color-sky-300: oklch(87% 0.017 86);
+  --color-sky-400: oklch(62% 0.016 75);
+  --color-sky-500: oklch(44% 0.014 60);
+  --color-sky-600: oklch(34% 0.013 58);
+  --color-sky-700: oklch(27% 0.012 58);
+  --color-sky-800: oklch(22% 0.012 58);
+  --color-sky-900: oklch(17% 0.012 60);
+  --color-sky-950: oklch(12% 0.010 58);
+
+  --color-cyan-50: oklch(97.5% 0.008 92);
+  --color-cyan-100: oklch(94% 0.011 92);
+  --color-cyan-200: oklch(90.5% 0.015 88);
+  --color-cyan-300: oklch(87% 0.017 86);
+  --color-cyan-400: oklch(62% 0.016 75);
+  --color-cyan-500: oklch(44% 0.014 60);
+  --color-cyan-600: oklch(34% 0.013 58);
+  --color-cyan-700: oklch(27% 0.012 58);
+  --color-cyan-800: oklch(22% 0.012 58);
+  --color-cyan-900: oklch(17% 0.012 60);
+  --color-cyan-950: oklch(12% 0.010 58);
+
+  --color-teal-50: oklch(97.5% 0.008 92);
+  --color-teal-100: oklch(94% 0.011 92);
+  --color-teal-200: oklch(90.5% 0.015 88);
+  --color-teal-300: oklch(87% 0.017 86);
+  --color-teal-400: oklch(62% 0.016 75);
+  --color-teal-500: oklch(44% 0.014 60);
+  --color-teal-600: oklch(34% 0.013 58);
+  --color-teal-700: oklch(27% 0.012 58);
+  --color-teal-800: oklch(22% 0.012 58);
+  --color-teal-900: oklch(17% 0.012 60);
+  --color-teal-950: oklch(12% 0.010 58);
+
+  --color-emerald-50: oklch(97.5% 0.008 92);
+  --color-emerald-100: oklch(94% 0.011 92);
+  --color-emerald-200: oklch(90.5% 0.015 88);
+  --color-emerald-300: oklch(87% 0.017 86);
+  --color-emerald-400: oklch(62% 0.016 75);
+  --color-emerald-500: oklch(44% 0.014 60);
+  --color-emerald-600: oklch(34% 0.013 58);
+  --color-emerald-700: oklch(27% 0.012 58);
+  --color-emerald-800: oklch(22% 0.012 58);
+  --color-emerald-900: oklch(17% 0.012 60);
+  --color-emerald-950: oklch(12% 0.010 58);
+
+  --color-green-50: oklch(97.5% 0.008 92);
+  --color-green-100: oklch(94% 0.011 92);
+  --color-green-200: oklch(90.5% 0.015 88);
+  --color-green-300: oklch(87% 0.017 86);
+  --color-green-400: oklch(62% 0.016 75);
+  --color-green-500: oklch(44% 0.014 60);
+  --color-green-600: oklch(34% 0.013 58);
+  --color-green-700: oklch(27% 0.012 58);
+  --color-green-800: oklch(22% 0.012 58);
+  --color-green-900: oklch(17% 0.012 60);
+  --color-green-950: oklch(12% 0.010 58);
+
+  --color-lime-50: oklch(97.5% 0.008 92);
+  --color-lime-100: oklch(94% 0.011 92);
+  --color-lime-200: oklch(90.5% 0.015 88);
+  --color-lime-300: oklch(87% 0.017 86);
+  --color-lime-400: oklch(62% 0.016 75);
+  --color-lime-500: oklch(44% 0.014 60);
+  --color-lime-600: oklch(34% 0.013 58);
+  --color-lime-700: oklch(27% 0.012 58);
+  --color-lime-800: oklch(22% 0.012 58);
+  --color-lime-900: oklch(17% 0.012 60);
+  --color-lime-950: oklch(12% 0.010 58);
+
+  /* the warm signal family: one dried brick, one ochre */
+  --color-red-50: oklch(95% 0.02 32);
+  --color-red-100: oklch(91% 0.035 32);
+  --color-red-200: oklch(85% 0.06 32);
+  --color-red-300: oklch(74% 0.09 32);
+  --color-red-400: oklch(60% 0.11 32);
+  --color-red-500: oklch(52% 0.13 32);
+  --color-red-600: oklch(44% 0.13 32);
+  --color-red-700: oklch(36% 0.11 32);
+  --color-red-800: oklch(28% 0.09 32);
+  --color-red-900: oklch(22% 0.07 32);
+  --color-red-950: oklch(15% 0.05 32);
+
+  --color-rose-50: oklch(95% 0.02 32);
+  --color-rose-100: oklch(91% 0.035 32);
+  --color-rose-200: oklch(85% 0.06 32);
+  --color-rose-300: oklch(74% 0.09 32);
+  --color-rose-400: oklch(60% 0.11 32);
+  --color-rose-500: oklch(52% 0.13 32);
+  --color-rose-600: oklch(44% 0.13 32);
+  --color-rose-700: oklch(36% 0.11 32);
+  --color-rose-800: oklch(28% 0.09 32);
+  --color-rose-900: oklch(22% 0.07 32);
+  --color-rose-950: oklch(15% 0.05 32);
+
+  --color-pink-50: oklch(95% 0.02 32);
+  --color-pink-100: oklch(91% 0.035 32);
+  --color-pink-200: oklch(85% 0.06 32);
+  --color-pink-300: oklch(74% 0.09 32);
+  --color-pink-400: oklch(60% 0.11 32);
+  --color-pink-500: oklch(52% 0.13 32);
+  --color-pink-600: oklch(44% 0.13 32);
+  --color-pink-700: oklch(36% 0.11 32);
+  --color-pink-800: oklch(28% 0.09 32);
+  --color-pink-900: oklch(22% 0.07 32);
+  --color-pink-950: oklch(15% 0.05 32);
+
+  --color-fuchsia-50: oklch(95% 0.02 32);
+  --color-fuchsia-100: oklch(91% 0.035 32);
+  --color-fuchsia-200: oklch(85% 0.06 32);
+  --color-fuchsia-300: oklch(74% 0.09 32);
+  --color-fuchsia-400: oklch(60% 0.11 32);
+  --color-fuchsia-500: oklch(52% 0.13 32);
+  --color-fuchsia-600: oklch(44% 0.13 32);
+  --color-fuchsia-700: oklch(36% 0.11 32);
+  --color-fuchsia-800: oklch(28% 0.09 32);
+  --color-fuchsia-900: oklch(22% 0.07 32);
+  --color-fuchsia-950: oklch(15% 0.05 32);
+
+  --color-purple-50: oklch(95% 0.02 32);
+  --color-purple-100: oklch(91% 0.035 32);
+  --color-purple-200: oklch(85% 0.06 32);
+  --color-purple-300: oklch(74% 0.09 32);
+  --color-purple-400: oklch(60% 0.11 32);
+  --color-purple-500: oklch(52% 0.13 32);
+  --color-purple-600: oklch(44% 0.13 32);
+  --color-purple-700: oklch(36% 0.11 32);
+  --color-purple-800: oklch(28% 0.09 32);
+  --color-purple-900: oklch(22% 0.07 32);
+  --color-purple-950: oklch(15% 0.05 32);
+
+  --color-violet-50: oklch(95% 0.02 32);
+  --color-violet-100: oklch(91% 0.035 32);
+  --color-violet-200: oklch(85% 0.06 32);
+  --color-violet-300: oklch(74% 0.09 32);
+  --color-violet-400: oklch(60% 0.11 32);
+  --color-violet-500: oklch(52% 0.13 32);
+  --color-violet-600: oklch(44% 0.13 32);
+  --color-violet-700: oklch(36% 0.11 32);
+  --color-violet-800: oklch(28% 0.09 32);
+  --color-violet-900: oklch(22% 0.07 32);
+  --color-violet-950: oklch(15% 0.05 32);
+
+  --color-amber-50: oklch(97% 0.02 80);
+  --color-amber-100: oklch(94% 0.04 82);
+  --color-amber-200: oklch(89% 0.07 82);
+  --color-amber-300: oklch(82% 0.10 80);
+  --color-amber-400: oklch(72% 0.12 78);
+  --color-amber-500: oklch(62% 0.13 74);
+  --color-amber-600: oklch(52% 0.12 68);
+  --color-amber-700: oklch(42% 0.10 62);
+  --color-amber-800: oklch(32% 0.08 60);
+  --color-amber-900: oklch(24% 0.06 58);
+  --color-amber-950: oklch(16% 0.04 56);
+
+  --color-orange-50: oklch(97% 0.02 80);
+  --color-orange-100: oklch(94% 0.04 82);
+  --color-orange-200: oklch(89% 0.07 82);
+  --color-orange-300: oklch(82% 0.10 80);
+  --color-orange-400: oklch(72% 0.12 78);
+  --color-orange-500: oklch(62% 0.13 74);
+  --color-orange-600: oklch(52% 0.12 68);
+  --color-orange-700: oklch(42% 0.10 62);
+  --color-orange-800: oklch(32% 0.08 60);
+  --color-orange-900: oklch(24% 0.06 58);
+  --color-orange-950: oklch(16% 0.04 56);
+
+  --color-yellow-50: oklch(97% 0.02 80);
+  --color-yellow-100: oklch(94% 0.04 82);
+  --color-yellow-200: oklch(89% 0.07 82);
+  --color-yellow-300: oklch(82% 0.10 80);
+  --color-yellow-400: oklch(72% 0.12 78);
+  --color-yellow-500: oklch(62% 0.13 74);
+  --color-yellow-600: oklch(52% 0.12 68);
+  --color-yellow-700: oklch(42% 0.10 62);
+  --color-yellow-800: oklch(32% 0.08 60);
+  --color-yellow-900: oklch(24% 0.06 58);
+  --color-yellow-950: oklch(16% 0.04 56);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    font-synthesis: none;
+    caret-color: var(--color-brick);
+    scrollbar-color: var(--color-rule) var(--color-paper-2);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  h1 {
+    line-height: 1.02;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  small,
+  figcaption,
+  th {
+    font-family: var(--font-body);
+    letter-spacing: normal;
+  }
+
+  a {
+    text-underline-offset: 0.16em;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-brick) 22%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    transition: none;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+}
+
+/*
+ * The anti-slop skin: the legacy tree leaned on tracked uppercase labels,
+ * gradient washes, glass and soft card lifts. Instead of repainting hundreds
+ * of files, the material forbids those effects at the utility level.
+ */
+.uppercase {
+  text-transform: none !important;
+}
+.tracking-wide,
+.tracking-wider,
+.tracking-widest,
+.tracking-\[0\.15em\] {
+  letter-spacing: normal !important;
+}
+.transition-all {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+}
+[class*="bg-gradient-to"],
+[class*="bg-linear-to"] {
+  background-image: none !important;
+}
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+}
+
+/* Newsprint primitives */
+.agate {
+  font-family: var(--font-outlier);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.rule-double {
+  box-sizing: content-box;
+  height: 2px;
+  border: 0;
+  border-block: 1px solid var(--color-rule-2);
+}
+.rule-hair {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+}
+.newsprint-cols {
+  columns: 2 20rem;
+  column-gap: 2rem;
+  column-rule: 1px solid var(--color-rule);
+}
+@media (min-width: 1024px) {
+  .newsprint-cols {
+    columns: 3 18rem;
+  }
+}
+.newsprint-cols p {
+  margin: 0 0 1em;
+  text-align: justify;
+  hyphens: auto;
+}
+.dropcap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.8;
+  padding-right: 0.08em;
+  color: var(--color-ink);
+}
+.news-well {
+  background: var(--color-paper-2);
+  border-block: 1px solid var(--color-rule);
 }
 
 * {

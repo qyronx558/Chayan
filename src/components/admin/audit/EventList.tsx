@@ -106,7 +106,7 @@ export function EventList({
   void flexRender;
   if (loading) {
     return (
-      <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white dark:divide-white/[0.04] dark:border-white/[0.06] dark:bg-[#0b1220]" aria-busy>
+      <div className="divide-y divide-rule100 rounded-xl border border-rule bg-background   " aria-busy>
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-3 py-3">
             <Skeleton className="h-4 w-4 rounded" />
@@ -124,9 +124,9 @@ export function EventList({
   }
   if (events.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white px-4 py-14 text-center dark:border-white/[0.06] dark:bg-[#0b1220]">
-        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">No events match</p>
-        <p className="mx-auto mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">Try widening the date range or clearing a filter.</p>
+      <div className="rounded-xl border border-rule bg-background px-4 py-14 text-center  ">
+        <p className="text-sm font-semibold text-foreground dark:text-paper">No events match</p>
+        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground dark:text-muted-foreground">Try widening the date range or clearing a filter.</p>
         <Button variant="outline" className="mt-4 h-9" onClick={onClearFilters}>Clear filters</Button>
       </div>
     );
@@ -135,19 +135,19 @@ export function EventList({
   const allIds = events.map((e) => e.id);
   const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/[0.06] dark:bg-[#0b1220]">
-      <div className="hidden items-center gap-2 border-b border-slate-200 px-3 py-2 md:flex dark:border-white/[0.06]">
+    <div className="overflow-hidden rounded-xl border border-rule bg-background  ">
+      <div className="hidden items-center gap-2 border-b border-rule px-3 py-2 md:flex ">
         <Checkbox
           checked={allSelected}
           onCheckedChange={(v) => onSelectAll(v === true)}
           aria-label="Select all events on page"
         />
-        <span className="text-xs text-slate-500 dark:text-slate-400">
+        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
           Showing {events.length.toLocaleString("en-IN")} of {total.toLocaleString("en-IN")} events
           {grouped && groupedCount > 0 ? <span> · {groupedCount} grouped</span> : null}
         </span>
       </div>
-      <div className="px-3 py-2 text-xs text-slate-500 md:hidden dark:text-slate-400">
+      <div className="px-3 py-2 text-xs text-muted-foreground md:hidden dark:text-muted-foreground">
         Showing {events.length.toLocaleString("en-IN")} of {total.toLocaleString("en-IN")} events
         {grouped && groupedCount > 0 ? <span> · {groupedCount} grouped</span> : null}
       </div>
@@ -161,7 +161,7 @@ export function EventList({
           return (
             <div key={g.key}>
               {showSep ? <DaySeparator label={label} /> : null}
-              <div className={liveIds.has(g.head.id) ? "bg-teal-50/70 transition-colors dark:bg-teal-950/20" : undefined}>
+              <div className={liveIds.has(g.head.id) ? "bg-paper-3 transition-colors dark:bg-paper-3" : undefined}>
                 <EventRow
                   event={g.head}
                   density={density}
@@ -172,22 +172,22 @@ export function EventList({
                   onToggle={() => onToggle(expandedId === g.head.id ? null : g.head.id)}
                 />
               </div>
-              <div className="border-b border-slate-100 px-3 py-1.5 dark:border-white/[0.04]">
+              <div className="border-b border-rule px-3 py-1.5 ">
                 <button
                   onClick={() => onGroupOpen(g.key)}
                   aria-expanded={open}
-                  className="inline-flex h-[30px] items-center rounded-full border border-slate-200 px-3 text-xs font-medium leading-none text-teal-800 hover:border-teal-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:border-white/10 dark:text-teal-300"
+                  className="inline-flex h-[30px] items-center rounded-full border border-rule px-3 text-xs font-medium leading-none text-brick hover:border-rule focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule  dark:text-brick"
                 >
                   {open ? `Hide ${g.children.length} events` : `Expand ${g.children.length} events`}
                 </button>
                 {open ? (
                   <ul className="mt-1.5 space-y-1 pb-1.5">
                     {g.children.map((c) => (
-                      <li key={c.id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs dark:bg-white/[0.03]">
+                      <li key={c.id} className="flex items-center gap-2 rounded-lg bg-paper-2 px-2.5 py-1.5 text-xs dark:bg-background/[0.03]">
                         <Checkbox checked={selected.has(c.id)} onCheckedChange={(v) => onSelect(c.id, v === true)} aria-label={`Select event ${c.id}`} />
-                        <span className="shrink-0 tabular-nums text-slate-400">{new Date(c.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
-                        <span className="min-w-0 flex-1 truncate text-slate-600 dark:text-slate-300">{c.summary}</span>
-                        <span className="hidden font-mono text-[11px] text-slate-400 sm:inline">{c.entityId.slice(0, 8)}</span>
+                        <span className="shrink-0 tabular-nums text-muted-foreground">{new Date(c.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
+                        <span className="min-w-0 flex-1 truncate text-muted-foreground dark:text-muted-foreground">{c.summary}</span>
+                        <span className="hidden font-mono text-[11px] text-muted-foreground sm:inline">{c.entityId.slice(0, 8)}</span>
                       </li>
                     ))}
                   </ul>
@@ -206,7 +206,7 @@ export function EventList({
         return (
           <div key={e.id}>
             {showSep ? <DaySeparator label={label} /> : null}
-            <div className={liveIds.has(e.id) ? "bg-teal-50/70 transition-colors dark:bg-teal-950/20" : undefined}>
+            <div className={liveIds.has(e.id) ? "bg-paper-3 transition-colors dark:bg-paper-3" : undefined}>
               <EventRow
                 event={e}
                 density={density}

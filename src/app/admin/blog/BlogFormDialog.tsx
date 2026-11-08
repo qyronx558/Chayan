@@ -126,7 +126,7 @@ export function BlogFormDialog({ row, open, onOpenChange, lookups, onSaved }: Fo
                         {...field}
                         placeholder="Post title..."
                         onChange={(e) => { field.onChange(e); if (!row) form.setValue("slug", slugify(e.target.value)) }}
-                        className="w-full border-0 bg-transparent text-3xl font-bold outline-none placeholder:text-gray-400 focus:outline-none focus:ring-0"
+                        className="w-full border-0 bg-transparent text-3xl font-bold outline-none placeholder:text-muted-foreground focus:outline-none focus:ring-0"
                       />
                     </FormControl>
                     <FormMessage />
@@ -142,32 +142,32 @@ export function BlogFormDialog({ row, open, onOpenChange, lookups, onSaved }: Fo
                 )} />
               </div>
             </div>
-            <div className="w-80 shrink-0 overflow-y-auto border-l bg-gray-50 p-6 dark:bg-gray-900/50">
+            <div className="w-80 shrink-0 overflow-y-auto border-l bg-paper-2 p-6 dark:bg-ink/50">
               <div className="space-y-5">
                 <FormField control={form.control} name="slug" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Slug</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Slug</FormLabel>
                     <FormControl><Input {...field} className="text-sm" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="author" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Author</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Author</FormLabel>
                     <FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="ChayanJobs" className="text-sm" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="tags" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Tags</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Tags</FormLabel>
                     <FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="exam-tips, ssc, govt-jobs" className="text-sm" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="categoryId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Category</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Category</FormLabel>
                     <FormControl>
                       <Select value={field.value || ""} onValueChange={(val) => field.onChange(val === "none" ? null : val)}>
                         <SelectTrigger className="text-sm">
@@ -186,7 +186,7 @@ export function BlogFormDialog({ row, open, onOpenChange, lookups, onSaved }: Fo
                 )} />
                 <FormField control={form.control} name="image" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Featured Image</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Featured Image</FormLabel>
                     <FormControl>
                       <ImageUpload value={field.value} onChange={field.onChange} folder="ChayanJobs/blog" className="!p-3" />
                     </FormControl>
@@ -195,16 +195,16 @@ export function BlogFormDialog({ row, open, onOpenChange, lookups, onSaved }: Fo
                 )} />
                 <FormField control={form.control} name="excerpt" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-gray-500">Excerpt</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Excerpt</FormLabel>
                     <FormControl><Textarea {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} rows={3} className="text-sm" placeholder="Brief summary for listings..." /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="published" render={({ field }) => (
-                  <FormItem className="flex items-center justify-between rounded-lg border bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <FormItem className="flex items-center justify-between rounded-lg border bg-background p-3 dark:border-ink dark:bg-ink">
                     <div>
                       <FormLabel className="text-sm font-medium">Published</FormLabel>
-                      <p className="text-xs text-gray-500">{field.value ? "Visible to readers" : "Saved as draft"}</p>
+                      <p className="text-xs text-muted-foreground">{field.value ? "Visible to readers" : "Saved as draft"}</p>
                     </div>
                     <FormControl>
                       <Switch checked={field.value} onCheckedChange={field.onChange} />

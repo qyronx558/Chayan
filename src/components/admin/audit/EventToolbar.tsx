@@ -27,7 +27,7 @@ function FiltersLabel({ activeCount }: { activeCount: number }) {
       <ListFilter className="mr-1.5 h-4 w-4" />
       <span className="leading-none">Filters</span>
       {activeCount > 0 ? (
-        <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-teal-700 px-1 text-[11px] font-bold leading-none text-white">
+        <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-paper-3 px-1 text-[11px] font-bold leading-none text-paper">
           {activeCount}
         </span>
       ) : null}
@@ -64,12 +64,12 @@ export function EventToolbar({
   return (
     <div className="flex items-center gap-2">
       <div className="relative min-w-0 flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <Input
           value={filters.q}
           onChange={(e) => onFilters({ ...filters, q: e.target.value })}
           placeholder="Search summary, entity, actor…"
-          className="h-9 min-w-0 bg-white pl-9 dark:bg-[#0b1220]"
+          className="h-9 min-w-0 bg-background pl-9 "
           aria-label="Search events"
         />
       </div>
@@ -78,7 +78,7 @@ export function EventToolbar({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="h-9 shrink-0 border-slate-200 bg-white px-3 text-sm leading-none dark:border-white/10 dark:bg-[#0b1220]"
+              className="h-9 shrink-0 border-rule bg-background px-3 text-sm leading-none  "
               aria-expanded={filtersOpen}
               aria-label="Toggle filters"
             >
@@ -86,7 +86,7 @@ export function EventToolbar({
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[min(520px,calc(100vw-2rem)] border-slate-200 bg-white p-0 dark:border-white/10 dark:bg-[#0b1220]"
+            className="w-[min(520px,calc(100vw-2rem)] border-rule bg-background p-0  "
             align="center"
             side="bottom"
             sideOffset={8}
@@ -103,7 +103,7 @@ export function EventToolbar({
       ) : (
         <Button
           variant="outline"
-          className="h-9 shrink-0 border-slate-200 bg-white px-3 text-sm leading-none dark:border-white/10 dark:bg-[#0b1220]"
+          className="h-9 shrink-0 border-rule bg-background px-3 text-sm leading-none  "
           aria-expanded={filtersOpen}
           aria-label="Toggle filters"
           onClick={() => onFiltersOpen(!filtersOpen)}

@@ -118,7 +118,7 @@ export default function AdminDepartments() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Departments</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Used as a filter on the gov-jobs page. You can only edit or delete departments you uploaded.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function AdminDepartments() {
       </div>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search departments..."
           value={search}
@@ -155,11 +155,11 @@ export default function AdminDepartments() {
                   return (
                     <TableRow key={dept.id}>
                       <TableCell className="font-medium">{dept.name}</TableCell>
-                      <TableCell className="text-gray-500">{dept.slug}</TableCell>
-                      <TableCell className="tabular-nums text-gray-600">{usageOf(dept)}</TableCell>
+                      <TableCell className="text-muted-foreground">{dept.slug}</TableCell>
+                      <TableCell className="tabular-nums text-muted-foreground">{usageOf(dept)}</TableCell>
                       <TableCell>
                         <div>
-                          <p className="whitespace-nowrap text-xs text-gray-600">{dept.createdBy?.name || dept.createdBy?.email || (dept.createdById ? dept.createdById : "System")}</p>
+                          <p className="whitespace-nowrap text-xs text-muted-foreground">{dept.createdBy?.name || dept.createdBy?.email || (dept.createdById ? dept.createdById : "System")}</p>
                           <AdminIdBadge id={dept.createdBy?.id || dept.createdById} />
                         </div>
                       </TableCell>
@@ -185,7 +185,7 @@ export default function AdminDepartments() {
                             disabled={!allowed}
                             title={allowed ? "Delete department" : "Only the uploader (or super admin) can delete this"}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-brick" />
                           </Button>
                         </div>
                       </TableCell>
@@ -193,7 +193,7 @@ export default function AdminDepartments() {
                   )
                 })}
                 {departments.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-gray-500">No departments found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No departments found</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -229,7 +229,7 @@ export default function AdminDepartments() {
       <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Delete Department</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? Departments in use by jobs or other content cannot be deleted. This action cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure? Departments in use by jobs or other content cannot be deleted. This action cannot be undone.</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => deleteId && deleteMutation.mutate(deleteId)} disabled={deleteMutation.isPending}>Delete</Button>

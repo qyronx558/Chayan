@@ -25,7 +25,7 @@ export function PurgeDangerZone({
   }
   return (
     <DataCard title="Danger zone" subtitle="Permanently delete old events. This writes a LOG_PURGE event.">
-      <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">
+      <div className="flex items-start gap-2 rounded-lg border border-brick bg-paper-2 p-2.5 text-xs text-brick dark:border-brick dark:bg-paper-2 dark:text-brick">
         <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <span>{legalHold ? "Legal hold is ON. All deletion is blocked until it is lifted." : "Deletion is permanent. An archive copy is created first when enabled."}</span>
       </div>
@@ -35,12 +35,12 @@ export function PurgeDangerZone({
             key={d}
             onClick={() => refresh(d)}
             aria-pressed={days === d}
-            className={`inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${days === d ? "border-teal-700 bg-teal-700 text-white" : "border-slate-200 bg-white text-slate-600 dark:border-white/10 dark:bg-transparent dark:text-slate-300"}`}
+            className={`inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule ${days === d ? "border-rule bg-paper-3 text-paper" : "border-rule bg-background text-muted-foreground  dark:bg-transparent dark:text-muted-foreground"}`}
           >
             Older than {d}d
           </button>
         ))}
-        <span className="inline-flex h-9 items-center text-xs tabular-nums text-slate-500 dark:text-slate-400">
+        <span className="inline-flex h-9 items-center text-xs tabular-nums text-muted-foreground dark:text-muted-foreground">
           {affected === null ? "Select a range to count" : `${affected.toLocaleString("en-IN")} events affected`}
         </span>
       </div>

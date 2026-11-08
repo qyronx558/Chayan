@@ -71,14 +71,14 @@ export function DocumentSideRail(p: Props) {
   return (
     <div className="space-y-4 print:hidden lg:sticky lg:top-24 lg:self-start">
       {/* ── Download card ── */}
-      <Card className="overflow-hidden border-orange-200 shadow-md dark:border-gray-700">
-        <div aria-hidden="true" className="h-1 bg-[linear-gradient(to_right,#FF9933_0%,#FF9933_33.3%,#F8F8F8_33.3%,#F8F8F8_66.6%,#138808_66.6%,#138808_100%)]" />
+      <Card className="overflow-hidden border-rule  dark:border-ink">
+        <div aria-hidden="true" className="h-1 bg-brick" />
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Official document</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2.5">
           {p.downloadUrl ? (
-            <Button className="w-full bg-gradient-to-r from-[#FF9933] to-[#138808] font-semibold text-white hover:opacity-90" size="lg" asChild>
+            <Button className="w-full bg-ink font-semibold text-paper hover:bg-ink-2" size="lg" asChild>
               {p.viewerHref ? (
                 <Link href={p.viewerHref}>
                   <FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}
@@ -104,35 +104,35 @@ export function DocumentSideRail(p: Props) {
       </Card>
 
       {/* ── Verify card ── */}
-      <Card className="border-green-200/70 dark:border-gray-700">
+      <Card className="border-rule dark:border-ink">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <ShieldCheck className="h-4 w-4 text-green-600" /> Verify this document
+            <ShieldCheck className="h-4 w-4 text-foreground" /> Verify this document
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-xs">
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant="secondary" className="bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200">
+            <Badge variant="secondary" className="bg-paper-3 text-foreground dark:bg-paper-3 dark:text-foreground">
               <Check className="mr-1 h-3 w-3" /> Source checked
             </Badge>
             {p.category ? <Badge variant="outline">{p.category}</Badge> : null}
           </div>
-          <dl className="space-y-1.5 text-gray-600 dark:text-gray-300">
+          <dl className="space-y-1.5 text-muted-foreground dark:text-muted-foreground">
             <div className="flex justify-between gap-2">
-              <dt className="text-gray-500">Department</dt>
-              <dd className="text-right font-semibold text-gray-800 dark:text-gray-100">{p.department}</dd>
+              <dt className="text-muted-foreground">Department</dt>
+              <dd className="text-right font-semibold text-foreground dark:text-paper">{p.department}</dd>
             </div>
             {p.publishedAt ? (
               <div className="flex justify-between gap-2">
-                <dt className="text-gray-500">Published</dt>
+                <dt className="text-muted-foreground">Published</dt>
                 <dd className="font-semibold tabular-nums">{formatDate(p.publishedAt)}</dd>
               </div>
             ) : null}
             {p.linkRows?.slice(0, 2).map((l) => (
               <div key={l.label} className="flex justify-between gap-2">
-                <dt className="shrink-0 text-gray-500">{l.label}</dt>
+                <dt className="shrink-0 text-muted-foreground">{l.label}</dt>
                 <dd className="truncate text-right">
-                  <SmartExternalLink href={l.href} linkTitle={l.value} className="font-semibold text-green-700 underline-offset-2 hover:underline dark:text-green-300">
+                  <SmartExternalLink href={l.href} linkTitle={l.value} className="font-semibold text-foreground underline-offset-2 hover:underline dark:text-foreground">
                     {l.value}
                   </SmartExternalLink>
                 </dd>
@@ -140,11 +140,11 @@ export function DocumentSideRail(p: Props) {
             ))}
           </dl>
           <div className="pt-1">
-            <a href="#discussion" onClick={(e) => { e.preventDefault(); document.getElementById("discussion")?.scrollIntoView({ behavior: "smooth" }) }} className="inline-flex items-center gap-1 font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400">
+            <a href="#discussion" onClick={(e) => { e.preventDefault(); document.getElementById("discussion")?.scrollIntoView({ behavior: "smooth" }) }} className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground dark:text-muted-foreground">
               <Flag className="h-3 w-3" /> Report an error
             </a>
           </div>
-          <p className="border-t border-dashed border-gray-200 pt-2 text-[11px] leading-relaxed text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <p className="border-t border-dashed border-rule pt-2 text-[11px] leading-relaxed text-muted-foreground dark:border-ink dark:text-muted-foreground">
             Not a govt. website. Always cross-check details on the department&apos;s official website before acting.
           </p>
         </CardContent>
@@ -152,7 +152,7 @@ export function DocumentSideRail(p: Props) {
 
       {/* ── On this page ── */}
       {p.sections.length > 1 ? (
-        <Card className="hidden lg:block dark:border-gray-700">
+        <Card className="hidden lg:block dark:border-ink">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">On this page</CardTitle>
           </CardHeader>
@@ -165,11 +165,11 @@ export function DocumentSideRail(p: Props) {
                 className={cn(
                   "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] transition",
                   active === s.id
-                    ? "bg-orange-50 font-bold text-orange-800 dark:bg-orange-950/50 dark:text-orange-200"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800",
+                    ? "bg-paper-2 font-bold text-brick dark:bg-paper-2 dark:text-brick"
+                    : "text-muted-foreground hover:bg-paper-2 hover:text-foreground dark:text-muted-foreground dark:hover:bg-ink",
                 )}
               >
-                <span className={cn("h-1.5 w-1.5 rounded-full", active === s.id ? "bg-orange-500" : "bg-gray-300 dark:bg-gray-600")} />
+                <span className={cn("h-1.5 w-1.5 rounded-full", active === s.id ? "bg-paper-2" : "bg-paper-3 dark:bg-ink-2")} />
                 {s.label}
               </button>
             ))}
@@ -178,12 +178,12 @@ export function DocumentSideRail(p: Props) {
       ) : null}
 
       {/* ── Share (single, consolidated) ── */}
-      <Card className="dark:border-gray-700">
+      <Card className="dark:border-ink">
         <CardContent className="flex items-center gap-2 p-3.5">
-          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500"><Share2 className="h-3.5 w-3.5" /> Share</span>
+          <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Share2 className="h-3.5 w-3.5" /> Share</span>
           <div className="ml-auto flex gap-1.5">
             <Button variant="outline" size="sm" onClick={copyLink} className="h-8 text-xs">
-              {copied ? <Check className="mr-1 h-3.5 w-3.5 text-green-600" /> : <Copy className="mr-1 h-3.5 w-3.5" />}
+              {copied ? <Check className="mr-1 h-3.5 w-3.5 text-foreground" /> : <Copy className="mr-1 h-3.5 w-3.5" />}
               {copied ? "Copied" : "Copy"}
             </Button>
             <Button variant="outline" size="sm" className="h-8 text-xs" asChild>

@@ -93,13 +93,13 @@ function greetingFor(hour: number): string {
 
 function activityDot(action: string): string {
   const a = action.toUpperCase()
-  if (a.includes("APPROVE")) return "bg-emerald-500"
-  if (a.includes("REJECT")) return "bg-rose-500"
-  if (a.includes("BULK") || a.includes("IMPORT") || a.includes("CLONE")) return "bg-teal-600"
-  if (a.includes("CREATE") || a.includes("SUBMIT")) return "bg-sky-500"
-  if (a.includes("DELETE")) return "bg-slate-400"
-  if (a.includes("LOGIN")) return "bg-violet-500"
-  return "bg-slate-300 dark:bg-slate-600"
+  if (a.includes("APPROVE")) return "bg-paper-3"
+  if (a.includes("REJECT")) return "bg-paper-2"
+  if (a.includes("BULK") || a.includes("IMPORT") || a.includes("CLONE")) return "bg-paper-3"
+  if (a.includes("CREATE") || a.includes("SUBMIT")) return "bg-paper-3"
+  if (a.includes("DELETE")) return "bg-ink-2"
+  if (a.includes("LOGIN")) return "bg-paper-3"
+  return "bg-paper-3 dark:bg-ink-2"
 }
 
 export default function AdminDashboardPage() {
@@ -218,20 +218,20 @@ export default function AdminDashboardPage() {
     <div className="space-y-4 sm:space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">
             {format(new Date(), "EEEE, d MMMM yyyy")}
           </p>
-          <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
+          <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight text-foreground dark:text-paper sm:text-2xl">
             {greetingFor(hour)}, {firstName}
           </h1>
-          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-0.5 text-sm text-muted-foreground dark:text-muted-foreground">
             {isSuper
               ? "Everything happening across ChayanJobs, in one view."
               : "How your uploads are performing across ChayanJobs."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild size="sm" className="bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500">
+          <Button asChild size="sm" className="bg-paper-3 hover:bg-paper-3 dark:bg-paper-3 dark:hover:bg-paper-3">
             <Link href="/admin/jobs">
               <Plus className="mr-1 h-4 w-4" /> Add job
             </Link>
@@ -250,11 +250,11 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-          <span className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground dark:text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-semibold text-foreground dark:text-foreground">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-paper-3 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-paper-3" />
             </span>
             Live
           </span>
@@ -270,7 +270,7 @@ export default function AdminDashboardPage() {
           </Button>
         </div>
         <div
-          className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/[0.03]"
+          className="flex items-center gap-0.5 rounded-lg border border-rule bg-background p-0.5  dark:bg-background/[0.03]"
           role="tablist"
           aria-label="Date range"
         >
@@ -284,8 +284,8 @@ export default function AdminDashboardPage() {
               className={cn(
                 "rounded-md px-3 py-1 text-xs font-semibold transition-colors",
                 range === r.value
-                  ? "bg-teal-700 text-white dark:bg-teal-600"
-                  : "text-slate-500 hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300"
+                  ? "bg-paper-3 text-paper dark:bg-paper-3"
+                  : "text-muted-foreground hover:text-brick dark:text-muted-foreground dark:hover:text-brick"
               )}
             >
               {r.label}
@@ -297,7 +297,7 @@ export default function AdminDashboardPage() {
       {dashboardQuery.isError && !data ? (
         <DataCard title="Dashboard unavailable" subtitle="Could not load dashboard data.">
           <div className="flex items-center gap-2">
-            <p className="text-sm text-slate-500 dark:text-slate-400">Something went wrong on our side.</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Something went wrong on our side.</p>
             <Button size="sm" variant="outline" onClick={handleRefresh}>
               Retry
             </Button>
@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
                 }
                 className="h-full"
                 action={
-                  <div className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-white/[0.06]">
+                  <div className="flex items-center gap-0.5 rounded-lg bg-paper-3 p-0.5 dark:bg-background/[0.06]">
                     {(
                       [
                         { value: "all", label: "All" },
@@ -354,8 +354,8 @@ export default function AdminDashboardPage() {
                         className={cn(
                           "rounded-md px-2.5 py-1 text-xs font-semibold transition-colors",
                           tab === t.value
-                            ? "bg-white text-slate-900 shadow-sm dark:bg-white/10 dark:text-slate-100"
-                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                            ? "bg-background text-foreground  dark:bg-background/10 dark:text-paper"
+                            : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                         )}
                       >
                         {t.label}
@@ -366,28 +366,28 @@ export default function AdminDashboardPage() {
               >
                 {visibleRecent.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-                    <Inbox className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No jobs found</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <Inbox className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
+                    <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">No jobs found</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                       {tab === "all" ? "New uploads will appear here." : "Nothing in this state right now."}
                     </p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                  <ul className="divide-y divide-rule100 ">
                     {visibleRecent.map((job) => (
                       <li key={job.id}>
                         <Link href={job.href} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                            <span className="block truncate text-sm font-medium text-foreground dark:text-paper">
                               {job.title}
                             </span>
-                            <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                            <span className="block truncate text-xs text-muted-foreground dark:text-muted-foreground">
                               {job.org}
                               {isSuper && job.uploader ? ` · ${job.uploader}` : ""}
                             </span>
                           </span>
                           <StatusDot value={job.moderation} />
-                          <span className="w-16 shrink-0 text-right text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                          <span className="w-16 shrink-0 text-right text-xs tabular-nums text-muted-foreground dark:text-muted-foreground">
                             {timeAgo(job.createdAt)}
                           </span>
                         </Link>
@@ -415,13 +415,13 @@ export default function AdminDashboardPage() {
                 subtitle="Live items per module"
                 className="h-full"
                 action={
-                  <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold tabular-nums text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                  <span className="rounded-full bg-paper-3 px-2.5 py-1 text-xs font-bold tabular-nums text-brick dark:bg-paper-3 dark:text-brick">
                     {(library?.total ?? 0).toLocaleString("en-IN")} total
                   </span>
                 }
               >
                 {!library ? (
-                  <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Loading library…</p>
+                  <p className="py-6 text-center text-sm text-muted-foreground dark:text-muted-foreground">Loading library…</p>
                 ) : (
                   <ul className="space-y-2.5">
                     {library.modules.map((m) => {
@@ -430,16 +430,16 @@ export default function AdminDashboardPage() {
                         <li key={m.key}>
                           <Link href={m.href} className="group block">
                             <span className="flex items-baseline justify-between gap-2 text-sm">
-                              <span className="truncate font-medium text-slate-700 group-hover:text-teal-700 dark:text-slate-200 dark:group-hover:text-teal-300">
+                              <span className="truncate font-medium text-foreground group-hover:text-brick dark:text-muted-foreground dark:group-hover:text-brick">
                                 {m.label}
                               </span>
-                              <span className="shrink-0 font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                              <span className="shrink-0 font-semibold tabular-nums text-foreground dark:text-paper">
                                 {m.count.toLocaleString("en-IN")}
                               </span>
                             </span>
-                            <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                            <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-paper-3 dark:bg-background/10">
                               <span
-                                className="block h-full rounded-full bg-teal-600 dark:bg-teal-500"
+                                className="block h-full rounded-full bg-paper-3 dark:bg-paper-3"
                                 style={{ width: `${m.count > 0 ? Math.max(pct, 2) : 0}%` }}
                               />
                             </span>
@@ -456,7 +456,7 @@ export default function AdminDashboardPage() {
                 className="h-full"
               >
                 {libraryQuery.isLoading && activityItems.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Loading activity…</p>
+                  <p className="py-6 text-center text-sm text-muted-foreground dark:text-muted-foreground">Loading activity…</p>
                 ) : (
                   <Timeline
                     items={activityItems}
@@ -474,18 +474,18 @@ export default function AdminDashboardPage() {
                 className="h-full"
               >
                 {feedbackQuery.isLoading && feedback.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">Loading feedback…</p>
+                  <p className="py-6 text-center text-sm text-muted-foreground dark:text-muted-foreground">Loading feedback…</p>
                 ) : feedback.length === 0 ? (
-                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-500 dark:border-white/[0.06] dark:text-slate-400">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <div className="flex items-center gap-2 rounded-lg border border-rule px-3 py-3 text-sm text-muted-foreground  dark:text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-foreground" />
                     No rejections - your uploads are clearing review.
                   </div>
                 ) : (
-                  <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                  <ul className="divide-y divide-rule100 ">
                     {feedback.map((f) => (
                       <li key={f.id} className="py-2.5 first:pt-0 last:pb-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                          <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground dark:text-paper">
                             {f.title}
                           </p>
                           <Button size="sm" variant="outline" asChild className="shrink-0">
@@ -494,10 +494,10 @@ export default function AdminDashboardPage() {
                             </Link>
                           </Button>
                         </div>
-                        <p className="mt-0.5 text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
+                        <p className="mt-0.5 text-[11px] tabular-nums text-muted-foreground dark:text-muted-foreground">
                           {f.module} · {timeAgo(f.createdAt)}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{f.reason}</p>
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground dark:text-muted-foreground">{f.reason}</p>
                       </li>
                     ))}
                   </ul>
@@ -510,7 +510,7 @@ export default function AdminDashboardPage() {
                     return (
                       <Button key={q.href} variant="outline" asChild className="h-auto flex-col gap-1.5 py-3.5">
                         <Link href={q.href}>
-                          <Icon className="h-4 w-4 text-teal-700 dark:text-teal-400" />
+                          <Icon className="h-4 w-4 text-brick dark:text-brick" />
                           <span className="text-xs">{q.label}</span>
                         </Link>
                       </Button>

@@ -32,7 +32,7 @@ export function TourReplayButton({ className = "" }: { className?: string }) {
     <button
       type="button"
       onClick={replay}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1.5 text-xs font-semibold text-teal-300 transition-colors hover:bg-teal-500/20 hover:text-teal-200 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-rule bg-paper-3 px-3 py-1.5 text-xs font-semibold text-brick transition-colors hover:bg-paper-3 hover:text-brick ${className}`}
     >
       <Sparkles className="h-3.5 w-3.5" />
       Take a quick tour

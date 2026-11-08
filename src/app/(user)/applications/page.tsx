@@ -133,17 +133,17 @@ export default function ApplicationsPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink text-paper ">
             <ClipboardList className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
-            <p className="text-sm text-gray-500">Track every job and admission you care about - from interested to result.</p>
+            <h1 className="text-2xl font-bold text-foreground">My Applications</h1>
+            <p className="text-sm text-muted-foreground">Track every job and admission you care about - from interested to result.</p>
           </div>
-          <div className="ml-auto flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+          <div className="ml-auto flex items-center gap-1.5 rounded-full border border-rule bg-paper-3 px-3 py-1 text-xs font-medium text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-paper-3 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-paper-3" />
             </span>
             Live{lastUpdated ? ` · ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}
           </div>
@@ -152,9 +152,9 @@ export default function ApplicationsPage() {
         {total === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center py-16">
-              <Briefcase className="mb-4 h-12 w-12 text-gray-300" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">No tracked applications</h3>
-              <p className="mb-6 max-w-md text-center text-sm text-gray-500">
+              <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
+              <h3 className="mb-2 text-lg font-semibold text-foreground">No tracked applications</h3>
+              <p className="mb-6 max-w-md text-center text-sm text-muted-foreground">
                 Tap the Track button on any job or admission to start following it. You&apos;ll get deadline, admit card and result reminders.
               </p>
               <Button asChild>
@@ -173,13 +173,13 @@ export default function ApplicationsPage() {
                   className={cn(
                     "rounded-xl border p-3 text-center transition-colors",
                     (counts[s.value] || 0) > 0
-                      ? "border-teal-200 bg-teal-50/70 dark:border-teal-800 dark:bg-teal-950/40"
-                      : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                      ? "border-rule bg-paper-3 dark:border-rule dark:bg-paper-3"
+                      : "border-rule bg-background dark:border-ink dark:bg-ink"
                   )}
                 >
                   <s.icon className={cn("mx-auto mb-1 h-5 w-5", s.color)} />
-                  <p className="text-xl font-bold text-gray-900">{counts[s.value] || 0}</p>
-                  <p className="text-[11px] font-medium text-gray-500">{s.short}</p>
+                  <p className="text-xl font-bold text-foreground">{counts[s.value] || 0}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground">{s.short}</p>
                 </div>
               ))}
             </div>
@@ -192,10 +192,10 @@ export default function ApplicationsPage() {
                 return (
                   <section key={statusKey}>
                     <div className="mb-3 flex items-center gap-2">
-                      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-white", info.active)}>
+                      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg text-paper", info.active)}>
                         <info.icon className="h-4 w-4" />
                       </span>
-                      <h2 className="text-lg font-bold text-gray-900">{info.label}</h2>
+                      <h2 className="text-lg font-bold text-foreground">{info.label}</h2>
                       <Badge variant="secondary" className="text-xs">{group.length}</Badge>
                     </div>
                     <div className="space-y-3">
@@ -234,25 +234,25 @@ function ApplicationRow({
   const nextMs = item.nextUpcoming ? new Date(item.nextUpcoming).getTime() : null
 
   return (
-    <Card className="group border-gray-200 transition-colors hover:border-teal-300 dark:border-gray-700">
+    <Card className="group border-rule transition-colors hover:border-rule dark:border-ink">
       <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <Link href={item.href} className="min-w-0 flex-1">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="max-w-full truncate text-xs">{item.content.department}</Badge>
             {item.type === "admission" ? (
-              <Badge className="bg-rose-100 text-rose-700 text-[10px] dark:bg-rose-950 dark:text-rose-300">Admission</Badge>
+              <Badge className="bg-paper-2 text-brick text-[10px] dark:bg-paper-2 dark:text-brick">Admission</Badge>
             ) : (
-              <Badge className="bg-blue-100 text-blue-700 text-[10px] dark:bg-blue-950 dark:text-blue-300">Job</Badge>
+              <Badge className="bg-paper-3 text-brick text-[10px] dark:bg-paper-3 dark:text-brick">Job</Badge>
             )}
-            {isUrgent && <Badge className="bg-amber-100 text-amber-800 text-[10px] dark:bg-amber-950 dark:text-amber-300">Closing Soon</Badge>}
-            {isOverdue && <Badge className="bg-red-100 text-red-700 text-[10px] dark:bg-red-950 dark:text-red-300">Deadline Passed</Badge>}
+            {isUrgent && <Badge className="bg-paper-2 text-brick text-[10px] dark:bg-paper-2 dark:text-brick">Closing Soon</Badge>}
+            {isOverdue && <Badge className="bg-paper-2 text-brick text-[10px] dark:bg-paper-2 dark:text-brick">Deadline Passed</Badge>}
           </div>
-          <h3 className="mb-2 text-base font-semibold leading-snug text-gray-900 transition-colors group-hover:text-teal-700 dark:text-gray-100">
+          <h3 className="mb-2 text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-brick dark:text-paper">
             {item.content.title}
           </h3>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {item.deadline && (
-              <span className={cn("inline-flex items-center gap-1", isUrgent ? "font-semibold text-amber-600" : isOverdue ? "font-semibold text-red-600" : "")}>
+              <span className={cn("inline-flex items-center gap-1", isUrgent ? "font-semibold text-brick" : isOverdue ? "font-semibold text-brick" : "")}>
                 <CalendarClock className="h-3.5 w-3.5" />
                 Apply by: {formatDate(item.deadline)}
               </span>
@@ -270,7 +270,7 @@ function ApplicationRow({
               </span>
             )}
             {item.appliedAt && (
-              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 Applied {formatDate(item.appliedAt)}
               </span>
             )}
@@ -281,7 +281,7 @@ function ApplicationRow({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-400 hover:text-red-500"
+            className="h-8 w-8 text-muted-foreground hover:text-brick"
             onClick={() => onRemove(item.id)}
             disabled={isRemoving}
             aria-label="Stop tracking"

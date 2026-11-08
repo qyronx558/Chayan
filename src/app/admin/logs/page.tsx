@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 export const dynamic = "force-dynamic";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -310,8 +310,8 @@ function AuditPageInner() {
         title="System logs"
         badge={
           superView ? (
-            <Badge variant="outline" className="inline-flex h-[26px] items-center gap-1.5 rounded-full border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold leading-none text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+            <Badge variant="outline" className="inline-flex h-[26px] items-center gap-1.5 rounded-full border-rule bg-paper-3 px-2.5 text-xs font-semibold leading-none text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-paper-3" aria-hidden />
               <span className="leading-none">{integrityData?.data.ok === false ? "Integrity issue" : "Integrity verified"}</span>
             </Badge>
           ) : (
@@ -327,20 +327,20 @@ function AuditPageInner() {
               aria-pressed={live}
               onClick={() => setLive(!live)}
             >
-              <span className={cn("mr-2 h-2 w-2 rounded-full", live ? "animate-pulse bg-emerald-500" : "bg-slate-300 dark:bg-white/20")} aria-hidden />
+              <span className={cn("mr-2 h-2 w-2 rounded-full", live ? "animate-pulse bg-paper-3" : "bg-paper-3 dark:bg-background/20")} aria-hidden />
               <Radio className="mr-1.5 h-4 w-4" />
               <span className="leading-none">Live tail</span>
             </Button>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="h-9 border-slate-200 bg-white px-3 text-sm leading-none dark:border-white/10 dark:bg-[#0b1220]" disabled={exporting}>
+                <Button variant="outline" className="h-9 border-rule bg-background px-3 text-sm leading-none  " disabled={exporting}>
                   <Download className="mr-1.5 h-4 w-4" />
                   <span className="leading-none">{superView ? "Export" : "Export my activity"}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-44 p-1.5" align="end">
-                <button onClick={() => doExport("CSV", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:hover:bg-white/5">Export CSV</button>
-                <button onClick={() => doExport("JSON", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:hover:bg-white/5">Export JSON</button>
+                <button onClick={() => doExport("CSV", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-paper-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:hover:bg-background/5">Export CSV</button>
+                <button onClick={() => doExport("JSON", false)} className="flex h-9 w-full items-center rounded-md px-2.5 text-sm leading-none hover:bg-paper-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:hover:bg-background/5">Export JSON</button>
               </PopoverContent>
             </Popover>
           </>
@@ -348,16 +348,16 @@ function AuditPageInner() {
       />
 
       <Tabs value={tab} onValueChange={(v) => { setTab(v as TabKey); setPage(1); }}>
-        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0 dark:border-white/[0.06]">
+        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-rule bg-transparent p-0 ">
           {tabs.map((t) => (
             <TabsTrigger
               key={t.key}
               value={t.key}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none border-b-2 border-transparent px-3 text-sm font-medium leading-none text-slate-500 data-[state=active]:border-teal-700 data-[state=active]:bg-transparent data-[state=active]:text-teal-800 data-[state=active]:shadow-none dark:text-slate-400 dark:data-[state=active]:text-teal-300"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none border-b-2 border-transparent px-3 text-sm font-medium leading-none text-muted-foreground data-[state=active]:border-rule data-[state=active]:bg-transparent data-[state=active]:text-brick data-[state=active]: dark:text-muted-foreground dark:data-[state=active]:text-brick"
             >
               <span className="leading-none">{t.label}</span>
               {typeof t.badge === "number" ? (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-100 px-1 text-[11px] font-bold leading-none tabular-nums text-slate-600 dark:bg-white/10 dark:text-slate-300">{t.badge} on</span>
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-paper-3 px-1 text-[11px] font-bold leading-none tabular-nums text-muted-foreground dark:bg-background/10 dark:text-muted-foreground">{t.badge} on</span>
               ) : null}
             </TabsTrigger>
           ))}
@@ -368,8 +368,8 @@ function AuditPageInner() {
             <KpiStrip kpis={kpis} icons={[Activity, Users, ShieldAlert, XCircle]} range={30} />
           ) : null}
           {!superView ? (
-            <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-white/[0.06] dark:bg-[#0b1220] dark:text-slate-300">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-teal-700 dark:text-teal-400" aria-hidden />
+            <div className="flex items-start gap-2 rounded-xl border border-rule bg-background p-3 text-xs text-muted-foreground   dark:text-muted-foreground">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-brick dark:text-brick" aria-hidden />
               <span>You can see your own activity only.</span>
             </div>
           ) : null}
@@ -401,8 +401,8 @@ function AuditPageInner() {
           ) : null}
 
           {selected.size > 0 ? (
-            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-white/[0.06] dark:bg-[#0b1220]" role="toolbar" aria-label="Bulk actions">
-              <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200">{selected.size} selected</span>
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-rule bg-background px-3 py-2  " role="toolbar" aria-label="Bulk actions">
+              <span className="text-xs font-semibold tabular-nums text-foreground dark:text-muted-foreground">{selected.size} selected</span>
               <span className="flex-1" />
               <Button variant="outline" className="h-[30px] px-2.5 text-xs leading-none" onClick={() => doExport("CSV", true)}>Export selected</Button>
               {superView ? (

@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 import type { InsightItem } from "@/lib/analytics/types";
 
 const META: Record<InsightItem["severity"], { icon: typeof Info; cls: string }> = {
-  info: { icon: Info, cls: "text-sky-600 dark:text-sky-400" },
-  warning: { icon: TriangleAlert, cls: "text-amber-600 dark:text-amber-400" },
-  critical: { icon: OctagonX, cls: "text-rose-600 dark:text-rose-400" },
+  info: { icon: Info, cls: "text-brick dark:text-brick" },
+  warning: { icon: TriangleAlert, cls: "text-brick dark:text-brick" },
+  critical: { icon: OctagonX, cls: "text-brick dark:text-brick" },
 };
 
 export function InsightsRow({ items, onSelect }: { items: InsightItem[]; onSelect: (tab: InsightItem["tab"]) => void }) {
@@ -23,15 +23,15 @@ export function InsightsRow({ items, onSelect }: { items: InsightItem[]; onSelec
             key={ins.key}
             type="button"
             onClick={() => onSelect(ins.tab)}
-            className="rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-teal-700/40 dark:border-white/[0.06] dark:bg-[#0b1220]"
+            className="rounded-xl border border-rule bg-background p-4 text-left transition-colors hover:border-rule  "
           >
             <span className="flex items-center gap-1.5 text-xs font-semibold">
               <Icon className={cn("h-4 w-4", M.cls)} />
-              <span className={cn("uppercase tracking-wide", M.cls)}>{ins.severity}</span>
+              <span className={cn("", M.cls)}>{ins.severity}</span>
             </span>
-            <span className="mt-1.5 block text-sm font-semibold text-slate-900 dark:text-slate-100">{ins.title}</span>
-            <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{ins.explanation}</span>
-            <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-teal-700 dark:text-teal-300">
+            <span className="mt-1.5 block text-sm font-semibold text-foreground dark:text-paper">{ins.title}</span>
+            <span className="mt-1 block text-xs text-muted-foreground dark:text-muted-foreground">{ins.explanation}</span>
+            <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brick dark:text-brick">
               View in {ins.tab} <ArrowRight className="h-3 w-3" />
             </span>
           </button>

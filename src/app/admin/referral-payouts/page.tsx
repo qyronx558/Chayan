@@ -51,19 +51,19 @@ export default function AdminReferralPayouts() {
     <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold">Coin rewards & payouts (pilot)</h1>
-        <p className="text-sm text-slate-500">1,000 coins = ₹20 · Pilot {pilot.enrolled}/{pilot.cap} companies · {pilot.paidCoins.toLocaleString("en-IN")} coins paid out. Check uniqueness, verified applicants and velocity notes before approving.</p>
+        <p className="text-sm text-muted-foreground">1,000 coins = ₹20 · Pilot {pilot.enrolled}/{pilot.cap} companies · {pilot.paidCoins.toLocaleString("en-IN")} coins paid out. Check uniqueness, verified applicants and velocity notes before approving.</p>
       </div>
 
       <Card><CardHeader><CardTitle className="text-base">Coin approval queue ({coinQueue.length})</CardTitle></CardHeader>
         <CardContent>
-          {coinQueue.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">Nothing pending.</p> : (
+          {coinQueue.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">Nothing pending.</p> : (
             <div className="space-y-2">
               {coinQueue.map((c) => (
                 <div key={c.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <p className="font-bold">+{c.coins.toLocaleString("en-IN")} coins · {c.kind.replaceAll("_", " ")} <span className="font-normal text-slate-400">· {c.user?.name || "?"} ({c.user?.email || "?"})</span></p>
-                      <p className="text-xs text-slate-500">{c.company?.name || "-"} {c.company ? `(${c.company.verifiedStatus})` : ""} · {c.job ? `${c.job.title} [${c.job.moderation}/${c.job.status}]` : "no job"} · {c.note || ""}</p>
+                      <p className="font-bold">+{c.coins.toLocaleString("en-IN")} coins · {c.kind.replaceAll("_", " ")} <span className="font-normal text-muted-foreground">· {c.user?.name || "?"} ({c.user?.email || "?"})</span></p>
+                      <p className="text-xs text-muted-foreground">{c.company?.name || "-"} {c.company ? `(${c.company.verifiedStatus})` : ""} · {c.job ? `${c.job.title} [${c.job.moderation}/${c.job.status}]` : "no job"} · {c.note || ""}</p>
                     </div>
                     <Badge variant="outline">PENDING</Badge>
                   </div>
@@ -80,15 +80,15 @@ export default function AdminReferralPayouts() {
 
       <Card><CardHeader><CardTitle className="text-base">Payout queue ({payouts.length})</CardTitle></CardHeader>
         <CardContent>
-          {payouts.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">Queue empty.</p> : (
+          {payouts.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">Queue empty.</p> : (
             <div className="space-y-2">
               {payouts.map((p) => (
                 <div key={p.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <p className="font-bold">{(p.amountCoins || 0).toLocaleString("en-IN")} coins ({formatINR(p.amountPaise)}) <span className="font-normal text-slate-400">→ {p.upiMasked}</span></p>
-                      <p className="text-xs text-slate-500">{p.user?.name || "-"} · {p.user?.email || ""} · {new Date(p.createdAt).toLocaleDateString("en-IN")}</p>
-                      {p.adminNote && <p className="text-xs text-slate-400">Note: {p.adminNote}</p>}
+                      <p className="font-bold">{(p.amountCoins || 0).toLocaleString("en-IN")} coins ({formatINR(p.amountPaise)}) <span className="font-normal text-muted-foreground">→ {p.upiMasked}</span></p>
+                      <p className="text-xs text-muted-foreground">{p.user?.name || "-"} · {p.user?.email || ""} · {new Date(p.createdAt).toLocaleDateString("en-IN")}</p>
+                      {p.adminNote && <p className="text-xs text-muted-foreground">Note: {p.adminNote}</p>}
                     </div>
                     <Badge variant={p.status === "PAID" ? "default" : "outline"}>{p.status}</Badge>
                   </div>
@@ -110,11 +110,11 @@ export default function AdminReferralPayouts() {
 
       <Card><CardHeader><CardTitle className="text-base">Recent employer referrals ({referrals.length})</CardTitle></CardHeader>
         <CardContent>
-          {referrals.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No referrals yet.</p> : (
+          {referrals.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">No referrals yet.</p> : (
             <div className="space-y-2">
               {referrals.map((r) => (
                 <div key={r.id} className="flex items-center justify-between rounded-lg border p-2.5 text-sm">
-                  <span>{r.referrer || "?"} → {r.referred || "?"} <span className="text-slate-400">· {new Date(r.createdAt).toLocaleDateString("en-IN")}</span></span>
+                  <span>{r.referrer || "?"} → {r.referred || "?"} <span className="text-muted-foreground">· {new Date(r.createdAt).toLocaleDateString("en-IN")}</span></span>
                   <Badge variant="outline">{r.status}</Badge>
                 </div>
               ))}

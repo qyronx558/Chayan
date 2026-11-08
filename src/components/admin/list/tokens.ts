@@ -1,15 +1,15 @@
 "use client";
 
-export const T_PRIMARY = "bg-teal-700 text-white shadow-sm hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500";
+export const T_PRIMARY = "bg-paper-3 text-paper  hover:bg-paper-3 dark:bg-paper-3 dark:hover:bg-paper-3";
 
-export const T_CARD = "overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm dark:border-white/[0.06] dark:bg-[#0b1220]";
+export const T_CARD = "overflow-hidden rounded-2xl border-rule bg-background   ";
 
-export const T_HEAD_CELL = "text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
+export const T_HEAD_CELL = "text-[11px] font-bold text-muted-foreground dark:text-muted-foreground";
 
 export const MOD_DOT: Record<string, string> = {
-  APPROVED: "bg-emerald-500",
-  PENDING: "bg-amber-500",
-  REJECTED: "bg-rose-500",
+  APPROVED: "bg-paper-3",
+  PENDING: "bg-paper-2",
+  REJECTED: "bg-paper-2",
 };
 
 export const MOD_LABEL: Record<string, string> = {
@@ -19,13 +19,13 @@ export const MOD_LABEL: Record<string, string> = {
 };
 
 export const MOD_TEXT: Record<string, string> = {
-  APPROVED: "text-emerald-700 dark:text-emerald-300",
-  PENDING: "text-amber-700 dark:text-amber-300",
-  REJECTED: "text-rose-700 dark:text-rose-300",
+  APPROVED: "text-foreground dark:text-foreground",
+  PENDING: "text-brick dark:text-brick",
+  REJECTED: "text-brick dark:text-brick",
 };
 
 export function modDot(moderation?: string | null): string {
-  return MOD_DOT[moderation ?? ""] ?? "bg-slate-400";
+  return MOD_DOT[moderation ?? ""] ?? "bg-ink-2";
 }
 
 export function modLabel(moderation?: string | null): string {
@@ -33,7 +33,7 @@ export function modLabel(moderation?: string | null): string {
 }
 
 export function modText(moderation?: string | null): string {
-  return MOD_TEXT[moderation ?? ""] ?? "text-slate-500 dark:text-slate-400";
+  return MOD_TEXT[moderation ?? ""] ?? "text-muted-foreground dark:text-muted-foreground";
 }
 
 export function initials(name?: string | null, email?: string | null): string {

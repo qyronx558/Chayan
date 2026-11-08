@@ -16,9 +16,9 @@ export function AnalyticsSkeleton() {
           <Skeleton className="h-9 w-24" />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-slate-200 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-rule lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-white p-4 dark:bg-[#0b1220]">
+          <div key={i} className="bg-background p-4 ">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="mt-3 h-8 w-20" />
             <Skeleton className="mt-2 h-9 w-full" />

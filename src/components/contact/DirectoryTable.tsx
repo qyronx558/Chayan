@@ -69,7 +69,7 @@ export function DirectoryTable() {
                 >
                   {copied === row.email ? (
                     <>
-                      <Check className="h-3.5 w-3.5 text-[#1a7f37]" aria-hidden /> Copied
+                      <Check className="h-3.5 w-3.5 text-foreground" aria-hidden /> Copied
                     </>
                   ) : (
                     "Copy"

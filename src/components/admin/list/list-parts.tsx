@@ -75,15 +75,15 @@ export function StatusTabs({
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors",
               isActive
-                ? "border-teal-700 bg-teal-700 text-white shadow-sm dark:border-teal-600 dark:bg-teal-600"
-                : "border-slate-200 bg-white text-slate-600 hover:border-teal-600/40 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:text-teal-300"
+                ? "border-rule bg-paper-3 text-paper  dark:border-rule dark:bg-paper-3"
+                : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-brick  dark:bg-background/[0.03] dark:text-muted-foreground dark:hover:text-brick"
             )}
           >
             {t.label}
             <span
               className={cn(
                 "rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums",
-                isActive ? "bg-white/25 text-white" : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400"
+                isActive ? "bg-background/25 text-paper" : "bg-paper-3 text-muted-foreground dark:bg-background/10 dark:text-muted-foreground"
               )}
             >
               {n ?? "…"}
@@ -133,16 +133,16 @@ export function ListToolbar({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative min-w-52 flex-1">
-        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           ref={searchRef}
           value={q}
           onChange={(e) => onQ(e.target.value)}
           placeholder={placeholder}
-          className="bg-white pl-8 pr-10 dark:bg-white/[0.03]"
+          className="bg-background pl-8 pr-10 dark:bg-background/[0.03]"
           aria-label="Search"
         />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 sm:block dark:border-white/10 dark:bg-white/[0.05]">
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-rule bg-paper-2 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground sm:block  dark:bg-background/[0.05]">
           /
         </kbd>
       </div>
@@ -151,7 +151,7 @@ export function ListToolbar({
           <Button type="button" variant="outline" size="sm" className="relative">
             <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" /> Filters
             {activeFilterCount > 0 && (
-              <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-teal-700 px-1 text-[11px] font-bold text-white dark:bg-teal-600">
+              <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-paper-3 px-1 text-[11px] font-bold text-paper dark:bg-paper-3">
                 {activeFilterCount}
               </span>
             )}
@@ -183,7 +183,7 @@ export function ListToolbar({
             </div>
           ))}
           {filters.showUploader && (
-            <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-white/[0.06]">
+            <div className="space-y-2 border-t border-rule pt-3 ">
               <div className="space-y-1">
                 <Label className="text-xs">Uploaded by</Label>
                 <Select value={filters.uploader || "ALL"} onValueChange={(v) => onUploader(v === "ALL" ? "" : v)}>
@@ -246,8 +246,8 @@ export function BulkBar({
 }) {
   if (count === 0) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-3 py-2.5 shadow-xl backdrop-blur dark:border-white/10 dark:bg-[#0b1220]/95">
-      <span className="mr-1 text-[13px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+    <div className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-rule bg-background/95 px-3 py-2.5   ">
+      <span className="mr-1 text-[13px] font-semibold tabular-nums text-foreground dark:text-muted-foreground">
         {count} selected
       </span>
       {!isSuper && (
@@ -257,7 +257,7 @@ export function BulkBar({
       )}
       {isSuper && (
         <>
-          <Button type="button" size="sm" disabled={busy} onClick={onVerify} className="bg-emerald-600 text-white hover:bg-emerald-700">
+          <Button type="button" size="sm" disabled={busy} onClick={onVerify} className="bg-paper-3 text-paper hover:bg-paper-3">
             <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Verify
           </Button>
           <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onReject}>
@@ -410,12 +410,12 @@ export function ActiveFilterPills({
       {pills.map((p) => (
         <Badge key={p.key} variant="secondary" className="gap-1 pl-2.5">
           {p.label}
-          <button type="button" onClick={() => onRemove(p.key)} aria-label={`Remove ${p.label} filter`} className="rounded-full hover:text-red-600">
+          <button type="button" onClick={() => onRemove(p.key)} aria-label={`Remove ${p.label} filter`} className="rounded-full hover:text-brick">
             <X className="h-3 w-3" />
           </button>
         </Badge>
       ))}
-      <button type="button" onClick={onClear} className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+      <button type="button" onClick={onClear} className="text-xs font-medium text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground">
         Clear all
       </button>
     </div>

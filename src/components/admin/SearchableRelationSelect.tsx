@@ -86,7 +86,7 @@ export function SearchableRelationSelect({
         onClick={() => setOpen(true)}
         className={cn(
           "h-10 w-full min-w-0 justify-between px-3 py-2 text-sm font-normal",
-          !selected && !stale && "text-gray-400"
+          !selected && !stale && "text-muted-foreground"
         )}
       >
         <span className="min-w-0 flex-1 truncate text-left">

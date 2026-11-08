@@ -16,11 +16,11 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
           <div className="grid grid-cols-[36px_repeat(24,1fr)] gap-[2px] text-[10px]">
             <span />
             {Array.from({ length: 24 }, (_, h) => (
-              <span key={h} className="text-center tabular-nums text-slate-400">{h % 3 === 0 ? `${h}h` : ""}</span>
+              <span key={h} className="text-center tabular-nums text-muted-foreground">{h % 3 === 0 ? `${h}h` : ""}</span>
             ))}
             {DOW.map((d, dow) => (
               <div key={d} className="contents">
-                <span className="flex items-center font-medium text-slate-500">{d}</span>
+                <span className="flex items-center font-medium text-muted-foreground">{d}</span>
                 {Array.from({ length: 24 }, (_, hour) => {
                   const v = at(dow, hour);
                   const t = v / max;
@@ -28,7 +28,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
                     <span
                       key={hour}
                       title={`${d} ${hour}:00 - ${v} visits`}
-                      className={cn("h-4 rounded-[3px]", t === 0 ? "bg-slate-100 dark:bg-white/[0.06]" : t < 0.25 ? "bg-teal-100 dark:bg-teal-950" : t < 0.5 ? "bg-teal-300 dark:bg-teal-800" : t < 0.75 ? "bg-teal-500" : "bg-teal-700")}
+                      className={cn("h-4 rounded-[3px]", t === 0 ? "bg-paper-3 dark:bg-background/[0.06]" : t < 0.25 ? "bg-paper-3 dark:bg-paper-3" : t < 0.5 ? "bg-paper-3 dark:bg-paper-3" : t < 0.75 ? "bg-paper-3" : "bg-paper-3")}
                     />
                   );
                 })}

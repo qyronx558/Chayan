@@ -128,7 +128,7 @@ export function DataTableAdvanced({
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-52 flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -190,14 +190,14 @@ export function DataTableAdvanced({
           <Badge variant="secondary">{total} rows</Badge>
         )}
         {typeof selectedCount === "number" && selectedCount > 0 && (
-          <Badge className="bg-teal-600 text-white">{selectedCount} selected across pages</Badge>
+          <Badge className="bg-paper-3 text-paper">{selectedCount} selected across pages</Badge>
         )}
         {views.map((v) => (
           <button
             key={v.name}
             type="button"
             onClick={() => applyView(v)}
-            className="rounded-full border border-slate-200 px-2.5 py-0.5 font-medium text-slate-600 hover:border-teal-500 hover:text-teal-700 dark:border-white/10 dark:text-slate-300"
+            className="rounded-full border border-rule px-2.5 py-0.5 font-medium text-muted-foreground hover:border-rule hover:text-brick  dark:text-muted-foreground"
           >
             {v.name}
           </button>

@@ -46,7 +46,7 @@ export function DocumentInsightStrip(p: Props) {
   const maxFee = fees.length > 0 ? Math.max(...fees.map((f) => f.amount)) : 0
   const chartData = fees.map((f) => ({
     ...f,
-    fill: f.amount === 0 ? "#16a34a" : f.amount === maxFee ? "#ea580c" : "#38bdf8",
+    fill: f.amount === 0 ? "var(--color-ink-2)" : f.amount === maxFee ? "var(--color-brick)" : "var(--color-rule-2)",
   }))
 
   const cards: { key: string; node: React.ReactNode }[] = []
@@ -75,27 +75,27 @@ export function DocumentInsightStrip(p: Props) {
       node: (
         <div
           className={cn(
-            "rounded-2xl border p-4 shadow-sm",
+            "rounded-2xl border p-4 ",
             isUrgent
-              ? "border-red-200 bg-gradient-to-br from-red-50 to-orange-50 dark:border-red-900 dark:from-red-950/50 dark:to-orange-950/30"
-              : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+              ? "border-brick bg-paper-2"
+              : "border-rule bg-background dark:border-ink dark:bg-ink",
           )}
         >
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <div className="mb-2 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
             <CalendarClock className="h-3.5 w-3.5" /> {p.primaryDateLabel}
           </div>
-          <div className={cn("text-2xl font-extrabold tabular-nums", isUrgent ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white")}>
+          <div className={cn("text-2xl font-bold tabular-nums", isUrgent ? "text-brick dark:text-brick" : "text-foreground dark:text-paper")}>
             {big}
           </div>
-          <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
+          <p className="mt-0.5 text-xs text-muted-foreground dark:text-muted-foreground">
             <span className="font-semibold">{formatDate(p.primaryDate!)}</span>
           </p>
           {progress !== null && !isPast ? (
             <div className="mt-3">
-              <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
-                <div className={cn("h-full rounded-full transition-all", progress > 85 ? "bg-red-500" : "bg-gradient-to-r from-[#FF9933] to-[#138808]")} style={{ width: `${progress}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-paper-3 dark:bg-ink" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+                <div className={cn("h-full rounded-full transition-all", progress > 85 ? "bg-brick" : "bg-ink")} style={{ width: `${progress}%` }} />
               </div>
-              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{progress}% of window elapsed</p>
+              <p className="mt-1 text-[11px] text-muted-foreground dark:text-muted-foreground">{progress}% of window elapsed</p>
             </div>
           ) : null}
         </div>
@@ -107,8 +107,8 @@ export function DocumentInsightStrip(p: Props) {
     cards.push({
       key: "fee",
       node: (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div className="rounded-2xl border border-rule bg-background p-4  dark:border-ink dark:bg-ink">
+          <div className="mb-2 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
             <Wallet className="h-3.5 w-3.5" /> Application fee
           </div>
           {fees.length >= 2 ? (
@@ -127,12 +127,12 @@ export function DocumentInsightStrip(p: Props) {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{feeShort} · as listed in notice</p>
+              <p className="mt-1 text-[11px] text-muted-foreground dark:text-muted-foreground">{feeShort} · as listed in notice</p>
             </>
           ) : (
             <>
-              <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{feeShort}</div>
-              <p className="mt-0.5 text-xs text-gray-500">Fee as per official notice.</p>
+              <div className="text-2xl font-bold text-foreground dark:text-paper">{feeShort}</div>
+              <p className="mt-0.5 text-xs text-muted-foreground">Fee as per official notice.</p>
             </>
           )}
         </div>
@@ -144,17 +144,17 @@ export function DocumentInsightStrip(p: Props) {
     cards.push({
       key: "status",
       node: (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div className="rounded-2xl border border-rule bg-background p-4  dark:border-ink dark:bg-ink">
+          <div className="mb-2 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
             <BadgeCheck className="h-3.5 w-3.5" /> Status
           </div>
-          <div className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">{p.statusText}</div>
+          <div className="text-2xl font-bold leading-tight text-foreground dark:text-paper">{p.statusText}</div>
           {p.topicsCount ? (
-            <p className="mt-0.5 text-xs text-gray-500">
-              <span className="font-bold tabular-nums text-gray-800 dark:text-gray-100">{p.topicsCount}</span> topics listed
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              <span className="font-bold tabular-nums text-foreground dark:text-paper">{p.topicsCount}</span> topics listed
             </p>
           ) : (
-            <p className="mt-0.5 text-xs text-gray-500">As published by the department.</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">As published by the department.</p>
           )}
         </div>
       ),
@@ -163,12 +163,12 @@ export function DocumentInsightStrip(p: Props) {
     cards.push({
       key: "topics",
       node: (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div className="rounded-2xl border border-rule bg-background p-4  dark:border-ink dark:bg-ink">
+          <div className="mb-2 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
             <BadgeCheck className="h-3.5 w-3.5" /> Coverage
           </div>
-          <div className="text-2xl font-extrabold tabular-nums text-gray-900 dark:text-white">{p.topicsCount} topics</div>
-          <p className="mt-0.5 text-xs text-gray-500">Full topic list below.</p>
+          <div className="text-2xl font-bold tabular-nums text-foreground dark:text-paper">{p.topicsCount} topics</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">Full topic list below.</p>
         </div>
       ),
     })
@@ -178,18 +178,18 @@ export function DocumentInsightStrip(p: Props) {
     key: "file",
     node: (
       <div className={cn(
-        "rounded-2xl border p-4 shadow-sm",
+        "rounded-2xl border p-4 ",
         p.downloadUrl
-          ? "border-green-200 bg-gradient-to-br from-green-50 to-white dark:border-green-900 dark:from-green-950/40 dark:to-gray-800"
-          : "border-amber-200 bg-gradient-to-br from-amber-50 to-white dark:border-amber-900 dark:from-amber-950/40 dark:to-gray-800",
+          ? "border-rule bg-paper-2"
+          : "border-rule bg-paper-2",
       )}>
-        <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div className="mb-2 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
           <FileDown className="h-3.5 w-3.5" /> Official file
         </div>
-        <div className={cn("text-2xl font-extrabold", p.downloadUrl ? "text-green-700 dark:text-green-300" : "text-amber-700 dark:text-amber-300")}>
+        <div className={cn("text-2xl font-bold", p.downloadUrl ? "text-foreground dark:text-foreground" : "text-brick dark:text-brick")}>
           {p.downloadUrl ? "Available" : "Coming soon"}
         </div>
-        <p className="mt-0.5 text-xs text-gray-500">
+        <p className="mt-0.5 text-xs text-muted-foreground">
           {p.publishedAt ? <>Published <span className="font-semibold tabular-nums">{formatDate(p.publishedAt)}</span></> : "Check back after official release."}
         </p>
       </div>

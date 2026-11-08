@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 export default function CopyrightPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-bold text-gray-900">Copyright Policy</h1>
-      <p className="mb-8 text-sm text-gray-500">Last updated: July 15, 2026</p>
+      <h1 className="mb-2 text-4xl font-bold text-foreground">Copyright Policy</h1>
+      <p className="mb-8 text-sm text-muted-foreground">Last updated: July 15, 2026</p>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Our Copyright</h2>
-        <p className="leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Our Copyright</h2>
+        <p className="leading-relaxed text-foreground">
           All original content published on ChayanJobs - including articles, compilations, layouts, graphics,
           logos, and design elements - is the intellectual property of ChayanJobs unless otherwise stated.
           This content is protected under applicable copyright laws.
@@ -26,8 +26,8 @@ export default function CopyrightPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Publicly Available Information</h2>
-        <p className="leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Publicly Available Information</h2>
+        <p className="leading-relaxed text-foreground">
           ChayanJobs aggregates and republishes publicly available information from official government sources,
           including job notifications, exam results, admit cards, and answer keys. Such content is in the
           public domain or is published in the public interest. We provide proper attribution and links to
@@ -36,19 +36,19 @@ export default function CopyrightPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Content Usage</h2>
-        <p className="mb-3 leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Content Usage</h2>
+        <p className="mb-3 leading-relaxed text-foreground">
           You may:
         </p>
-        <ul className="list-disc space-y-2 pl-6 text-gray-700">
+        <ul className="list-disc space-y-2 pl-6 text-foreground">
           <li>View, read, and share our content for personal, non-commercial purposes</li>
           <li>Link to our pages from your website or social media</li>
           <li>Quote short excerpts with proper attribution and a link back to the original page</li>
         </ul>
-        <p className="mb-3 mt-4 leading-relaxed text-gray-700">
+        <p className="mb-3 mt-4 leading-relaxed text-foreground">
           You may NOT:
         </p>
-        <ul className="list-disc space-y-2 pl-6 text-gray-700">
+        <ul className="list-disc space-y-2 pl-6 text-foreground">
           <li>Reproduce, republish, or distribute substantial portions of our content without prior written permission</li>
           <li>Use our content for commercial purposes without authorization</li>
           <li>Modify or create derivative works based on our original content</li>
@@ -57,8 +57,8 @@ export default function CopyrightPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Third-Party Content</h2>
-        <p className="leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Third-Party Content</h2>
+        <p className="leading-relaxed text-foreground">
           Our website may contain content from third parties, including images, articles, and embedded media.
           Such content remains the property of their respective owners. ChayanJobs does not claim ownership of
           third-party content and will remove it upon valid request from the copyright holder.
@@ -66,21 +66,21 @@ export default function CopyrightPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Reporting Copyright Infringement</h2>
-        <p className="leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Reporting Copyright Infringement</h2>
+        <p className="leading-relaxed text-foreground">
           If you believe that your copyrighted work has been used on ChayanJobs in a way that constitutes
           copyright infringement, please refer to our{" "}
-          <Link href="/dmca" className="text-teal-600 hover:underline">DMCA Policy</Link> for instructions
+          <Link href="/dmca" className="text-brick hover:underline">DMCA Policy</Link> for instructions
           on how to submit a takedown notice.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-gray-900">Contact</h2>
-        <p className="leading-relaxed text-gray-700">
+        <h2 className="mb-3 text-2xl font-semibold text-foreground">Contact</h2>
+        <p className="leading-relaxed text-foreground">
           If you have any questions about our Copyright Policy or wish to request permission to use our
           content, please{" "}
-          <Link href="/contact" className="text-teal-600 hover:underline">contact us</Link>.
+          <Link href="/contact" className="text-brick hover:underline">contact us</Link>.
         </p>
       </section>
     </div>

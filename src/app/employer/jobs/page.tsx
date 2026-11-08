@@ -95,15 +95,15 @@ export default function EmployerJobsPage() {
   }
 
   if (status === "loading" || (status === "authenticated" && loading)) {
-    return <div className="container mx-auto max-w-6xl px-4 py-16 text-sm text-gray-500">Loading employer studio…</div>
+    return <div className="container mx-auto max-w-6xl px-4 py-16 text-sm text-muted-foreground">Loading employer studio…</div>
   }
 
   if (status === "unauthenticated") {
     return (
       <div className="container mx-auto max-w-xl px-4 py-16 text-center">
-        <Lock className="mx-auto mb-3 h-8 w-8 text-teal-600" />
+        <Lock className="mx-auto mb-3 h-8 w-8 text-brick" />
         <h1 className="mb-2 text-3xl font-bold">Employer Studio is gated</h1>
-        <p className="mb-6 text-gray-600">First sign in with your normal account, then prove your work inbox with OTP to unlock posting + monitoring.</p>
+        <p className="mb-6 text-muted-foreground">First sign in with your normal account, then prove your work inbox with OTP to unlock posting + monitoring.</p>
         <div className="flex justify-center gap-2">
           <EmployerLoginCTA backTo="/employer/jobs" />
           <Button variant="outline" asChild><Link href="/login">Jobseeker login</Link></Button>
@@ -120,8 +120,8 @@ export default function EmployerJobsPage() {
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold"><Building2 className="h-7 w-7 text-teal-600" /> Employer Studio</h1>
-          <p className="text-gray-600">Step 1 - inbox OTP verification → Step 2 - post + monitor everything.</p>
+          <h1 className="flex items-center gap-2 text-3xl font-bold"><Building2 className="h-7 w-7 text-brick" /> Employer Studio</h1>
+          <p className="text-muted-foreground">Step 1 - inbox OTP verification → Step 2 - post + monitor everything.</p>
         </div>
         {hasAccess && (
           <Select value={activeCompanyId} onValueChange={setActiveCompanyId}>
@@ -136,10 +136,10 @@ export default function EmployerJobsPage() {
       </div>
 
       {/* STEP 1 - inbox-proof gate. Typing a domain never verifies; only the inbox code does. */}
-      <Card className="mb-6 border-teal-200">
-        <CardHeader><CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="h-4 w-4 text-teal-600" /> Step 1 - Verify your work inbox {hasAccess && <Badge className="bg-emerald-600">Access unlocked</Badge>}</CardTitle></CardHeader>
+      <Card className="mb-6 border-rule">
+        <CardHeader><CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="h-4 w-4 text-brick" /> Step 1 - Verify your work inbox {hasAccess && <Badge className="bg-paper-3">Access unlocked</Badge>}</CardTitle></CardHeader>
         <CardContent>
-          {!hasAccess && <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Studio posting is locked until inbox OTP proves you own a company-domain email. No code, no posting - copy-pasting a domain is not enough.</p>}
+          {!hasAccess && <p className="mb-4 rounded-lg bg-paper-2 p-3 text-sm text-brick">Studio posting is locked until inbox OTP proves you own a company-domain email. No code, no posting - copy-pasting a domain is not enough.</p>}
           <EmployerVerifyPanel companies={companies} onVerified={onVerified} />
           {memberships.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -154,8 +154,8 @@ export default function EmployerJobsPage() {
       </Card>
 
       {!hasAccess ? (
-        <Card><CardContent className="py-10 text-center text-sm text-gray-500">
-          <Lock className="mx-auto mb-2 h-6 w-6 text-gray-300" />
+        <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
+          <Lock className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
           Complete Step 1 inbox verification above to unlock posting + monitoring dashboard.
         </CardContent></Card>
       ) : (
@@ -167,7 +167,7 @@ export default function EmployerJobsPage() {
               { label: "Tracked applies", value: totalApplies },
               { label: "Avg trust", value: myJobs.length ? Math.round(myJobs.reduce((s, j) => s + (j.trustScore || 0), 0) / myJobs.length) : 0 },
             ].map((s) => (
-              <Card key={s.label}><CardContent className="p-4 text-center"><p className="text-2xl font-extrabold">{s.value}</p><p className="text-xs text-gray-500">{s.label}</p></CardContent></Card>
+              <Card key={s.label}><CardContent className="p-4 text-center"><p className="text-2xl font-extrabold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></CardContent></Card>
             ))}
           </div>
 
@@ -190,20 +190,20 @@ export default function EmployerJobsPage() {
                   </div>
                   <FormField control={form.control} name="description" render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={6} {...field} value={field.value || ""} /></FormControl></FormItem>} />
                   <Button type="submit" disabled={form.formState.isSubmitting || !isVerified}>{form.formState.isSubmitting ? "Posting..." : "Publish (verified)"}</Button>
-                  {!isVerified && <p className="text-xs text-amber-700">Selected company is not OTP-verified - switch to a verified company above.</p>}
+                  {!isVerified && <p className="text-xs text-brick">Selected company is not OTP-verified - switch to a verified company above.</p>}
                 </form>
               </Form>
             </CardContent></Card>
 
             <div>
               <h2 className="mb-3 flex items-center gap-2 font-bold"><BarChart3 className="h-4 w-4" /> Monitoring - {activeMembership?.company.name} ({myJobs.length})</h2>
-              {myJobs.length === 0 ? <Card><CardContent className="py-10 text-center text-sm text-gray-500">No jobs yet for this company.</CardContent></Card> : (
+              {myJobs.length === 0 ? <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No jobs yet for this company.</CardContent></Card> : (
                 <div className="space-y-3">
                   {myJobs.map((j) => (
                     <Card key={j.id}><CardContent className="flex items-center justify-between gap-3 p-4">
                       <div>
                         <Link href={`/private-jobs/${j.slug}`} className="font-bold hover:underline">{j.title}</Link>
-                        <p className="text-xs text-gray-500">{j.views} views · {j._count.applications} tracked applies · trust {j.trustScore}</p>
+                        <p className="text-xs text-muted-foreground">{j.views} views · {j._count.applications} tracked applies · trust {j.trustScore}</p>
                         <div className="mt-1 flex gap-1.5"><Badge variant="secondary" className="text-[10px]">{j.type}</Badge><Badge variant={j.moderation === "APPROVED" ? "default" : "outline"} className="text-[10px]">{j.moderation}</Badge></div>
                       </div>
                       <div className="flex gap-2">
@@ -218,7 +218,7 @@ export default function EmployerJobsPage() {
           </div>
         </>
       )}
-      <p className="mt-6 text-center text-xs text-gray-500">Logged in as {session?.user?.email} - employer access is tied to your OTP-verified company, not a separate account. Inbox addresses are masked everywhere and codes are hashed, single-use and expiring.</p>
+      <p className="mt-6 text-center text-xs text-muted-foreground">Logged in as {session?.user?.email} - employer access is tied to your OTP-verified company, not a separate account. Inbox addresses are masked everywhere and codes are hashed, single-use and expiring.</p>
     </div>
   )
 }

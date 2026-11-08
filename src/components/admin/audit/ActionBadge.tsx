@@ -6,16 +6,16 @@ import type { AuditAction } from "./types";
 import { Check, Copy, Pencil, ShieldAlert, ThumbsDown, Trash2, Layers, Plus, XCircle } from "lucide-react";
 
 const TONE: Record<AuditAction, string> = {
-  CREATE: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  BULK_CREATE: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  UPDATE: "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200",
-  APPROVE: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  BULK_APPROVE: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  REJECT: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  DELETE: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200",
-  BULK_DELETE: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200",
-  ROLE_CHANGE: "border-purple-200 bg-purple-50 text-purple-800 dark:border-purple-900 dark:bg-purple-950 dark:text-purple-200",
-  LOG_PURGE: "border-slate-300 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200",
+  CREATE: "border-rule bg-paper-3 text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground",
+  BULK_CREATE: "border-rule bg-paper-3 text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground",
+  UPDATE: "border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick",
+  APPROVE: "border-rule bg-paper-3 text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground",
+  BULK_APPROVE: "border-rule bg-paper-3 text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground",
+  REJECT: "border-rule bg-paper-2 text-brick dark:border-rule dark:bg-paper-2 dark:text-brick",
+  DELETE: "border-brick bg-paper-2 text-brick dark:border-brick dark:bg-paper-2 dark:text-brick",
+  BULK_DELETE: "border-brick bg-paper-2 text-brick dark:border-brick dark:bg-paper-2 dark:text-brick",
+  ROLE_CHANGE: "border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick",
+  LOG_PURGE: "border-rule bg-paper-3 text-foreground  dark:bg-background/10 dark:text-muted-foreground",
 };
 
 const ICON: Record<AuditAction, typeof Check> = {

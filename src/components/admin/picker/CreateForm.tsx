@@ -38,7 +38,7 @@ export function CreateForm({ initialName, singular, takenNames, saving, onCancel
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <label className="text-xs font-semibold text-muted-foreground">
           {singular} name
         </label>
         <Input
@@ -57,9 +57,9 @@ export function CreateForm({ initialName, singular, takenNames, saving, onCancel
           placeholder={`Enter ${singular.toLowerCase()} name`}
         />
         {error ? (
-          <p className="text-xs font-medium text-red-500">{error}</p>
+          <p className="text-xs font-medium text-brick">{error}</p>
         ) : (
-          <p className="text-xs text-gray-400">It will be available in every form right away.</p>
+          <p className="text-xs text-muted-foreground">It will be available in every form right away.</p>
         )}
       </div>
       <div className="flex items-center justify-end gap-2">

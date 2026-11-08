@@ -83,7 +83,7 @@ const CALENDAR_STEPS: TourStep[] = [
   {
     id: "cal-filters",
     title: "Filter by type",
-    description: "Last Date (red), Exam (blue), Admit Card (amber), Result (green). Counts update live.",
+    description: "Last Date, Exam, Admit Card and Result each carry an ink marker. Counts update live.",
     cta: "Next",
     action: "next",
     fallbackSelector: '[data-tour="cal-month-nav"]',
@@ -168,7 +168,8 @@ export function SpotlightTour() {
   )
 
   // Stable implementation stored in ref to allow self-retry without lint cycle
-  positionRef.current = (idx: number, attempt = 0) => {
+  useEffect(() => {
+    positionRef.current = (idx: number, attempt = 0) => {
       const stepList = getStepsForPath(window.location.pathname)
       const step = stepList[idx]
       if (!step) {
@@ -216,7 +217,8 @@ export function SpotlightTour() {
         const spaceBelow = window.innerHeight - (r.top + r.height)
         setTooltipBelow(spaceBelow > 260 || r.top < 180)
       }, 450)
-  }
+    }
+  }, [measure])
 
   const start = useCallback(
     (idx = 0) => {
@@ -409,7 +411,7 @@ export function SpotlightTour() {
   return (
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-live="polite" aria-label={`Guided tour: ${step.title}`}>
       {/* Dim layer - click does nothing (must use Skip) to avoid accidental loss */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-ink/60" />
 
       {/* Spotlight cutout */}
       {hl && (
@@ -418,30 +420,30 @@ export function SpotlightTour() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="absolute rounded-2xl ring-4 ring-teal-400"
+          className="absolute rounded-2xl ring-4 ring-rule"
           style={{
             top: hl.top,
             left: hl.left,
             width: Math.min(hl.width, typeof window !== "undefined" ? window.innerWidth - 16 : hl.width),
             height: hl.height,
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.60), 0 0 40px rgba(45,212,191,0.45)",
+            boxShadow: "0 0 0 9999px rgba(0,0,0,0.60)",
           }}
         >
           {/* Pulsing arrow marker */}
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 -translate-y-full">
             <div className="flex flex-col items-center gap-1">
-              <span className="rounded-full bg-teal-400 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-teal-950 shadow-lg">
+              <span className="rounded-full bg-paper-3 px-2.5 py-1 text-[11px] font-extrabold text-brick ">
                 Look here
               </span>
               <motion.div
                 animate={{ y: [0, 6, 0] }}
                 transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                className="h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-teal-400"
+                className="h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-brick"
                 aria-hidden="true"
               />
             </div>
           </div>
-          <span className="absolute inset-0 animate-pulse rounded-2xl border-2 border-teal-300/60" aria-hidden="true" />
+          <span className="absolute inset-0 animate-pulse rounded-2xl border-2 border-rule" aria-hidden="true" />
         </motion.div>
       )}
 
@@ -454,7 +456,7 @@ export function SpotlightTour() {
           exit={{ opacity: 0, y: tooltipBelow ? 8 : -8 }}
           transition={{ duration: 0.22 }}
           className={cn(
-            "absolute left-1/2 w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-950",
+            "absolute left-1/2 w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-rule bg-background p-5  dark:border-ink dark:bg-ink",
             isMobile || !hl
               ? "bottom-4 top-auto"
               : tooltipBelow
@@ -471,14 +473,14 @@ export function SpotlightTour() {
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-paper">
                 {step.id.startsWith("cal-") || step.id === "deadlines-teaser" ? (
                   <CalendarDays className="h-5 w-5" />
                 ) : (
                   <MapPin className="h-5 w-5" />
                 )}
               </span>
-              <p className="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+              <p className="text-xs font-bold text-brick dark:text-brick">
                 Step {stepIndex + 1} of {steps.length}
               </p>
             </div>
@@ -486,14 +488,14 @@ export function SpotlightTour() {
               type="button"
               onClick={() => close(true)}
               aria-label="Skip tour"
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-paper-3 hover:text-foreground dark:hover:bg-ink dark:hover:text-muted-foreground"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <h2 className="mt-3 text-lg font-extrabold tracking-tight text-gray-900 dark:text-white">{step.title}</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-300">{step.description}</p>
+          <h2 className="mt-3 text-lg font-extrabold tracking-tight text-foreground dark:text-paper">{step.title}</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground dark:text-muted-foreground">{step.description}</p>
 
           {/* Progress dots */}
           <div className="mt-4 flex items-center gap-1.5" aria-hidden="true">
@@ -502,7 +504,7 @@ export function SpotlightTour() {
                 key={s.id}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  i === stepIndex ? "w-6 bg-teal-500" : i < stepIndex ? "w-3 bg-teal-300" : "w-3 bg-gray-200 dark:bg-gray-700"
+                  i === stepIndex ? "w-6 bg-paper-3" : i < stepIndex ? "w-3 bg-paper-3" : "w-3 bg-paper-3 dark:bg-ink"
                 )}
               />
             ))}
@@ -515,20 +517,20 @@ export function SpotlightTour() {
                 Back
               </Button>
             )}
-            <Button size="sm" onClick={goNext} className="flex-1 gap-1 bg-teal-600 hover:bg-teal-700">
+            <Button size="sm" onClick={goNext} className="flex-1 gap-1 bg-paper-3 hover:bg-paper-3">
               {step.cta}
               <ChevronRight className="h-4 w-4" />
             </Button>
             <button
               type="button"
               onClick={() => close(true)}
-              className="px-2 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+              className="px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-paper"
             >
               Skip
             </button>
           </div>
 
-          <p className="mt-3 flex items-center justify-between text-[11px] text-gray-400">
+          <p className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
             <span>Tip: use ← → keys, Esc to skip</span>
             <button
               type="button"
@@ -541,7 +543,7 @@ export function SpotlightTour() {
                   router.push("/exam-calendar?tour=1")
                 }
               }}
-              className="hidden font-semibold text-teal-700 hover:underline dark:text-teal-300"
+              className="hidden font-semibold text-brick hover:underline dark:text-brick"
             >
               Jump to calendar
             </button>
@@ -553,7 +555,7 @@ export function SpotlightTour() {
       <button
         type="button"
         onClick={() => start(0)}
-        className="absolute bottom-4 right-4 hidden items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/20 sm:inline-flex"
+        className="absolute bottom-4 right-4 hidden items-center gap-1.5 rounded-full border border-white/20 bg-background/10 px-3 py-1.5 text-xs font-semibold text-paper hover:bg-background/20 sm:inline-flex"
       >
         <RotateCcw className="h-3.5 w-3.5" />
         Restart tour

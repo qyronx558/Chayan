@@ -111,19 +111,19 @@ export function NotificationMatrix({ admin, initial, loading }: NotificationMatr
         <div className="overflow-x-auto">
           <table className="w-full min-w-105 text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+              <tr className="border-b border-rule text-left text-xs text-muted-foreground  dark:text-muted-foreground">
                 <th scope="col" className="py-2 pr-3 font-medium">Alert</th>
                 <th scope="col" className="w-16 px-2 py-2 text-center font-medium">Email</th>
                 <th scope="col" className="w-16 px-2 py-2 text-center font-medium">SMS</th>
                 <th scope="col" className="w-20 px-2 py-2 text-center font-medium">Telegram</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+            <tbody className="divide-y divide-rule100 ">
               {rows.map((r) => (
                 <tr key={r.key}>
                   <td className="py-3 pr-3">
-                    <p className="font-medium text-slate-900 dark:text-slate-50">{r.label}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{r.hint}</p>
+                    <p className="font-medium text-foreground dark:text-paper">{r.label}</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">{r.hint}</p>
                   </td>
                   <td className="px-2 py-3 text-center">
                     <Switch checked={prefs[r.emailKey] === true} onCheckedChange={(v) => update(r.emailKey, v)} aria-label={`${r.label} by email`} />
@@ -160,7 +160,7 @@ export function NotificationMatrix({ admin, initial, loading }: NotificationMatr
           <div className="flex items-center justify-between gap-3">
             <div>
               <Label htmlFor="notify-quiet">Quiet hours</Label>
-              <p className="text-xs text-slate-500 dark:text-slate-400">No SMS or push from 22:00 to 07:00.</p>
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">No SMS or push from 22:00 to 07:00.</p>
             </div>
             <Switch id="notify-quiet" checked={prefs["quietHoursEnabled"] === true} onCheckedChange={(v) => update("quietHoursEnabled", v)} aria-label="Quiet hours" />
           </div>

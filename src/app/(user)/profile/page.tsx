@@ -393,19 +393,19 @@ function ProfilePageInner() {
         <StatsStrip admin={admin} stats={stats} />
       </div>
       <Tabs value={activeTab} onValueChange={(v) => setTab(v as TabKey)} className="mt-4 w-full">
-        <TabsList className="no-scrollbar flex h-auto w-full items-center justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-transparent p-0 dark:border-white/10">
+        <TabsList className="no-scrollbar flex h-auto w-full items-center justify-start gap-1 overflow-x-auto rounded-none border-b border-rule bg-transparent p-0 ">
           {tabs.map((t) => (
             <TabsTrigger
               key={t.key}
               value={t.key}
               className={cn(
-                "relative shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 data-[state=active]:border-teal-700 data-[state=active]:bg-transparent data-[state=active]:text-teal-700 data-[state=active]:shadow-none dark:text-slate-400 dark:data-[state=active]:text-teal-300"
+                "relative shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule data-[state=active]:border-rule data-[state=active]:bg-transparent data-[state=active]:text-brick data-[state=active]: dark:text-muted-foreground dark:data-[state=active]:text-brick"
               )}
             >
               <span className="flex items-center gap-1.5">
                 <t.icon className="h-4 w-4" aria-hidden="true" />
                 {t.label}
-                {t.dot ? <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-label="Action needed" /> : null}
+                {t.dot ? <span className="h-1.5 w-1.5 rounded-full bg-paper-2" aria-label="Action needed" /> : null}
               </span>
             </TabsTrigger>
           ))}

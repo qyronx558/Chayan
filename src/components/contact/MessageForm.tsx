@@ -68,7 +68,7 @@ export function MessageForm() {
     return (
       <div className="rounded-xl border border-[var(--cp-border)] p-6 md:p-8" role="status">
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-6 w-6 shrink-0 text-[#1a7f37]" aria-hidden />
+          <CheckCircle2 className="h-6 w-6 shrink-0 text-foreground" aria-hidden />
           <h3 className="text-[19px] font-semibold tracking-[-0.01em] text-[var(--cp-ink)]">
             Message received
           </h3>
@@ -91,7 +91,7 @@ export function MessageForm() {
 
   const inputClass = (invalid: boolean) =>
     `h-10 w-full rounded-md border bg-[var(--cp-field)] px-3 text-[15px] text-[var(--cp-ink)] placeholder:text-[var(--cp-faint)] transition-colors ${
-      invalid ? "border-red-500" : "border-[var(--cp-border)]"
+      invalid ? "border-brick" : "border-[var(--cp-border)]"
     }`
 
   return (
@@ -143,7 +143,7 @@ export function MessageForm() {
             aria-invalid={!!errors.topic}
             aria-describedby={errors.topic ? "contact-topic-error" : undefined}
             className={`h-10 w-full appearance-none rounded-md border bg-[var(--cp-field)] pl-3 pr-10 text-[15px] text-[var(--cp-ink)] transition-colors ${
-              errors.topic ? "border-red-500" : "border-[var(--cp-border)]"
+              errors.topic ? "border-brick" : "border-[var(--cp-border)]"
             }`}
             {...register("topic", {
               onChange: (event: ChangeEvent<HTMLSelectElement>) => setTopicValue(event.target.value),
@@ -194,7 +194,7 @@ export function MessageForm() {
           aria-describedby={errors.message ? "contact-message-error" : undefined}
           maxLength={8000}
           className={`w-full rounded-md border bg-[var(--cp-field)] px-3 py-2.5 text-[15px] leading-relaxed text-[var(--cp-ink)] placeholder:text-[var(--cp-faint)] transition-colors ${
-            errors.message ? "border-red-500" : "border-[var(--cp-border)]"
+            errors.message ? "border-brick" : "border-[var(--cp-border)]"
           }`}
           {...register("message")}
         />
@@ -212,7 +212,7 @@ export function MessageForm() {
       />
 
       {serverError && (
-        <p role="alert" className="mt-4 text-[14px] font-medium text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-[14px] font-medium text-brick">
           {serverError}
         </p>
       )}
@@ -245,7 +245,7 @@ export function MessageForm() {
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null
   return (
-    <p id={id} role="alert" className="mt-1.5 text-[13px] text-red-600 dark:text-red-400">
+    <p id={id} role="alert" className="mt-1.5 text-[13px] text-brick">
       {message}
     </p>
   )

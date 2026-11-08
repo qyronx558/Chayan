@@ -65,22 +65,22 @@ export default function EmployerEarnings() {
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold">Coins & cash</h1>
-        <p className="text-sm text-slate-500">1,000 coins = ₹20. Cash withdrawal unlocks at 1,000 coins. Milestone coins start as pending, become withdrawable after admin review.</p>
+        <p className="text-sm text-muted-foreground">1,000 coins = ₹20. Cash withdrawal unlocks at 1,000 coins. Milestone coins start as pending, become withdrawable after admin review.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="border-emerald-200 bg-emerald-50/60"><CardContent className="p-4 text-center">
-          <Wallet className="mx-auto mb-1 h-5 w-5 text-emerald-600" />
-          <p className="text-2xl font-extrabold text-emerald-700">{coins.withdrawable.toLocaleString("en-IN")} coins</p>
-          <p className="text-xs text-slate-500">withdrawable ({rupees.withdrawable})</p>
+        <Card className="border-rule bg-paper-3"><CardContent className="p-4 text-center">
+          <Wallet className="mx-auto mb-1 h-5 w-5 text-foreground" />
+          <p className="text-2xl font-extrabold text-foreground">{coins.withdrawable.toLocaleString("en-IN")} coins</p>
+          <p className="text-xs text-muted-foreground">withdrawable ({rupees.withdrawable})</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
           <p className="text-2xl font-extrabold">{coins.pending.toLocaleString("en-IN")} coins</p>
-          <p className="text-xs text-slate-500">pending review</p>
+          <p className="text-xs text-muted-foreground">pending review</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
           <p className="text-2xl font-extrabold">{formatCoins(coins.approved).split(" (")[0]}</p>
-          <p className="text-xs text-slate-500">total approved ({rupees.approved})</p>
+          <p className="text-xs text-muted-foreground">total approved ({rupees.approved})</p>
         </CardContent></Card>
       </div>
 
@@ -94,8 +94,8 @@ export default function EmployerEarnings() {
             [`${rules.referral} coins`, "each invited company hitting 3 applications"],
           ].map(([amt, what]) => (
             <div key={what} className="flex items-center justify-between rounded-lg border p-2.5">
-              <span className="font-extrabold text-emerald-700">{amt}</span>
-              <span className="text-xs text-slate-500">{what}</span>
+              <span className="font-extrabold text-foreground">{amt}</span>
+              <span className="text-xs text-muted-foreground">{what}</span>
             </div>
           ))}
         </CardContent></Card>
@@ -108,7 +108,7 @@ export default function EmployerEarnings() {
             [`${metrics.partialApps}`, "partial (saved-only) applications"],
           ].map(([v, label]) => (
             <div key={label} className="flex items-center justify-between rounded-lg border border-dashed p-2.5">
-              <span className="font-extrabold">{v}</span><span className="text-xs text-slate-500">{label} - display only</span>
+              <span className="font-extrabold">{v}</span><span className="text-xs text-muted-foreground">{label} - display only</span>
             </div>
           ))}
         </CardContent></Card>
@@ -116,7 +116,7 @@ export default function EmployerEarnings() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Landmark className="h-4 w-4" /> Cash withdrawal (UPI)</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {account ? <p className="text-sm">Saved: <strong>{account.upiMasked}</strong> <span className="text-slate-400">(masked for privacy)</span></p> : <p className="text-sm text-slate-500">No UPI saved yet.</p>}
+            {account ? <p className="text-sm">Saved: <strong>{account.upiMasked}</strong> <span className="text-muted-foreground">(masked for privacy)</span></p> : <p className="text-sm text-muted-foreground">No UPI saved yet.</p>}
             <div className="flex gap-2">
               <Input placeholder="name@okbank" value={upi} onChange={(e) => setUpi(e.target.value)} />
               <Button onClick={saveAccount}>Save</Button>
@@ -125,17 +125,17 @@ export default function EmployerEarnings() {
               <Input placeholder={`Coins (min ${minWithdraw})`} value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="numeric" />
               <Button onClick={requestPayout} disabled={!canWithdraw}><ArrowDownToLine className="mr-1 h-4 w-4" /> Withdraw</Button>
             </div>
-            {!canWithdraw && <p className="text-xs text-amber-700">Withdrawals unlock at {minWithdraw.toLocaleString("en-IN")} withdrawable coins (≈{formatINR(coinsToPaise(minWithdraw))}).</p>}
+            {!canWithdraw && <p className="text-xs text-brick">Withdrawals unlock at {minWithdraw.toLocaleString("en-IN")} withdrawable coins (≈{formatINR(coinsToPaise(minWithdraw))}).</p>}
           </CardContent></Card>
 
         <Card><CardHeader><CardTitle className="text-base">Withdrawal history</CardTitle></CardHeader>
           <CardContent>
-            {requests.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No withdrawals yet.</p> : (
+            {requests.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">No withdrawals yet.</p> : (
               <div className="space-y-2">
                 {requests.map((r) => (
                   <div key={r.id} className="flex items-center justify-between rounded-lg border p-2.5 text-sm">
-                    <div><p className="font-bold">{(r.amountCoins || 0).toLocaleString("en-IN")} coins <span className="font-normal text-slate-400">→ {r.upiMasked}</span></p>
-                    <p className="text-xs text-slate-400">{new Date(r.createdAt).toLocaleDateString("en-IN")}{r.adminNote ? ` · ${r.adminNote}` : ""}</p></div>
+                    <div><p className="font-bold">{(r.amountCoins || 0).toLocaleString("en-IN")} coins <span className="font-normal text-muted-foreground">→ {r.upiMasked}</span></p>
+                    <p className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString("en-IN")}{r.adminNote ? ` · ${r.adminNote}` : ""}</p></div>
                     <Badge variant={r.status === "PAID" ? "default" : "outline"}>{r.status}</Badge>
                   </div>
                 ))}
@@ -146,12 +146,12 @@ export default function EmployerEarnings() {
 
       <Card><CardHeader><CardTitle className="text-base">Coin ledger</CardTitle></CardHeader>
         <CardContent>
-          {ledger.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No coin entries yet - milestones appear here as pending first.</p> : (
+          {ledger.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">No coin entries yet - milestones appear here as pending first.</p> : (
             <div className="space-y-2">
               {ledger.map((l) => (
                 <div key={l.id} className="flex items-center justify-between rounded-lg border p-2.5 text-sm">
-                  <div><p className="font-semibold">{l.kind.replaceAll("_", " ")}</p><p className="text-xs text-slate-400">{l.note || ""} · {new Date(l.createdAt).toLocaleDateString("en-IN")}</p></div>
-                  <div className="text-right"><p className="font-extrabold text-emerald-700">+{l.coins.toLocaleString("en-IN")}</p><Badge variant="outline" className="text-[10px]">{l.status}</Badge></div>
+                  <div><p className="font-semibold">{l.kind.replaceAll("_", " ")}</p><p className="text-xs text-muted-foreground">{l.note || ""} · {new Date(l.createdAt).toLocaleDateString("en-IN")}</p></div>
+                  <div className="text-right"><p className="font-extrabold text-foreground">+{l.coins.toLocaleString("en-IN")}</p><Badge variant="outline" className="text-[10px]">{l.status}</Badge></div>
                 </div>
               ))}
             </div>

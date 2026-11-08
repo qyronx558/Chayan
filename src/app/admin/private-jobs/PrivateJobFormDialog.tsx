@@ -220,7 +220,7 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
                             Back to select existing company
                           </Button>
                           {form.formState.errors.companyId?.message && (
-                            <p className="mt-1 text-xs font-medium text-red-500">{form.formState.errors.companyId.message}</p>
+                            <p className="mt-1 text-xs font-medium text-brick">{form.formState.errors.companyId.message}</p>
                           )}
                         </>
                       ) : (
@@ -370,15 +370,15 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
             {wizardStep === 3 && (
               <FormSection title="Review & publish" description="Confirm before saving.">
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Company</dt><dd>{newCompanyMode ? watched.companyName || "New company" : companies.find((c) => c.id === watched.companyId)?.name || "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Type</dt><dd>{watched.type}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Last date</dt><dd>{watched.lastDate ? formatDate(watched.lastDate) : "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Company</dt><dd>{newCompanyMode ? watched.companyName || "New company" : companies.find((c) => c.id === watched.companyId)?.name || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Type</dt><dd>{watched.type}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Last date</dt><dd>{watched.lastDate ? formatDate(watched.lastDate) : "-"}</dd></div>
                 </dl>
               </FormSection>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-4 dark:border-ink">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <div className="flex items-center gap-2">
                 {wizardStep > 0 && (

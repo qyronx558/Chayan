@@ -116,7 +116,7 @@ export default function BulkUploadPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Bulk Upload</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Upload an Excel (.xlsx) or CSV file to add many records at once. Duplicates (same title or slug) are
           automatically skipped - existing records are never changed. Max {BULK_MAX_ROWS} rows per file.
         </p>
@@ -134,8 +134,8 @@ export default function BulkUploadPage() {
               className={cn(
                 "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-semibold transition-all",
                 active
-                  ? "border-teal-600 bg-teal-50 text-teal-700 shadow-sm dark:border-teal-500 dark:bg-teal-500/10 dark:text-teal-300"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-teal-600/40 hover:text-teal-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400"
+                  ? "border-rule bg-paper-3 text-brick  dark:border-rule dark:bg-paper-3 dark:text-brick"
+                  : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-brick dark:border-ink dark:bg-ink dark:text-muted-foreground"
               )}
             >
               <Icon className="h-5 w-5" />
@@ -155,10 +155,10 @@ export default function BulkUploadPage() {
           <CardContent className="space-y-5">
             {/* Step 1 */}
             <div className="flex items-start gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">1</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-paper-3 text-xs font-bold text-paper">1</span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">Download the template</p>
-                <p className="text-xs text-gray-500">Fill your data into these exact columns - order doesn&apos;t matter.</p>
+                <p className="text-xs text-muted-foreground">Fill your data into these exact columns - order doesn&apos;t matter.</p>
                 <Button variant="outline" size="sm" className="mt-2 gap-2 text-xs" onClick={() => downloadTemplate(mod)}>
                   <Download className="h-3.5 w-3.5" /> {mod.id}-template.xlsx
                 </Button>
@@ -167,7 +167,7 @@ export default function BulkUploadPage() {
 
             {/* Step 2 */}
             <div className="flex items-start gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">2</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-paper-3 text-xs font-bold text-paper">2</span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">Choose your filled file</p>
                 <div
@@ -183,16 +183,16 @@ export default function BulkUploadPage() {
                   className={cn(
                     "mt-2 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed px-4 py-5 transition-colors",
                     dragOver
-                      ? "border-teal-600 bg-teal-50/60"
-                      : "border-gray-200 hover:border-teal-600/50 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50"
+                      ? "border-rule bg-paper-3"
+                      : "border-rule hover:border-rule hover:bg-paper-2 dark:border-ink dark:hover:bg-ink/50"
                   )}
                 >
                   {parsing ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+                    <Loader2 className="h-6 w-6 animate-spin text-brick" />
                   ) : fileName ? (
-                    <FileSpreadsheet className="h-6 w-6 shrink-0 text-green-600" />
+                    <FileSpreadsheet className="h-6 w-6 shrink-0 text-foreground" />
                   ) : (
-                    <UploadCloud className="h-6 w-6 shrink-0 text-gray-400" />
+                    <UploadCloud className="h-6 w-6 shrink-0 text-muted-foreground" />
                   )}
                   <div className="min-w-0 text-xs">
                     {parsing ? (
@@ -200,12 +200,12 @@ export default function BulkUploadPage() {
                     ) : fileName && parsedRows ? (
                       <>
                         <p className="truncate font-semibold">{fileName}</p>
-                        <p className="text-gray-500">{parsedRows.length} data row{parsedRows.length === 1 ? "" : "s"} ready</p>
+                        <p className="text-muted-foreground">{parsedRows.length} data row{parsedRows.length === 1 ? "" : "s"} ready</p>
                       </>
                     ) : (
                       <>
                         <p className="font-medium">Drop .xlsx / .csv here or click to browse</p>
-                        <p className="text-gray-500">First row must be the column headers</p>
+                        <p className="text-muted-foreground">First row must be the column headers</p>
                       </>
                     )}
                   </div>
@@ -231,7 +231,7 @@ export default function BulkUploadPage() {
                   }}
                 />
                 {parseError && (
-                  <p className="mt-2 flex items-start gap-1.5 rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-700">
+                  <p className="mt-2 flex items-start gap-1.5 rounded-md border border-brick bg-paper-2 p-2 text-xs text-brick">
                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {parseError}
                   </p>
                 )}
@@ -241,12 +241,12 @@ export default function BulkUploadPage() {
             {/* Step 3 */}
             <div className="flex items-start gap-3">
               <span className={cn(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white",
-                parsedRows && !uploading ? "bg-teal-600" : "bg-gray-300"
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-paper",
+                parsedRows && !uploading ? "bg-paper-3" : "bg-paper-3"
               )}>3</span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">Import into database</p>
-                <p className="text-xs text-gray-500">Departments & categories are created first, then every row is validated and saved.</p>
+                <p className="text-xs text-muted-foreground">Departments & categories are created first, then every row is validated and saved.</p>
                 <Button
                   className="mt-2 gap-2"
                   disabled={!parsedRows || uploading || parsing}
@@ -265,32 +265,32 @@ export default function BulkUploadPage() {
             {hasResult && (
               <div className={cn(
                 "rounded-xl border p-4",
-                result.errors.length > 0 ? "border-amber-200 bg-amber-50/50" : "border-green-200 bg-green-50/50"
+                result.errors.length > 0 ? "border-rule bg-paper-2" : "border-rule bg-paper-3"
               )}>
                 <div className="flex items-center gap-2">
                   {result.errors.length > 0 ? (
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertTriangle className="h-4 w-4 text-brick" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-foreground" />
                   )}
                   <p className="text-sm font-bold">Import finished - {result.imported} added, {result.skipped} duplicates skipped</p>
                 </div>
                 <div className="mt-3 flex gap-3 text-center">
-                  <div className="flex-1 rounded-md bg-green-100/80 p-2">
-                    <div className="text-lg font-bold text-green-700">{result.imported}</div>
-                    <div className="text-[11px] font-medium text-green-600">Imported</div>
+                  <div className="flex-1 rounded-md bg-paper-3 p-2">
+                    <div className="text-lg font-bold text-foreground">{result.imported}</div>
+                    <div className="text-[11px] font-medium text-foreground">Imported</div>
                   </div>
-                  <div className="flex-1 rounded-md bg-teal-100/60 p-2">
-                    <div className="text-lg font-bold text-teal-700">{result.skipped}</div>
-                    <div className="text-[11px] font-medium text-teal-600">Skipped</div>
+                  <div className="flex-1 rounded-md bg-paper-3 p-2">
+                    <div className="text-lg font-bold text-brick">{result.skipped}</div>
+                    <div className="text-[11px] font-medium text-brick">Skipped</div>
                   </div>
-                  <div className="flex-1 rounded-md bg-red-100/80 p-2">
-                    <div className="text-lg font-bold text-red-700">{result.errors.length}</div>
-                    <div className="text-[11px] font-medium text-red-600">Errors</div>
+                  <div className="flex-1 rounded-md bg-paper-2 p-2">
+                    <div className="text-lg font-bold text-brick">{result.errors.length}</div>
+                    <div className="text-[11px] font-medium text-brick">Errors</div>
                   </div>
                 </div>
                 {(result.newDepartments > 0 || result.newCategories > 0) && (
-                  <p className="mt-2 flex items-center gap-1.5 text-xs text-gray-600">
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Building2 className="h-3.5 w-3.5" />
                     Auto-created: {result.newDepartments} department{result.newDepartments === 1 ? "" : "s"}
                     {result.newDepartments > 0 && result.newCategories > 0 ? ", " : ""}
@@ -298,7 +298,7 @@ export default function BulkUploadPage() {
                   </p>
                 )}
                 {result.errors.length > 0 && (
-                  <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-md border border-red-100 bg-white p-2 text-xs text-red-700">
+                  <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-md border border-brick bg-background p-2 text-xs text-brick">
                     {result.errors.map((e, i) => (
                       <p key={i}><span className="font-bold">Row {e.row}:</span> {e.message}</p>
                     ))}
@@ -314,26 +314,26 @@ export default function BulkUploadPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Columns for {mod.label}</CardTitle>
             <CardDescription className="text-xs">
-              <span className="font-semibold text-red-500">* required.</span> Slug auto-generates from Title/Name if blank.
+              <span className="font-semibold text-brick">* required.</span> Slug auto-generates from Title/Name if blank.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
               {mod.columns.map((c) => (
-                <div key={c.key} className="rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2 dark:border-gray-800 dark:bg-gray-800/40">
+                <div key={c.key} className="rounded-lg border border-rule bg-paper-2/60 px-3 py-2 dark:border-ink dark:bg-ink/40">
                   <p className="flex items-center gap-2 text-xs font-bold">
                     {c.header}
                     {c.required ? (
-                      <Badge variant="secondary" className="border-0 bg-red-100 px-1.5 py-0 text-[10px] text-red-700">required</Badge>
+                      <Badge variant="secondary" className="border-0 bg-paper-2 px-1.5 py-0 text-[10px] text-brick">required</Badge>
                     ) : (
-                      <Badge variant="secondary" className="border-0 bg-gray-200/70 px-1.5 py-0 text-[10px] text-gray-500">optional</Badge>
+                      <Badge variant="secondary" className="border-0 bg-paper-3/70 px-1.5 py-0 text-[10px] text-muted-foreground">optional</Badge>
                     )}
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-gray-500">{c.hint}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{c.hint}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-3 rounded-lg border border-teal-600/20 bg-teal-50/60 p-3 text-[11px] leading-relaxed text-teal-800 dark:bg-teal-500/10 dark:text-teal-200">
+            <div className="mt-3 rounded-lg border border-rule bg-paper-3 p-3 text-[11px] leading-relaxed text-brick dark:bg-paper-3 dark:text-brick">
               {mod.id === "jobs" ? (
                 <>State must already exist in the system - unknown states are left empty. Departments and categories are created automatically when missing.</>
               ) : mod.id === "categories" || mod.id === "departments" ? (

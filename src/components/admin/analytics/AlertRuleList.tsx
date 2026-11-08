@@ -85,16 +85,16 @@ export function AlertRuleList({ rules, onToggle, onCreate, onDelete }: {
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={submit} disabled={saving} className="bg-teal-700 hover:bg-teal-800">{saving ? "Saving…" : "Create"}</Button>
+              <Button onClick={submit} disabled={saving} className="bg-paper-3 hover:bg-paper-3">{saving ? "Saving…" : "Create"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       }
     >
       {rules.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">No alert rules yet. Create one to get notified.</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">No alert rules yet. Create one to get notified.</p>
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+        <ul className="divide-y divide-rule100 ">
           {rules.map((r) => (
             <li key={r.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
               <Switch
@@ -110,7 +110,7 @@ export function AlertRuleList({ rules, onToggle, onCreate, onDelete }: {
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{METRICS.find((m) => m.value === r.metric)?.label ?? r.metric}</p>
-                <p className="text-xs tabular-nums text-slate-500">Threshold {r.threshold}</p>
+                <p className="text-xs tabular-nums text-muted-foreground">Threshold {r.threshold}</p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {r.channels.map((c) => <Badge key={c} variant="secondary" className="text-[11px]">{c}</Badge>)}

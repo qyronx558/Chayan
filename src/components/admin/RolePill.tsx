@@ -9,7 +9,7 @@ export function RolePill({ role, className }: { role?: string | null; className?
     return (
       <Badge
         className={cn(
-          "border-teal-700/20 bg-teal-700/10 font-semibold text-teal-800 hover:bg-teal-700/15 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-200",
+          "border-rule bg-paper-3 font-semibold text-brick hover:bg-paper-3 dark:border-rule dark:bg-paper-3 dark:text-brick",
           className
         )}
       >
@@ -19,13 +19,13 @@ export function RolePill({ role, className }: { role?: string | null; className?
   }
   if (v === "ADMIN") {
     return (
-      <Badge variant="outline" className={cn("font-semibold text-slate-600 dark:text-slate-300", className)}>
+      <Badge variant="outline" className={cn("font-semibold text-muted-foreground dark:text-muted-foreground", className)}>
         Admin
       </Badge>
     );
   }
   return (
-    <Badge variant="secondary" className={cn("font-medium text-slate-500 dark:text-slate-400", className)}>
+    <Badge variant="secondary" className={cn("font-medium text-muted-foreground dark:text-muted-foreground", className)}>
       {v === "USER" ? "User" : (role ?? "Unknown")}
     </Badge>
   );

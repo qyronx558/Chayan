@@ -208,13 +208,13 @@ export function AnswerKeyFormDialog({ row, open, onOpenChange, lookups, onSaved 
             {wizardStep === 2 && (
               <FormSection title="Review & publish" description="Confirm before saving.">
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Status</dt><dd><Badge variant={watched.status === "PUBLISHED" ? "default" : "secondary"}>{watched.status || "Draft"}</Badge></dd></div>
-                  <div className="sm:col-span-2"><dt className="text-xs uppercase tracking-wide text-gray-400">PDF</dt><dd className="truncate text-teal-700">{watched.pdfUrl || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Status</dt><dd><Badge variant={watched.status === "PUBLISHED" ? "default" : "secondary"}>{watched.status || "Draft"}</Badge></dd></div>
+                  <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">PDF</dt><dd className="truncate text-brick">{watched.pdfUrl || "-"}</dd></div>
                 </dl>
               </FormSection>
             )}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-4 dark:border-ink">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <div className="flex items-center gap-2">
                 {wizardStep > 0 && <Button type="button" variant="outline" onClick={() => setWizardStep((s) => s - 1)}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>}

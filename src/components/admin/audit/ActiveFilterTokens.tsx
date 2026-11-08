@@ -15,7 +15,7 @@ export function ActiveFilterTokens({ filters, onChange }: { filters: AuditFilter
       {tokens.map((t) => (
         <span
           key={t.key}
-          className="inline-flex h-[26px] items-center gap-1 rounded-full border border-slate-200 bg-white pl-2.5 pr-1 text-xs font-medium leading-none text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+          className="inline-flex h-[26px] items-center gap-1 rounded-full border border-rule bg-background pl-2.5 pr-1 text-xs font-medium leading-none text-foreground  dark:bg-background/5 dark:text-muted-foreground"
         >
           <span className="leading-none">{t.label}</span>
           <button
@@ -24,7 +24,7 @@ export function ActiveFilterTokens({ filters, onChange }: { filters: AuditFilter
               if (t.key === "from") onChange({ ...filters, from: "", to: "" });
               else onChange({ ...filters, [t.key]: "" });
             }}
-            className="inline-flex h-5 w-5 items-center justify-center rounded-full leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:hover:bg-white/10"
+            className="inline-flex h-5 w-5 items-center justify-center rounded-full leading-none text-muted-foreground hover:bg-paper-3 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:hover:bg-background/10"
           >
             <X className="h-3 w-3" />
           </button>
@@ -32,7 +32,7 @@ export function ActiveFilterTokens({ filters, onChange }: { filters: AuditFilter
       ))}
       <Button
         variant="ghost"
-        className="h-[26px] px-2 text-xs leading-none text-slate-500"
+        className="h-[26px] px-2 text-xs leading-none text-muted-foreground"
         onClick={() => onChange({ ...filters, action: "", entity: "", actor: "", from: "", to: "" })}
       >
         Clear all

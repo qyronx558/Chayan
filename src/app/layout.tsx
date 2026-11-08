@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import { Zilla_Slab, Spectral, Libre_Franklin } from "next/font/google"
 import "./globals.css"
 import { Suspense } from "react"
 import { Providers } from "@/components/layout/Providers"
@@ -15,7 +15,27 @@ import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
 import { siteConfig } from "@/lib/constants"
 
-const inter = Inter({ subsets: ["latin"] })
+const zilla = Zilla_Slab({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-zilla",
+  display: "swap",
+})
+
+const spectral = Spectral({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-spectral",
+  display: "swap",
+})
+
+const franklin = Libre_Franklin({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-franklin",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -89,8 +109,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${zilla.variable} ${spectral.variable} ${franklin.variable}`}
+    >
+      <body>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />

@@ -413,7 +413,7 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
               <Button type="button" variant="outline" size="sm" onClick={downloadTemplate}>
                 <Download className="mr-1.5 h-3.5 w-3.5" /> Download CSV template
               </Button>
-              <span className="text-xs text-slate-500">Columns: {headers.join(", ")}</span>
+              <span className="text-xs text-muted-foreground">Columns: {headers.join(", ")}</span>
             </div>
             <div>
               <Label>Choose file (.csv, .xlsx)</Label>
@@ -427,14 +427,14 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
                   if (f) void handleFile(f);
                 }}
               />
-              {resolving && <p className="mt-2 text-xs text-slate-500">Reading file, resolving names…</p>}
+              {resolving && <p className="mt-2 text-xs text-muted-foreground">Reading file, resolving names…</p>}
             </div>
           </div>
         ) : step === "preview" ? (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <Badge variant="secondary">{fileName}</Badge>
-              <Badge className="bg-green-600 text-white">
+              <Badge className="bg-paper-3 text-paper">
                 <CheckCircle2 className="mr-1 h-3 w-3" /> {validRows.length} ready
               </Badge>
               {errorRows.length > 0 && (
@@ -451,12 +451,12 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
                 </Button>
               </div>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Blocked rows are skipped automatically. Warnings (unrecognized department, cleared job link…) don&apos;t block import.
             </p>
             <div className="max-h-80 overflow-auto rounded-lg border text-xs">
               <table className="w-full">
-                <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900">
+                <thead className="sticky top-0 bg-paper-2 dark:bg-ink">
                   <tr>
                     <th className="px-2 py-1.5 text-left">#</th>
                     <th className="px-2 py-1.5 text-left">title</th>
@@ -466,15 +466,15 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
                 </thead>
                 <tbody>
                   {rows.slice(0, 100).map((r, i) => (
-                    <tr key={i} className={r.error ? "bg-red-50 dark:bg-red-950/30" : r.warning ? "bg-amber-50 dark:bg-amber-950/20" : undefined}>
+                    <tr key={i} className={r.error ? "bg-paper-2 dark:bg-paper-2" : r.warning ? "bg-paper-2 dark:bg-paper-2" : undefined}>
                       <td className="px-2 py-1">{i + 1}</td>
                       <td className="px-2 py-1">{r.title}</td>
                       <td className="px-2 py-1 font-mono">{r.slug}</td>
                       <td className="px-2 py-1">
                         {r.error ? (
-                          <span className="text-red-600">{r.error}</span>
+                          <span className="text-brick">{r.error}</span>
                         ) : r.warning ? (
-                          <span className="text-amber-700 dark:text-amber-300">ready · {r.warning}</span>
+                          <span className="text-brick dark:text-brick">ready · {r.warning}</span>
                         ) : (
                           "ready"
                         )}
@@ -483,13 +483,13 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
                   ))}
                 </tbody>
               </table>
-              {rows.length > 100 && <p className="px-2 py-1.5 text-slate-500">Showing first 100 of {rows.length}…</p>}
+              {rows.length > 100 && <p className="px-2 py-1.5 text-muted-foreground">Showing first 100 of {rows.length}…</p>}
             </div>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge className="bg-green-600 text-white">
+              <Badge className="bg-paper-3 text-paper">
                 <CheckCircle2 className="mr-1 h-3 w-3" /> {imported} imported
               </Badge>
               {failed.length > 0 && (
@@ -509,7 +509,7 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
             {failed.length > 0 ? (
               <div className="max-h-80 overflow-auto rounded-lg border text-xs">
                 <table className="w-full">
-                  <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900">
+                  <thead className="sticky top-0 bg-paper-2 dark:bg-ink">
                     <tr>
                       <th className="px-2 py-1.5 text-left">title</th>
                       <th className="px-2 py-1.5 text-left">slug</th>
@@ -518,17 +518,17 @@ export function ImportWizard({ open, onClose, module, endpoint, queryKey, extraD
                   </thead>
                   <tbody>
                     {failed.map((f, i) => (
-                      <tr key={i} className="bg-red-50 dark:bg-red-950/30">
+                      <tr key={i} className="bg-paper-2 dark:bg-paper-2">
                         <td className="px-2 py-1">{f.title}</td>
                         <td className="px-2 py-1 font-mono">{f.slug}</td>
-                        <td className="px-2 py-1 text-red-600">{f.error}</td>
+                        <td className="px-2 py-1 text-brick">{f.error}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                 All rows imported successfully and are now visible in the list.
               </p>
             )}

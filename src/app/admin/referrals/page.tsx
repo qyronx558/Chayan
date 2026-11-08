@@ -33,16 +33,16 @@ export default function AdminReferrals() {
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-6">
       <h1 className="text-2xl font-bold">Job referrals ({items.length})</h1>
-      <p className="text-sm text-gray-500">Community-submitted openings. Approve to keep in queue, then create the Private Job from the URL.</p>
-      {loading ? <p className="text-sm text-gray-500">Loading…</p> : items.length === 0 ? <Card><CardContent className="py-10 text-center text-sm text-gray-500">No pending referrals.</CardContent></Card> : (
+      <p className="text-sm text-muted-foreground">Community-submitted openings. Approve to keep in queue, then create the Private Job from the URL.</p>
+      {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : items.length === 0 ? <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No pending referrals.</CardContent></Card> : (
         <div className="space-y-3">
           {items.map((r) => (
-            <Card key={r.id}><CardHeader className="pb-2"><CardTitle className="text-base">{r.title} <span className="font-normal text-gray-500">at {r.companyName}</span></CardTitle></CardHeader>
+            <Card key={r.id}><CardHeader className="pb-2"><CardTitle className="text-base">{r.title} <span className="font-normal text-muted-foreground">at {r.companyName}</span></CardTitle></CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p><a href={r.url} target="_blank" rel="noreferrer" className="text-teal-700 underline">{r.url}</a></p>
+                <p><a href={r.url} target="_blank" rel="noreferrer" className="text-brick underline">{r.url}</a></p>
                 {r.proofUrl && <p>Proof: <a href={r.proofUrl} target="_blank" rel="noreferrer" className="underline">{r.proofUrl}</a></p>}
                 {r.location && <Badge variant="outline">{r.location}</Badge>}
-                {r.note && <p className="text-gray-600">{r.note}</p>}
+                {r.note && <p className="text-muted-foreground">{r.note}</p>}
                 <div className="flex gap-2 pt-1">
                   <Button size="sm" onClick={() => act(r.id, "APPROVED")}>Approve</Button>
                   <Button size="sm" variant="outline" onClick={() => act(r.id, "REJECTED")}>Reject</Button>

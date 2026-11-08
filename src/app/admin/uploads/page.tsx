@@ -221,19 +221,19 @@ export default function AdminUploads() {
       />
 
       <Card className={T_CARD}>
-        <div className="space-y-2.5 border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+        <div className="space-y-2.5 border-b border-rule p-3 sm:p-4 ">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-52 flex-1">
-              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 ref={searchRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Search by title or slug…"
-                className="bg-white pl-8 pr-10 dark:bg-white/[0.03]"
+                className="bg-background pl-8 pr-10 dark:bg-background/[0.03]"
                 aria-label="Search uploads"
               />
-              <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 sm:block dark:border-white/10 dark:bg-white/[0.05]">
+              <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-rule bg-paper-2 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground sm:block  dark:bg-background/[0.05]">
                 /
               </kbd>
             </div>
@@ -268,7 +268,7 @@ export default function AdminUploads() {
                 <Button type="button" variant="outline" size="sm" className="relative">
                   <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" /> Filters
                   {activeFilterCount > 0 && (
-                    <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-teal-700 px-1 text-[11px] font-bold text-white dark:bg-teal-600">
+                    <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-paper-3 px-1 text-[11px] font-bold text-paper dark:bg-paper-3">
                       {activeFilterCount}
                     </span>
                   )}
@@ -309,7 +309,7 @@ export default function AdminUploads() {
         <div className="overflow-x-auto saas-table-scroll">
           <Table className="saas-table" data-density={density}>
             <TableHeader className="sticky top-0 z-10">
-              <TableRow className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+              <TableRow className="bg-paper-2/95 hover:bg-paper-2/95 ">
                 <TableHead><span className={T_HEAD_CELL}>Title</span></TableHead>
                 <TableHead><span className={T_HEAD_CELL}>Uploaded by</span></TableHead>
                 <TableHead><span className={T_HEAD_CELL}>Status</span></TableHead>
@@ -328,11 +328,11 @@ export default function AdminUploads() {
                 <TableRow>
                   <TableCell colSpan={5}>
                     <div className="flex flex-col items-center gap-2 py-12 text-center">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
-                        <Inbox className="h-6 w-6 text-slate-400" />
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-3 dark:bg-background/[0.06]">
+                        <Inbox className="h-6 w-6 text-muted-foreground" />
                       </span>
-                      <p className="font-semibold text-slate-700 dark:text-slate-200">No uploads found</p>
-                      <p className="max-w-xs text-sm text-slate-400">
+                      <p className="font-semibold text-foreground dark:text-muted-foreground">No uploads found</p>
+                      <p className="max-w-xs text-sm text-muted-foreground">
                         {q || module || adminId ? "Try a different search or filter." : "Admin uploads will appear here."}
                       </p>
                     </div>
@@ -344,30 +344,30 @@ export default function AdminUploads() {
                   return (
                     <TableRow
                       key={`${r.module}-${r.id}`}
-                      className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 dark:border-white/[0.06] dark:hover:bg-white/[0.03]"
+                      className="group border-b border-rule transition-colors last:border-0 hover:bg-paper-3  dark:hover:bg-background/[0.03]"
                     >
                       <TableCell className={cn(density === "compact" && "py-2")}>
                         <div className="min-w-0 max-w-[380px]">
-                          <p className="truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100" title={r.title}>
+                          <p className="truncate text-[13.5px] font-semibold text-foreground dark:text-paper" title={r.title}>
                             {r.title}
                           </p>
-                          <p className="mt-0.5 truncate font-mono text-xs text-slate-400 dark:text-slate-500" title={`/${r.slug}`}>
+                          <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground dark:text-muted-foreground" title={`/${r.slug}`}>
                             /{r.slug} · {r.moduleLabel}
                           </p>
                         </div>
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>
                         <span className="flex items-center gap-2" title={r.createdBy?.email ?? ""}>
-                          <Avatar className="h-7 w-7 shrink-0 border border-slate-200 dark:border-white/10">
-                            <AvatarFallback className="bg-teal-700 text-[10px] font-bold text-white dark:bg-teal-600">
+                          <Avatar className="h-7 w-7 shrink-0 border border-rule ">
+                            <AvatarFallback className="bg-paper-3 text-[10px] font-bold text-paper dark:bg-paper-3">
                               {initials(r.createdBy?.name, r.createdBy?.email)}
                             </AvatarFallback>
                           </Avatar>
                           <span className="min-w-0">
-                            <span className="block max-w-[150px] truncate text-[13px] font-medium text-slate-700 dark:text-slate-200">
+                            <span className="block max-w-[150px] truncate text-[13px] font-medium text-foreground dark:text-muted-foreground">
                               {r.createdBy?.name || "Unknown"}
                             </span>
-                            <span className="block max-w-[150px] truncate text-xs text-slate-400">
+                            <span className="block max-w-[150px] truncate text-xs text-muted-foreground">
                               {r.createdBy?.email ?? ""}
                             </span>
                           </span>
@@ -377,7 +377,7 @@ export default function AdminUploads() {
                         <StatusDot value={r.moderation ?? "PENDING"} />
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>
-                        <span className="whitespace-nowrap text-[13px] tabular-nums text-slate-600 dark:text-slate-300" title={formatDate(r.createdAt)}>
+                        <span className="whitespace-nowrap text-[13px] tabular-nums text-muted-foreground dark:text-muted-foreground" title={formatDate(r.createdAt)}>
                           {Number.isNaN(t) ? "-" : formatDistanceToNow(new Date(t), { addSuffix: true })}
                         </span>
                       </TableCell>
@@ -387,7 +387,7 @@ export default function AdminUploads() {
                             type="button"
                             title="View"
                             onClick={() => setPreview(r)}
-                            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-teal-700 dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-teal-300"
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-paper-3 hover:text-brick dark:text-muted-foreground dark:hover:bg-background/[0.06] dark:hover:text-brick"
                           >
                             <Eye className="h-4 w-4" /> View
                           </button>
@@ -423,23 +423,23 @@ export default function AdminUploads() {
           {preview && (
             <div className="space-y-3 text-sm">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{preview.title}</h3>
-                <p className="font-mono text-xs text-slate-400">/{preview.slug} · {preview.moduleLabel}</p>
+                <h3 className="text-base font-bold text-foreground dark:text-paper">{preview.title}</h3>
+                <p className="font-mono text-xs text-muted-foreground">/{preview.slug} · {preview.moduleLabel}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusDot value={preview.moderation ?? "PENDING"} />
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted-foreground">
                   by {preview.createdBy?.name || "Unknown"} ({preview.createdBy?.email || preview.createdById})
                 </span>
                 <AdminIdBadge id={preview.createdBy?.id || preview.createdById} />
-                <span className="text-xs text-slate-400">{formatDate(preview.createdAt)}</span>
+                <span className="text-xs text-muted-foreground">{formatDate(preview.createdAt)}</span>
               </div>
               {preview.reviewNote && (
-                <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                <div className="rounded-lg bg-paper-2 p-3 text-xs text-brick dark:bg-paper-2 dark:text-brick">
                   <span className="font-semibold">Reviewer note: </span>{preview.reviewNote}
                 </div>
               )}
-              <p className="text-xs text-slate-400">Read-only - no edits, approvals, or deletions can be made from this page.</p>
+              <p className="text-xs text-muted-foreground">Read-only - no edits, approvals, or deletions can be made from this page.</p>
             </div>
           )}
         </DialogContent>

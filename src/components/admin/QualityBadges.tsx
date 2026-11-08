@@ -29,12 +29,12 @@ export function QualityBadges({ row, required = ["title", "slug"], linkKeys = ["
         </Badge>
       )}
       {!isExpiredRow(lastDate, status) && isExpiringSoon(lastDate) && (
-        <Badge className="h-5 bg-amber-500 px-1.5 text-[10px] text-white hover:bg-amber-500">
+        <Badge className="h-5 bg-paper-2 px-1.5 text-[10px] text-paper hover:bg-paper-2">
           expiring soon
         </Badge>
       )}
       {broken.length > 0 && (
-        <Badge variant="outline" className="h-5 border-amber-300 px-1.5 text-[10px] text-amber-700" title={`Check: ${broken.join(", ")}`}>
+        <Badge variant="outline" className="h-5 border-rule px-1.5 text-[10px] text-brick" title={`Check: ${broken.join(", ")}`}>
           <Link2Off className="mr-0.5 h-3 w-3" /> link?
         </Badge>
       )}

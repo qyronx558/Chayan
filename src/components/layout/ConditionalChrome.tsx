@@ -61,7 +61,7 @@ export function ConditionalChrome({
     // Standalone SaaS shells (admin + employer studio): no main-site
     // header/footer - each renders its own sidebar + topbar only.
     return (
-      <div className="min-h-[100dvh] bg-slate-100 dark:bg-[#070d1a]">
+      <div className="min-h-[100dvh] bg-paper-3">
         <main className="min-h-[100dvh]">{children}</main>
       </div>
     )

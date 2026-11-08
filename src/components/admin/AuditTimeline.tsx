@@ -48,34 +48,34 @@ export function AuditTimeline({ entity, entityId, limit = 20, title = "Activity"
 
   const logs = data?.data ?? [];
   if (logs.length === 0) {
-    return <p className="text-sm text-slate-500">No audit entries yet. Creates, updates, approvals and bulk actions appear here.</p>;
+    return <p className="text-sm text-muted-foreground">No audit entries yet. Creates, updates, approvals and bulk actions appear here.</p>;
   }
 
   const color = (a: string) => {
-    if (/APPROVE/i.test(a)) return "bg-green-600 text-white";
-    if (/REJECT/i.test(a)) return "bg-red-600 text-white";
-    if (/DELETE/i.test(a)) return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300";
-    if (/CREATE|CLONE|IMPORT/i.test(a)) return "bg-blue-600 text-white";
-    if (/BULK/i.test(a)) return "bg-purple-600 text-white";
+    if (/APPROVE/i.test(a)) return "bg-paper-3 text-paper";
+    if (/REJECT/i.test(a)) return "bg-paper-2 text-paper";
+    if (/DELETE/i.test(a)) return "bg-paper-2 text-brick dark:bg-paper-2 dark:text-brick";
+    if (/CREATE|CLONE|IMPORT/i.test(a)) return "bg-paper-3 text-paper";
+    if (/BULK/i.test(a)) return "bg-paper-3 text-paper";
     return undefined;
   };
 
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-semibold">{title} ({logs.length})</h4>
-      <ol className="relative space-y-3 border-l border-slate-200 pl-4 dark:border-white/10">
+      <ol className="relative space-y-3 border-l border-rule pl-4 ">
         {logs.map((l) => (
           <li key={l.id} className="text-xs">
             <div className="flex flex-wrap items-center gap-1.5">
               <Badge className={color(l.action)}>{l.action}</Badge>
               <span className="font-medium">{l.entity}</span>
-              <span className="text-slate-400">{formatDate(l.createdAt)}</span>
+              <span className="text-muted-foreground">{formatDate(l.createdAt)}</span>
             </div>
-            <p className="mt-0.5 text-slate-600 dark:text-slate-300">
+            <p className="mt-0.5 text-muted-foreground dark:text-muted-foreground">
               {l.details || `${l.entityId}`}
             </p>
             {l.user && (
-              <p className="text-slate-400">by {l.user.name || l.user.email}</p>
+              <p className="text-muted-foreground">by {l.user.name || l.user.email}</p>
             )}
           </li>
         ))}

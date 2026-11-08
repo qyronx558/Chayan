@@ -9,8 +9,8 @@ import { isAdmin } from "@/lib/roles"
 
 function AdminLoading() {
   return (
-    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-slate-100 dark:bg-[#070d1a]">
-      <div className="hidden w-[280px] shrink-0 flex-col gap-3 border-r border-slate-200 bg-white p-4 lg:flex dark:border-white/[0.06] dark:bg-[#0b1220]">
+    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-paper-3 ">
+      <div className="hidden w-[280px] shrink-0 flex-col gap-3 border-r border-rule bg-background p-4 lg:flex  ">
         <Skeleton className="h-10 w-40 rounded-xl" />
         <Skeleton className="h-16 w-full rounded-xl" />
         {Array.from({ length: 8 }).map((_, i) => (
@@ -18,7 +18,7 @@ function AdminLoading() {
         ))}
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-[68px] items-center gap-3 border-b border-slate-200 bg-white px-6 dark:border-white/[0.06] dark:bg-[#0b1220]">
+        <div className="flex h-[68px] items-center gap-3 border-b border-rule bg-background px-6  ">
           <Skeleton className="h-6 w-48 rounded-lg" />
           <div className="flex-1" />
           <Skeleton className="h-9 w-9 rounded-full" />
@@ -56,18 +56,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-slate-100 text-slate-900 antialiased dark:bg-[#070d1a] dark:text-slate-100">
+    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-paper-3 text-foreground antialiased  dark:text-paper">
       <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main id="admin-main" className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-slate-100 dark:bg-[#070d1a]">
+        <main id="admin-main" className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-paper-3 ">
           <div className="mx-auto w-full max-w-[1400px] p-3 sm:p-5 lg:p-7">
             <div key={typeof window !== "undefined" ? window.location.pathname : "admin"}>
               {children}
             </div>
-            <footer className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-slate-200/70 pb-4 pt-4 text-[11.5px] text-slate-400 sm:flex-row dark:border-white/[0.06] dark:text-slate-500">
+            <footer className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-rule/70 pb-4 pt-4 text-[11.5px] text-muted-foreground sm:flex-row  dark:text-muted-foreground">
               <span>ChayanJobs Admin Console · v2.0 - Secure staff area</span>
-              <span className="text-teal-700 dark:text-teal-400">Teal system · light + dark ready</span>
+              <span className="text-brick">Newsprint system · light + dark ready</span>
             </footer>
           </div>
         </main>

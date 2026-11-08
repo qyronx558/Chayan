@@ -35,39 +35,39 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
     <div className="container mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold"><Building2 className="h-7 w-7 text-teal-600" />{company.name}</h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-600">
+          <h1 className="flex items-center gap-2 text-3xl font-bold"><Building2 className="h-7 w-7 text-brick" />{company.name}</h1>
+          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
             {company.industry && <Badge variant="secondary">{company.industry}</Badge>}
             {company.size && <Badge variant="outline">{company.size}</Badge>}
             {company.hq && <Badge variant="outline">{company.hq}</Badge>}
-            {verified ? <Badge className="bg-emerald-600">Verified employer</Badge> : <Badge variant="outline">Unverified</Badge>}
+            {verified ? <Badge className="bg-paper-3">Verified employer</Badge> : <Badge variant="outline">Unverified</Badge>}
           </div>
-          {company.description && <p className="mt-3 max-w-2xl text-gray-600">{company.description}</p>}
+          {company.description && <p className="mt-3 max-w-2xl text-muted-foreground">{company.description}</p>}
           <div className="mt-3 flex gap-3">
-            {company.website && <a href={company.website.startsWith("http") ? company.website : `https://${company.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-teal-700 hover:underline"><ExternalLink className="h-3.5 w-3.5" /> Website</a>}
-            <Link href="/companies/claim" className="text-sm font-semibold text-gray-500 hover:underline">Claim this profile</Link>
+            {company.website && <a href={company.website.startsWith("http") ? company.website : `https://${company.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-brick hover:underline"><ExternalLink className="h-3.5 w-3.5" /> Website</a>}
+            <Link href="/companies/claim" className="text-sm font-semibold text-muted-foreground hover:underline">Claim this profile</Link>
           </div>
         </div>
         <Card className="w-48"><CardContent className="p-4 text-center">
           <p className="text-3xl font-extrabold">{company.privateJob.length}</p>
-          <p className="text-xs text-gray-500">active openings</p>
+          <p className="text-xs text-muted-foreground">active openings</p>
         </CardContent></Card>
       </div>
 
       {company.privateJob.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-gray-500">No active jobs right now. Check back soon.</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-muted-foreground">No active jobs right now. Check back soon.</CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {company.privateJob.map((j) => (
             <Link key={j.id} href={`/private-jobs/${j.slug}`}>
-              <Card className="h-full transition hover:shadow-md">
+              <Card className="h-full transition hover:">
                 <CardContent className="p-4">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <Badge variant="secondary" className="text-[11px]">{j.type.replace("_", " ")}</Badge>
                     <TrustBadge score={j.trustScore} size="sm" />
                   </div>
-                  <p className="font-bold text-gray-900">{j.title}</p>
-                  <p className="mt-1 flex flex-wrap gap-3 text-xs text-gray-500">
+                  <p className="font-bold text-foreground">{j.title}</p>
+                  <p className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
                     {j.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{j.location}</span>}
                     {(j.salaryMin || j.salaryMax || j.salary) && <span className="inline-flex items-center gap-1"><IndianRupee className="h-3 w-3" />{formatSalaryRange(j.salaryMin, j.salaryMax, j.salary)}</span>}
                     {j.lastDate && <span>Last: {formatDate(j.lastDate)}</span>}

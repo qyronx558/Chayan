@@ -12,10 +12,10 @@ interface EmptyStateProps {
 export function EmptyState({ query, singular, onCreate }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-white/10 dark:text-gray-500">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-3 text-muted-foreground dark:bg-background/10 dark:text-muted-foreground">
         <SearchX className="h-6 w-6" />
       </span>
-      <p className="mt-3 max-w-full truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+      <p className="mt-3 max-w-full truncate text-sm font-medium text-foreground dark:text-paper">
         No {singular.toLowerCase()} found for &lsquo;{query}&rsquo;
       </p>
       <Button type="button" onClick={onCreate} className="mt-4 max-w-full">

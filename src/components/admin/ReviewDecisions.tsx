@@ -43,11 +43,11 @@ export function auditLabel(action: string): string {
 
 export function auditTone(action: string): string {
   const a = action.toUpperCase();
-  if (a.includes("APPROVE")) return "bg-emerald-600 text-white hover:bg-emerald-600";
-  if (a.includes("REJECT")) return "bg-rose-100 text-rose-800 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-200";
-  if (a.includes("DELETE")) return "bg-rose-600 text-white hover:bg-rose-600";
-  if (a.includes("CREATE") || a.includes("IMPORT")) return "bg-teal-700 text-white hover:bg-teal-700 dark:bg-teal-600";
-  if (a.includes("BULK")) return "bg-violet-600 text-white hover:bg-violet-600";
+  if (a.includes("APPROVE")) return "bg-paper-3 text-paper hover:bg-paper-3";
+  if (a.includes("REJECT")) return "bg-paper-2 text-brick hover:bg-paper-2 dark:bg-paper-2 dark:text-brick";
+  if (a.includes("DELETE")) return "bg-paper-2 text-paper hover:bg-paper-2";
+  if (a.includes("CREATE") || a.includes("IMPORT")) return "bg-paper-3 text-paper hover:bg-paper-3 dark:bg-paper-3";
+  if (a.includes("BULK")) return "bg-paper-3 text-paper hover:bg-paper-3";
   return "";
 }
 
@@ -114,14 +114,14 @@ export function ReviewDecisions({ limit = 12 }: { limit?: number }) {
     /APPROVE|REJECT|DELETE|CREATE|BULK|IMPORT|SUBMIT/i.test(l.action)
   ).slice(0, limit * 2);
   if (logs.length === 0) {
-    return <p className="py-6 text-center text-sm text-slate-400">No review decisions yet.</p>;
+    return <p className="py-6 text-center text-sm text-muted-foreground">No review decisions yet.</p>;
   }
 
   const groups = groupConsecutive(logs).slice(0, limit);
 
   return (
     <div>
-      <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+      <ul className="divide-y divide-rule100 ">
         {groups.map((g) => {
           const t = new Date(g.createdAt).getTime();
           return (
@@ -131,16 +131,16 @@ export function ReviewDecisions({ limit = 12 }: { limit?: number }) {
                   {auditLabel(g.action)}
                   {g.count > 1 ? ` ×${g.count}` : ""}
                 </Badge>
-                <span className="text-[13px] font-medium text-slate-700 dark:text-slate-200">{g.entity}</span>
+                <span className="text-[13px] font-medium text-foreground dark:text-muted-foreground">{g.entity}</span>
                 {g.summary ? (
-                  <span className="min-w-0 truncate text-[13px] text-slate-500 dark:text-slate-400" title={g.summary}>
+                  <span className="min-w-0 truncate text-[13px] text-muted-foreground dark:text-muted-foreground" title={g.summary}>
                     {g.summary.slice(0, 120)}
                   </span>
                 ) : (
-                  <span className="font-mono text-xs text-slate-400">{g.sampleEntityId.slice(0, 8)}</span>
+                  <span className="font-mono text-xs text-muted-foreground">{g.sampleEntityId.slice(0, 8)}</span>
                 )}
               </div>
-              <div className="flex shrink-0 items-center gap-2 text-xs text-slate-400">
+              <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                 {g.actor ? <span className="hidden max-w-[140px] truncate sm:inline">{g.actor}</span> : null}
                 <span
                   className="whitespace-nowrap tabular-nums"
@@ -153,10 +153,10 @@ export function ReviewDecisions({ limit = 12 }: { limit?: number }) {
           );
         })}
       </ul>
-      <div className="border-t border-slate-100 pt-2.5 dark:border-white/[0.06]">
+      <div className="border-t border-rule pt-2.5 ">
         <Link
           href="/admin/logs"
-          className="text-[13px] font-semibold text-teal-700 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300"
+          className="text-[13px] font-semibold text-brick hover:text-brick dark:text-brick dark:hover:text-brick"
         >
           View full audit trail →
         </Link>
@@ -174,10 +174,10 @@ export function CompactAuditList({ entity, limit = 8 }: { entity?: string; limit
   });
   if (isLoading) return <Skeleton className="h-24 w-full" />;
   const logs = (data?.data ?? []).slice(0, limit);
-  if (logs.length === 0) return <p className="text-sm text-slate-400">No audit entries yet.</p>;
+  if (logs.length === 0) return <p className="text-sm text-muted-foreground">No audit entries yet.</p>;
   const groups = groupConsecutive(logs);
   return (
-    <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+    <ul className="divide-y divide-rule100 ">
       {groups.map((g) => (
         <li key={g.key} className="flex items-center justify-between gap-3 py-2">
           <span className="flex min-w-0 items-center gap-2">
@@ -185,11 +185,11 @@ export function CompactAuditList({ entity, limit = 8 }: { entity?: string; limit
               {auditLabel(g.action)}
               {g.count > 1 ? ` ×${g.count}` : ""}
             </Badge>
-            <span className="truncate text-[13px] text-slate-500 dark:text-slate-400" title={g.summary ?? ""}>
+            <span className="truncate text-[13px] text-muted-foreground dark:text-muted-foreground" title={g.summary ?? ""}>
               {g.entity} · {g.summary ? g.summary.slice(0, 100) : g.sampleEntityId.slice(0, 8)}
             </span>
           </span>
-          <span className="shrink-0 text-xs text-slate-400" title={formatDate(g.createdAt)}>
+          <span className="shrink-0 text-xs text-muted-foreground" title={formatDate(g.createdAt)}>
             {g.actor ?? ""}
           </span>
         </li>

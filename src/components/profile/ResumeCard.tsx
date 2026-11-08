@@ -150,14 +150,14 @@ export function ResumeCard({ resume, loading, onChanged }: ResumeCardProps) {
         />
         {resume ? (
           <div className="space-y-3">
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.06]">
+            <div className="flex flex-col gap-3 rounded-xl border border-rule p-4 sm:flex-row sm:items-center sm:justify-between ">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-teal-700 text-white" aria-hidden="true">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-paper-3 text-paper" aria-hidden="true">
                   <FileText className="h-5 w-5" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-slate-900 dark:text-slate-50">{resume.fileName}</span>
-                  <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  <span className="block truncate text-sm font-semibold text-foreground dark:text-paper">{resume.fileName}</span>
+                  <span className="block text-xs text-muted-foreground dark:text-muted-foreground">
                     {(resume.fileSize / 1024).toFixed(1)} KB · updated {formatDate(new Date(resume.updatedAt), "dd MMM yyyy")}
                   </span>
                 </span>
@@ -167,7 +167,7 @@ export function ResumeCard({ resume, loading, onChanged }: ResumeCardProps) {
                   {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1.5 h-3.5 w-3.5" />}
                   Replace
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleRemove} className="text-red-600 hover:text-red-700">
+                <Button variant="outline" size="sm" onClick={handleRemove} className="text-brick hover:text-brick">
                   Remove
                 </Button>
               </div>
@@ -182,14 +182,14 @@ export function ResumeCard({ resume, loading, onChanged }: ResumeCardProps) {
               e.preventDefault()
               handleFile(e.dataTransfer.files?.[0])
             }}
-            className="flex w-full flex-col items-center rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center transition-colors hover:border-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:border-white/15"
+            className="flex w-full flex-col items-center rounded-xl border border-dashed border-rule px-4 py-10 text-center transition-colors hover:border-rule focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule "
           >
-            <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-teal-700/10 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300" aria-hidden="true">
+            <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick" aria-hidden="true">
               <Upload className="h-5 w-5" />
             </span>
-            <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">Drop your resume here or browse</span>
-            <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">PDF or DOCX, max 5 MB</span>
-            <span className="mt-4 inline-flex items-center rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white">
+            <span className="text-sm font-semibold text-foreground dark:text-paper">Drop your resume here or browse</span>
+            <span className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground">PDF or DOCX, max 5 MB</span>
+            <span className="mt-4 inline-flex items-center rounded-md bg-paper-3 px-4 py-2 text-sm font-medium text-paper">
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Choose file
             </span>

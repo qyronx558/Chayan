@@ -99,8 +99,8 @@ export default function ImportDataPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Import Data</h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            Fetch content from <span className="font-medium text-gray-700">sarkariresult.com.cm</span> into your database.
+          <p className="text-muted-foreground mt-1 text-sm">
+            Fetch content from <span className="font-medium text-foreground">sarkariresult.com.cm</span> into your database.
             Each importer processes up to 15 records per run and automatically skips duplicates.
           </p>
         </div>
@@ -128,15 +128,15 @@ export default function ImportDataPage() {
             <Card
               key={imp.id}
               className={cn(
-                "relative transition-shadow duration-200",
-                isActive && "ring-2 ring-teal-400 shadow-md",
-                result && result.success && "ring-1 ring-green-200",
-                result && !result.success && "ring-1 ring-red-200",
+                "relative transition-colors duration-200",
+                isActive && "ring-2 ring-rule ",
+                result && result.success && "ring-1 ring-rule",
+                result && !result.success && "ring-1 ring-rule",
               )}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-teal-50 to-teal-100 text-teal-600">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-paper-2 text-brick">
                     <Icon className="h-6 w-6" />
                   </div>
                   {result && (
@@ -144,7 +144,7 @@ export default function ImportDataPage() {
                       variant="secondary"
                       className={cn(
                         "text-xs border-0",
-                        result.success ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        result.success ? "bg-paper-3 text-foreground" : "bg-paper-2 text-brick"
                       )}
                     >
                       {result.success ? (
@@ -162,21 +162,21 @@ export default function ImportDataPage() {
                 {result ? (
                   <div className="space-y-3">
                     <div className="flex gap-3 text-center">
-                      <div className="flex-1 rounded-md bg-green-50 p-2">
-                        <div className="text-lg font-bold text-green-700">{result.imported}</div>
-                        <div className="text-[11px] text-green-600 font-medium">Imported</div>
+                      <div className="flex-1 rounded-md bg-paper-3 p-2">
+                        <div className="text-lg font-bold text-foreground">{result.imported}</div>
+                        <div className="text-[11px] text-foreground font-medium">Imported</div>
                       </div>
-                      <div className="flex-1 rounded-md bg-teal-50 p-2">
-                        <div className="text-lg font-bold text-teal-700">{result.skipped}</div>
-                        <div className="text-[11px] text-teal-600 font-medium">Skipped</div>
+                      <div className="flex-1 rounded-md bg-paper-3 p-2">
+                        <div className="text-lg font-bold text-brick">{result.skipped}</div>
+                        <div className="text-[11px] text-brick font-medium">Skipped</div>
                       </div>
-                      <div className="flex-1 rounded-md bg-red-50 p-2">
-                        <div className="text-lg font-bold text-red-700">{result.errors.length}</div>
-                        <div className="text-[11px] text-red-600 font-medium">Errors</div>
+                      <div className="flex-1 rounded-md bg-paper-2 p-2">
+                        <div className="text-lg font-bold text-brick">{result.errors.length}</div>
+                        <div className="text-[11px] text-brick font-medium">Errors</div>
                       </div>
                     </div>
                     {result.errors.length > 0 && (
-                      <div className="max-h-20 overflow-y-auto rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-700 space-y-1">
+                      <div className="max-h-20 overflow-y-auto rounded-md border border-brick bg-paper-2 p-2 text-xs text-brick space-y-1">
                         {result.errors.map((e, i) => (
                           <p key={i}>{e}</p>
                         ))}

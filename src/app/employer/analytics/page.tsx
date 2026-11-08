@@ -43,7 +43,7 @@ export default function EmployerAnalytics() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold">Analytics</h1>
-          <p className="text-sm text-slate-500">Views, genuine clicks and applies per job - display only, coins come from milestones.</p>
+          <p className="text-sm text-muted-foreground">Views, genuine clicks and applies per job - display only, coins come from milestones.</p>
         </div>
         <div className="flex gap-2">
           <Select value={company} onValueChange={setCompany}>
@@ -66,39 +66,39 @@ export default function EmployerAnalytics() {
       </div>
 
       <Card><CardHeader><CardTitle className="text-base">Views - last 30 days</CardTitle></CardHeader><CardContent className="h-60">
-        {series.length === 0 ? <p className="py-16 text-center text-sm text-slate-500">No view data yet.</p> : (
+        {series.length === 0 ? <p className="py-16 text-center text-sm text-muted-foreground">No view data yet.</p> : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={series}>
               <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.max(0, Math.floor(series.length / 6) - 1)} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="views" fill="#0d9488" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="views" fill="var(--color-brick)" radius={0} />
             </BarChart>
           </ResponsiveContainer>
         )}
       </CardContent></Card>
 
       {sorted.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-sm text-slate-500">No jobs for this filter. <Link href="/employer/jobs" className="font-semibold text-teal-700 underline">Post one</Link>.</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-sm text-muted-foreground">No jobs for this filter. <Link href="/employer/jobs" className="font-semibold text-brick underline">Post one</Link>.</CardContent></Card>
       ) : (
         <div className="space-y-3">
           {sorted.map((j) => (
             <Card key={j.id}><CardContent className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-bold">{j.title} <span className="font-normal text-slate-500">· {j.company.name}</span></p>
+                  <p className="font-bold">{j.title} <span className="font-normal text-muted-foreground">· {j.company.name}</span></p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     <Badge variant="secondary" className="text-[10px]">{j.type}</Badge>
                     <Badge variant={j.moderation === "APPROVED" ? "default" : "outline"} className="text-[10px]">{j.moderation}</Badge>
                     <Badge variant="outline" className="text-[10px]">Trust {j.trustScore}</Badge>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     {j.views} views · {j.clicks.APPLY} apply clicks · {j.clicks.EMAIL} email clicks · {j.applies} tracked applies · {j.bookmarks} saves
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-extrabold text-emerald-700">{j.earningsCoins.toLocaleString("en-IN")} coins</p>
-                  <p className="text-[11px] text-slate-500">milestone coins</p>
+                  <p className="text-lg font-extrabold text-foreground">{j.earningsCoins.toLocaleString("en-IN")} coins</p>
+                  <p className="text-[11px] text-muted-foreground">milestone coins</p>
                   <div className="mt-2 flex gap-2">
                     <Button size="sm" asChild><Link href={`/employer/monitor/${j.id}`}>Monitor</Link></Button>
                     <Button size="sm" variant="outline" asChild><Link href={`/private-jobs/${j.slug}`} target="_blank" rel="noopener noreferrer">Public</Link></Button>
@@ -109,7 +109,7 @@ export default function EmployerAnalytics() {
           ))}
         </div>
       )}
-      <p className="text-xs text-slate-500">Clicks are deduped per visitor per day with salted session hashes - refreshing your own listing does not inflate earnings. Full inbox addresses and raw IPs are never stored.</p>
+      <p className="text-xs text-muted-foreground">Clicks are deduped per visitor per day with salted session hashes - refreshing your own listing does not inflate earnings. Full inbox addresses and raw IPs are never stored.</p>
     </div>
   )
 }

@@ -26,21 +26,21 @@ export function SavedViews({
               aria-selected={active}
               onClick={() => onChange(v.key)}
               className={cn(
-                "inline-flex h-[30px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-xs font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600",
+                "inline-flex h-[30px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-xs font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule",
                 active
-                  ? "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-200"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-transparent dark:text-slate-300 dark:hover:text-white"
+                  ? "border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick"
+                  : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-foreground  dark:bg-transparent dark:text-muted-foreground dark:hover:text-paper"
               )}
             >
               <span className="leading-none">{v.label}</span>
-              <span className={cn("leading-none tabular-nums", amber ? "font-bold text-amber-600 dark:text-amber-400" : "text-slate-400 dark:text-slate-500")}>
+              <span className={cn("leading-none tabular-nums", amber ? "font-bold text-brick dark:text-brick" : "text-muted-foreground dark:text-muted-foreground")}>
                 {count.toLocaleString("en-IN")}
               </span>
             </button>
           );
         })}
       </div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-slate-100 to-transparent dark:from-[#070d1a]" aria-hidden />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-paper-2/80" aria-hidden />
     </div>
   );
 }

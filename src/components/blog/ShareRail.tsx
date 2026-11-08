@@ -23,11 +23,11 @@ export function ShareRail({ title, url, vertical = true }: { title: string; url:
     } else copy()
   }
 
-  const btn = "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#B08D57] hover:text-[#1B3A5C] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-[#B08D57] dark:hover:text-[#E8C87A]"
+  const btn = "flex h-10 w-10 items-center justify-center rounded-full border border-rule bg-background text-muted-foreground  transition-colors  hover:border-brick hover:text-brick dark:border-ink dark:bg-ink dark:text-muted-foreground dark:hover:border-brick dark:hover:text-paper"
 
   return (
     <div className={cn("flex gap-2", vertical ? "flex-col items-center" : "flex-row items-center")}>
-      <span className={cn("text-[11px] font-bold uppercase tracking-widest text-gray-400", vertical && "[writing-mode:vertical-lr] rotate-180")}>Share</span>
+      <span className={cn("text-[11px] font-bold  text-muted-foreground", vertical && "[writing-mode:vertical-lr] rotate-180")}>Share</span>
       <a href={`https://wa.me/?text=${encTitle}%20${encUrl}`} target="_blank" rel="noreferrer" aria-label="Share on WhatsApp" className={btn}>
         <MessageCircle className="h-4 w-4" />
       </a>
@@ -40,7 +40,7 @@ export function ShareRail({ title, url, vertical = true }: { title: string; url:
       <a href={`mailto:?subject=${encTitle}&body=${encUrl}`} aria-label="Share by email" className={btn}>
         <Mail className="h-4 w-4" />
       </a>
-      <button type="button" onClick={copy} aria-label="Copy link" className={cn(btn, copied && "border-green-300 text-green-600")}>
+      <button type="button" onClick={copy} aria-label="Copy link" className={cn(btn, copied && "border-rule text-foreground")}>
         {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
       </button>
       <button type="button" onClick={nativeShare} aria-label="More share options" className={`${btn} lg:hidden`}>

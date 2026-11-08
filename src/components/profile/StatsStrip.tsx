@@ -33,22 +33,22 @@ export function StatsStrip({ admin, stats }: StatsStripProps) {
   return (
     <section
       aria-label={admin ? "Upload statistics" : "Account statistics"}
-      className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 lg:grid-cols-4 dark:border-white/[0.06] dark:bg-white/[0.06]"
+      className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-rule bg-paper-3 lg:grid-cols-4  dark:bg-background/[0.06]"
     >
       {items.map((item, i) => (
         <div
           key={item.label}
           className={cn(
-            "flex min-w-0 items-center gap-3 bg-white p-4 dark:bg-[#0b1220]",
+            "flex min-w-0 items-center gap-3 bg-background p-4 ",
             i < items.length - 1 ? "" : ""
           )}
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-700/10 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300" aria-hidden="true">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick" aria-hidden="true">
             <item.icon className="h-5 w-5" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{item.value.toLocaleString("en-IN")}</span>
-            <span className="block truncate text-xs text-slate-500 dark:text-slate-400">{item.label}</span>
+            <span className="block truncate text-xl font-bold tabular-nums text-foreground dark:text-paper">{item.value.toLocaleString("en-IN")}</span>
+            <span className="block truncate text-xs text-muted-foreground dark:text-muted-foreground">{item.label}</span>
           </span>
         </div>
       ))}

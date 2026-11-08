@@ -26,10 +26,10 @@ export function SaveButton({ slug, title }: { slug: string; title: string }) {
       aria-pressed={saved}
       aria-label={saved ? "Saved to reading list" : "Save to reading list"}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all",
+        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
         saved
-          ? "border-green-300 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
-          : "border-gray-200 bg-white text-gray-600 hover:border-[#B08D57] hover:text-[#1B3A5C] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+          ? "border-rule bg-paper-3 text-foreground dark:border-rule dark:bg-paper-3 dark:text-foreground"
+          : "border-rule bg-background text-muted-foreground hover:border-brick hover:text-brick dark:border-ink dark:bg-ink dark:text-muted-foreground"
       )}
     >
       {saved ? <Check className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}

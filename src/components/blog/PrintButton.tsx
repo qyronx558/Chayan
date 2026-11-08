@@ -24,7 +24,7 @@ export function PrintButton({ title }: { title?: string }) {
     <button
       type="button"
       onClick={handlePrint}
-      className="hidden items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-[#B08D57] hover:text-[#1B3A5C] sm:inline-flex print:hidden dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+      className="hidden items-center gap-1.5 rounded-full border border-rule bg-background px-3.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-brick hover:text-brick sm:inline-flex print:hidden dark:border-ink dark:bg-ink dark:text-muted-foreground"
     >
       <Printer className="h-3.5 w-3.5" /> Print / PDF
     </button>

@@ -13,315 +13,315 @@ import { moduleTheme } from "@/components/ui/module-theme"
 import { filterValidItems } from "@/lib/card-helpers"
 import { SearchableFilter } from "@/components/jobs/SearchableFilter"
 import {
-  useInfiniteScroll,
-  appendUnique,
-  PUBLIC_INFINITE_LIMIT as LIMIT,
+ useInfiniteScroll,
+ appendUnique,
+ PUBLIC_INFINITE_LIMIT as LIMIT,
 } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface FilterOption {
-  id: string
-  name: string
+ id: string
+ name: string
 }
 
 interface JobData {
-  id: string
-  title: string
-  slug: string
-  department: { id: string; name: string; slug: string }
-  category: { id: string; name: string; slug: string }
-  state: { id: string; name: string; slug: string } | null
-  location: string | null
-  totalVacancies: number | null
-  lastDate: string | null
-  salary: string | null
-  status: "ACTIVE" | "EXPIRED" | "UPCOMING"
+ id: string
+ title: string
+ slug: string
+ department: { id: string; name: string; slug: string }
+ category: { id: string; name: string; slug: string }
+ state: { id: string; name: string; slug: string } | null
+ location: string | null
+ totalVacancies: number | null
+ lastDate: string | null
+ salary: string | null
+ status: "ACTIVE" | "EXPIRED" | "UPCOMING"
 }
 
 export function JobsClient() {
-  const searchParams = useSearchParams()
-  const [jobs, setJobs] = useState<JobData[]>([])
-  const [total, setTotal] = useState(0)
-  const [hasMore, setHasMore] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [error, setError] = useState("")
-  const [loadMoreError, setLoadMoreError] = useState("")
+ const searchParams = useSearchParams()
+ const [jobs, setJobs] = useState<JobData[]>([])
+ const [total, setTotal] = useState(0)
+ const [hasMore, setHasMore] = useState(false)
+ const [loading, setLoading] = useState(true)
+ const [loadingMore, setLoadingMore] = useState(false)
+ const [error, setError] = useState("")
+ const [loadMoreError, setLoadMoreError] = useState("")
 
-  const [search, setSearch] = useState(searchParams.get("search") ?? "")
-  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") ?? "")
+ const [search, setSearch] = useState(searchParams.get("search") ?? "")
+ const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get("search") ?? "")
 
-  const [categories, setCategories] = useState<FilterOption[]>([])
-  const [departments, setDepartments] = useState<FilterOption[]>([])
-  const [states, setStates] = useState<FilterOption[]>([])
+ const [categories, setCategories] = useState<FilterOption[]>([])
+ const [departments, setDepartments] = useState<FilterOption[]>([])
+ const [states, setStates] = useState<FilterOption[]>([])
 
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedDepartment, setSelectedDepartment] = useState("")
-  const [selectedState, setSelectedState] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("")
+ const [selectedCategory, setSelectedCategory] = useState("")
+ const [selectedDepartment, setSelectedDepartment] = useState("")
+ const [selectedState, setSelectedState] = useState("")
+ const [selectedStatus, setSelectedStatus] = useState("")
 
-  const [showFilters, setShowFilters] = useState(false)
-  const pageRef = useRef(1)
-  const abortRef = useRef<AbortController | null>(null)
+ const [showFilters, setShowFilters] = useState(false)
+ const pageRef = useRef(1)
+ const abortRef = useRef<AbortController | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
-    return () => clearTimeout(timer)
-  }, [search])
+ useEffect(() => {
+  const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
+  return () => clearTimeout(timer)
+ }, [search])
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/categories").then((r) => r.json()),
-      fetch("/api/departments").then((r) => r.json()),
-      fetch("/api/states").then((r) => r.json()),
-    ])
-      .then(([catRes, depRes, stateRes]) => {
-        if (catRes.success) setCategories(catRes.data)
-        if (depRes.success) setDepartments(depRes.data)
-        if (stateRes.success) setStates(stateRes.data)
-      })
-      .catch(() => {})
-  }, [])
+ useEffect(() => {
+  Promise.all([
+   fetch("/api/categories").then((r) => r.json()),
+   fetch("/api/departments").then((r) => r.json()),
+   fetch("/api/states").then((r) => r.json()),
+  ])
+   .then(([catRes, depRes, stateRes]) => {
+    if (catRes.success) setCategories(catRes.data)
+    if (depRes.success) setDepartments(depRes.data)
+    if (stateRes.success) setStates(stateRes.data)
+   })
+   .catch(() => {})
+ }, [])
 
-  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
-    if (replace) {
-      setLoading(true)
-      setError("")
-    } else {
-      setLoadingMore(true)
-      setLoadMoreError("")
-    }
-    try {
-      const params = new URLSearchParams()
-      if (debouncedSearch) params.set("search", debouncedSearch)
-      if (selectedCategory) params.set("categoryId", selectedCategory)
-      if (selectedDepartment) params.set("departmentId", selectedDepartment)
-      if (selectedState) params.set("stateId", selectedState)
-      if (selectedStatus) params.set("status", selectedStatus)
-      params.set("page", String(pageNum))
-      params.set("limit", String(LIMIT))
-
-      const res = await fetch(`/api/jobs?${params}`, { signal })
-      const json = await res.json()
-      if (signal.aborted) return
-      if (json.success) {
-        setJobs((prev) => (replace ? json.data : appendUnique(prev, json.data)))
-        setTotal(json.pagination.total ?? 0)
-        setHasMore(pageNum < (json.pagination.totalPages ?? 1))
-        pageRef.current = pageNum
-      } else if (replace) {
-        setError(json.error || "Failed to fetch jobs")
-      } else {
-        setLoadMoreError(json.error || "Failed to load more. Please retry.")
-      }
-    } catch {
-      if (signal.aborted) return
-      if (replace) setError("Failed to fetch jobs. Please try again.")
-      else setLoadMoreError("Failed to load more. Please retry.")
-    } finally {
-      if (!signal.aborted) {
-        if (replace) setLoading(false)
-        else setLoadingMore(false)
-      }
-    }
-  }, [debouncedSearch, selectedCategory, selectedDepartment, selectedState, selectedStatus])
-
-  // Initial load + reset on any filter/search change (Amazon-style: list restarts).
-  useEffect(() => {
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-    pageRef.current = 1
-    setHasMore(false)
-    fetchPage(1, true, controller.signal)
-    return () => controller.abort()
-  }, [fetchPage])
-
-  const loadMore = useCallback(() => {
-    if (loading || loadingMore || !hasMore) return
-    const controller = new AbortController()
-    abortRef.current = controller
-    fetchPage(pageRef.current + 1, false, controller.signal)
-  }, [loading, loadingMore, hasMore, fetchPage])
-
-  const retryInitial = useCallback(() => {
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-    fetchPage(1, true, controller.signal)
-  }, [fetchPage])
-
-  const sentinelRef = useInfiniteScroll({
-    hasMore,
-    isLoading: loading || loadingMore,
-    onLoadMore: loadMore,
-  })
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setDebouncedSearch(search.trim())
+ const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
+  if (replace) {
+   setLoading(true)
+   setError("")
+  } else {
+   setLoadingMore(true)
+   setLoadMoreError("")
   }
+  try {
+   const params = new URLSearchParams()
+   if (debouncedSearch) params.set("search", debouncedSearch)
+   if (selectedCategory) params.set("categoryId", selectedCategory)
+   if (selectedDepartment) params.set("departmentId", selectedDepartment)
+   if (selectedState) params.set("stateId", selectedState)
+   if (selectedStatus) params.set("status", selectedStatus)
+   params.set("page", String(pageNum))
+   params.set("limit", String(LIMIT))
 
-  const clearFilters = () => {
-    setSelectedCategory("")
-    setSelectedDepartment("")
-    setSelectedState("")
-    setSelectedStatus("")
-    setSearch("")
-    setDebouncedSearch("")
+   const res = await fetch(`/api/jobs?${params}`, { signal })
+   const json = await res.json()
+   if (signal.aborted) return
+   if (json.success) {
+    setJobs((prev) => (replace ? json.data : appendUnique(prev, json.data)))
+    setTotal(json.pagination.total ?? 0)
+    setHasMore(pageNum < (json.pagination.totalPages ?? 1))
+    pageRef.current = pageNum
+   } else if (replace) {
+    setError(json.error || "Failed to fetch jobs")
+   } else {
+    setLoadMoreError(json.error || "Failed to load more. Please retry.")
+   }
+  } catch {
+   if (signal.aborted) return
+   if (replace) setError("Failed to fetch jobs. Please try again.")
+   else setLoadMoreError("Failed to load more. Please retry.")
+  } finally {
+   if (!signal.aborted) {
+    if (replace) setLoading(false)
+    else setLoadingMore(false)
+   }
   }
+ }, [debouncedSearch, selectedCategory, selectedDepartment, selectedState, selectedStatus])
 
-  const hasActiveFilters = selectedCategory || selectedDepartment || selectedState || selectedStatus || debouncedSearch
+ // Initial load + reset on any filter/search change (Amazon-style: list restarts).
+ useEffect(() => {
+  abortRef.current?.abort()
+  const controller = new AbortController()
+  abortRef.current = controller
+  pageRef.current = 1
+  setHasMore(false)
+  fetchPage(1, true, controller.signal)
+  return () => controller.abort()
+ }, [fetchPage])
 
-  return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Latest Government Jobs</h1>
-        <p className="mb-8 text-gray-600">
-          Browse and apply to the latest government job notifications across India.
-        </p>
+ const loadMore = useCallback(() => {
+  if (loading || loadingMore || !hasMore) return
+  const controller = new AbortController()
+  abortRef.current = controller
+  fetchPage(pageRef.current + 1, false, controller.signal)
+ }, [loading, loadingMore, hasMore, fetchPage])
 
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Search jobs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-10"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => { setSearch("") }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </form>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="sm:hidden"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-          </Button>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              <X className="mr-2 h-4 w-4" />
-              Clear Filters
-            </Button>
-          )}
-        </div>
+ const retryInitial = useCallback(() => {
+  abortRef.current?.abort()
+  const controller = new AbortController()
+  abortRef.current = controller
+  fetchPage(1, true, controller.signal)
+ }, [fetchPage])
 
-        <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
-          <SearchableFilter
-            value={selectedCategory}
-            options={categories}
-            allLabel="All Categories"
-            searchPlaceholder="Search categories..."
-            onChange={(v) => { setSelectedCategory(v) }}
-          />
-          <SearchableFilter
-            value={selectedDepartment}
-            options={departments}
-            allLabel="All Departments"
-            searchPlaceholder="Search departments..."
-            onChange={(v) => { setSelectedDepartment(v) }}
-          />
-          <SearchableFilter
-            value={selectedState}
-            options={states}
-            allLabel="All States"
-            searchPlaceholder="Search states..."
-            onChange={(v) => { setSelectedState(v) }}
-          />
-          <select
-            value={selectedStatus}
-            onChange={(e) => { setSelectedStatus(e.target.value) }}
-            className="h-10 w-full min-w-0 truncate rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="">All Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="EXPIRED">Expired</option>
-            <option value="UPCOMING">Upcoming</option>
-          </select>
-        </div>
-{loading ? (
-          <div className={moduleTheme.government.listGrid}>
-            {Array.from({ length: LIMIT }).map((_, i) => (
-              <JobCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : error ? (
-          <Card>
-            <CardContent className="flex flex-col items-center py-16">
-              <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">Something went wrong</h3>
-              <p className="mb-4 text-sm text-gray-500">{error}</p>
-              <Button onClick={retryInitial}>Try Again</Button>
-            </CardContent>
-          </Card>
-        ) : filterValidItems(jobs).length === 0 ? (
-          <UniversalCardEmpty
-            title="No jobs found"
-            hint="Try adjusting your search or filter criteria."
-            action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-          />
-        ) : (
-          <>
-            <div className="mb-4 text-sm text-gray-500">
-              Showing {filterValidItems(jobs).length} of {total} jobs
-            </div>
-            <div className={moduleTheme.government.listGrid}>
-              {filterValidItems(jobs).map((job) => (
-                <motion.div
-                  key={job.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.35 }}
-                  className="h-full"
-                >
-                  <JobCard
-                    id={job.id}
-                    title={job.title}
-                    department={job.department.name}
-                    departmentSlug={job.department.slug}
-                    location={job.location || job.state?.name}
-                    totalVacancies={job.totalVacancies}
-                    lastDateToApply={job.lastDate}
-                    salary={job.salary}
-                    status={job.status}
-                    slug={job.slug}
-                  />
-                </motion.div>
-              ))}
-            </div>
-            {loadingMore && (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <JobCardSkeleton key={i} />
-                ))}
-              </div>
-            )}
-            <InfiniteListFooter
-              sentinelRef={sentinelRef}
-              hasMore={hasMore}
-              loadingMore={loadingMore}
-              loadMoreError={loadMoreError}
-              onLoadMore={loadMore}
-              onRetry={loadMore}
-              loadedCount={jobs.length}
-              total={total}
-              label="jobs"
-            />
-          </>
-        )}
-      </motion.div>
+ const sentinelRef = useInfiniteScroll({
+  hasMore,
+  isLoading: loading || loadingMore,
+  onLoadMore: loadMore,
+ })
+
+ const handleSearch = (e: React.FormEvent) => {
+  e.preventDefault()
+  setDebouncedSearch(search.trim())
+ }
+
+ const clearFilters = () => {
+  setSelectedCategory("")
+  setSelectedDepartment("")
+  setSelectedState("")
+  setSelectedStatus("")
+  setSearch("")
+  setDebouncedSearch("")
+ }
+
+ const hasActiveFilters = selectedCategory || selectedDepartment || selectedState || selectedStatus || debouncedSearch
+
+ return (
+  <div className="container mx-auto max-w-7xl px-4 py-8">
+   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+    <h1 className="mb-2 text-3xl font-bold text-foreground">Latest Government Jobs</h1>
+    <p className="mb-8 text-muted-foreground">
+     Browse and apply to the latest government job notifications across India.
+    </p>
+
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+     <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+       placeholder="Search jobs..."
+       value={search}
+       onChange={(e) => setSearch(e.target.value)}
+       className="pl-10 pr-10"
+      />
+      {search && (
+       <button
+        type="button"
+        onClick={() => { setSearch("") }}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
+       >
+        <X className="h-4 w-4" />
+       </button>
+      )}
+     </form>
+     <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setShowFilters(!showFilters)}
+      className="sm:hidden"
+     >
+      <Filter className="mr-2 h-4 w-4" />
+      Filters
+     </Button>
+     {hasActiveFilters && (
+      <Button variant="ghost" size="sm" onClick={clearFilters}>
+       <X className="mr-2 h-4 w-4" />
+       Clear Filters
+      </Button>
+     )}
     </div>
-  )
+
+    <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
+     <SearchableFilter
+      value={selectedCategory}
+      options={categories}
+      allLabel="All Categories"
+      searchPlaceholder="Search categories..."
+      onChange={(v) => { setSelectedCategory(v) }}
+     />
+     <SearchableFilter
+      value={selectedDepartment}
+      options={departments}
+      allLabel="All Departments"
+      searchPlaceholder="Search departments..."
+      onChange={(v) => { setSelectedDepartment(v) }}
+     />
+     <SearchableFilter
+      value={selectedState}
+      options={states}
+      allLabel="All States"
+      searchPlaceholder="Search states..."
+      onChange={(v) => { setSelectedState(v) }}
+     />
+     <select
+      value={selectedStatus}
+      onChange={(e) => { setSelectedStatus(e.target.value) }}
+      className="h-10 w-full min-w-0 truncate rounded-md border border-rule bg-background px-3 py-2 text-sm"
+     >
+      <option value="">All Status</option>
+      <option value="ACTIVE">Active</option>
+      <option value="EXPIRED">Expired</option>
+      <option value="UPCOMING">Upcoming</option>
+     </select>
+    </div>
+{loading ? (
+     <div className={moduleTheme.government.listGrid}>
+      {Array.from({ length: LIMIT }).map((_, i) => (
+       <JobCardSkeleton key={i} />
+      ))}
+     </div>
+    ) : error ? (
+     <Card>
+      <CardContent className="flex flex-col items-center py-16">
+       <AlertCircle className="mb-4 h-12 w-12 text-brick" />
+       <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
+       <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+       <Button onClick={retryInitial}>Try Again</Button>
+      </CardContent>
+     </Card>
+    ) : filterValidItems(jobs).length === 0 ? (
+     <UniversalCardEmpty
+      title="No jobs found"
+      hint="Try adjusting your search or filter criteria."
+      action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+     />
+    ) : (
+     <>
+      <div className="mb-4 text-sm text-muted-foreground">
+       Showing {filterValidItems(jobs).length} of {total} jobs
+      </div>
+      <div className={moduleTheme.government.listGrid}>
+       {filterValidItems(jobs).map((job) => (
+        <motion.div
+         key={job.id}
+         initial={{ opacity: 0, y: 24 }}
+         whileInView={{ opacity: 1, y: 0 }}
+         viewport={{ once: true, margin: "-40px" }}
+         transition={{ duration: 0.35 }}
+         className="h-full"
+        >
+         <JobCard
+          id={job.id}
+          title={job.title}
+          department={job.department.name}
+          departmentSlug={job.department.slug}
+          location={job.location || job.state?.name}
+          totalVacancies={job.totalVacancies}
+          lastDateToApply={job.lastDate}
+          salary={job.salary}
+          status={job.status}
+          slug={job.slug}
+         />
+        </motion.div>
+       ))}
+      </div>
+      {loadingMore && (
+       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+         <JobCardSkeleton key={i} />
+        ))}
+       </div>
+      )}
+      <InfiniteListFooter
+       sentinelRef={sentinelRef}
+       hasMore={hasMore}
+       loadingMore={loadingMore}
+       loadMoreError={loadMoreError}
+       onLoadMore={loadMore}
+       onRetry={loadMore}
+       loadedCount={jobs.length}
+       total={total}
+       label="jobs"
+      />
+     </>
+    )}
+   </motion.div>
+  </div>
+ )
 }

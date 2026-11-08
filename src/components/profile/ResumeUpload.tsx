@@ -81,7 +81,7 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
     return (
       <Card>
         <CardContent className="py-6 text-center">
-          <p className="text-sm text-gray-600">Sign in to upload a resume and receive personalized matches.</p>
+          <p className="text-sm text-muted-foreground">Sign in to upload a resume and receive personalized matches.</p>
           <Button asChild size="sm" className="mt-3">
             <Link href="/login">Sign in to continue</Link>
           </Button>
@@ -94,7 +94,7 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-brick" />
         </CardContent>
       </Card>
     )
@@ -105,7 +105,7 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5 text-teal-600" />
+            <FileText className="h-5 w-5 text-brick" />
             Your Resume
           </CardTitle>
           <Button variant="ghost" size="sm" onClick={() => { setResume(null); inputRef.current?.click() }}>
@@ -113,12 +113,12 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CheckCircle className="h-4 w-4 text-foreground" />
             {resume.fileName}
           </div>
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Briefcase className="h-4 w-4" /> Skills
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -131,16 +131,16 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <GraduationCap className="h-4 w-4" />
               {resume.education === "unknown" ? "Not detected" : resume.education}
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Briefcase className="h-4 w-4" />
               {resume.experience > 0 ? `${resume.experience} years` : "Entry level"}
             </div>
             {(resume.locations || []).length > 0 && (
-              <div className="flex items-center gap-2 text-gray-600 col-span-2">
+              <div className="flex items-center gap-2 text-muted-foreground col-span-2">
                 <MapPin className="h-4 w-4" />
                 {resume.locations.join(", ")}
               </div>
@@ -155,23 +155,23 @@ export function ResumeUpload({ onResumeChange }: { onResumeChange?: () => void }
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          <Upload className="h-5 w-5 text-teal-600" />
+          <Upload className="h-5 w-5 text-brick" />
           Upload Resume
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div
           className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
-            dragOver ? "border-teal-500 bg-teal-50" : "border-gray-300 hover:border-teal-400"
+            dragOver ? "border-rule bg-paper-3" : "border-rule hover:border-rule"
           }`}
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
-          <Upload className="mb-4 h-10 w-10 text-gray-400" />
-          <p className="mb-1 text-sm font-medium text-gray-700">Drop your resume here or click to browse</p>
-          <p className="text-xs text-gray-500">Supports PDF, DOCX, TXT (max 5MB)</p>
+          <Upload className="mb-4 h-10 w-10 text-muted-foreground" />
+          <p className="mb-1 text-sm font-medium text-foreground">Drop your resume here or click to browse</p>
+          <p className="text-xs text-muted-foreground">Supports PDF, DOCX, TXT (max 5MB)</p>
           <input
             ref={inputRef}
             type="file"

@@ -41,7 +41,7 @@ export default function EmployerReferrals() {
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold">Referrals - earn 1,000 coins each</h1>
-        <p className="text-sm text-slate-500">Invite HR friends and companies. When a company you invited gets <strong>3 unique, completed applications</strong> on its rewarded job, you earn <strong>1,000 coins (≈₹20)</strong>. Pilot: first 100 new companies, one rewarded job each.</p>
+        <p className="text-sm text-muted-foreground">Invite HR friends and companies. When a company you invited gets <strong>3 unique, completed applications</strong> on its rewarded job, you earn <strong>1,000 coins (≈₹20)</strong>. Pilot: first 100 new companies, one rewarded job each.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -51,13 +51,13 @@ export default function EmployerReferrals() {
           { icon: Gift, label: "Referral coins earned", value: d ? `${d.earnedCoins.toLocaleString("en-IN")} coins` : "-" },
         ].map((s) => (
           <Card key={s.label}><CardContent className="flex items-center gap-3 p-4">
-            <s.icon className="h-6 w-6 text-teal-600" />
-            <div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-slate-500">{s.label}</p></div>
+            <s.icon className="h-6 w-6 text-brick" />
+            <div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
           </CardContent></Card>
         ))}
       </div>
 
-      <Card className="border-teal-200"><CardHeader><CardTitle className="text-base">Your referral link</CardTitle></CardHeader>
+      <Card className="border-rule"><CardHeader><CardTitle className="text-base">Your referral link</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {d ? (
             <>
@@ -66,9 +66,9 @@ export default function EmployerReferrals() {
                 <Button onClick={() => copy(d.link)}>{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}</Button>
                 <Button variant="outline" onClick={share}><Share2 className="mr-1 h-4 w-4" /> Share</Button>
               </div>
-              <p className="text-xs text-slate-500">Code <strong>{d.code}</strong> · First-touch attribution (60 days) - self-invites blocked, one reward per company, paid only at the 3-application milestone (not on signup). Coins start pending, withdrawable after admin review.</p>
+              <p className="text-xs text-muted-foreground">Code <strong>{d.code}</strong> · First-touch attribution (60 days) - self-invites blocked, one reward per company, paid only at the 3-application milestone (not on signup). Coins start pending, withdrawable after admin review.</p>
             </>
-          ) : <p className="text-sm text-slate-500">Loading your link…</p>}
+          ) : <p className="text-sm text-muted-foreground">Loading your link…</p>}
         </CardContent></Card>
 
       <Card><CardHeader><CardTitle className="text-base">Simple reward rules</CardTitle></CardHeader>
@@ -82,19 +82,19 @@ export default function EmployerReferrals() {
             ["1,000 coins = ₹20", "cash withdrawal from 1,000 coins"],
           ].map(([amt, what]) => (
             <div key={what} className="flex items-center justify-between rounded-lg border p-2.5">
-              <span className="font-extrabold text-emerald-700">{amt}</span>
-              <span className="text-xs text-slate-500">{what}</span>
+              <span className="font-extrabold text-foreground">{amt}</span>
+              <span className="text-xs text-muted-foreground">{what}</span>
             </div>
           ))}
         </CardContent></Card>
 
       <Card><CardHeader><CardTitle className="text-base">Recent invites</CardTitle></CardHeader>
         <CardContent>
-          {!d || d.recent.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No invites yet - share your link to start earning.</p> : (
+          {!d || d.recent.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">No invites yet - share your link to start earning.</p> : (
             <div className="space-y-2">
               {d.recent.map((r) => (
                 <div key={r.id} className="flex items-center justify-between rounded-lg border p-2.5 text-sm">
-                  <span className="text-slate-500">Invite · {new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
+                  <span className="text-muted-foreground">Invite · {new Date(r.createdAt).toLocaleDateString("en-IN")}</span>
                   <Badge variant={r.status === "REWARDED" || r.status === "CONFIRMED" ? "default" : "outline"}>{r.status}</Badge>
                 </div>
               ))}

@@ -47,12 +47,12 @@ export default function MonitorJobPage() {
     else toast(res?.error || "Failed", "destructive")
   }
 
-  if (error) return <div className="container mx-auto max-w-4xl px-4 py-16 text-center"><p className="mb-4 text-red-600">{error}</p><Button variant="outline" asChild><Link href="/employer/jobs">Back to studio</Link></Button></div>
-  if (!data) return <div className="container mx-auto max-w-4xl px-4 py-16 text-sm text-gray-500">Loading monitoring…</div>
+  if (error) return <div className="container mx-auto max-w-4xl px-4 py-16 text-center"><p className="mb-4 text-brick">{error}</p><Button variant="outline" asChild><Link href="/employer/jobs">Back to studio</Link></Button></div>
+  if (!data) return <div className="container mx-auto max-w-4xl px-4 py-16 text-sm text-muted-foreground">Loading monitoring…</div>
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
-      <Link href="/employer/jobs" className="mb-4 inline-flex items-center gap-1 text-sm text-teal-700 hover:underline"><ArrowLeft className="h-4 w-4" /> Back to studio</Link>
+      <Link href="/employer/jobs" className="mb-4 inline-flex items-center gap-1 text-sm text-brick hover:underline"><ArrowLeft className="h-4 w-4" /> Back to studio</Link>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <h1 className="text-2xl font-bold">{data.job.title}</h1>
         <Badge variant="secondary">{data.job.type}</Badge>
@@ -68,11 +68,11 @@ export default function MonitorJobPage() {
           { icon: Bookmark, label: "Bookmarks", value: data.totals.bookmarks },
           { icon: Flag, label: "Reports", value: data.totals.reports },
         ].map((s) => (
-          <Card key={s.label}><CardContent className="flex items-center gap-3 p-4"><s.icon className="h-5 w-5 text-teal-600" /><div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-gray-500">{s.label}</p></div></CardContent></Card>
+          <Card key={s.label}><CardContent className="flex items-center gap-3 p-4"><s.icon className="h-5 w-5 text-brick" /><div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div></CardContent></Card>
         ))}
       </div>
 
-      <Card className="mb-4 border-emerald-200"><CardHeader><CardTitle className="text-base">Coin milestones - 1,000 coins = ₹20</CardTitle></CardHeader>
+      <Card className="mb-4 border-rule"><CardHeader><CardTitle className="text-base">Coin milestones - 1,000 coins = ₹20</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
           {[
             ["100 coins", "Live 7+ days as a real unique job", "auto"],
@@ -81,7 +81,7 @@ export default function MonitorJobPage() {
             ["500 coins", "Hire confirmed by you", "hire"],
           ].map(([amt, what, kind]) => (
             <div key={what} className="flex items-center gap-2 rounded-lg border p-2.5">
-              <Circle className="h-4 w-4 text-slate-300" />
+              <Circle className="h-4 w-4 text-muted-foreground" />
               <span className="flex-1">{what}</span>
               <Badge variant="secondary">{amt}</Badge>
               {(kind === "interview" || kind === "hire") && (
@@ -91,13 +91,13 @@ export default function MonitorJobPage() {
           ))}
           <div className="flex flex-wrap gap-2 pt-1">
             <Button size="sm" onClick={checkMilestones}><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Check milestones now</Button>
-            <span className="text-xs text-slate-500">Auto-milestones (7-day, 3-app) submit as pending for admin review. Interview/hire need your confirmation, once per job.</span>
+            <span className="text-xs text-muted-foreground">Auto-milestones (7-day, 3-app) submit as pending for admin review. Interview/hire need your confirmation, once per job.</span>
           </div>
         </CardContent></Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card><CardHeader><CardTitle className="text-base">Views - last 30 days</CardTitle></CardHeader><CardContent className="h-64">
-          {data.viewsSeries.length === 0 ? <p className="py-16 text-center text-sm text-gray-500">No view data yet.</p> : (
+          {data.viewsSeries.length === 0 ? <p className="py-16 text-center text-sm text-muted-foreground">No view data yet.</p> : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.viewsSeries}>
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.max(0, Math.floor(data.viewsSeries.length / 6) - 1)} />
@@ -109,7 +109,7 @@ export default function MonitorJobPage() {
           )}
         </CardContent></Card>
         <Card><CardHeader><CardTitle className="text-base">Application funnel</CardTitle></CardHeader><CardContent>
-          {data.funnel.length === 0 ? <p className="py-10 text-center text-sm text-gray-500">No tracked applications yet. Share the listing to get applies.</p> : (
+          {data.funnel.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">No tracked applications yet. Share the listing to get applies.</p> : (
             <div className="space-y-2">
               {data.funnel.map((f) => (
                 <div key={f.status} className="flex items-center justify-between rounded-lg border p-2.5 text-sm">
@@ -123,7 +123,7 @@ export default function MonitorJobPage() {
             <div className="mt-4 border-t pt-3">
               <p className="mb-2 text-sm font-bold">Scam/quality reports ({data.reports.length})</p>
               {data.reports.map((r) => (
-                <p key={r.id} className="text-xs text-gray-600">• {r.reason} - <span className="text-gray-400">{r.status}</span></p>
+                <p key={r.id} className="text-xs text-muted-foreground">• {r.reason} - <span className="text-muted-foreground">{r.status}</span></p>
               ))}
             </div>
           )}

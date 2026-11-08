@@ -112,19 +112,19 @@ export default function AdminCategories() {
                 {categories.map((cat) => (
                   <TableRow key={cat.id}>
                     <TableCell className="font-medium">{cat.name}</TableCell>
-                    <TableCell className="text-gray-500">{cat.slug}</TableCell>
-                    <TableCell className="max-w-[200px] truncate text-gray-500">{cat.description || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}</TableCell>
+                    <TableCell className="text-muted-foreground">{cat.slug}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-muted-foreground">{cat.description || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}</TableCell>
                     <TableCell>{formatDate(cat.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(cat)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(cat.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(cat.id)}><Trash2 className="h-4 w-4 text-brick" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {categories.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-gray-500">No categories found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No categories found</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -160,7 +160,7 @@ export default function AdminCategories() {
       <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Delete Category</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? This action cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure? This action cannot be undone.</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => deleteId && deleteMutation.mutate(deleteId)} disabled={deleteMutation.isPending}>Delete</Button>

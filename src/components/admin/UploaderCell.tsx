@@ -20,7 +20,7 @@ export function UploaderCell({ name, email, id, role, compact = false }: Uploade
   const isSuper = role === "SUPER_ADMIN"
   return (
     <div>
-      <p className={cn("whitespace-nowrap text-gray-600 dark:text-gray-400", compact ? "text-sm" : "text-xs")}>
+      <p className={cn("whitespace-nowrap text-muted-foreground dark:text-muted-foreground", compact ? "text-sm" : "text-xs")}>
         {label}
       </p>
       <span className="mt-0.5 flex flex-wrap items-center gap-1">
@@ -29,8 +29,8 @@ export function UploaderCell({ name, email, id, role, compact = false }: Uploade
             variant="secondary"
             title={role === "SUPER_ADMIN" ? "Uploaded by Super Admin" : "Uploaded by Admin"}
             className={cn(
-              "border-0 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wide",
-              isSuper ? "bg-teal-100 text-teal-700" : "bg-slate-200/80 text-slate-600"
+              "border-0 px-1.5 py-0 text-[10px] font-bold ",
+              isSuper ? "bg-paper-3 text-brick" : "bg-paper-3/80 text-muted-foreground"
             )}
           >
             {isSuper ? "Super" : "Admin"}

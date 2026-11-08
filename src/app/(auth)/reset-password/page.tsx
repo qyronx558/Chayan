@@ -3,7 +3,7 @@ import { ResetPasswordForm } from "./reset-password-form"
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">Loading...</p></div>}>
       <ResetPasswordForm />
     </Suspense>
   )

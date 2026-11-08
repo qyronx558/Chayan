@@ -244,19 +244,19 @@ export default function AdminUsers() {
         />
 
         <Card className={T_CARD}>
-          <div className="border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+          <div className="border-b border-rule p-3 sm:p-4 ">
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative min-w-52 flex-1">
-                <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   ref={searchRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Search name, email, or admin ID…"
-                  className="bg-white pl-8 pr-10 dark:bg-white/[0.03]"
+                  className="bg-background pl-8 pr-10 dark:bg-background/[0.03]"
                   aria-label="Search users"
                 />
-                <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 sm:block dark:border-white/10 dark:bg-white/[0.05]">
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-rule bg-paper-2 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground sm:block  dark:bg-background/[0.05]">
                   /
                 </kbd>
               </div>
@@ -280,7 +280,7 @@ export default function AdminUsers() {
           <div className="overflow-x-auto saas-table-scroll">
             <Table className="saas-table" data-density={density}>
               <TableHeader className="sticky top-0 z-10">
-                <TableRow className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+                <TableRow className="bg-paper-2/95 hover:bg-paper-2/95 ">
                   <TableHead><span className={T_HEAD_CELL}>User</span></TableHead>
                   <TableHead><span className={T_HEAD_CELL}>Role</span></TableHead>
                   <TableHead><span className={T_HEAD_CELL}>Admin ID</span></TableHead>
@@ -299,11 +299,11 @@ export default function AdminUsers() {
                   <TableRow>
                     <TableCell colSpan={5}>
                       <div className="flex flex-col items-center gap-2 py-12 text-center">
-                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
-                          <Inbox className="h-6 w-6 text-slate-400" />
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-3 dark:bg-background/[0.06]">
+                          <Inbox className="h-6 w-6 text-muted-foreground" />
                         </span>
-                        <p className="font-semibold text-slate-700 dark:text-slate-200">No users found</p>
-                        <p className="max-w-xs text-sm text-slate-400">Try a different search or role filter.</p>
+                        <p className="font-semibold text-foreground dark:text-muted-foreground">No users found</p>
+                        <p className="max-w-xs text-sm text-muted-foreground">Try a different search or role filter.</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -315,20 +315,20 @@ export default function AdminUsers() {
                     return (
                       <TableRow
                         key={u.id}
-                        className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 dark:border-white/[0.06] dark:hover:bg-white/[0.03]"
+                        className="group border-b border-rule transition-colors last:border-0 hover:bg-paper-3  dark:hover:bg-background/[0.03]"
                       >
                         <TableCell className={cn(density === "compact" && "py-2")}>
                           <span className="flex items-center gap-2.5">
-                            <Avatar className="h-8 w-8 shrink-0 border border-slate-200 dark:border-white/10">
-                              <AvatarFallback className="bg-teal-700 text-[11px] font-bold text-white dark:bg-teal-600">
+                            <Avatar className="h-8 w-8 shrink-0 border border-rule ">
+                              <AvatarFallback className="bg-paper-3 text-[11px] font-bold text-paper dark:bg-paper-3">
                                 {initials(u.name, u.email)}
                               </AvatarFallback>
                             </Avatar>
                             <span className="min-w-0">
-                              <span className="block max-w-[200px] truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100">
+                              <span className="block max-w-[200px] truncate text-[13.5px] font-semibold text-foreground dark:text-paper">
                                 {u.name || "Unnamed"}
                               </span>
-                              <span className="block max-w-[200px] truncate text-xs text-slate-400" title={u.email}>
+                              <span className="block max-w-[200px] truncate text-xs text-muted-foreground" title={u.email}>
                                 {u.email}
                               </span>
                             </span>
@@ -344,10 +344,10 @@ export default function AdminUsers() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-default">
-                                <span className="block text-[13px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+                                <span className="block text-[13px] font-semibold tabular-nums text-foreground dark:text-muted-foreground">
                                   {uploads} upload{uploads === 1 ? "" : "s"}
                                 </span>
-                                <span className="block text-xs tabular-nums text-slate-400" title={formatDate(u.createdAt)}>
+                                <span className="block text-xs tabular-nums text-muted-foreground" title={formatDate(u.createdAt)}>
                                   Joined {!Number.isNaN(joined) ? formatDistanceToNow(new Date(joined), { addSuffix: true }) : "-"}
                                 </span>
                               </span>
@@ -361,13 +361,13 @@ export default function AdminUsers() {
                         </TableCell>
                         <TableCell className={cn("text-right", density === "compact" && "py-2")}>
                           {isSelf ? (
-                            <Badge variant="outline" className="font-semibold text-slate-500">
+                            <Badge variant="outline" className="font-semibold text-muted-foreground">
                               You
                             </Badge>
                           ) : (
                             <span className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                               {u.role === "SUPER_ADMIN" ? (
-                                <Badge variant="outline" className="font-semibold text-slate-400">
+                                <Badge variant="outline" className="font-semibold text-muted-foreground">
                                   Locked
                                 </Badge>
                               ) : (
@@ -378,7 +378,7 @@ export default function AdminUsers() {
                                     variant={u.role === "ADMIN" ? "outline" : "default"}
                                     disabled={changing}
                                     onClick={() => void doRoleChange(u, u.role === "ADMIN" ? "USER" : "ADMIN")}
-                                    className={u.role === "ADMIN" ? "" : "bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500"}
+                                    className={u.role === "ADMIN" ? "" : "bg-paper-3 hover:bg-paper-3 dark:bg-paper-3 dark:hover:bg-paper-3"}
                                   >
                                     {u.role === "ADMIN" ? (
                                       <>
@@ -395,7 +395,7 @@ export default function AdminUsers() {
                                       <button
                                         type="button"
                                         aria-label={`Actions for ${u.email}`}
-                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground dark:text-muted-foreground dark:hover:bg-background/[0.06] dark:hover:text-muted-foreground"
                                       >
                                         <MoreHorizontal className="h-4 w-4" />
                                       </button>
@@ -403,7 +403,7 @@ export default function AdminUsers() {
                                     <DropdownMenuContent align="end" className="w-44">
                                       <DropdownMenuItem
                                         onClick={() => setDeleteTarget(u)}
-                                        className="text-red-600 focus:text-red-600 dark:text-red-400"
+                                        className="text-brick focus:text-brick dark:text-brick"
                                       >
                                         <Trash2 className="mr-2 h-4 w-4" /> Delete user
                                       </DropdownMenuItem>

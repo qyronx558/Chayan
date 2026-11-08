@@ -90,31 +90,31 @@ function MineView({ range }: { range: AnalyticsRangeKey }) {
   });
   const d = mine.data?.data;
   if (mine.isLoading && !d) return <AnalyticsSkeleton />;
-  if (!d) return <p className="py-10 text-center text-sm text-slate-500">Could not load your analytics.</p>;
+  if (!d) return <p className="py-10 text-center text-sm text-muted-foreground">Could not load your analytics.</p>;
   return (
     <div className="space-y-4">
       <KpiStrip items={d.kpis} range={range} />
       <TrendChart series={d.trend} title="My upload trend" subtitle={`Your uploads · last ${range}`} />
       <div className="grid gap-4 lg:grid-cols-2">
         <DataCard title="My top jobs" subtitle="Your most-viewed postings" className="h-full">
-          {d.topJobs.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No uploads yet.</p> : (
-            <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+          {d.topJobs.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No uploads yet.</p> : (
+            <ul className="divide-y divide-rule100 ">
               {d.topJobs.map((j) => (
                 <li key={j.id} className="flex items-center justify-between gap-2 py-2.5 first:pt-0 last:pb-0">
-                  <Link href={j.href} className="min-w-0 flex-1 truncate text-sm font-medium hover:text-teal-700">{j.title}</Link>
-                  <span className="flex items-center gap-1 text-xs tabular-nums text-slate-500"><Eye className="h-3 w-3" />{j.views}</span>
+                  <Link href={j.href} className="min-w-0 flex-1 truncate text-sm font-medium hover:text-brick">{j.title}</Link>
+                  <span className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground"><Eye className="h-3 w-3" />{j.views}</span>
                 </li>
               ))}
             </ul>
           )}
         </DataCard>
         <DataCard title="Reviewer feedback" subtitle="Fix and resubmit" className="h-full">
-          {d.feedback.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No rejections - your uploads are clearing review.</p> : (
-            <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+          {d.feedback.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No rejections - your uploads are clearing review.</p> : (
+            <ul className="divide-y divide-rule100 ">
               {d.feedback.map((f) => (
                 <li key={f.id} className="py-2.5 first:pt-0 last:pb-0">
                   <p className="truncate text-sm font-medium">{f.title}</p>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{f.reason}</p>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{f.reason}</p>
                 </li>
               ))}
             </ul>
@@ -288,7 +288,7 @@ function Dashboard() {
 
   const headerActions = useMemo(() => (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/[0.03]" role="tablist" aria-label="Date range">
+      <div className="flex items-center gap-0.5 rounded-lg border border-rule bg-background p-0.5  dark:bg-background/[0.03]" role="tablist" aria-label="Date range">
         {RANGES.map((r) => (
           <button
             key={r}
@@ -298,7 +298,7 @@ function Dashboard() {
             onClick={() => setRange(r)}
             className={cn(
               "rounded-md px-3 py-1 text-xs font-semibold transition-colors",
-              range === r ? "bg-teal-700 text-white dark:bg-teal-600" : "text-slate-500 hover:text-teal-700 dark:text-slate-400"
+              range === r ? "bg-paper-3 text-paper dark:bg-paper-3" : "text-muted-foreground hover:text-brick dark:text-muted-foreground"
             )}
           >
             {r}
@@ -328,10 +328,10 @@ function Dashboard() {
           title="My content analytics"
           description="How your uploads are performing across ChayanJobs."
           actions={
-            <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/[0.03]" role="tablist" aria-label="Date range">
+            <div className="flex items-center gap-0.5 rounded-lg border border-rule bg-background p-0.5  dark:bg-background/[0.03]" role="tablist" aria-label="Date range">
               {RANGES.map((r) => (
                 <button key={r} type="button" role="tab" aria-selected={range === r} onClick={() => setRange(r)}
-                  className={cn("rounded-md px-3 py-1 text-xs font-semibold", range === r ? "bg-teal-700 text-white" : "text-slate-500")}>{r}</button>
+                  className={cn("rounded-md px-3 py-1 text-xs font-semibold", range === r ? "bg-paper-3 text-paper" : "text-muted-foreground")}>{r}</button>
               ))}
             </div>
           }
@@ -348,10 +348,10 @@ function Dashboard() {
         title="Analytics"
         description="Traffic, content and system health for ChayanJobs."
         badge={
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+          <span className="flex items-center gap-1.5 rounded-full bg-paper-3 px-2.5 py-1 text-xs font-semibold text-foreground dark:bg-paper-3 dark:text-foreground">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-paper-3 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-paper-3" />
             </span>
             Live
           </span>
@@ -359,15 +359,15 @@ function Dashboard() {
         actions={headerActions}
       />
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground dark:text-muted-foreground">
         <span className="tabular-nums">Updated {updatedLabel}</span>
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={refresh} title="Refresh analytics" aria-label="Refresh analytics">
           <RefreshCw className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")} />
         </Button>
-        {q.isError ? <span className="text-rose-600">Could not refresh - showing cached data.</span> : null}
+        {q.isError ? <span className="text-brick">Could not refresh - showing cached data.</span> : null}
       </div>
 
-      <div className="border-b border-slate-200 dark:border-white/[0.06]" role="tablist" aria-label="Analytics sections">
+      <div className="border-b border-rule " role="tablist" aria-label="Analytics sections">
         <div className="flex gap-1 overflow-x-auto no-scrollbar">
           {TABS.map((t) => (
             <button
@@ -379,8 +379,8 @@ function Dashboard() {
               className={cn(
                 "flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold transition-colors",
                 tab === t.key
-                  ? "border-teal-700 text-teal-800 dark:border-teal-400 dark:text-teal-200"
-                  : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                  ? "border-rule text-brick dark:border-rule dark:text-brick"
+                  : "border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground"
               )}
             >
               {t.label}
@@ -414,15 +414,15 @@ function Dashboard() {
                 </div>
               </div>
               <DataCard title="Popular jobs" subtitle="Most viewed in range" className="h-full">
-                {data.overview.popular.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No popular jobs in this period.</p> : (
-                  <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                {data.overview.popular.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No popular jobs in this period.</p> : (
+                  <ul className="divide-y divide-rule100 ">
                     {data.overview.popular.map((j) => (
                       <li key={j.id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
                         <div className="min-w-0">
-                          <Link href={j.href} className="block truncate text-sm font-medium hover:text-teal-700">{j.title}</Link>
-                          <p className="truncate text-xs text-slate-500">{j.department}</p>
+                          <Link href={j.href} className="block truncate text-sm font-medium hover:text-brick">{j.title}</Link>
+                          <p className="truncate text-xs text-muted-foreground">{j.department}</p>
                         </div>
-                        <div className="flex shrink-0 gap-3 text-xs tabular-nums text-slate-500">
+                        <div className="flex shrink-0 gap-3 text-xs tabular-nums text-muted-foreground">
                           <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{j.views}</span>
                           <span className="flex items-center gap-1"><Bookmark className="h-3 w-3" />{j.bookmarks}</span>
                           <span className="hidden sm:inline">{j.comments} comments</span>
@@ -456,7 +456,7 @@ function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="saas-table w-full min-w-[560px] text-sm" aria-label="Module performance">
                     <thead>
-                      <tr className="border-b border-slate-200 text-left text-xs text-slate-500 dark:border-white/[0.06]">
+                      <tr className="border-b border-rule text-left text-xs text-muted-foreground ">
                         <th className="py-2 pr-2 font-semibold">Module</th>
                         <th className="py-2 pr-2 text-right font-semibold">Items</th>
                         <th className="py-2 pr-2 text-right font-semibold">Views</th>
@@ -466,7 +466,7 @@ function Dashboard() {
                     </thead>
                     <tbody>
                       {data.content.modules.map((m) => (
-                        <tr key={m.module} className="border-b border-slate-100 last:border-0 dark:border-white/[0.04]">
+                        <tr key={m.module} className="border-b border-rule last:border-0 ">
                           <td className="py-2 pr-2 font-medium">{m.label}</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{m.items.toLocaleString("en-IN")}</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{m.views.toLocaleString("en-IN")}</td>
@@ -482,7 +482,7 @@ function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="saas-table w-full min-w-[620px] text-sm" aria-label="Demand versus supply">
                     <thead>
-                      <tr className="border-b border-slate-200 text-left text-xs text-slate-500 dark:border-white/[0.06]">
+                      <tr className="border-b border-rule text-left text-xs text-muted-foreground ">
                         <th className="py-2 pr-2 font-semibold">Category</th>
                         <th className="py-2 pr-2 text-right font-semibold">Jobs</th>
                         <th className="py-2 pr-2 text-right font-semibold">Job share</th>
@@ -493,39 +493,39 @@ function Dashboard() {
                     </thead>
                     <tbody>
                       {data.content.demand.map((d) => (
-                        <tr key={d.categoryId} className="border-b border-slate-100 last:border-0 dark:border-white/[0.04]">
+                        <tr key={d.categoryId} className="border-b border-rule last:border-0 ">
                           <td className="py-2 pr-2 font-medium">{d.category}</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{d.jobs.toLocaleString("en-IN")}</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{d.jobShare}%</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{d.viewShare}%</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{d.gap > 0 ? "+" : ""}{d.gap}pp</td>
                           <td className="py-2">
-                            {d.signal === "under" ? <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Under-supplied</Badge>
+                            {d.signal === "under" ? <Badge className="bg-paper-2 text-brick hover:bg-paper-2">Under-supplied</Badge>
                               : d.signal === "over" ? <Badge variant="secondary">Over-supplied</Badge>
-                                : <span className="text-xs text-slate-400">Balanced</span>}
+                                : <span className="text-xs text-muted-foreground">Balanced</span>}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p className="mt-2 text-xs text-slate-400">Under-supplied above +3pp · Over-supplied below −3pp.</p>
+                <p className="mt-2 text-xs text-muted-foreground">Under-supplied above +3pp · Over-supplied below −3pp.</p>
               </DataCard>
               <div className="grid gap-4 lg:grid-cols-2">
                 <DataCard title="Top searches" subtitle="Most frequent terms in range" className="h-full">
-                  {data.content.topSearches.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No searches recorded yet.</p> : (
+                  {data.content.topSearches.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No searches recorded yet.</p> : (
                     <ul className="space-y-2">
                       {data.content.topSearches.map((s) => (
                         <li key={s.term} className="flex items-center justify-between gap-2 text-sm">
-                          <span className="flex min-w-0 items-center gap-1.5"><Search className="h-3.5 w-3.5 shrink-0 text-slate-400" /><span className="truncate font-medium">{s.term}</span></span>
-                          <span className="shrink-0 text-xs tabular-nums text-slate-500">{s.count}× · {s.results} results</span>
+                          <span className="flex min-w-0 items-center gap-1.5"><Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /><span className="truncate font-medium">{s.term}</span></span>
+                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{s.count}× · {s.results} results</span>
                         </li>
                       ))}
                     </ul>
                   )}
                 </DataCard>
                 <DataCard title="Searches with zero results" subtitle="Create content to fill these gaps" className="h-full">
-                  {data.content.zeroSearches.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No zero-result searches - coverage looks good.</p> : (
+                  {data.content.zeroSearches.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No zero-result searches - coverage looks good.</p> : (
                     <ul className="space-y-2">
                       {data.content.zeroSearches.map((s) => (
                         <li key={s.term} className="flex items-center justify-between gap-2 text-sm">
@@ -552,12 +552,12 @@ function Dashboard() {
                   maxRows={4}
                 />
                 <DataCard title="Top landing pages" subtitle="Entry paths by views" className="h-full">
-                  {data.acquisition.landing.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No landing data yet.</p> : (
+                  {data.acquisition.landing.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No landing data yet.</p> : (
                     <ul className="space-y-2.5">
                       {data.acquisition.landing.map((l) => (
                         <li key={l.path} className="flex items-center justify-between gap-2 text-sm">
                           <span className="min-w-0 truncate font-mono text-[13px]">{l.path}</span>
-                          <span className="shrink-0 text-xs tabular-nums text-slate-500">{l.views.toLocaleString("en-IN")} views · {l.visitors.toLocaleString("en-IN")} visitors</span>
+                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{l.views.toLocaleString("en-IN")} views · {l.visitors.toLocaleString("en-IN")} visitors</span>
                         </li>
                       ))}
                     </ul>
@@ -569,8 +569,8 @@ function Dashboard() {
                   <DataCard key={g.key} title={g.title} subtitle={g.description} className="h-full">
                     {g.connected ? (
                       <div className="space-y-2">
-                        <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-300">Connected</Badge>
-                        {g.summary ? <p className="text-sm tabular-nums text-slate-600 dark:text-slate-300">{g.summary}</p> : null}
+                        <Badge className="bg-paper-3 text-foreground hover:bg-paper-3 dark:bg-paper-3 dark:text-foreground">Connected</Badge>
+                        {g.summary ? <p className="text-sm tabular-nums text-muted-foreground dark:text-muted-foreground">{g.summary}</p> : null}
                         <div><Button size="sm" variant="ghost" onClick={() => disconnectIntegration(g.key)}>Disconnect</Button></div>
                       </div>
                     ) : (
@@ -600,14 +600,14 @@ function Dashboard() {
                   action={<Button size="sm" variant="ghost" asChild><Link href="/admin/logs">Audit trail <ExternalLink className="ml-1 h-3.5 w-3.5" /></Link></Button>}
                 >
                   {data.monitoring.activity.length === 0 ? (
-                    <p className="flex items-center gap-2 py-6 text-sm text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Quiet period - no security events.</p>
+                    <p className="flex items-center gap-2 py-6 text-sm text-muted-foreground"><ShieldCheck className="h-4 w-4 text-foreground" /> Quiet period - no security events.</p>
                   ) : (
-                    <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                    <ul className="divide-y divide-rule100 ">
                       {data.monitoring.activity.map((e) => (
                         <li key={e.id} className="py-2.5 first:pt-0 last:pb-0">
                           <p className="truncate text-sm font-medium">{e.title}</p>
-                          {e.detail ? <p className="line-clamp-1 text-xs text-slate-500">{e.detail}</p> : null}
-                          <p className="text-[11px] tabular-nums text-slate-400">{timeAgo(e.createdAt)}</p>
+                          {e.detail ? <p className="line-clamp-1 text-xs text-muted-foreground">{e.detail}</p> : null}
+                          <p className="text-[11px] tabular-nums text-muted-foreground">{timeAgo(e.createdAt)}</p>
                         </li>
                       ))}
                     </ul>
@@ -629,13 +629,13 @@ function Dashboard() {
           </label>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConnectKey(null)}>Cancel</Button>
-            <Button onClick={connectIntegration} disabled={connecting || !connectVal.trim()} className="bg-teal-700 hover:bg-teal-800">{connecting ? "Connecting…" : "Connect"}</Button>
+            <Button onClick={connectIntegration} disabled={connecting || !connectVal.trim()} className="bg-paper-3 hover:bg-paper-3">{connecting ? "Connecting…" : "Connect"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {q.isFetching && data ? (
-        <div className="flex items-center gap-2 text-xs text-slate-400" aria-live="polite"><Skeleton className="h-3 w-24" /> Refreshing…</div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite"><Skeleton className="h-3 w-24" /> Refreshing…</div>
       ) : null}
     </div>
   );

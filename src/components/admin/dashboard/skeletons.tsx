@@ -5,7 +5,7 @@ function PanelShell({ className, children }: { className?: string; children: Rea
   return (
     <div
       className={cn(
-        "rounded-xl border border-slate-200 bg-white p-4 dark:border-white/[0.06] dark:bg-[#0b1220] sm:p-5",
+        "rounded-xl border border-rule bg-background p-4   sm:p-5",
         className
       )}
     >
@@ -16,9 +16,9 @@ function PanelShell({ className, children }: { className?: string; children: Rea
 
 export function KpiStripSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 dark:border-white/[0.06] dark:bg-white/[0.06] lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-rule bg-paper-3  dark:bg-background/[0.06] lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="bg-white p-4 dark:bg-[#0b1220] sm:p-5">
+        <div key={i} className="bg-background p-4  sm:p-5">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="mt-3 h-8 w-20" />
           <Skeleton className="mt-2 h-9 w-full" />
@@ -133,7 +133,7 @@ export function TimelineSkeleton() {
     <PanelShell>
       <Skeleton className="h-4 w-32" />
       <Skeleton className="mt-2 h-3 w-44" />
-      <div className="mt-3 space-y-3 border-l border-slate-200 pl-4 dark:border-white/10">
+      <div className="mt-3 space-y-3 border-l border-rule pl-4 ">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i}>
             <Skeleton className="h-4 w-2/3" />

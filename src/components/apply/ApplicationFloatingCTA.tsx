@@ -5,19 +5,19 @@ import { ArrowUpRight, Download, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ApplicationFloatingCTAProps {
-  officialUrl: string
-  hostname: string
-  /** e.g. "Official Website" | "Official Application" */
-  sublabel: string
-  onApply: () => void
-  /** Desktop floating card vs mobile bottom bar. */
-  variant: "desktop" | "mobile"
-  /** Main CTA text. Defaults to "Apply Now". */
-  title?: string
-  /** When set (PDF mode), CTA downloads from ChayanJobs origin end-to-end. */
-  downloadUrl?: string | null
-  downloadFilename?: string
-  onDownload?: () => void
+ officialUrl: string
+ hostname: string
+ /** e.g. "Official Website" | "Official Application" */
+ sublabel: string
+ onApply: () => void
+ /** Desktop floating card vs mobile bottom bar. */
+ variant: "desktop" | "mobile"
+ /** Main CTA text. Defaults to "Apply Now". */
+ title?: string
+ /** When set (PDF mode), CTA downloads from ChayanJobs origin end-to-end. */
+ downloadUrl?: string | null
+ downloadFilename?: string
+ onDownload?: () => void
 }
 
 /**
@@ -25,112 +25,112 @@ interface ApplicationFloatingCTAProps {
  * PDF mode: primary Download from ChayanJobs origin (no exit needed).
  */
 export function ApplicationFloatingCTA({
-  officialUrl,
-  hostname,
-  sublabel,
-  onApply,
-  variant,
-  title = "Apply Now",
-  downloadUrl,
-  downloadFilename,
-  onDownload,
+ officialUrl,
+ hostname,
+ sublabel,
+ onApply,
+ variant,
+ title = "Apply Now",
+ downloadUrl,
+ downloadFilename,
+ onDownload,
 }: ApplicationFloatingCTAProps) {
-  const [intro, setIntro] = useState(true)
+ const [intro, setIntro] = useState(true)
 
-  useEffect(() => {
-    const t = window.setTimeout(() => setIntro(false), 550)
-    return () => window.clearTimeout(t)
-  }, [])
+ useEffect(() => {
+  const t = window.setTimeout(() => setIntro(false), 550)
+  return () => window.clearTimeout(t)
+ }, [])
 
-  const isDownload = Boolean(downloadUrl)
+ const isDownload = Boolean(downloadUrl)
 
-  if (variant === "mobile") {
-    return (
-      <div className="border-t border-gray-200 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
-        {isDownload ? (
-          <a
-            href={downloadUrl as string}
-            download={downloadFilename || "document.pdf"}
-            onClick={onDownload}
-            aria-label={`Download ${title} from ChayanJobs`}
-            className={cn(
-              "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-base font-semibold text-white",
-              "shadow-[0_8px_24px_rgba(5,150,105,0.4)] transition hover:bg-emerald-700 active:scale-[0.99]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2",
-              intro && "scale-[0.97]"
-            )}
-          >
-            {title}
-            <Download className="h-5 w-5" aria-hidden="true" />
-          </a>
-        ) : (
-          <a
-            href={officialUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onApply}
-            aria-label={`${title} on ${hostname}`}
-            className={cn(
-              "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-base font-semibold text-white",
-              "shadow-[0_8px_24px_rgba(5,150,105,0.4)] transition hover:bg-emerald-700 active:scale-[0.99]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2",
-              intro && "scale-[0.97]"
-            )}
-          >
-            {title}
-            <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
-          </a>
-        )}
-        <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-          <ShieldCheck className="h-3 w-3 text-emerald-600" aria-hidden="true" />
-          {sublabel} · {hostname}
-        </p>
-      </div>
-    )
-  }
-
-  if (isDownload) {
-    return (
-      <a
-        href={downloadUrl as string}
-        download={downloadFilename || "document.pdf"}
-        onClick={onDownload}
-        aria-label={`Download ${title} from ChayanJobs`}
-        className={cn(
-          "fixed bottom-5 right-5 z-40 hidden w-[200px] flex-col justify-center gap-0.5 rounded-xl bg-emerald-600 px-4 py-3 text-white md:flex",
-          "shadow-[0_10px_36px_rgba(5,150,105,0.45)] transition hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-[0_14px_40px_rgba(5,150,105,0.5)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2",
-          intro ? "scale-95 opacity-90" : "scale-100 opacity-100"
-        )}
-      >
-        <span className="flex items-center justify-between text-[15px] font-semibold leading-tight">
-          {title}
-          <Download className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <span className="text-[11px] font-normal leading-tight text-emerald-50">{sublabel}</span>
-      </a>
-    )
-  }
-
+ if (variant === "mobile") {
   return (
-    <a
+   <div className="border-t border-rule bg-background px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+    {isDownload ? (
+     <a
+      href={downloadUrl as string}
+      download={downloadFilename || "document.pdf"}
+      onClick={onDownload}
+      aria-label={`Download ${title} from ChayanJobs`}
+      className={cn(
+       "flex h-12 w-full items-center justify-center gap-2 bg-ink text-base font-medium text-paper",
+       "transition-colors hover:bg-ink-2",
+       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2",
+       intro && "opacity-90"
+      )}
+     >
+      {title}
+      <Download className="h-5 w-5" aria-hidden="true" />
+     </a>
+    ) : (
+     <a
       href={officialUrl}
       target="_blank"
       rel="noopener noreferrer"
       onClick={onApply}
       aria-label={`${title} on ${hostname}`}
       className={cn(
-        "fixed bottom-5 right-5 z-40 hidden w-[200px] flex-col justify-center gap-0.5 rounded-xl bg-emerald-600 px-4 py-3 text-white md:flex",
-        "shadow-[0_10px_36px_rgba(5,150,105,0.45)] transition hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-[0_14px_40px_rgba(5,150,105,0.5)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2",
-        intro ? "scale-95 opacity-90" : "scale-100 opacity-100"
+       "flex h-12 w-full items-center justify-center gap-2 bg-ink text-base font-medium text-paper",
+       "transition-colors hover:bg-ink-2",
+       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2",
+       intro && "opacity-90"
       )}
-    >
-      <span className="flex items-center justify-between text-[15px] font-semibold leading-tight">
-        {title}
-        <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <span className="text-[11px] font-normal leading-tight text-emerald-50">{sublabel}</span>
-    </a>
+     >
+      {title}
+      <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+     </a>
+    )}
+    <p className="agate mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+     <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+     {sublabel}, {hostname}
+    </p>
+   </div>
   )
+ }
+
+ if (isDownload) {
+  return (
+   <a
+    href={downloadUrl as string}
+    download={downloadFilename || "document.pdf"}
+    onClick={onDownload}
+    aria-label={`Download ${title} from ChayanJobs`}
+    className={cn(
+     "fixed bottom-5 right-5 z-40 hidden w-[200px] flex-col justify-center gap-0.5 bg-ink px-4 py-3 text-paper md:flex",
+     "transition-colors hover:bg-ink-2",
+     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2",
+     intro ? "opacity-90" : "opacity-100"
+    )}
+   >
+    <span className="flex items-center justify-between text-[15px] font-medium leading-tight">
+     {title}
+     <Download className="h-5 w-5" aria-hidden="true" />
+    </span>
+    <span className="text-[11px] font-normal leading-tight text-paper/70">{sublabel}</span>
+   </a>
+  )
+ }
+
+ return (
+  <a
+   href={officialUrl}
+   target="_blank"
+   rel="noopener noreferrer"
+   onClick={onApply}
+   aria-label={`${title} on ${hostname}`}
+   className={cn(
+    "fixed bottom-5 right-5 z-40 hidden w-[200px] flex-col justify-center gap-0.5 bg-ink px-4 py-3 text-paper md:flex",
+    "transition-colors hover:bg-ink-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2",
+    intro ? "opacity-90" : "opacity-100"
+   )}
+  >
+   <span className="flex items-center justify-between text-[15px] font-medium leading-tight">
+    {title}
+    <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+   </span>
+   <span className="text-[11px] font-normal leading-tight text-paper/70">{sublabel}</span>
+  </a>
+ )
 }

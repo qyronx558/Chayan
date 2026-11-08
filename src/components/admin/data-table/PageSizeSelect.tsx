@@ -18,7 +18,7 @@ interface PageSizeSelectProps {
 /** Rows-per-page selector shared by every admin + public list. */
 export function PageSizeSelect({ value, options, onChange, label = "Rows" }: PageSizeSelectProps) {
   return (
-    <label className="flex shrink-0 items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+    <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground dark:text-muted-foreground">
       <span className="hidden font-medium sm:inline">{label}</span>
       <Select value={String(value)} onValueChange={(v) => onChange(parseInt(v, 10))}>
         <SelectTrigger className="h-8 w-[76px] text-xs" aria-label={`${label} per page`}>

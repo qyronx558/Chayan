@@ -19,11 +19,11 @@ export function AuthLayout({
   benefits = [],
 }: AuthLayoutProps) {
   return (
-    <div className="relative min-h-screen flex bg-gradient-to-br from-teal-50 via-white to-emerald-50 px-4 py-12 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
+    <div className="relative min-h-screen flex bg-paper-2 px-4 py-12   ">
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-teal-200/30 blur-3xl animate-blob" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-emerald-200/30 blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-teal-100/20 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-paper-3 blur-3xl animate-blob" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-paper-3 blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-paper-3 blur-3xl" />
       </div>
 
       <div className="relative z-10 flex w-full max-w-5xl items-center justify-center mx-auto">
@@ -36,18 +36,18 @@ export function AuthLayout({
           {sideContent || (
             <div className="h-full flex flex-col items-start justify-center p-8 max-w-lg">
               <div className="mb-8">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-100 text-teal-700 text-sm font-medium dark:bg-teal-900/30 dark:text-teal-300">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-paper-3 text-brick text-sm font-medium dark:bg-paper-3 dark:text-brick">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-paper-3 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-paper-3" />
                   </span>
                   Career & Jobs Portal
                 </span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-6">
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground dark:text-paper mb-6">
                 {sideTitle || "Your Career Gateway"}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-10 max-w-lg">
+              <p className="text-lg text-muted-foreground dark:text-muted-foreground mb-10 max-w-lg">
                 {sideDescription || "Discover latest opportunities, track applications, and never miss a career move. Join thousands of professionals."}
               </p>
               {benefits.length > 0 && (
@@ -58,14 +58,14 @@ export function AuthLayout({
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
-                      className="flex items-start gap-4 p-4 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-100 dark:border-gray-700 hover:border-teal-200 dark:hover:border-teal-800 transition-colors"
+                      className="flex items-start gap-4 p-4 rounded-xl bg-background/80 dark:bg-ink/80 border border-rule dark:border-ink hover:border-rule dark:hover:border-rule transition-colors"
                     >
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-paper-3 flex items-center justify-center text-brick dark:bg-paper-3 dark:text-brick">
                         {benefit.icon}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{benefit.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{benefit.description}</p>
+                        <h3 className="font-semibold text-foreground dark:text-paper">{benefit.title}</h3>
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-0.5">{benefit.description}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -83,24 +83,24 @@ export function AuthLayout({
         >
           <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
             <div className="lg:hidden text-center mb-8">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-100 text-teal-700 text-sm font-medium dark:bg-teal-900/30 dark:text-teal-300">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-paper-3 text-brick text-sm font-medium dark:bg-paper-3 dark:text-brick">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-paper-3 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-paper-3" />
                 </span>
                 Career & Jobs Portal
               </span>
             </div>
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl p-8">
+            <div className="bg-background/90 dark:bg-ink/90 rounded-2xl border border-rule dark:border-ink  p-8">
               {children}
             </div>
-            <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-6 text-center text-sm text-muted-foreground dark:text-muted-foreground">
               By continuing, you agree to our{" "}
-              <a href="/terms" className="text-teal-600 hover:text-teal-700 font-medium underline underline-offset-2">
+              <a href="/terms" className="text-brick hover:text-brick font-medium underline underline-offset-2">
                 Terms of Service
               </a>{" "}
               and{" "}
-              <a href="/privacy" className="text-teal-600 hover:text-teal-700 font-medium underline underline-offset-2">
+              <a href="/privacy" className="text-brick hover:text-brick font-medium underline underline-offset-2">
                 Privacy Policy
               </a>
             </p>
@@ -141,18 +141,18 @@ export function GoogleButton({
       className={`
         w-full flex items-center justify-center gap-3 px-6 py-3.5
         rounded-xl font-semibold text-base
-        bg-white border border-gray-200 dark:border-gray-700
-        text-gray-900 dark:text-white
-        hover:bg-gray-50 dark:hover:bg-gray-800
+        bg-background border border-rule dark:border-ink
+        text-foreground dark:text-paper
+        hover:bg-paper-2 dark:hover:bg-ink
         active:scale-[0.98] transition-all duration-150
-        focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-rule focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
-        shadow-sm hover:shadow-md
+         hover:
         ${className}
       `}
     >
       {loading ? (
-        <svg className="animate-spin h-5 w-5 text-teal-600" viewBox="0 0 24 24">
+        <svg className="animate-spin h-5 w-5 text-brick" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
@@ -193,10 +193,10 @@ export function Divider({ children = "or continue with email" }: { children?: st
   return (
     <div className="relative my-6">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+        <div className="w-full border-t border-rule dark:border-ink" />
       </div>
       <div className="relative flex justify-center text-sm">
-        <span className="px-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl text-gray-500 font-medium">
+        <span className="px-4 bg-background/90 dark:bg-ink/90 text-muted-foreground font-medium">
           {children}
         </span>
       </div>
@@ -214,10 +214,10 @@ export function InputWithIcon({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{props.label}</label>
+      <label className="block text-sm font-medium text-foreground dark:text-muted-foreground">{props.label}</label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
             {icon}
           </div>
         )}
@@ -225,19 +225,19 @@ export function InputWithIcon({
           {...props}
           className={`
             w-full px-4 py-3 rounded-xl border
-            bg-white dark:bg-gray-800
-            border-gray-200 dark:border-gray-700
-            text-gray-900 dark:text-white
-            placeholder:text-gray-400 dark:placeholder:text-gray-500
-            focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500
+            bg-background dark:bg-ink
+            border-rule dark:border-ink
+            text-foreground dark:text-paper
+            placeholder:text-muted-foreground dark:placeholder:text-muted-foreground
+            focus:outline-none focus:ring-2 focus:ring-rule focus:border-rule
             transition-all duration-200
             ${icon ? "pl-10" : ""}
-            ${props.error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}
+            ${props.error ? "border-brick focus:border-brick focus:ring-rule" : ""}
             disabled:opacity-50 disabled:cursor-not-allowed
           `}
         />
       </div>
-      {props.error && <p className="text-sm text-red-500">{props.error}</p>}
+      {props.error && <p className="text-sm text-brick">{props.error}</p>}
     </div>
   )
 }
@@ -278,10 +278,10 @@ export function PasswordInput({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+      <label className="block text-sm font-medium text-foreground dark:text-muted-foreground">{label}</label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
             {icon}
           </div>
         )}
@@ -299,14 +299,14 @@ export function PasswordInput({
           required={required}
           className={`
             w-full px-4 py-3 rounded-xl border
-            bg-white dark:bg-gray-800
-            border-gray-200 dark:border-gray-700
-            text-gray-900 dark:text-white
-            placeholder:text-gray-400 dark:placeholder:text-gray-500
-            focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500
+            bg-background dark:bg-ink
+            border-rule dark:border-ink
+            text-foreground dark:text-paper
+            placeholder:text-muted-foreground dark:placeholder:text-muted-foreground
+            focus:outline-none focus:ring-2 focus:ring-rule focus:border-rule
             transition-all duration-200
             pr-12 ${icon ? "pl-10" : ""}
-            ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}
+            ${error ? "border-brick focus:border-brick focus:ring-rule" : ""}
             disabled:opacity-50 disabled:cursor-not-allowed
           `}
           {...props}
@@ -314,7 +314,7 @@ export function PasswordInput({
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground transition-colors"
           aria-label={show ? "Hide password" : "Show password"}
         >
           {show ? (
@@ -329,7 +329,7 @@ export function PasswordInput({
           )}
         </button>
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-brick">{error}</p>}
     </div>
   )
 }
@@ -346,18 +346,18 @@ export function StrengthMeter({ password }: { password: string }) {
   if (/[^A-Za-z0-9]/.test(password)) score++
 
   const levels = [
-    { label: "Weak", color: "bg-red-500", width: "16%" },
-    { label: "Fair", color: "bg-orange-500", width: "33%" },
-    { label: "Good", color: "bg-yellow-500", width: "50%" },
-    { label: "Strong", color: "bg-green-500", width: "66%" },
-    { label: "Very Strong", color: "bg-emerald-500", width: "100%" },
+    { label: "Weak", color: "bg-paper-2", width: "16%" },
+    { label: "Fair", color: "bg-paper-2", width: "33%" },
+    { label: "Good", color: "bg-paper-2", width: "50%" },
+    { label: "Strong", color: "bg-paper-3", width: "66%" },
+    { label: "Very Strong", color: "bg-paper-3", width: "100%" },
   ]
 
   const level = levels[Math.min(score, levels.length - 1)]
 
   return (
     <div className="space-y-1.5 mt-2" role="progressbar" aria-valuenow={score} aria-valuemin={0} aria-valuemax={5} aria-label="Password strength">
-      <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="flex h-2 w-full overflow-hidden rounded-full bg-paper-3 dark:bg-ink">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: level.width }}
@@ -365,7 +365,7 @@ export function StrengthMeter({ password }: { password: string }) {
           className={`h-full rounded-full transition-colors ${level.color}`}
         />
       </div>
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{level.label}</p>
+      <p className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">{level.label}</p>
     </div>
   )
 }

@@ -241,7 +241,7 @@ export function RelationPicker({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <span className="h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/20" />
+          <span className="h-1.5 w-12 rounded-full bg-paper-3 dark:bg-background/20" />
         </div>
 
         <div className="min-w-0 shrink-0 px-5 pb-3 pt-5 max-sm:pt-1">
@@ -262,7 +262,7 @@ export function RelationPicker({
             </div>
 
             {stale && (
-              <div className="mx-5 mb-3 flex shrink-0 items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              <div className="mx-5 mb-3 flex shrink-0 items-start gap-2 rounded-xl border border-rule bg-paper-2 p-2.5 text-xs text-brick dark:border-rule dark:bg-paper-2 dark:text-brick">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>
                   The previously saved value is no longer available. Pick a replacement below
@@ -276,15 +276,15 @@ export function RelationPicker({
               id={listboxId}
               role="listbox"
               aria-label={title}
-              className="min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-2 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/20"
+              className="min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-2 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-paper-3 dark:hover:[&::-webkit-scrollbar-thumb]:bg-background/20"
               style={{ maxHeight: 360 }}
             >
               {loading ? (
                 <div className="space-y-1.5 px-2 py-1">
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="flex h-[52px] animate-pulse items-center gap-3 rounded-lg bg-gray-100 px-3 dark:bg-white/5">
-                      <span className="h-9 w-9 rounded-lg bg-gray-200 dark:bg-white/10" />
-                      <span className="h-4 flex-1 rounded bg-gray-200 dark:bg-white/10" />
+                    <div key={index} className="flex h-[52px] animate-pulse items-center gap-3 rounded-lg bg-paper-3 px-3 dark:bg-background/5">
+                      <span className="h-9 w-9 rounded-lg bg-paper-3 dark:bg-background/10" />
+                      <span className="h-4 flex-1 rounded bg-paper-3 dark:bg-background/10" />
                     </div>
                   ))}
                 </div>
@@ -292,7 +292,7 @@ export function RelationPicker({
                 allowCreate ? (
                   <EmptyState query={search.debounced} singular={singular} onCreate={() => startCreate(search.debounced)} />
                 ) : (
-                  <p className="px-3 py-8 text-center text-sm text-gray-400">
+                  <p className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No match found for &lsquo;{search.debounced}&rsquo;.
                   </p>
                 )
@@ -311,7 +311,7 @@ export function RelationPicker({
                           style={{ height: HEADER_HEIGHT, transform: `translateY(${virtualRow.start}px)` }}
                           className="absolute inset-x-0 top-0 px-2"
                         >
-                          <p className="py-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                          <p className="py-1 text-[11px] font-bold text-muted-foreground">
                             {row.letter}
                           </p>
                         </div>
@@ -391,7 +391,7 @@ export function RelationPicker({
                       ))
                     : search.groups.map((group) => (
                         <div key={group.letter}>
-                          <p className="sticky top-0 z-10 bg-white px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:bg-gray-950">
+                          <p className="sticky top-0 z-10 bg-background px-2 py-1 text-[11px] font-bold text-muted-foreground dark:bg-ink">
                             {group.letter}
                           </p>
                           {group.items.map((item) => (
@@ -422,8 +422,8 @@ export function RelationPicker({
               )}
             </div>
 
-            <div className="flex min-w-0 shrink-0 items-center justify-between gap-2 border-t border-gray-100 px-5 py-3 dark:border-white/10">
-              <p className="truncate text-xs text-gray-400">
+            <div className="flex min-w-0 shrink-0 items-center justify-between gap-2 border-t border-rule px-5 py-3 ">
+              <p className="truncate text-xs text-muted-foreground">
                 {search.searching
                   ? `${search.results.length} of ${search.total} ${plural}`
                   : `${search.total} ${plural}`}
@@ -484,15 +484,15 @@ function NoneRow({
       className={cn(
         "flex h-[52px] w-full min-w-0 items-center gap-2 rounded-lg px-3 text-left text-sm outline-none transition-colors",
         selected
-          ? "bg-teal-50 dark:bg-teal-950/50"
+          ? "bg-paper-3 dark:bg-paper-3"
           : active
-            ? "bg-teal-50/70 dark:bg-teal-950/30"
-            : "hover:bg-teal-50/70 dark:hover:bg-teal-950/30",
-        "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600"
+            ? "bg-paper-3 dark:bg-paper-3"
+            : "hover:bg-paper-3 dark:hover:bg-paper-3",
+        "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rule"
       )}
     >
       <Check className={cn("h-4 w-4 shrink-0", selected ? "opacity-100" : "opacity-0")} />
-      <span className="truncate text-gray-500">{label}</span>
+      <span className="truncate text-muted-foreground">{label}</span>
     </button>
   );
   if (top === undefined) return content;

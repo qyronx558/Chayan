@@ -19,8 +19,8 @@ interface BulkActionBarProps {
 export function BulkActionBar({ selectedCount, onClear, onDelete, onExport, deleting, onBulkEdit, onApprove, onReject, approving, showModeration }: BulkActionBarProps) {
   if (selectedCount === 0) return null
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-sm dark:border-teal-900 dark:bg-teal-950/60">
-      <span className="font-medium text-teal-800 dark:text-teal-200">
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-rule bg-paper-3 px-3 py-2 text-sm dark:border-rule dark:bg-paper-3">
+      <span className="font-medium text-brick dark:text-brick">
         {selectedCount} selected
       </span>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -30,7 +30,7 @@ export function BulkActionBar({ selectedCount, onClear, onDelete, onExport, dele
           </Button>
         )}
         {showModeration && onApprove && (
-          <Button type="button" size="sm" onClick={onApprove} disabled={approving} className="h-7 bg-green-600 text-xs text-white hover:bg-green-700">
+          <Button type="button" size="sm" onClick={onApprove} disabled={approving} className="h-7 bg-paper-3 text-xs text-paper hover:bg-paper-3">
             {approving ? "Working…" : "Approve"}
           </Button>
         )}
@@ -39,7 +39,7 @@ export function BulkActionBar({ selectedCount, onClear, onDelete, onExport, dele
             Reject
           </Button>
         )}
-        <Button type="button" size="sm" variant="outline" onClick={onExport} className="h-7 bg-white text-xs dark:bg-gray-900">
+        <Button type="button" size="sm" variant="outline" onClick={onExport} className="h-7 bg-background text-xs dark:bg-ink">
           <Download className="mr-1 h-3.5 w-3.5" /> Export CSV
         </Button>
         <Button type="button" size="sm" variant="destructive" onClick={onDelete} disabled={deleting} className="h-7 text-xs">

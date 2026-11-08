@@ -56,7 +56,7 @@ export default function PrivateApplicationsPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">My private applications</h1>
-          <p className="text-gray-600">Pipeline for external applies - Saved → Applied → Interview → Offer.</p>
+          <p className="text-muted-foreground">Pipeline for external applies - Saved → Applied → Interview → Offer.</p>
         </div>
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-44"><SelectValue placeholder="All stages" /></SelectTrigger>
@@ -69,7 +69,7 @@ export default function PrivateApplicationsPage() {
       {items.length === 0 ? (
         <Card><CardContent className="py-14 text-center">
           <p className="font-semibold">No tracked applications yet</p>
-          <p className="mb-4 text-sm text-gray-500">Open any private job and hit “Track Application”.</p>
+          <p className="mb-4 text-sm text-muted-foreground">Open any private job and hit “Track Application”.</p>
           <Button asChild><Link href="/private-jobs">Browse private jobs</Link></Button>
         </CardContent></Card>
       ) : (
@@ -81,12 +81,12 @@ export default function PrivateApplicationsPage() {
                 {g.items.map((it) => (
                   <Card key={it.id}><CardContent className="p-4">
                     <Link href={it.href} className="font-bold hover:underline">{it.job.title}</Link>
-                    <p className="text-xs text-gray-500">{it.job.company}{it.job.location ? ` · ${it.job.location}` : ""}</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-gray-500">
+                    <p className="text-xs text-muted-foreground">{it.job.company}{it.job.location ? ` · ${it.job.location}` : ""}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
                       {it.job.lastDate && <span className="inline-flex items-center gap-1"><CalendarClock className="h-3 w-3" />Last: {formatDate(it.job.lastDate)}</span>}
                       {it.interviewAt && <Badge variant="outline">Interview: {formatDate(it.interviewAt)}</Badge>}
                     </div>
-                    {it.notes && <p className="mt-2 text-xs text-gray-600">“{it.notes}”</p>}
+                    {it.notes && <p className="mt-2 text-xs text-muted-foreground">“{it.notes}”</p>}
                     <div className="mt-3 flex gap-2">
                       <Select value={it.status} onValueChange={(v) => move(it.job.id, v as PrivateStatus)}>
                         <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
@@ -101,7 +101,7 @@ export default function PrivateApplicationsPage() {
           ))}
         </div>
       )}
-      <p className="mt-6 text-xs text-gray-500"><MapPin className="mr-1 inline h-3 w-3" />Tip: set interview dates via tracker notes and enable private-job alerts in <Link href="/profile" className="underline">profile notifications</Link>.</p>
+      <p className="mt-6 text-xs text-muted-foreground"><MapPin className="mr-1 inline h-3 w-3" />Tip: set interview dates via tracker notes and enable private-job alerts in <Link href="/profile" className="underline">profile notifications</Link>.</p>
     </div>
   )
 }

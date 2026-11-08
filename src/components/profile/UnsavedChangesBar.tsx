@@ -15,8 +15,8 @@ export function UnsavedChangesBar({ visible, saving, canSave, onDiscard, onSave 
   if (!visible) return null
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 sm:px-6 sm:pb-4" role="status" aria-live="polite">
-      <div className="mx-auto flex max-w-3xl flex-col gap-2 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:items-center dark:border-white/10 dark:bg-[#0b1220]/95">
-        <p className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-200">You have unsaved changes</p>
+      <div className="mx-auto flex max-w-3xl flex-col gap-2 rounded-xl border border-rule bg-background/95 p-3  sm:flex-row sm:items-center  ">
+        <p className="flex-1 text-sm font-medium text-foreground dark:text-muted-foreground">You have unsaved changes</p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onDiscard} disabled={saving}>
             Discard

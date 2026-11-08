@@ -47,51 +47,48 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
     <div className="mx-auto flex min-h-[420px] w-full max-w-7xl min-w-0 flex-col items-center justify-center gap-7 px-4 py-10 sm:min-h-[460px] sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
       <div className="w-full min-w-0 lg:flex-1">
         {item.image && (
-          <div className="relative mb-5 aspect-[16/10] w-full max-w-xl overflow-hidden rounded-xl border border-white/10 shadow-lg sm:mx-auto sm:aspect-[4/3] lg:hidden">
+          <div className="relative mb-5 aspect-[16/10] w-full max-w-xl overflow-hidden border border-paper/20 sm:mx-auto sm:aspect-[4/3] lg:hidden">
             <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" loading="lazy" />
-            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
           </div>
         )}
-        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
-          {icon}
-          {badge}
-        </div>
 
-        <h1 className="mb-3 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+        <h1 className="break-words font-display text-[2rem] font-bold leading-[1.05] text-paper sm:text-[2.6rem] lg:text-[3rem]">
           {item.title}
         </h1>
 
-        {(item.organization || item.isPinned) && (
-          <p className="mb-4 flex flex-wrap items-center gap-3 text-sm text-teal-300 sm:text-base">
-            {item.organization && (
-              <span className="inline-flex items-center gap-1.5 font-semibold">
-                <Building2 className="h-4 w-4" /> {item.organization}
-              </span>
-            )}
-            {item.isPinned && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-400">
-                <Star className="h-3.5 w-3.5 fill-amber-400" /> Pinned
-              </span>
-            )}
-          </p>
-        )}
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-paper/70">
+          {item.organization && (
+            <span className="inline-flex items-center gap-1.5 font-medium text-paper/90">
+              <Building2 className="h-4 w-4" /> {item.organization}
+            </span>
+          )}
+          <span className="agate inline-flex items-center gap-1.5 text-xs text-paper/60">
+            {icon}
+            {badge}
+          </span>
+          {item.isPinned && (
+            <span className="agate inline-flex items-center gap-1 text-xs text-brick">
+              <Star className="h-3 w-3" /> Pinned
+            </span>
+          )}
+        </div>
 
         {item.info && (
-          <p className="mb-3 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{item.info}</p>
+          <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-paper/80 sm:text-base">{item.info}</p>
         )}
 
         {item.dateText && (
-          <p className="mb-6 inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-white/85">
-            <Calendar className="h-4 w-4 text-amber-400" /> {item.dateText}
+          <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-paper/70">
+            <Calendar className="h-4 w-4" /> {item.dateText}
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
             href={ctaHref}
             target={isCtaExternal ? "_blank" : undefined}
             rel={isCtaExternal ? "noopener noreferrer" : undefined}
-            className="inline-flex items-center rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-bold text-[#0a1628] shadow-lg shadow-amber-400/25 transition-all hover:bg-amber-300 hover:shadow-amber-400/40"
+            className="inline-flex items-center bg-paper px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-paper-2"
           >
             {item.ctaLabel}
           </Link>
@@ -99,17 +96,16 @@ export function FeaturedSlideView({ item }: { item: FeaturedSlideItem }) {
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
-            className="inline-flex items-center rounded-lg border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/15"
+            className="inline-flex items-center border border-paper/35 px-5 py-2.5 text-sm font-semibold text-paper transition-colors hover:border-paper/70"
           >
-            View Details
+            View details
           </Link>
         </div>
       </div>
 
       {item.image && (
-        <div className="relative hidden aspect-[4/3] w-72 shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-lg lg:block xl:w-80">
+        <div className="relative hidden aspect-[4/3] w-72 shrink-0 overflow-hidden border border-paper/20 lg:block xl:w-80">
           <img src={item.image} alt={item.title} className="h-full w-full object-cover object-center" loading="lazy" />
-          <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
         </div>
       )}
     </div>

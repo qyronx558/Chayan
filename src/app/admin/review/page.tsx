@@ -316,11 +316,11 @@ export default function AdminReview() {
 
   const badge =
     pendingTotal > 0 ? (
-      <Badge className="bg-amber-100 font-semibold text-amber-800 hover:bg-amber-100 dark:bg-amber-950/60 dark:text-amber-200">
+      <Badge className="bg-paper-2 font-semibold text-brick hover:bg-paper-2 dark:bg-paper-2 dark:text-brick">
         {pendingTotal} pending
       </Badge>
     ) : (
-      <Badge className="bg-emerald-100 font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-200">
+      <Badge className="bg-paper-3 font-semibold text-foreground hover:bg-paper-3 dark:bg-paper-3 dark:text-foreground">
         All clear
       </Badge>
     );
@@ -368,15 +368,15 @@ export default function AdminReview() {
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors",
                 active
-                  ? "border-teal-700 bg-teal-700 text-white shadow-sm dark:border-teal-600 dark:bg-teal-600"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-teal-600/40 hover:text-teal-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:text-teal-300"
+                  ? "border-rule bg-paper-3 text-paper  dark:border-rule dark:bg-paper-3"
+                  : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-brick  dark:bg-background/[0.03] dark:text-muted-foreground dark:hover:text-brick"
               )}
             >
               {t.label}
               <span
                 className={cn(
                   "rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums",
-                  active ? "bg-white/25 text-white" : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400"
+                  active ? "bg-background/25 text-paper" : "bg-paper-3 text-muted-foreground dark:bg-background/10 dark:text-muted-foreground"
                 )}
               >
                 {t.count ?? "…"}
@@ -397,8 +397,8 @@ export default function AdminReview() {
             className={cn(
               "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
               !module
-                ? "border-teal-700 bg-teal-700/10 text-teal-800 dark:border-teal-500/40 dark:text-teal-200"
-                : "border-slate-200 bg-white text-slate-500 hover:border-teal-600/40 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400"
+                ? "border-rule bg-paper-3 text-brick dark:border-rule dark:text-brick"
+                : "border-rule bg-background text-muted-foreground hover:border-rule  dark:bg-background/[0.03] dark:text-muted-foreground"
             )}
           >
             All modules
@@ -416,8 +416,8 @@ export default function AdminReview() {
                 className={cn(
                   "rounded-full border px-2.5 py-1 text-xs font-medium tabular-nums transition-colors",
                   active
-                    ? "border-teal-700 bg-teal-700/10 text-teal-800 dark:border-teal-500/40 dark:text-teal-200"
-                    : "border-slate-200 bg-white text-slate-500 hover:border-teal-600/40 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400"
+                    ? "border-rule bg-paper-3 text-brick dark:border-rule dark:text-brick"
+                    : "border-rule bg-background text-muted-foreground hover:border-rule  dark:bg-background/[0.03] dark:text-muted-foreground"
                 )}
               >
                 {m.label} · {m.count}
@@ -428,7 +428,7 @@ export default function AdminReview() {
       )}
 
       <Card className={T_CARD}>
-        <div className="space-y-2.5 border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+        <div className="space-y-2.5 border-b border-rule p-3 sm:p-4 ">
           <ListToolbar
             q={input}
             onQ={setInput}
@@ -477,7 +477,7 @@ export default function AdminReview() {
         <div id="review-table" className="overflow-x-auto saas-table-scroll">
           <Table className="saas-table" data-density={density}>
             <TableHeader className="sticky top-0 z-10">
-              <TableRow className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+              <TableRow className="bg-paper-2/95 hover:bg-paper-2/95 ">
                 <TableHead className="w-10">
                   <Checkbox
                     checked={rows.length > 0 && selection.size === rows.length ? true : selection.size > 0 ? "indeterminate" : false}
@@ -502,13 +502,13 @@ export default function AdminReview() {
                 <TableRow>
                   <TableCell colSpan={5}>
                     <div className="flex flex-col items-center gap-2 py-12 text-center">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
-                        <Inbox className="h-6 w-6 text-slate-400" />
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-3 dark:bg-background/[0.06]">
+                        <Inbox className="h-6 w-6 text-muted-foreground" />
                       </span>
-                      <p className="font-semibold text-slate-700 dark:text-slate-200">
+                      <p className="font-semibold text-foreground dark:text-muted-foreground">
                         {tab === "PENDING" ? "Queue is clear" : tab === "APPROVED" ? "No approved items" : "No rejected items"}
                       </p>
-                      <p className="max-w-xs text-sm text-slate-400">
+                      <p className="max-w-xs text-sm text-muted-foreground">
                         {q || module || adminId
                           ? "Try a different search or filter."
                           : tab === "PENDING"
@@ -526,17 +526,17 @@ export default function AdminReview() {
                     <TableRow
                       key={r.id}
                       data-selected={selected}
-                      className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 data-[selected=true]:bg-teal-50/70 dark:border-white/[0.06] dark:hover:bg-white/[0.03] dark:data-[selected=true]:bg-teal-950/40"
+                      className="group border-b border-rule transition-colors last:border-0 hover:bg-paper-3 data-[selected=true]:bg-paper-3  dark:hover:bg-background/[0.03] dark:data-[selected=true]:bg-paper-3"
                     >
                       <TableCell className={cn(density === "compact" && "py-2")}>
                         <Checkbox checked={selected} onCheckedChange={() => toggleOne(r.id)} aria-label={`Select ${r.title}`} />
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>
                         <div className="min-w-0 max-w-[420px]">
-                          <p className="truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100" title={r.title}>
+                          <p className="truncate text-[13.5px] font-semibold text-foreground dark:text-paper" title={r.title}>
                             {r.title}
                           </p>
-                          <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground dark:text-muted-foreground">
                             {r.moduleLabel}
                             {r.reviewNote ? `  •  ${r.reviewNote}` : ""}
                           </p>
@@ -544,18 +544,18 @@ export default function AdminReview() {
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>
                         <span className="flex items-center gap-2" title={r.createdBy?.email ?? ""}>
-                          <Avatar className="h-7 w-7 shrink-0 border border-slate-200 dark:border-white/10">
-                            <AvatarFallback className="bg-teal-700 text-[10px] font-bold text-white dark:bg-teal-600">
+                          <Avatar className="h-7 w-7 shrink-0 border border-rule ">
+                            <AvatarFallback className="bg-paper-3 text-[10px] font-bold text-paper dark:bg-paper-3">
                               {initials(r.createdBy?.name, r.createdBy?.email)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="max-w-[140px] truncate text-[13px] text-slate-600 dark:text-slate-300">
+                          <span className="max-w-[140px] truncate text-[13px] text-muted-foreground dark:text-muted-foreground">
                             {r.createdBy?.name || r.createdBy?.email || "Unknown"}
                           </span>
                         </span>
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>
-                        <span className="whitespace-nowrap text-[13px] tabular-nums text-slate-600 dark:text-slate-300" title={formatDate(r.createdAt)}>
+                        <span className="whitespace-nowrap text-[13px] tabular-nums text-muted-foreground dark:text-muted-foreground" title={formatDate(r.createdAt)}>
                           {Number.isNaN(t) ? "-" : formatDistanceToNow(new Date(t), { addSuffix: true })}
                         </span>
                       </TableCell>
@@ -567,18 +567,18 @@ export default function AdminReview() {
                               title="Approve"
                               disabled={working}
                               onClick={() => void doApprove([r])}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-emerald-700 dark:text-slate-500 dark:hover:bg-white/[0.06]"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground dark:text-muted-foreground dark:hover:bg-background/[0.06]"
                             >
-                              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                              <CheckCircle2 className="h-4 w-4 text-foreground" />
                             </button>
                             <button
                               type="button"
                               title="Reject with note"
                               disabled={working}
                               onClick={() => setRejectIds([r.id])}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-amber-700 dark:text-slate-500 dark:hover:bg-white/[0.06]"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-brick dark:text-muted-foreground dark:hover:bg-background/[0.06]"
                             >
-                              <XCircle className="h-4 w-4 text-amber-600" />
+                              <XCircle className="h-4 w-4 text-brick" />
                             </button>
                           </span>
                         ) : (
@@ -608,11 +608,11 @@ export default function AdminReview() {
       </Card>
 
       {selection.size > 0 && (
-        <div className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/95 px-3 py-2.5 shadow-xl backdrop-blur dark:border-white/10 dark:bg-[#0b1220]/95">
-          <span className="mr-1 text-[13px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+        <div className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-rule bg-background/95 px-3 py-2.5   ">
+          <span className="mr-1 text-[13px] font-semibold tabular-nums text-foreground dark:text-muted-foreground">
             {selection.size} selected
           </span>
-          <Button type="button" size="sm" disabled={working} onClick={() => void doApprove(selectedRows)} className="bg-emerald-600 text-white hover:bg-emerald-700">
+          <Button type="button" size="sm" disabled={working} onClick={() => void doApprove(selectedRows)} className="bg-paper-3 text-paper hover:bg-paper-3">
             <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Approve
           </Button>
           <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => setRejectIds(selectedRows.map((r) => r.id))}>
@@ -625,7 +625,7 @@ export default function AdminReview() {
       )}
 
       <Card className={cn(T_CARD, "p-4 sm:p-5")}>
-        <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Recent review decisions</h2>
+        <h2 className="text-sm font-bold text-foreground dark:text-paper">Recent review decisions</h2>
         <div className="mt-2">
           <ReviewDecisions limit={10} />
         </div>

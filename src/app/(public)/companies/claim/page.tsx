@@ -17,7 +17,7 @@ export default function ClaimCompanyPage() {
   return (
     <div className="container mx-auto max-w-xl px-4 py-10">
       <h1 className="mb-2 text-3xl font-bold">Claim your company</h1>
-      <p className="mb-6 text-gray-600">
+      <p className="mb-6 text-muted-foreground">
         Typing a domain never verifies you - only a 6-digit code sent to that work inbox does.
         Free inboxes (Gmail/Yahoo) are rejected. Full addresses stay private (shown masked).
       </p>

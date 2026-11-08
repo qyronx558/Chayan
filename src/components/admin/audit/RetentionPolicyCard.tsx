@@ -25,7 +25,7 @@ export function RetentionPolicyCard({
     <DataCard title="Retention policy" subtitle="How long audit events are kept">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block min-w-0">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Keep logs for</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Keep logs for</span>
           <Select value={keep} onValueChange={setKeep}>
             <SelectTrigger className="h-9 w-full" aria-label="Retention period">
               <SelectValue />
@@ -40,7 +40,7 @@ export function RetentionPolicyCard({
         </label>
         <div className="flex items-end pb-1">
           <Button
-            className="h-9 bg-teal-700 text-white hover:bg-teal-800"
+            className="h-9 bg-paper-3 text-paper hover:bg-paper-3"
             disabled={saving}
             onClick={() => onSave({ keepDays: keep === "forever" ? null : parseInt(keep, 10), archiveBeforeDelete: archive, legalHold: hold })}
           >
@@ -51,26 +51,26 @@ export function RetentionPolicyCard({
       <div className="mt-3 space-y-2.5">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Archive before deleting</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Keep a compressed CSV.GZ copy first.</p>
+            <p className="text-sm font-medium text-foreground dark:text-paper">Archive before deleting</p>
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">Keep a compressed CSV.GZ copy first.</p>
           </div>
-          <Switch checked={archive} onCheckedChange={setArchive} aria-label="Archive before deleting" className="shrink-0 data-[state=checked]:bg-teal-700" />
+          <Switch checked={archive} onCheckedChange={setArchive} aria-label="Archive before deleting" className="shrink-0 data-[state=checked]:bg-paper-3" />
         </div>
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Legal hold</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Blocks all deletion while on.</p>
+            <p className="text-sm font-medium text-foreground dark:text-paper">Legal hold</p>
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">Blocks all deletion while on.</p>
           </div>
-          <Switch checked={hold} onCheckedChange={setHold} aria-label="Legal hold" className="shrink-0 data-[state=checked]:bg-teal-700" />
+          <Switch checked={hold} onCheckedChange={setHold} aria-label="Legal hold" className="shrink-0 data-[state=checked]:bg-paper-3" />
         </div>
       </div>
       <div className="mt-3">
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground">
           <span>Storage used</span>
           <span className="tabular-nums">{policy.storageUsedMb} / {policy.storageQuotaMb} MB</span>
         </div>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-teal-600" style={{ width: `${pct}%` }} />
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper-3 dark:bg-background/10" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <div className="h-full rounded-full bg-paper-3" style={{ width: `${pct}%` }} />
         </div>
       </div>
     </DataCard>
@@ -93,14 +93,14 @@ export function ScheduleCard({
     <DataCard title="Scheduled export" subtitle="Weekly off-site copy of the audit trail">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Weekly export</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Runs every Monday at 02:00 UTC.</p>
+          <p className="text-sm font-medium text-foreground dark:text-paper">Weekly export</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground">Runs every Monday at 02:00 UTC.</p>
         </div>
-        <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Weekly export" className="shrink-0 data-[state=checked]:bg-teal-700" />
+        <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Weekly export" className="shrink-0 data-[state=checked]:bg-paper-3" />
       </div>
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block min-w-0">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Format</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Format</span>
           <Select value={format} onValueChange={(v) => setFormat(v === "JSON" ? "JSON" : "CSV")}>
             <SelectTrigger className="h-9 w-full" aria-label="Export format"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -110,12 +110,12 @@ export function ScheduleCard({
           </Select>
         </label>
         <label className="block min-w-0">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Recipients</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Recipients</span>
           <Input value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="a@x.in, b@x.in" className="h-9" aria-label="Export recipients" />
         </label>
       </div>
       <Button
-        className="mt-3 h-9 bg-teal-700 text-white hover:bg-teal-800"
+        className="mt-3 h-9 bg-paper-3 text-paper hover:bg-paper-3"
         disabled={saving}
         onClick={() => onSave({ enabled, frequency: "WEEKLY", format, recipients: recipients.split(",").map((s) => s.trim()).filter((s) => s.includes("@")) })}
       >
@@ -129,10 +129,10 @@ export function IntegrityCard({ state, onVerify, verifying }: { state: Integrity
   return (
     <DataCard title="Integrity" subtitle="Tamper-evident hash chain">
       <div className="flex items-center gap-2">
-        <ShieldCheck className={`h-5 w-5 ${state?.ok === false ? "text-red-600" : "text-emerald-600"}`} aria-hidden />
-        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{state?.ok === false ? "Mismatch found" : "Chain intact"}</p>
+        <ShieldCheck className={`h-5 w-5 ${state?.ok === false ? "text-brick" : "text-foreground"}`} aria-hidden />
+        <p className="text-sm font-semibold text-foreground dark:text-paper">{state?.ok === false ? "Mismatch found" : "Chain intact"}</p>
       </div>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+      <p className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground">
         {state?.checked.toLocaleString("en-IN") ?? 0} events checked
         {state?.lastVerifiedAt ? ` · last verified ${new Date(state.lastVerifiedAt).toLocaleString("en-IN")}` : ""}
         {state?.firstMismatchId ? ` · first mismatch ${state.firstMismatchId.slice(0, 8)}` : ""}

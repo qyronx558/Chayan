@@ -20,7 +20,7 @@ function HighlightedName({ text, query }: { text: string; query: string }) {
   return (
     <span className="truncate">
       {text.slice(0, start)}
-      <span className="rounded bg-teal-100 font-bold text-teal-900 dark:bg-teal-900/60 dark:text-teal-100">
+      <span className="rounded bg-paper-3 font-bold text-brick dark:bg-paper-3 dark:text-brick">
         {text.slice(start, start + q.length)}
       </span>
       {text.slice(start + q.length)}
@@ -55,14 +55,14 @@ export const DepartmentRow = forwardRef<HTMLButtonElement, DepartmentRowProps>(f
       className={cn(
         "relative flex h-[52px] w-full min-w-0 items-center gap-3 overflow-hidden rounded-lg px-3 text-left outline-none transition-colors",
         selected
-          ? "bg-teal-50 dark:bg-teal-950/50"
+          ? "bg-paper-3 dark:bg-paper-3"
           : active
-            ? "bg-teal-50/70 dark:bg-teal-950/30"
-            : "hover:bg-teal-50/70 dark:hover:bg-teal-950/30",
-        "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600"
+            ? "bg-paper-3 dark:bg-paper-3"
+            : "hover:bg-paper-3 dark:hover:bg-paper-3",
+        "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rule"
       )}
     >
-      {selected && <span className="absolute inset-y-1 left-0 w-1 rounded-full bg-teal-600" />}
+      {selected && <span className="absolute inset-y-1 left-0 w-1 rounded-full bg-paper-3" />}
       <span
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
@@ -71,15 +71,15 @@ export const DepartmentRow = forwardRef<HTMLButtonElement, DepartmentRowProps>(f
       >
         {initialsFor(item.name)}
       </span>
-      <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+      <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-foreground dark:text-paper">
         <HighlightedName text={text} query={query} />
         {acronym && (
-          <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500 dark:bg-white/10 dark:text-gray-300">
+          <span className="shrink-0 rounded-full bg-paper-3 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground dark:bg-background/10 dark:text-muted-foreground">
             {acronym}
           </span>
         )}
       </span>
-      {selected && <Check className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />}
+      {selected && <Check className="h-4 w-4 shrink-0 text-brick dark:text-brick" />}
     </button>
   );
 });

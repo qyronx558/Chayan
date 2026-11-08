@@ -102,8 +102,8 @@ export default function RegisterPage() {
     >
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create Account</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Takes less than a minute</p>
+          <h1 className="text-2xl font-bold text-foreground dark:text-paper">Create Account</h1>
+          <p className="mt-2 text-muted-foreground dark:text-muted-foreground">Takes less than a minute</p>
         </div>
 
         <GoogleButton onClick={handleGoogleSignIn} disabled={isGoogleLoading} loading={isGoogleLoading} />
@@ -171,13 +171,13 @@ export default function RegisterPage() {
               onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
               className="mt-0.5"
             />
-            <Label htmlFor="terms" className="text-sm font-normal text-gray-600 dark:text-gray-400">
+            <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">
               I accept the{" "}
-              <Link href="/terms" className="text-teal-600 hover:text-teal-700 font-medium underline underline-offset-2">
+              <Link href="/terms" className="text-brick hover:text-brick font-medium underline underline-offset-2">
                 Terms and Conditions
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-teal-600 hover:text-teal-700 font-medium underline underline-offset-2">
+              <Link href="/privacy" className="text-brick hover:text-brick font-medium underline underline-offset-2">
                 Privacy Policy
               </Link>
             </Label>
@@ -195,9 +195,9 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+          <Link href="/login" className="font-semibold text-brick hover:text-brick transition-colors">
             Sign in
           </Link>
         </p>

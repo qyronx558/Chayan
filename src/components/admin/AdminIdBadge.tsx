@@ -7,7 +7,7 @@ import { Check, Copy } from "lucide-react"
 /** Unique Admin ID badge - the canonical User.id (cuid), truncated with copy. */
 export function AdminIdBadge({ id, className = "" }: { id?: string | null; className?: string }) {
   const [copied, setCopied] = useState(false)
-  if (!id) return <span className="text-gray-400">-</span>
+  if (!id) return <span className="text-muted-foreground">-</span>
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
       <Badge variant="outline" className="font-mono text-[11px]" title={id}>
@@ -17,7 +17,7 @@ export function AdminIdBadge({ id, className = "" }: { id?: string | null; class
         type="button"
         aria-label="Copy admin ID"
         title="Copy full Admin ID"
-        className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+        className="rounded p-0.5 text-muted-foreground hover:bg-paper-3 hover:text-foreground"
         onClick={async (e) => {
           e.stopPropagation()
           try {
@@ -29,7 +29,7 @@ export function AdminIdBadge({ id, className = "" }: { id?: string | null; class
           }
         }}
       >
-        {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-foreground" /> : <Copy className="h-3.5 w-3.5" />}
       </button>
     </span>
   )

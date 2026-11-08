@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { DataCard } from "@/components/admin/dashboard/DataCard";
 import type { MetricSeries } from "@/lib/analytics/types";
 
-const COLORS: Record<string, string> = { views: "#0F766E", visitors: "#2563EB", jobs: "#D97706" };
+const COLORS: Record<string, string> = { views: "var(--color-brick)", visitors: "var(--color-ink-2)", jobs: "var(--color-brick-ink)" };
 
 export function TrendChart({ series, title, subtitle }: { series: MetricSeries[]; title: string; subtitle: string }) {
   const [active, setActive] = useState<string[]>(() => series.map((s) => s.key));
@@ -39,11 +39,11 @@ export function TrendChart({ series, title, subtitle }: { series: MetricSeries[]
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors",
                 active.includes(s.key)
-                  ? "border-teal-700/30 bg-teal-50 text-teal-800 dark:border-teal-500/30 dark:bg-teal-950 dark:text-teal-200"
-                  : "border-slate-200 text-slate-400 opacity-60 dark:border-white/10"
+                  ? "border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick"
+                  : "border-rule text-muted-foreground opacity-60 "
               )}
             >
-              <span className="h-2 w-2 rounded-full" style={{ background: COLORS[s.key] ?? "#0F766E" }} />
+              <span className="h-2 w-2 rounded-full" style={{ background: COLORS[s.key] ?? "var(--color-brick)" }} />
               {s.label}
             </button>
           ))}
@@ -55,42 +55,34 @@ export function TrendChart({ series, title, subtitle }: { series: MetricSeries[]
           type="button"
           onClick={() => setShowPrev((v) => !v)}
           aria-pressed={showPrev}
-          className="flex items-center gap-1.5 rounded-full border border-slate-200 px-2 py-0.5 font-medium text-slate-600 dark:border-white/10 dark:text-slate-300"
+          className="flex items-center gap-1.5 rounded-full border border-rule px-2 py-0.5 font-medium text-muted-foreground  dark:text-muted-foreground"
         >
-          <span className="inline-block h-0 w-3 border-t-2 border-dashed border-slate-400" /> Previous period
+          <span className="inline-block h-0 w-3 border-t-2 border-dashed border-rule-2" /> Previous period
         </button>
       </div>
       {empty ? (
         <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-center">
-          <Inbox className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No activity in this period</p>
-          <p className="text-xs text-slate-400">Try a longer range.</p>
+          <Inbox className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
+          <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">No activity in this period</p>
+          <p className="text-xs text-muted-foreground">Try a longer range.</p>
         </div>
       ) : (
         <div className="h-[280px] w-full" role="img" aria-label={`${title} trend chart`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <defs>
-                {series.map((s) => (
-                  <linearGradient key={s.key} id={`ag-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={COLORS[s.key] ?? "#0F766E"} stopOpacity={0.22} />
-                    <stop offset="100%" stopColor={COLORS[s.key] ?? "#0F766E"} stopOpacity={0.02} />
-                  </linearGradient>
-                ))}
-              </defs>
-              <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.12} className="text-slate-400" />
+              <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.12} className="text-muted-foreground" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={32} tick={{ fontSize: 11 }} />
               <YAxis width={36} tickLine={false} axisLine={false} allowDecimals={false} tick={{ fontSize: 11 }} />
               <Tooltip
-                cursor={{ stroke: "#0F766E", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
+                cursor={{ stroke: "var(--color-brick)", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
                 content={({ active: a, payload, label }) => {
                   if (!a || !payload || payload.length === 0) return null;
                   return (
-                    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-[#0b1220]">
+                    <div className="rounded-lg border border-rule bg-background px-3 py-2 text-xs   ">
                       <p className="mb-1 font-semibold">{label}</p>
                       {(payload as unknown as Array<{ dataKey?: string | number; value?: number | string; color?: string }>).map((p) => (
-                        <p key={String(p.dataKey)} className="flex items-center gap-1.5 tabular-nums text-slate-600 dark:text-slate-300">
-                          <span className="h-2 w-2 rounded-full" style={{ background: p.color ?? "#0F766E" }} />
+                        <p key={String(p.dataKey)} className="flex items-center gap-1.5 tabular-nums text-muted-foreground dark:text-muted-foreground">
+                          <span className="h-2 w-2 rounded-full" style={{ background: p.color ?? "var(--color-brick)" }} />
                           {String(p.dataKey).replace("_prev", " (prev)")}: <strong>{p.value}</strong>
                         </p>
                       ))}
@@ -101,18 +93,18 @@ export function TrendChart({ series, title, subtitle }: { series: MetricSeries[]
               {series.filter((s) => active.includes(s.key)).map((s) => (
                 <g key={s.key}>
                   {showPrev ? (
-                    <Area type="monotone" dataKey={`${s.key}_prev`} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="5 4" fill="transparent" dot={false} />
+                    <Area type="monotone" dataKey={`${s.key}_prev`} stroke="var(--color-rule-2)" strokeWidth={1.5} strokeDasharray="5 4" fill="transparent" dot={false} />
                   ) : null}
-                  <Area type="monotone" dataKey={s.key} stroke={COLORS[s.key] ?? "#0F766E"} strokeWidth={2.5} fill={`url(#ag-${s.key})`} dot={false} activeDot={{ r: 4, fill: COLORS[s.key] ?? "#0F766E", strokeWidth: 2, stroke: "#fff" }} />
+                  <Area type="monotone" dataKey={s.key} stroke={COLORS[s.key] ?? "var(--color-brick)"} strokeWidth={2.5} fill={COLORS[s.key] ?? "var(--color-brick)"} fillOpacity={0.1} dot={false} activeDot={{ r: 4, fill: COLORS[s.key] ?? "var(--color-brick)", strokeWidth: 2, stroke: "var(--color-paper)" }} />
                 </g>
               ))}
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-teal-700" /> Current</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t-2 border-dashed border-slate-400" /> Previous</span>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground dark:text-muted-foreground">
+        <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-paper-3" /> Current</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-3 border-t-2 border-dashed border-rule-2" /> Previous</span>
       </div>
     </DataCard>
   );

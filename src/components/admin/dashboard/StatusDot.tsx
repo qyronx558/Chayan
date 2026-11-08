@@ -1,15 +1,15 @@
 import { cn } from "@/lib/utils"
 
 const TONES: Record<string, string> = {
-  APPROVED: "bg-emerald-500",
-  PUBLISHED: "bg-emerald-500",
-  ACTIVE: "bg-emerald-500",
-  PENDING: "bg-amber-400",
-  NEEDS: "bg-amber-400",
-  REJECTED: "bg-rose-500",
-  EXPIRED: "bg-slate-300 dark:bg-slate-600",
-  UPCOMING: "bg-sky-400",
-  DRAFT: "bg-sky-400",
+  APPROVED: "bg-paper-3",
+  PUBLISHED: "bg-paper-3",
+  ACTIVE: "bg-paper-3",
+  PENDING: "bg-paper-2",
+  NEEDS: "bg-paper-2",
+  REJECTED: "bg-paper-2",
+  EXPIRED: "bg-paper-3 dark:bg-ink-2",
+  UPCOMING: "bg-paper-3",
+  DRAFT: "bg-paper-3",
 }
 
 const LABELS: Record<string, string> = {
@@ -29,11 +29,11 @@ export function StatusDot({ value, className }: { value: string; className?: str
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300",
+        "inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground dark:text-muted-foreground",
         className
       )}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", TONES[key] ?? "bg-slate-300 dark:bg-slate-600")} />
+      <span className={cn("h-1.5 w-1.5 rounded-full", TONES[key] ?? "bg-paper-3 dark:bg-ink-2")} />
       {LABELS[key] ?? value}
     </span>
   )

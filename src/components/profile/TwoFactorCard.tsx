@@ -47,11 +47,11 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
     <DataCard
       title="Two-factor authentication"
       subtitle="Authenticator app (TOTP)"
-      action={<ShieldCheck className="h-4 w-4 text-teal-700 dark:text-teal-400" aria-hidden="true" />}
+      action={<ShieldCheck className="h-4 w-4 text-brick dark:text-brick" aria-hidden="true" />}
     >
       {admin && !enabled ? (
-        <div className="mb-3 flex flex-col gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 sm:flex-row sm:items-center">
-          <p className="flex-1 text-sm font-medium text-amber-800 dark:text-amber-200">Turn on two-factor authentication</p>
+        <div className="mb-3 flex flex-col gap-2 rounded-lg border border-rule bg-paper-2 p-3 sm:flex-row sm:items-center">
+          <p className="flex-1 text-sm font-medium text-brick dark:text-brick">Turn on two-factor authentication</p>
           <Button size="sm" disabled={busy} onClick={() => toggle(true)}>
             Enable
           </Button>
@@ -60,7 +60,7 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
       <div className="flex items-center justify-between gap-3">
         <div>
           <Label htmlFor="profile-2fa">Authenticator app</Label>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{admin ? "Required for admins." : "Recommended for all accounts."}</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground">{admin ? "Required for admins." : "Recommended for all accounts."}</p>
         </div>
         <Switch id="profile-2fa" checked={enabled} disabled={busy} onCheckedChange={(v) => toggle(v)} aria-label="Two-factor authentication" />
       </div>

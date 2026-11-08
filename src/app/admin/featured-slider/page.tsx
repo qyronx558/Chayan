@@ -221,10 +221,10 @@ export default function AdminFeaturedSlider() {
 
   const typeBadgeClass = (type: string) => {
     switch (type) {
-      case "RESULT": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-      case "PRIVATE_JOB": return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-      case "ADMIT_CARD": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-      default: return "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+      case "RESULT": return "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
+      case "PRIVATE_JOB": return "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
+      case "ADMIT_CARD": return "bg-paper-2 text-brick dark:bg-paper-2 dark:text-brick"
+      default: return "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
     }
   }
 
@@ -233,7 +233,7 @@ export default function AdminFeaturedSlider() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Featured Slider</h1>
-          <p className="text-sm text-gray-500">Showcase selected content on the homepage slider</p>
+          <p className="text-sm text-muted-foreground">Showcase selected content on the homepage slider</p>
         </div>
         <Button onClick={openCreate}><Plus className="mr-1 h-4 w-4" /> Add New Slide</Button>
       </div>
@@ -261,18 +261,18 @@ export default function AdminFeaturedSlider() {
                       onDragStart={() => onDragStart(index)}
                       onDragOver={(e) => onDragOver(e, index)}
                       onDragEnd={onDragEnd}
-                      className={dragging === index ? "bg-teal-50" : "cursor-grab"}
+                      className={dragging === index ? "bg-paper-3" : "cursor-grab"}
                     >
                       <TableCell>
-                        <GripVertical className="h-4 w-4 text-gray-400" />
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {item.isPinned && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+                          {item.isPinned && <Star className="h-4 w-4 fill-brick text-brick" />}
                           <span className="font-medium">{item.title}</span>
                         </div>
                         {item.organization && (
-                          <p className="text-xs text-gray-500">{item.organization}</p>
+                          <p className="text-xs text-muted-foreground">{item.organization}</p>
                         )}
                       </TableCell>
                       <TableCell>
@@ -287,7 +287,7 @@ export default function AdminFeaturedSlider() {
                             onCheckedChange={() => toggleActive(item)}
                             aria-label="Toggle slide"
                           />
-                          <span className={`text-xs font-medium ${item.isActive ? "text-green-600" : "text-gray-400"}`}>
+                          <span className={`text-xs font-medium ${item.isActive ? "text-foreground" : "text-muted-foreground"}`}>
                             {item.isActive ? "Active" : "Hidden"}
                           </span>
                         </div>
@@ -295,19 +295,19 @@ export default function AdminFeaturedSlider() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => patchMutation.mutate({ id: item.id, data: { isPinned: !item.isPinned } })} title={item.isPinned ? "Unpin" : "Pin"}>
-                            <Star className={`h-4 w-4 ${item.isPinned ? "fill-amber-400 text-amber-400" : "text-gray-400"}`} />
+                            <Star className={`h-4 w-4 ${item.isPinned ? "fill-brick text-brick" : "text-muted-foreground"}`} />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => setPreviewItem(item)} title="Preview">
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4 text-brick" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
                   {items.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-gray-500">
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">
                       No featured slides yet. Add one to see it on the homepage.
                     </TableCell></TableRow>
                   )}
@@ -323,8 +323,8 @@ export default function AdminFeaturedSlider() {
           <DialogHeader><DialogTitle>{editingId ? "Edit Slide" : "Add New Slide"}</DialogTitle></DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="rounded-lg border border-teal-200 bg-teal-50 p-4">
-                <p className="mb-3 text-sm font-semibold text-teal-800">Link existing content (optional)</p>
+              <div className="rounded-lg border border-rule bg-paper-3 p-4">
+                <p className="mb-3 text-sm font-semibold text-brick">Link existing content (optional)</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Select value={optionType} onValueChange={setOptionType}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -393,26 +393,26 @@ export default function AdminFeaturedSlider() {
 
               <FormField control={form.control} name="image" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Slide Image (optional) <span className="text-xs font-normal text-gray-400">- 1200×900 (4:3) recommended, auto-cropped on upload</span></FormLabel>
+                  <FormLabel>Slide Image (optional) <span className="text-xs font-normal text-muted-foreground">- 1200×900 (4:3) recommended, auto-cropped on upload</span></FormLabel>
                   <div className="flex items-center gap-3">
                     <FormControl>
                       <Input type="file" accept="image/*" className="hidden" id="slide-image" disabled={uploading}
                         onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f) }} />
                     </FormControl>
-                    <label htmlFor="slide-image" className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <label htmlFor="slide-image" className="flex cursor-pointer items-center gap-2 rounded-lg border border-rule px-4 py-2 text-sm text-foreground hover:bg-paper-2">
                       <Upload className="h-4 w-4" /> {uploading ? "Uploading..." : "Upload Image"}
                     </label>
                     <Input placeholder="Or paste image URL" {...field} value={field.value || ""} onChange={field.onChange} />
                   </div>
                   {field.value ? (
                     <div className="mt-3 flex items-center gap-4">
-                      <div className="relative aspect-[4/3] w-40 shrink-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+                      <div className="relative aspect-[4/3] w-40 shrink-0 overflow-hidden rounded-lg border border-rule ">
                         <img src={field.value} alt="Slide preview" className="h-full w-full object-cover object-center" />
                       </div>
                       <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue("image", "")}>Remove</Button>
                     </div>
                   ) : (
-                    <p className="mt-2 text-xs text-gray-400">No image - the slide will show without a visual.</p>
+                    <p className="mt-2 text-xs text-muted-foreground">No image - the slide will show without a visual.</p>
                   )}
                   <FormMessage />
                 </FormItem>
@@ -484,7 +484,7 @@ export default function AdminFeaturedSlider() {
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0">
           <DialogHeader className="hidden"><DialogTitle>Slide Preview</DialogTitle></DialogHeader>
           {previewItem && (
-            <div className="overflow-hidden rounded-lg bg-[#0a1628]">
+            <div className="overflow-hidden rounded-lg bg-ink">
               <FeaturedSlideView item={previewItem} />
             </div>
           )}
@@ -494,7 +494,7 @@ export default function AdminFeaturedSlider() {
       <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Delete Slide</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? This action cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure? This action cannot be undone.</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => deleteId && deleteMutation.mutate(deleteId)} disabled={deleteMutation.isPending}>Delete</Button>

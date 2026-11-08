@@ -66,16 +66,16 @@ export function ImageUpload({ value, onChange, folder = "ChayanJobs", className 
 
   if (value) {
     return (
-      <div className={cn("relative overflow-hidden rounded-lg border border-gray-200", className)}>
+      <div className={cn("relative overflow-hidden rounded-lg border border-rule", className)}>
         <img src={value} alt="Uploaded" className="h-40 w-full object-cover" />
         <button
           type="button"
           onClick={() => onChange(null)}
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/50 text-paper hover:bg-ink/70"
         >
           <X className="h-4 w-4" />
         </button>
-        <p className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 text-xs text-white">
+        <p className="absolute bottom-0 left-0 right-0 bg-ink/70 p-2 text-xs text-paper">
           {value.split("/").pop()?.split("?")[0] || "Image"}
         </p>
       </div>
@@ -86,7 +86,7 @@ export function ImageUpload({ value, onChange, folder = "ChayanJobs", className 
     <div
       className={cn(
         "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors",
-        dragOver ? "border-teal-400 bg-teal-50" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100",
+        dragOver ? "border-rule bg-paper-3" : "border-rule bg-paper-2 hover:border-rule-2 hover:bg-paper-3",
         uploading && "pointer-events-none opacity-60",
         className,
       )}
@@ -104,14 +104,14 @@ export function ImageUpload({ value, onChange, folder = "ChayanJobs", className 
       />
       {uploading ? (
         <>
-          <Loader2 className="mb-2 h-8 w-8 animate-spin text-teal-500" />
-          <p className="text-sm text-gray-500">Uploading...</p>
+          <Loader2 className="mb-2 h-8 w-8 animate-spin text-brick" />
+          <p className="text-sm text-muted-foreground">Uploading...</p>
         </>
       ) : (
         <>
-          <Upload className="mb-2 h-8 w-8 text-gray-400" />
-          <p className="text-sm font-medium text-gray-600">Click or drag to upload</p>
-          <p className="text-xs text-gray-400 mt-1">Max 5MB, images only</p>
+          <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+          <p className="text-sm font-medium text-muted-foreground">Click or drag to upload</p>
+          <p className="text-xs text-muted-foreground mt-1">Max 5MB, images only</p>
         </>
       )}
     </div>

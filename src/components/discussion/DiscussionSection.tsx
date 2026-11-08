@@ -2,9 +2,9 @@ import { Discussion } from "./Discussion"
 import type { PostType } from "./types"
 
 interface DiscussionSectionProps {
-  postId: string
-  postType: PostType
-  path?: string
+ postId: string
+ postType: PostType
+ path?: string
 }
 
 /**
@@ -17,9 +17,9 @@ interface DiscussionSectionProps {
  * and must never appear on printed job / result sheets.
  */
 export function DiscussionSection({ postId, postType, path }: DiscussionSectionProps) {
-  return (
-    <div id="discussion" className="print:hidden">
-      <Discussion postId={postId} postType={postType} path={path} />
-    </div>
-  )
+ return (
+  <div id="discussion" className="print:hidden">
+   <Discussion postId={postId} postType={postType} path={path} />
+  </div>
+ )
 }

@@ -23,12 +23,12 @@ export function FilterPanel({
   onClose: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/[0.06] dark:bg-white/[0.02]">
+    <div className="rounded-lg border border-rule bg-paper-2 p-3  dark:bg-background/[0.02]">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block min-w-0">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Action</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Action</span>
           <Select value={filters.action || "all"} onValueChange={(v) => onChange({ ...filters, action: v === "all" ? "" : v })}>
-            <SelectTrigger className="h-9 w-full bg-white dark:bg-[#0b1220]" aria-label="Filter by action">
+            <SelectTrigger className="h-9 w-full bg-background " aria-label="Filter by action">
               <SelectValue placeholder="All actions" />
             </SelectTrigger>
             <SelectContent>
@@ -40,9 +40,9 @@ export function FilterPanel({
           </Select>
         </label>
         <label className="block min-w-0">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Entity</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Entity</span>
           <Select value={filters.entity || "all"} onValueChange={(v) => onChange({ ...filters, entity: v === "all" ? "" : v })}>
-            <SelectTrigger className="h-9 w-full bg-white dark:bg-[#0b1220]" aria-label="Filter by entity">
+            <SelectTrigger className="h-9 w-full bg-background " aria-label="Filter by entity">
               <SelectValue placeholder="All sections" />
             </SelectTrigger>
             <SelectContent>
@@ -55,24 +55,24 @@ export function FilterPanel({
         </label>
         {showActor ? (
           <label className="block min-w-0">
-            <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Actor</span>
+            <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">Actor</span>
             <Input
               value={filters.actor}
               onChange={(e) => onChange({ ...filters, actor: e.target.value })}
               placeholder="Actor user ID"
-              className="h-9 bg-white font-mono text-xs dark:bg-[#0b1220]"
+              className="h-9 bg-background font-mono text-xs "
               aria-label="Filter by actor ID"
             />
           </label>
         ) : null}
         <div className="grid grid-cols-2 gap-2">
           <label className="block min-w-0">
-            <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">From</span>
-            <Input type="date" value={filters.from} onChange={(e) => onChange({ ...filters, from: e.target.value })} className="h-9 bg-white dark:bg-[#0b1220]" aria-label="From date" />
+            <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">From</span>
+            <Input type="date" value={filters.from} onChange={(e) => onChange({ ...filters, from: e.target.value })} className="h-9 bg-background " aria-label="From date" />
           </label>
           <label className="block min-w-0">
-            <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">To</span>
-            <Input type="date" value={filters.to} onChange={(e) => onChange({ ...filters, to: e.target.value })} className="h-9 bg-white dark:bg-[#0b1220]" aria-label="To date" />
+            <span className="mb-1 block text-xs font-medium text-muted-foreground dark:text-muted-foreground">To</span>
+            <Input type="date" value={filters.to} onChange={(e) => onChange({ ...filters, to: e.target.value })} className="h-9 bg-background " aria-label="To date" />
           </label>
         </div>
       </div>
@@ -84,7 +84,7 @@ export function FilterPanel({
         >
           Clear filters
         </Button>
-        <Button className="h-9 bg-teal-700 px-4 text-sm text-white hover:bg-teal-800" onClick={onClose}>
+        <Button className="h-9 bg-paper-3 px-4 text-sm text-paper hover:bg-paper-3" onClick={onClose}>
           Show {resultCount.toLocaleString("en-IN")} results
         </Button>
       </div>
@@ -110,24 +110,24 @@ export function DisplayPopover({
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9 shrink-0 border-slate-200 bg-white dark:border-white/10 dark:bg-[#0b1220]"
+          className="h-9 w-9 shrink-0 border-rule bg-background  "
           aria-label="Display options"
           aria-expanded={open}
         >
           <SlidersHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 border-slate-200 bg-white dark:border-white/10 dark:bg-[#0b1220]" align="end">
-        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Row density</p>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Comfy breathes, compact fits more rows.</p>
-        <div className="mt-2 grid grid-cols-2 gap-1 rounded-lg border border-slate-200 p-1 dark:border-white/10" role="group" aria-label="Row density">
+      <PopoverContent className="w-72 border-rule bg-background  " align="end">
+        <p className="text-sm font-semibold text-foreground dark:text-paper">Row density</p>
+        <p className="mt-0.5 text-xs text-muted-foreground dark:text-muted-foreground">Comfy breathes, compact fits more rows.</p>
+        <div className="mt-2 grid grid-cols-2 gap-1 rounded-lg border border-rule p-1 " role="group" aria-label="Row density">
           {(["comfy", "compact"] as RowDensity[]).map((d) => (
             <button
               key={d}
               onClick={() => onDensity(d)}
               aria-pressed={density === d}
-              className={`inline-flex h-9 items-center justify-center rounded-md text-sm font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                density === d ? "bg-teal-700 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5"
+              className={`inline-flex h-9 items-center justify-center rounded-md text-sm font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule ${
+                density === d ? "bg-paper-3 text-paper" : "text-muted-foreground hover:bg-paper-3 dark:text-muted-foreground dark:hover:bg-background/5"
               }`}
             >
               {d === "comfy" ? "Comfy" : "Compact"}
@@ -136,10 +136,10 @@ export function DisplayPopover({
         </div>
         <div className="mt-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Group similar events</p>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Merge repeats within 10 minutes.</p>
+            <p className="text-sm font-semibold text-foreground dark:text-paper">Group similar events</p>
+            <p className="mt-0.5 text-xs text-muted-foreground dark:text-muted-foreground">Merge repeats within 10 minutes.</p>
           </div>
-          <Switch checked={grouped} onCheckedChange={onGrouped} aria-label="Group similar events" className="shrink-0 data-[state=checked]:bg-teal-700" />
+          <Switch checked={grouped} onCheckedChange={onGrouped} aria-label="Group similar events" className="shrink-0 data-[state=checked]:bg-paper-3" />
         </div>
       </PopoverContent>
     </Popover>

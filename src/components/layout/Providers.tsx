@@ -10,21 +10,21 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            {children}
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </SessionProvider>
-  )
+ return (
+  <SessionProvider>
+   <QueryClientProvider client={queryClient}>
+    <ThemeProvider
+     attribute="class"
+     defaultTheme="light"
+     enableSystem
+     disableTransitionOnChange
+    >
+     <TooltipProvider>
+      {children}
+      <Toaster />
+     </TooltipProvider>
+    </ThemeProvider>
+   </QueryClientProvider>
+  </SessionProvider>
+ )
 }

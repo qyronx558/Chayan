@@ -329,17 +329,17 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
             {wizardStep === 3 && (
               <FormSection title="Review & publish" description="Confirm the summary below, then create or update. Nothing is changed until you submit.">
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Slug</dt><dd className="font-mono text-xs">{watched.slug || "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Status</dt><dd><Badge className={getStatusColor(watched.status || "ACTIVE")}>{watched.status}</Badge></dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Vacancies</dt><dd>{watched.totalVacancies ?? "N/A"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Last date</dt><dd>{watched.lastDate ? formatDate(watched.lastDate) : "-"}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-gray-400">Apply link</dt><dd className="truncate text-teal-700">{watched.applyLink || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Slug</dt><dd className="font-mono text-xs">{watched.slug || "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Status</dt><dd><Badge className={getStatusColor(watched.status || "ACTIVE")}>{watched.status}</Badge></dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Vacancies</dt><dd>{watched.totalVacancies ?? "N/A"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Last date</dt><dd>{watched.lastDate ? formatDate(watched.lastDate) : "-"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Apply link</dt><dd className="truncate text-brick">{watched.applyLink || "-"}</dd></div>
                 </dl>
               </FormSection>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-4 dark:border-ink">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <div className="flex items-center gap-2">
                 {wizardStep > 0 && (

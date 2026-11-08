@@ -30,9 +30,9 @@ export default function EmployerOverview() {
   if (status === "unauthenticated") {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <Lock className="mx-auto mb-3 h-8 w-8 text-teal-600" />
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Employer Studio</h1>
-        <p className="mb-6 text-slate-600">Sign in, verify your work inbox with OTP, then post free jobs and earn coins for real hiring milestones.</p>
+        <Lock className="mx-auto mb-3 h-8 w-8 text-brick" />
+        <h1 className="mb-2 text-3xl font-bold text-foreground">Employer Studio</h1>
+        <p className="mb-6 text-muted-foreground">Sign in, verify your work inbox with OTP, then post free jobs and earn coins for real hiring milestones.</p>
         <EmployerLoginCTA backTo="/employer" />
       </div>
     )
@@ -44,8 +44,8 @@ export default function EmployerOverview() {
     <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Good day{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}</h1>
-          <p className="text-sm text-slate-500">Post free jobs, hit hiring milestones, earn coins - 1,000 coins = ₹20.</p>
+          <h1 className="text-2xl font-extrabold text-foreground">Good day{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}</h1>
+          <p className="text-sm text-muted-foreground">Post free jobs, hit hiring milestones, earn coins - 1,000 coins = ₹20.</p>
         </div>
         {!verified ? (
           <Button asChild><Link href="/employer/jobs">Verify company to unlock →</Link></Button>
@@ -55,7 +55,7 @@ export default function EmployerOverview() {
       </div>
 
       {!verified && (
-        <p className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"><ShieldCheck className="h-4 w-4" /> No verified company yet - complete inbox OTP in Jobs to unlock posting, milestones and earnings.</p>
+        <p className="flex items-center gap-2 rounded-xl border border-rule bg-paper-2 p-3 text-sm text-brick"><ShieldCheck className="h-4 w-4" /> No verified company yet - complete inbox OTP in Jobs to unlock posting, milestones and earnings.</p>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -66,21 +66,21 @@ export default function EmployerOverview() {
           { icon: Wallet, label: "Pending coins", value: `${coins.pending.toLocaleString("en-IN")}` },
         ].map((s) => (
           <Card key={s.label}><CardContent className="flex items-center gap-3 p-4">
-            <s.icon className="h-6 w-6 text-teal-600" />
-            <div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-slate-500">{s.label}</p></div>
+            <s.icon className="h-6 w-6 text-brick" />
+            <div><p className="text-xl font-extrabold">{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
           </CardContent></Card>
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card><CardHeader><CardTitle className="text-base">Views - last 30 days (not paid)</CardTitle></CardHeader><CardContent className="h-60">
-          {!a || !a.viewsSeries || a.viewsSeries.length === 0 ? <p className="py-16 text-center text-sm text-slate-500">Publish a verified job to start collecting views.</p> : (
+          {!a || !a.viewsSeries || a.viewsSeries.length === 0 ? <p className="py-16 text-center text-sm text-muted-foreground">Publish a verified job to start collecting views.</p> : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={a.viewsSeries}>
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.max(0, Math.floor(a.viewsSeries.length / 6) - 1)} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="views" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="views" fill="var(--color-brick)" radius={0} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -95,30 +95,30 @@ export default function EmployerOverview() {
               ["500 coins", "Confirmed hire (you confirm)"],
             ].map(([amt, what], i) => (
               <div key={what} className="flex items-center gap-2.5 rounded-lg border p-2.5">
-                {i === 0 ? <CheckCircle2 className="h-4 w-4 text-slate-300" /> : <Circle className="h-4 w-4 text-slate-300" />}
+                {i === 0 ? <CheckCircle2 className="h-4 w-4 text-muted-foreground" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
                 <span className="flex-1">{what}</span>
                 <Badge variant="secondary">{amt}</Badge>
               </div>
             ))}
-            <p className="text-xs text-slate-500">Progress per job is tracked in <Link href="/employer/analytics" className="font-semibold text-teal-700 hover:underline">Analytics</Link> and confirmed in <span className="font-semibold">Monitor</span>. Views, clicks and saved-only applications are shown but never paid.</p>
+            <p className="text-xs text-muted-foreground">Progress per job is tracked in <Link href="/employer/analytics" className="font-semibold text-brick hover:underline">Analytics</Link> and confirmed in <span className="font-semibold">Monitor</span>. Views, clicks and saved-only applications are shown but never paid.</p>
           </CardContent></Card>
       </div>
 
-      <Card><CardHeader><CardTitle className="flex items-center justify-between text-base">Top jobs <Link href="/employer/analytics" className="flex items-center gap-1 text-xs font-semibold text-teal-700 hover:underline">All analytics <ArrowRight className="h-3 w-3" /></Link></CardTitle></CardHeader>
+      <Card><CardHeader><CardTitle className="flex items-center justify-between text-base">Top jobs <Link href="/employer/analytics" className="flex items-center gap-1 text-xs font-semibold text-brick hover:underline">All analytics <ArrowRight className="h-3 w-3" /></Link></CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {!a || !a.jobs || a.jobs.length === 0 ? <p className="py-8 text-center text-sm text-slate-500">No jobs yet.</p> : a.jobs.slice(0, 5).map((j) => (
+          {!a || !a.jobs || a.jobs.length === 0 ? <p className="py-8 text-center text-sm text-muted-foreground">No jobs yet.</p> : a.jobs.slice(0, 5).map((j) => (
             <div key={j.id} className="flex items-center justify-between gap-2 rounded-lg border p-2.5 text-sm">
-              <div className="min-w-0"><p className="truncate font-semibold">{j.title}</p><p className="text-xs text-slate-500">{j.views} views · {j.applies} applies</p></div>
+              <div className="min-w-0"><p className="truncate font-semibold">{j.title}</p><p className="text-xs text-muted-foreground">{j.views} views · {j.applies} applies</p></div>
               <Button size="sm" variant="outline" asChild><Link href={`/employer/monitor/${j.id}`}>Monitor</Link></Button>
             </div>
           ))}
         </CardContent></Card>
 
-      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+      <Card className="border-rule bg-paper-2">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
           <div>
-            <p className="font-extrabold text-emerald-900">Refer & earn 1,000 coins</p>
-            <p className="text-sm text-emerald-700">For every invited company that reaches 3 applications. Pilot: 100 companies, one rewarded job each.</p>
+            <p className="font-extrabold text-foreground">Refer & earn 1,000 coins</p>
+            <p className="text-sm text-foreground">For every invited company that reaches 3 applications. Pilot: 100 companies, one rewarded job each.</p>
           </div>
           <div className="flex gap-2">
             <Button asChild><Link href="/employer/referrals">Get my referral link</Link></Button>

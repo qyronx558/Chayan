@@ -11,10 +11,10 @@ interface FormSectionProps {
 
 export function FormSection({ title, description, children, className }: FormSectionProps) {
   return (
-    <section className={cn("rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 dark:border-gray-800 dark:bg-gray-900", className)}>
+    <section className={cn("rounded-xl border border-rule bg-background p-4  sm:p-5 dark:border-ink dark:bg-ink", className)}>
       <div className="mb-4">
-        <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">{title}</h3>
-        {description && <p className="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{description}</p>}
+        <h3 className="text-sm font-semibold tracking-tight text-foreground dark:text-paper">{title}</h3>
+        {description && <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground dark:text-muted-foreground">{description}</p>}
       </div>
       <div className="space-y-4">{children}</div>
     </section>

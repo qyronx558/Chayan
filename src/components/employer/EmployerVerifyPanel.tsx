@@ -101,15 +101,15 @@ export function EmployerVerifyPanel({ companies, onVerified }: Props) {
                 <Input placeholder="Work email - you@acme.com" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} inputMode="email" />
               </div>
               <Input placeholder="Short description (optional)" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
-              <p className="text-xs text-gray-500">Not in the dropdown? Type the official name + domain. Free inboxes (Gmail/Yahoo) are rejected - only the company&apos;s own domain counts.</p>
+              <p className="text-xs text-muted-foreground">Not in the dropdown? Type the official name + domain. Free inboxes (Gmail/Yahoo) are rejected - only the company&apos;s own domain counts.</p>
             </div>
           )}
           <div><Button onClick={sendCode} disabled={sending}>{sending ? "Sending secure code…" : "Send 6-digit verification code"}</Button></div>
-          <p className="flex items-start gap-1.5 text-xs text-gray-500"><Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />Typing a domain never verifies you - only entering the code sent to that inbox does. Codes are hashed, expire in 10 minutes and lock after 5 wrong tries.</p>
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground"><Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />Typing a domain never verifies you - only entering the code sent to that inbox does. Codes are hashed, expire in 10 minutes and lock after 5 wrong tries.</p>
         </div>
       ) : (
-        <Card className="border-teal-200 bg-teal-50/50"><CardContent className="space-y-3 p-4">
-          <p className="flex items-center gap-1.5 text-sm font-bold"><MailCheck className="h-4 w-4 text-teal-600" /> Code sent to {maskedEmail}</p>
+        <Card className="border-rule bg-paper-3"><CardContent className="space-y-3 p-4">
+          <p className="flex items-center gap-1.5 text-sm font-bold"><MailCheck className="h-4 w-4 text-brick" /> Code sent to {maskedEmail}</p>
           <div className="flex max-w-sm gap-2">
             <Input placeholder="6-digit code" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" maxLength={6} className="text-center text-lg font-bold tracking-[0.3em]" />
             <Button onClick={verifyCode} disabled={verifying}>{verifying ? "Verifying…" : "Verify"}</Button>
@@ -118,7 +118,7 @@ export function EmployerVerifyPanel({ companies, onVerified }: Props) {
             <Button size="sm" variant="ghost" onClick={sendCode} disabled={sending}>{sending ? "Resending…" : "Resend code"}</Button>
             <Button size="sm" variant="ghost" onClick={() => { setChallengeId(""); setOtp("") }}>Change inbox</Button>
           </div>
-          <p className="flex items-start gap-1.5 text-xs text-gray-500"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />Anti-phishing: the mail comes only from <strong>ChayanJobs Verify &lt;noreply@chayanjobs.com&gt;</strong> with a code and no login links. Never share the code; enter it only on chayanjobs.com. Full inbox addresses are never shown publicly - only {maskedEmail}.</p>
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />Anti-phishing: the mail comes only from <strong>ChayanJobs Verify &lt;noreply@chayanjobs.com&gt;</strong> with a code and no login links. Never share the code; enter it only on chayanjobs.com. Full inbox addresses are never shown publicly - only {maskedEmail}.</p>
         </CardContent></Card>
       )}
     </div>

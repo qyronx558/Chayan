@@ -49,7 +49,7 @@ export function DeleteAccountCard({ admin }: DeleteAccountCardProps) {
   if (admin) {
     return (
       <DataCard title="Delete account" subtitle="Danger zone">
-        <p className="text-sm text-slate-500 dark:text-slate-400">A super admin removes admin accounts. Contact support for help.</p>
+        <p className="text-sm text-muted-foreground dark:text-muted-foreground">A super admin removes admin accounts. Contact support for help.</p>
       </DataCard>
     )
   }

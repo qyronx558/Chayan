@@ -30,7 +30,7 @@ export function HealthCheckList({ items, onRunAll, running }: { items: HealthIte
         </Button>
       }
     >
-      <div className="mb-3 flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-white/[0.06]" role="tablist" aria-label="Health filter">
+      <div className="mb-3 flex items-center gap-0.5 rounded-lg bg-paper-3 p-0.5 dark:bg-background/[0.06]" role="tablist" aria-label="Health filter">
         {(["all", "issues", "healthy"] as Filter[]).map((f) => (
           <button
             key={f}
@@ -40,7 +40,7 @@ export function HealthCheckList({ items, onRunAll, running }: { items: HealthIte
             onClick={() => setFilter(f)}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-semibold capitalize transition-colors",
-              filter === f ? "bg-white text-slate-900 shadow-sm dark:bg-white/10 dark:text-slate-100" : "text-slate-500 hover:text-slate-800 dark:text-slate-400"
+              filter === f ? "bg-background text-foreground  dark:bg-background/10 dark:text-paper" : "text-muted-foreground hover:text-foreground dark:text-muted-foreground"
             )}
           >
             {f}
@@ -49,11 +49,11 @@ export function HealthCheckList({ items, onRunAll, running }: { items: HealthIte
       </div>
       {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
-          <Inbox className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm text-slate-500">Nothing in this view.</p>
+          <Inbox className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Nothing in this view.</p>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+        <ul className="divide-y divide-rule100 ">
           {visible.map((h) => {
             const Icon = ICON[h.status];
             return (
@@ -61,14 +61,14 @@ export function HealthCheckList({ items, onRunAll, running }: { items: HealthIte
                 <Icon
                   className={cn(
                     "mt-0.5 h-4 w-4 shrink-0",
-                    h.status === "ok" ? "text-emerald-600" : h.status === "warning" ? "text-amber-500" : "text-rose-600"
+                    h.status === "ok" ? "text-foreground" : h.status === "warning" ? "text-brick" : "text-brick"
                   )}
                   aria-label={`Status ${h.status}`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{h.title}</p>
-                  <p className="line-clamp-2 text-xs text-slate-500">{h.detail}</p>
-                  <p className="mt-0.5 text-[11px] tabular-nums text-slate-400">Checked {timeAgo(h.checkedAt)}</p>
+                  <p className="truncate text-sm font-medium text-foreground dark:text-paper">{h.title}</p>
+                  <p className="line-clamp-2 text-xs text-muted-foreground">{h.detail}</p>
+                  <p className="mt-0.5 text-[11px] tabular-nums text-muted-foreground">Checked {timeAgo(h.checkedAt)}</p>
                 </div>
                 <Button size="sm" variant="ghost" asChild className="shrink-0">
                   <Link href={h.href}>{h.actionLabel}</Link>

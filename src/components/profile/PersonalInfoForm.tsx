@@ -108,7 +108,7 @@ export function PersonalInfoForm({
           <Label htmlFor="profile-name">Full name</Label>
           <Input id="profile-name" autoComplete="name" {...register("name")} aria-invalid={!!errors.name} aria-describedby={errors.name ? "profile-name-error" : undefined} />
           {errors.name ? (
-            <p id="profile-name-error" role="alert" aria-live="polite" className="text-xs font-medium text-red-600 dark:text-red-400">
+            <p id="profile-name-error" role="alert" aria-live="polite" className="text-xs font-medium text-brick dark:text-brick">
               {errors.name.message}
             </p>
           ) : null}
@@ -134,7 +134,7 @@ export function PersonalInfoForm({
             <div className="flex items-center gap-2">
               <Input id="profile-email-input" value={email} disabled className="flex-1" aria-label="Email address" />
               {emailVerified ? (
-                <Badge variant="secondary" className="shrink-0 gap-1 border-teal-700/20 bg-teal-700/10 text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-300">
+                <Badge variant="secondary" className="shrink-0 gap-1 border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick">
                   <BadgeCheck className="h-3 w-3" />
                   Verified
                 </Badge>
@@ -145,12 +145,12 @@ export function PersonalInfoForm({
               )}
             </div>
             {!emailMode ? (
-              <button type="button" onClick={() => setEmailMode(true)} className="w-fit text-xs font-medium text-teal-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:text-teal-300">
+              <button type="button" onClick={() => setEmailMode(true)} className="w-fit text-xs font-medium text-brick underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:text-brick">
                 Change email
               </button>
             ) : (
-              <div className="rounded-lg border border-slate-200 p-3 dark:border-white/10">
-                <p className="text-xs text-slate-500 dark:text-slate-400">A confirmation link will be sent to the new address before it changes.</p>
+              <div className="rounded-lg border border-rule p-3 ">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground">A confirmation link will be sent to the new address before it changes.</p>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                   <Input value={emailNext} onChange={(e) => setEmailNext(e.target.value)} placeholder="new@example.com" aria-label="New email address" inputMode="email" />
                   <div className="flex gap-2">
@@ -171,7 +171,7 @@ export function PersonalInfoForm({
           <div className="flex items-center gap-2">
             <Input id="profile-phone-input" inputMode="numeric" autoComplete="tel" placeholder="10-digit mobile number" {...register("phone")} aria-invalid={!!errors.phone} aria-describedby={errors.phone ? "profile-phone-error" : "profile-phone-hint"} className="flex-1" />
             {phoneVerified ? (
-              <Badge variant="secondary" className="shrink-0 gap-1 border-teal-700/20 bg-teal-700/10 text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-300">
+              <Badge variant="secondary" className="shrink-0 gap-1 border-rule bg-paper-3 text-brick dark:border-rule dark:bg-paper-3 dark:text-brick">
                 <BadgeCheck className="h-3 w-3" />
                 Verified
               </Badge>
@@ -182,20 +182,20 @@ export function PersonalInfoForm({
             )}
           </div>
           {errors.phone ? (
-            <p id="profile-phone-error" role="alert" aria-live="polite" className="text-xs font-medium text-red-600 dark:text-red-400">
+            <p id="profile-phone-error" role="alert" aria-live="polite" className="text-xs font-medium text-brick dark:text-brick">
               {errors.phone.message}
             </p>
           ) : (
-            <p id="profile-phone-hint" className="text-xs text-slate-500 dark:text-slate-400">
+            <p id="profile-phone-hint" className="text-xs text-muted-foreground dark:text-muted-foreground">
               Changing the number resets verification.
             </p>
           )}
           {codeOpen && !phoneVerified ? (
-            <div className="rounded-lg border border-slate-200 p-3 dark:border-white/10">
+            <div className="rounded-lg border border-rule p-3 ">
               <Label htmlFor="profile-phone-code">6-digit SMS code</Label>
               {devCode ? (
-                <p className="mt-1 rounded-md bg-teal-700/10 px-2.5 py-1.5 text-xs font-medium text-teal-800 dark:bg-teal-500/10 dark:text-teal-200" role="status">
-                  No SMS service configured, so your code is shown here: <span className="font-mono text-sm font-bold tracking-widest">{devCode}</span>
+                <p className="mt-1 rounded-md bg-paper-3 px-2.5 py-1.5 text-xs font-medium text-brick dark:bg-paper-3 dark:text-brick" role="status">
+                  No SMS service configured, so your code is shown here: <span className="font-mono text-sm font-bold ">{devCode}</span>
                 </p>
               ) : null}
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">

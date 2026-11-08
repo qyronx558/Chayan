@@ -101,20 +101,20 @@ export function SessionList({ sessions, signIns, loading, onRefresh }: SessionLi
             <Skeleton className="h-14 rounded-lg" />
           </div>
         ) : sessions.length === 0 ? (
-          <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">No other sessions.</p>
+          <p className="py-4 text-center text-sm text-muted-foreground dark:text-muted-foreground">No other sessions.</p>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+          <ul className="divide-y divide-rule100 ">
             {sessions.map((s) => (
               <li key={s.id} className="flex items-center gap-3 py-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-700/10 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300" aria-hidden="true">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick" aria-hidden="true">
                   <MonitorSmartphone className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-50">{s.device}</span>
+                    <span className="truncate text-sm font-medium text-foreground dark:text-paper">{s.device}</span>
                     {s.current ? <Badge variant="secondary" className="text-[11px]">This device</Badge> : null}
                   </span>
-                  <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                  <span className="block truncate text-xs text-muted-foreground dark:text-muted-foreground">
                     {s.location} · last active {formatDate(new Date(s.lastActiveAt), "dd MMM, HH:mm")}
                   </span>
                 </span>
@@ -132,14 +132,14 @@ export function SessionList({ sessions, signIns, loading, onRefresh }: SessionLi
         {loading ? (
           <Skeleton className="h-20 rounded-lg" />
         ) : signIns.length === 0 ? (
-          <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">No recent sign-in activity.</p>
+          <p className="py-4 text-center text-sm text-muted-foreground dark:text-muted-foreground">No recent sign-in activity.</p>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+          <ul className="divide-y divide-rule100 ">
             {signIns.map((s) => (
               <li key={s.id} className="flex items-center gap-2.5 py-2.5 text-sm">
-                <span className={s.success ? "h-2 w-2 shrink-0 rounded-full bg-teal-600" : "h-2 w-2 shrink-0 rounded-full bg-amber-500"} aria-label={s.success ? "Success" : "Failed"} />
-                <span className="min-w-0 flex-1 truncate text-slate-700 dark:text-slate-300">{s.device}</span>
-                <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">{formatDate(new Date(s.createdAt), "dd MMM, HH:mm")}</span>
+                <span className={s.success ? "h-2 w-2 shrink-0 rounded-full bg-paper-3" : "h-2 w-2 shrink-0 rounded-full bg-paper-2"} aria-label={s.success ? "Success" : "Failed"} />
+                <span className="min-w-0 flex-1 truncate text-foreground dark:text-muted-foreground">{s.device}</span>
+                <span className="shrink-0 text-xs tabular-nums text-muted-foreground dark:text-muted-foreground">{formatDate(new Date(s.createdAt), "dd MMM, HH:mm")}</span>
               </li>
             ))}
           </ul>

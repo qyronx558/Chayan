@@ -12,195 +12,195 @@ import { ResumeUpload } from "@/components/profile/ResumeUpload"
 
 interface Company { id: string; name: string; logo: string | null }
 interface RecommendedJob {
-  id: string; title: string; slug: string; type: string; category: string | null
-  location: string | null; salary: string | null; experience: string | null
-  company: Company; matchScore: number; matchedSkills: string[]
-  matchDetails: string[]; improvementTips: string[]
+ id: string; title: string; slug: string; type: string; category: string | null
+ location: string | null; salary: string | null; experience: string | null
+ company: Company; matchScore: number; matchedSkills: string[]
+ matchDetails: string[]; improvementTips: string[]
 }
 
 export function JobRecommendations() {
-  const [recs, setRecs] = useState<{ topMatches: RecommendedJob[]; otherJobs: RecommendedJob[]; matchCount: number } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [hasResume, setHasResume] = useState(false)
-  const [message, setMessage] = useState("")
-  const [showChangeResume, setShowChangeResume] = useState(false)
+ const [recs, setRecs] = useState<{ topMatches: RecommendedJob[]; otherJobs: RecommendedJob[]; matchCount: number } | null>(null)
+ const [loading, setLoading] = useState(true)
+ const [hasResume, setHasResume] = useState(false)
+ const [message, setMessage] = useState("")
+ const [showChangeResume, setShowChangeResume] = useState(false)
 
-  const fetchRecs = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch("/api/private-jobs/recommendations")
-      const json = await res.json()
-      if (json.success) {
-        if (json.data?.topMatches) {
-          setRecs(json.data)
-          setHasResume(true)
-          setMessage("")
-        } else {
-          setMessage(json.message || "Upload your resume to get job recommendations")
-          setHasResume(false)
-          setRecs(null)
-        }
-      }
-    } catch {
-    } finally {
-      setLoading(false)
+ const fetchRecs = async () => {
+  setLoading(true)
+  try {
+   const res = await fetch("/api/private-jobs/recommendations")
+   const json = await res.json()
+   if (json.success) {
+    if (json.data?.topMatches) {
+     setRecs(json.data)
+     setHasResume(true)
+     setMessage("")
+    } else {
+     setMessage(json.message || "Upload your resume to get job recommendations")
+     setHasResume(false)
+     setRecs(null)
     }
+   }
+  } catch {
+  } finally {
+   setLoading(false)
   }
+ }
 
-  useEffect(() => { fetchRecs() }, [])
+ useEffect(() => { fetchRecs() }, [])
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 md:grid-cols-2">
-          {[1, 2].map(i => <Skeleton key={i} className="h-40 rounded-xl" />)}
-        </div>
-      </div>
-    )
-  }
-
-  if (!hasResume) {
-    return (
-      <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50">
-        <CardContent className="py-8">
-          <div className="flex flex-col items-center text-center">
-            <Target className="mb-3 h-10 w-10 text-blue-500" />
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">Personalized Job Recommendations</h3>
-            <p className="mb-6 max-w-md text-sm text-gray-600">
-              Upload your resume and we&apos;ll match your skills, experience, and education with the best private jobs for you.
-            </p>
-            <div className="w-full max-w-md">
-              <ResumeUpload onResumeChange={fetchRecs} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (!recs || recs.topMatches.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <TrendingUp className="mx-auto mb-3 h-10 w-10 text-gray-400" />
-          <h3 className="mb-1 text-lg font-semibold text-gray-900">No Matching Jobs Yet</h3>
-          <p className="mb-4 text-sm text-gray-500">
-            We couldn&apos;t find jobs matching your profile. Check back later or update your resume.
-          </p>
-          <ResumeUpload onResumeChange={fetchRecs} />
-        </CardContent>
-      </Card>
-    )
-  }
-
+ if (loading) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-600" />
-          <h2 className="text-xl font-bold text-gray-900">
-            Recommended for You
-            <span className="ml-2 text-sm font-normal text-gray-500">({recs.matchCount} matches)</span>
-          </h2>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button variant="outline" size="sm" onClick={() => setShowChangeResume(!showChangeResume)}>
-            <FileUp className="mr-1 h-4 w-4" /> {showChangeResume ? "Hide Resume" : "Change Resume"}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={fetchRecs}>
-            <RefreshCw className="mr-1 h-4 w-4" /> Refresh
-          </Button>
-        </div>
-      </div>
-
-      {showChangeResume && (
-        <div className="max-w-xl">
-          <ResumeUpload
-            onResumeChange={() => {
-              setShowChangeResume(false)
-              fetchRecs()
-            }}
-          />
-        </div>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {recs.topMatches.slice(0, 6).map((job, i) => (
-          <motion.div
-            key={job.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <Link href={`/private-jobs/${job.slug}`}>
-              <Card className="group h-full cursor-pointer border-blue-100 transition-all hover:border-blue-300 hover:shadow-md">
-                <CardContent className="p-5">
-                  <div className="mb-3 flex items-start justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-600 text-white">
-                          {job.matchScore}% Match
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">{job.type}</Badge>
-                      </div>
-                      <h3 className="mt-2 text-base font-semibold text-gray-900 group-hover:text-blue-700">
-                        {job.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">{job.company.name}</p>
-                    </div>
-                  </div>
-                  <div className="mb-3 flex flex-wrap gap-1">
-                    {job.matchedSkills.slice(0, 4).map(s => (
-                      <Badge key={s} variant="secondary" className="bg-blue-50 text-xs text-blue-700">
-                        {s}
-                      </Badge>
-                    ))}
-                    {job.matchedSkills.length > 4 && (
-                      <Badge variant="outline" className="text-xs">+{job.matchedSkills.length - 4}</Badge>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-                    {job.location && <span>{job.location}</span>}
-                    {job.experience && <span>{job.experience}</span>}
-                    {job.salary && <span className="text-blue-600">{job.salary}</span>}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      {recs.otherJobs.length > 0 && (
-        <details className="group">
-          <summary className="cursor-pointer text-sm font-medium text-gray-500 hover:text-blue-600">
-            Show other {recs.otherJobs.length} available jobs
-          </summary>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {recs.otherJobs.slice(0, 4).map((job, i) => (
-              <Link key={job.id} href={`/private-jobs/${job.slug}`}>
-                <Card className="group h-full cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">{job.matchScore}%</Badge>
-                          <Badge variant="outline" className="text-xs">{job.type}</Badge>
-                        </div>
-                        <h3 className="mt-1 text-sm font-semibold text-gray-900 group-hover:text-blue-700">
-                          {job.title}
-                        </h3>
-                        <p className="text-xs text-gray-600">{job.company.name}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </details>
-      )}
+   <div className="space-y-4">
+    <Skeleton className="h-8 w-64" />
+    <div className="grid gap-4 md:grid-cols-2">
+     {[1, 2].map(i => <Skeleton key={i} className="h-40 rounded-none" />)}
     </div>
+   </div>
   )
+ }
+
+ if (!hasResume) {
+  return (
+   <Card className="border-y border-rule bg-paper-2">
+    <CardContent className="py-8">
+     <div className="flex flex-col items-center text-center">
+      <Target className="mb-3 h-10 w-10 text-muted-foreground" />
+      <h3 className="mb-2 font-display text-lg font-bold text-foreground">Personalized Job Recommendations</h3>
+      <p className="mb-6 max-w-md text-sm text-muted-foreground">
+       Upload your resume and we&apos;ll match your skills, experience, and education with the best private jobs for you.
+      </p>
+      <div className="w-full max-w-md">
+       <ResumeUpload onResumeChange={fetchRecs} />
+      </div>
+     </div>
+    </CardContent>
+   </Card>
+  )
+ }
+
+ if (!recs || recs.topMatches.length === 0) {
+  return (
+   <Card>
+    <CardContent className="py-8 text-center">
+     <TrendingUp className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+     <h3 className="mb-1 font-display text-lg font-bold text-foreground">No Matching Jobs Yet</h3>
+     <p className="mb-4 text-sm text-muted-foreground">
+      We couldn&apos;t find jobs matching your profile. Check back later or update your resume.
+     </p>
+     <ResumeUpload onResumeChange={fetchRecs} />
+    </CardContent>
+   </Card>
+  )
+ }
+
+ return (
+  <div className="space-y-6">
+   <div className="flex items-center justify-between">
+    <div className="flex items-center gap-2">
+     <Sparkles className="h-5 w-5 text-muted-foreground" />
+     <h2 className="font-display text-xl font-bold text-foreground">
+      Recommended for You
+      <span className="agate ml-2 text-xs font-normal text-muted-foreground">({recs.matchCount} matches)</span>
+     </h2>
+    </div>
+    <div className="flex items-center gap-1">
+     <Button variant="outline" size="sm" onClick={() => setShowChangeResume(!showChangeResume)}>
+      <FileUp className="mr-1 h-4 w-4" /> {showChangeResume ? "Hide Resume" : "Change Resume"}
+     </Button>
+     <Button variant="ghost" size="sm" onClick={fetchRecs}>
+      <RefreshCw className="mr-1 h-4 w-4" /> Refresh
+     </Button>
+    </div>
+   </div>
+
+   {showChangeResume && (
+    <div className="max-w-xl">
+     <ResumeUpload
+      onResumeChange={() => {
+       setShowChangeResume(false)
+       fetchRecs()
+      }}
+     />
+    </div>
+   )}
+
+   <div className="grid gap-4 md:grid-cols-2">
+    {recs.topMatches.slice(0, 6).map((job, i) => (
+     <motion.div
+      key={job.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.05 }}
+     >
+      <Link href={`/private-jobs/${job.slug}`}>
+       <Card className="group h-full cursor-pointer border-rule">
+        <CardContent className="p-5">
+         <div className="mb-3 flex items-start justify-between">
+          <div className="min-w-0 flex-1">
+           <div className="flex items-center gap-2">
+            <Badge className="agate border border-brick bg-transparent font-normal text-brick">
+             {job.matchScore}% match
+            </Badge>
+            <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">{job.type}</Badge>
+           </div>
+           <h3 className="mt-2 font-display text-base font-semibold text-foreground transition-colors group-hover:text-brick">
+            {job.title}
+           </h3>
+           <p className="text-sm text-muted-foreground">{job.company.name}</p>
+          </div>
+         </div>
+         <div className="mb-3 flex flex-wrap gap-1">
+          {job.matchedSkills.slice(0, 4).map(s => (
+           <Badge key={s} variant="outline" className="agate border-rule font-normal text-muted-foreground">
+            {s}
+           </Badge>
+          ))}
+          {job.matchedSkills.length > 4 && (
+           <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">+{job.matchedSkills.length - 4}</Badge>
+          )}
+         </div>
+         <div className="agate flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {job.location && <span>{job.location}</span>}
+          {job.experience && <span>{job.experience}</span>}
+          {job.salary && <span className="text-foreground">{job.salary}</span>}
+         </div>
+        </CardContent>
+       </Card>
+      </Link>
+     </motion.div>
+    ))}
+   </div>
+
+   {recs.otherJobs.length > 0 && (
+    <details className="group">
+     <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-brick">
+      Show other {recs.otherJobs.length} available jobs
+     </summary>
+     <div className="mt-4 grid gap-4 md:grid-cols-2">
+      {recs.otherJobs.slice(0, 4).map((job, i) => (
+       <Link key={job.id} href={`/private-jobs/${job.slug}`}>
+        <Card className="group h-full cursor-pointer border-rule">
+         <CardContent className="p-4">
+          <div className="flex items-start justify-between">
+           <div>
+            <div className="flex items-center gap-2">
+             <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">{job.matchScore}%</Badge>
+             <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">{job.type}</Badge>
+            </div>
+            <h3 className="mt-1 font-display text-sm font-semibold text-foreground transition-colors group-hover:text-brick">
+             {job.title}
+            </h3>
+            <p className="text-xs text-muted-foreground">{job.company.name}</p>
+           </div>
+          </div>
+         </CardContent>
+        </Card>
+       </Link>
+      ))}
+     </div>
+    </details>
+   )}
+  </div>
+ )
 }

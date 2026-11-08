@@ -60,7 +60,7 @@ export default function AdminExpiring() {
         <Card key={s.key}>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{s.label} ({s.rows.length})</CardTitle>
-            <Link href={s.href} className="text-xs font-semibold text-teal-700 hover:underline">Open {s.label} →</Link>
+            <Link href={s.href} className="text-xs font-semibold text-brick hover:underline">Open {s.label} →</Link>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -71,10 +71,10 @@ export default function AdminExpiring() {
                     <TableCell className="font-medium">{r.title}</TableCell>
                     <TableCell><Badge variant="secondary">{r.status ?? "-"}</Badge></TableCell>
                     <TableCell>{r.lastDate ? formatDate(r.lastDate) : "-"}</TableCell>
-                    <TableCell>{r.expired ? <Badge variant="destructive">past last-date</Badge> : <Badge className="bg-amber-500 text-white">expiring soon</Badge>}</TableCell>
+                    <TableCell>{r.expired ? <Badge variant="destructive">past last-date</Badge> : <Badge className="bg-paper-2 text-paper">expiring soon</Badge>}</TableCell>
                   </TableRow>
                 ))}
-                {s.rows.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-slate-500">All clear - nothing expiring.</TableCell></TableRow>}
+                {s.rows.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">All clear - nothing expiring.</TableCell></TableRow>}
               </TableBody>
             </Table>
           </CardContent>

@@ -47,11 +47,11 @@ interface SliderProps {
 function Slider({ label, icon: Icon, min, max, step, value, display, onChange, disabled }: SliderProps) {
   return (
     <div className="flex items-center gap-3">
-      <Icon className="h-4 w-4 shrink-0 text-gray-400" />
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <div className="flex-1">
         <div className="mb-1 flex items-center justify-between text-xs">
-          <span className="font-medium text-gray-500">{label}</span>
-          <span className="tabular-nums font-semibold text-gray-700 dark:text-gray-300">{display}</span>
+          <span className="font-medium text-muted-foreground">{label}</span>
+          <span className="tabular-nums font-semibold text-foreground dark:text-muted-foreground">{display}</span>
         </div>
         <input
           type="range"
@@ -61,7 +61,7 @@ function Slider({ label, icon: Icon, min, max, step, value, display, onChange, d
           value={value}
           disabled={disabled}
           onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-teal-600 disabled:opacity-50 dark:bg-gray-700"
+          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-paper-3 accent-[var(--color-brick)] disabled:opacity-50 dark:bg-ink"
           aria-label={label}
         />
       </div>
@@ -274,8 +274,8 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
 
   const toolbarButton = (disabled = false) =>
     cn(
-      "flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition-colors hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-teal-700 dark:hover:bg-teal-950",
-      disabled && "cursor-not-allowed opacity-40 hover:border-gray-200 hover:bg-transparent hover:text-gray-600 dark:hover:border-gray-700 dark:hover:bg-transparent dark:hover:text-gray-300"
+      "flex h-9 w-9 items-center justify-center rounded-lg border border-rule text-muted-foreground transition-colors hover:border-rule hover:bg-paper-3 hover:text-brick dark:border-ink dark:text-muted-foreground dark:hover:border-rule dark:hover:bg-paper-3",
+      disabled && "cursor-not-allowed opacity-40 hover:border-rule hover:bg-transparent hover:text-muted-foreground dark:hover:border-ink dark:hover:bg-transparent dark:hover:text-muted-foreground"
     )
 
   return (
@@ -284,7 +284,7 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
         type="button"
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "absolute -bottom-1 -right-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg ring-4 ring-white transition-all hover:scale-110 hover:bg-teal-700 dark:ring-gray-950",
+          "absolute -bottom-1 -right-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-paper-3 text-paper  ring-4 ring-white transition-all hover:scale-110 hover:bg-paper-3 dark:ring-rule950",
           className
         )}
         title="Change profile photo"
@@ -306,21 +306,21 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
 
       {modalOpen && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/60 p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget && !uploading) setModalOpen(false)
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-              <h3 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white">
-                <Upload className="h-4 w-4 text-teal-600" />
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-background  dark:bg-ink">
+            <div className="flex items-center justify-between border-b border-rule px-5 py-4 dark:border-ink">
+              <h3 className="flex items-center gap-2 text-base font-bold text-foreground dark:text-paper">
+                <Upload className="h-4 w-4 text-brick" />
                 Edit Profile Photo
               </h3>
               {!uploading && (
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-paper-3 hover:text-muted-foreground dark:hover:bg-ink dark:hover:text-muted-foreground"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
@@ -330,7 +330,7 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
 
             <div className="max-h-[70vh] overflow-y-auto p-5">
               <div
-                className="relative mx-auto h-[288px] w-[288px] touch-none select-none overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"
+                className="relative mx-auto h-[288px] w-[288px] touch-none select-none overflow-hidden rounded-full bg-paper-3 dark:bg-ink"
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
@@ -350,8 +350,8 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
                     }}
                   />
                 )}
-                <div className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-white/70 dark:ring-gray-900/70" />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur">
+                <div className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-white/70 dark:ring-rule900/70" />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-ink/50 px-2.5 py-1 text-[10px] font-medium text-paper">
                   <Move className="h-3 w-3" />
                   Drag to position
                 </div>
@@ -459,7 +459,7 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
               </div>
 
               {error && (
-                <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-brick bg-paper-2 px-3 py-2 text-sm text-brick dark:border-brick dark:bg-paper-2 dark:text-brick">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
@@ -472,13 +472,13 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
                 </Button>
                 {src && (
                   <Button variant="outline" onClick={removePhoto} disabled={uploading}>
-                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                    <Trash2 className="mr-2 h-4 w-4 text-brick" />
                     Remove
                   </Button>
                 )}
               </div>
 
-              <p className="mt-3 text-center text-[11px] text-gray-400">
+              <p className="mt-3 text-center text-[11px] text-muted-foreground">
                 {name ? `${name} · ` : ""}JPG, PNG, WEBP or GIF - max 5MB
               </p>
             </div>

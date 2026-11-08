@@ -34,13 +34,13 @@ function TrendTooltip({
   const current = payload.find((p) => p.dataKey === "current")?.value ?? 0
   const previous = payload.find((p) => p.dataKey === "previous")?.value ?? 0
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-[#0b1220]">
-      <p className="mb-1 font-semibold text-slate-900 dark:text-slate-100">{label}</p>
-      <p className="flex items-center gap-1.5 tabular-nums text-slate-600 dark:text-slate-300">
-        <span className="h-2 w-2 rounded-full bg-teal-700" /> Current: <strong>{current}</strong>
+    <div className="rounded-lg border border-rule bg-background px-3 py-2 text-xs   ">
+      <p className="mb-1 font-semibold text-foreground dark:text-paper">{label}</p>
+      <p className="flex items-center gap-1.5 tabular-nums text-muted-foreground dark:text-muted-foreground">
+        <span className="h-2 w-2 rounded-full bg-paper-3" /> Current: <strong>{current}</strong>
       </p>
-      <p className="flex items-center gap-1.5 tabular-nums text-slate-600 dark:text-slate-300">
-        <span className="h-2 w-2 rounded-full bg-slate-400" /> Previous: <strong>{previous}</strong>
+      <p className="flex items-center gap-1.5 tabular-nums text-muted-foreground dark:text-muted-foreground">
+        <span className="h-2 w-2 rounded-full bg-ink-2" /> Previous: <strong>{previous}</strong>
       </p>
     </div>
   )
@@ -64,19 +64,19 @@ export function TrendChart({
       subtitle={subtitle}
       action={
         <div className="text-right">
-          <p className="text-lg font-bold tabular-nums leading-none text-slate-900 dark:text-slate-50">
+          <p className="text-lg font-bold tabular-nums leading-none text-foreground dark:text-paper">
             {trend.total.toLocaleString("en-IN")}
           </p>
           <span
             className={cn(
               "mt-1 inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums",
               change === null
-                ? "text-slate-400"
+                ? "text-muted-foreground"
                 : change === 0
-                  ? "text-slate-500 dark:text-slate-400"
+                  ? "text-muted-foreground dark:text-muted-foreground"
                   : change > 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-rose-600 dark:text-rose-400"
+                    ? "text-foreground dark:text-foreground"
+                    : "text-brick dark:text-brick"
             )}
           >
             {change === null ? (
@@ -99,8 +99,8 @@ export function TrendChart({
       }
     >
       <div className="mb-2 flex items-center gap-3 text-xs">
-        <span className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
-          <span className="h-2 w-2 rounded-full bg-teal-700" /> Current
+        <span className="flex items-center gap-1.5 font-medium text-muted-foreground dark:text-muted-foreground">
+          <span className="h-2 w-2 rounded-full bg-paper-3" /> Current
         </span>
         <button
           type="button"
@@ -109,29 +109,23 @@ export function TrendChart({
           className={cn(
             "flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-medium transition-colors",
             showPrevious
-              ? "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"
-              : "border-slate-200 text-slate-400 opacity-60 dark:border-white/10 dark:text-slate-500"
+              ? "border-rule text-muted-foreground  dark:text-muted-foreground"
+              : "border-rule text-muted-foreground opacity-60  dark:text-muted-foreground"
           )}
         >
-          <span className="inline-block h-0 w-3 border-t-2 border-dashed border-slate-400" /> Previous
+          <span className="inline-block h-0 w-3 border-t-2 border-dashed border-rule-2" /> Previous
         </button>
       </div>
       {empty ? (
         <div className="flex h-[260px] flex-col items-center justify-center gap-2 text-center">
-          <Inbox className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No activity in this period</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">New publishes will appear here.</p>
+          <Inbox className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
+          <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">No activity in this period</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground">New publishes will appear here.</p>
         </div>
       ) : (
-        <div className="h-[260px] w-full text-slate-400 dark:text-slate-500">
+        <div className="h-[260px] w-full text-muted-foreground dark:text-muted-foreground">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={trend.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="trendCurrent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0F766E" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#0F766E" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
               <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.15} />
               <XAxis
                 dataKey="label"
@@ -149,30 +143,30 @@ export function TrendChart({
               />
               <Tooltip
                 content={<TrendTooltip />}
-                cursor={{ stroke: "#0F766E", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
+                cursor={{ stroke: "var(--color-brick)", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
               />
               {showPrevious ? (
                 <Area
                   type="monotone"
                   dataKey="previous"
                   name="Previous period"
-                  stroke="#9CA3AF"
+                  stroke="var(--color-rule-2)"
                   strokeWidth={1.5}
                   strokeDasharray="5 4"
                   fill="transparent"
                   dot={false}
-                  activeDot={{ r: 3, fill: "#9CA3AF", strokeWidth: 0 }}
+                  activeDot={{ r: 3, fill: "var(--color-rule-2)", strokeWidth: 0 }}
                 />
               ) : null}
               <Area
                 type="monotone"
                 dataKey="current"
                 name="Current period"
-                stroke="#0F766E"
+                stroke="var(--color-brick)"
                 strokeWidth={2.5}
-                fill="url(#trendCurrent)"
+                fill="var(--color-brick)" fillOpacity={0.1}
                 dot={false}
-                activeDot={{ r: 4, fill: "#0F766E", strokeWidth: 2, stroke: "#fff" }}
+                activeDot={{ r: 4, fill: "var(--color-brick)", strokeWidth: 2, stroke: "var(--color-paper)" }}
               />
             </AreaChart>
           </ResponsiveContainer>

@@ -143,8 +143,8 @@ export default function BookmarksPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="mb-6 flex items-center gap-3">
-          <Bookmark className="h-6 w-6 text-teal-600" />
-          <h1 className="text-2xl font-bold text-gray-900">
+          <Bookmark className="h-6 w-6 text-brick" />
+          <h1 className="text-2xl font-bold text-foreground">
             My Bookmarks ({bookmarks.length})
           </h1>
         </div>
@@ -294,9 +294,9 @@ function EmptyState({ type }: { type: string }) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center py-16">
-        <Bookmark className="mb-4 h-12 w-12 text-gray-300" />
-        <h3 className="mb-2 text-lg font-semibold text-gray-900">No bookmarks yet</h3>
-        <p className="mb-6 text-sm text-gray-500">
+        <Bookmark className="mb-4 h-12 w-12 text-muted-foreground" />
+        <h3 className="mb-2 text-lg font-semibold text-foreground">No bookmarks yet</h3>
+        <p className="mb-6 text-sm text-muted-foreground">
           You haven&apos;t saved any {type} yet. Start browsing and save items you&apos;re interested in.
         </p>
         <Button asChild>
@@ -323,7 +323,7 @@ interface BookmarkCardProps {
 function BookmarkCard({ id, title, department, location, date, status, href, onRemove, isRemoving }: BookmarkCardProps) {
   return (
     <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <Card className="group relative border-gray-200 transition-colors hover:border-teal-200">
+      <Card className="group relative border-rule transition-colors hover:border-rule">
         <CardContent className="flex items-start justify-between p-5">
           <Link href={href} className="min-w-0 flex-1">
             <div className="mb-2 flex items-center gap-2">
@@ -343,10 +343,10 @@ function BookmarkCard({ id, title, department, location, date, status, href, onR
                 </Badge>
               )}
             </div>
-            <h3 className="mb-2 text-base font-semibold text-gray-900 transition-colors group-hover:text-teal-700">
+            <h3 className="mb-2 text-base font-semibold text-foreground transition-colors group-hover:text-brick">
               {title}
             </h3>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {location && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />
@@ -364,7 +364,7 @@ function BookmarkCard({ id, title, department, location, date, status, href, onR
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0 text-gray-400 hover:text-red-500"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-brick"
             onClick={() => onRemove(id)}
             disabled={isRemoving}
           >

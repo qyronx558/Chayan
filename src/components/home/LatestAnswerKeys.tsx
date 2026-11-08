@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Calendar, Flame } from "lucide-react"
+import { ArrowRight, Calendar } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
 import { SectionHeader } from "@/components/ui/section-header"
 import { UniversalCard, UniversalCardSkeleton } from "@/components/ui/universal-card"
@@ -12,90 +12,85 @@ import { useHomeSection } from "@/components/home/use-home-section"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 
 interface AnswerKeyItem {
-  id: string
-  title: string
-  department: string
-  description?: string | null
-  createdAt: string
-  slug: string
+ id: string
+ title: string
+ department: string
+ description?: string | null
+ createdAt: string
+ slug: string
 }
 
 const toItem = (item: Record<string, unknown>): AnswerKeyItem => ({
-  id: item.id as string,
-  title: item.title as string,
-  department: (item.department as { name: string })?.name ?? "",
-  description: item.description as string | null | undefined,
-  createdAt: item.createdAt as string,
-  slug: item.slug as string,
+ id: item.id as string,
+ title: item.title as string,
+ department: (item.department as { name: string })?.name ?? "",
+ description: item.description as string | null | undefined,
+ createdAt: item.createdAt as string,
+ slug: item.slug as string,
 })
 
 export function LatestAnswerKeys() {
-  const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
-    "/api/answer-keys?limit=6",
-    "/api/answer-keys?limit=6&sort=trending"
-  )
+ const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
+  "/api/answer-keys?limit=6",
+  "/api/answer-keys?limit=6&sort=trending"
+ )
 
-  const items = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toItem))
-  const busy = tab === "trending" ? trendingLoading && trending === null : loading
-  const theme = moduleTheme.answerKey
+ const items = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toItem))
+ const busy = tab === "trending" ? trendingLoading && trending === null : loading
+ const theme = moduleTheme.answerKey
 
-  if (!busy && items.length === 0) return null
+ if (!busy && items.length === 0) return null
 
-  return (
-    <section className={cn("py-16")}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          icon={theme.icon}
-          iconClassName={theme.iconBg}
-          title="Latest Answer Keys"
-          subtitle={
-            tab === "trending" && trendingMeta && !trendingMeta.fallback
-              ? `Most viewed over the last ${trendingMeta.windowDays} days`
-              : "Provisional and final answer keys"
-          }
-          viewAllHref="/answer-keys"
-          action={<SectionTabs tab={tab} onChange={selectTab} />}
+ return (
+  <section className={cn("py-16")}>
+   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <SectionHeader
+     icon={theme.icon}
+     iconClassName={theme.iconBg}
+     title="Latest Answer Keys"
+     subtitle={
+      tab === "trending" && trendingMeta && !trendingMeta.fallback
+       ? `Most viewed over the last ${trendingMeta.windowDays} days`
+       : "Provisional and final answer keys"
+     }
+     viewAllHref="/answer-keys"
+     action={<SectionTabs tab={tab} onChange={selectTab} />}
+    />
+
+    {busy ? (
+     <div className={theme.homeGrid}>
+      {Array.from({ length: 6 }).map((_, i) => (
+       <UniversalCardSkeleton key={i} />
+      ))}
+     </div>
+    ) : (
+     <div className={theme.homeGrid}>
+      {items.map((item) => (
+       <div key={item.id} className="relative h-full">
+        <UniversalCard
+         module="answerKey"
+         title={cleanTitle(item.title)}
+         organization={item.department}
+         description={item.description}
+         metadata={[{ icon: Calendar, text: `Published: ${formatDate(item.createdAt)}` }]}
+         primaryCtaUrl={`/answer-key/${item.slug}`}
+         share={<CardShareButton title={cleanTitle(item.title)} url={`/answer-key/${item.slug}`} />}
         />
+       </div>
+      ))}
+     </div>
+    )}
 
-        {busy ? (
-          <div className={theme.homeGrid}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <UniversalCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className={theme.homeGrid}>
-            {items.map((item) => (
-              <div key={item.id} className="relative h-full">
-                {tab === "trending" && (
-                  <span className="absolute -top-2.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                    <Flame className="h-3 w-3" /> Trending
-                  </span>
-                )}
-                <UniversalCard
-                  module="answerKey"
-                  title={cleanTitle(item.title)}
-                  organization={item.department}
-                  description={item.description}
-                  metadata={[{ icon: Calendar, text: `Published: ${formatDate(item.createdAt)}` }]}
-                  primaryCtaUrl={`/answer-key/${item.slug}`}
-                  share={<CardShareButton title={cleanTitle(item.title)} url={`/answer-key/${item.slug}`} />}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 text-center sm:hidden">
-          <Link
-            href="/answer-keys"
-            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
-          >
-            View All Answer Keys
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  )
+    <div className="mt-6 text-center sm:hidden">
+     <Link
+      href="/answer-keys"
+      className="inline-flex items-center gap-1 text-sm font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
+     >
+      View All Answer Keys
+      <ArrowRight className="h-4 w-4" />
+     </Link>
+    </div>
+   </div>
+  </section>
+ )
 }

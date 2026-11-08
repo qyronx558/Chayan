@@ -17,7 +17,7 @@ export default async function Image() {
           justifyContent: "center",
           width: "100%",
           height: "100%",
-          background: "#ffffff",
+          background: "#f5f1e8",
           fontFamily: "system-ui, sans-serif",
           position: "relative",
           overflow: "hidden",
@@ -35,7 +35,7 @@ export default async function Image() {
               width: 140,
               height: 140,
               borderRadius: 28,
-              background: "#0f766e",
+              background: "#9b3426",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -61,10 +61,10 @@ export default async function Image() {
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 72, fontWeight: 500, color: "#0b0b0b", letterSpacing: -1 }}>
+            <div style={{ fontSize: 72, fontWeight: 500, color: "#141210", letterSpacing: -1 }}>
               ChayanJobs
             </div>
-            <div style={{ fontSize: 20, fontWeight: 400, color: "#52514e", marginTop: 4 }}>
+            <div style={{ fontSize: 20, fontWeight: 400, color: "#5c5850", marginTop: 4 }}>
               select right. serve right.
             </div>
           </div>
@@ -72,7 +72,7 @@ export default async function Image() {
         <div
           style={{
             fontSize: 18,
-            color: "#64748b",
+            color: "#5c5850",
             textAlign: "center",
             maxWidth: 600,
             lineHeight: 1.5,

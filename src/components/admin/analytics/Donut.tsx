@@ -5,7 +5,7 @@ import { Inbox } from "lucide-react";
 import { DataCard } from "@/components/admin/dashboard/DataCard";
 import type { DonutSlice } from "@/lib/analytics/types";
 
-const PALETTE = ["#0F766E", "#2563EB", "#D97706", "#7C3AED", "#DB2777", "#059669"];
+const PALETTE = ["var(--color-brick)", "var(--color-ink-2)", "var(--color-brick-ink)", "var(--color-ink)", "var(--color-rule-2)", "var(--color-muted)"];
 
 export function Donut({ title, subtitle, slices }: { title: string; subtitle?: string; slices: DonutSlice[] }) {
   const empty = slices.every((s) => s.value === 0);
@@ -14,8 +14,8 @@ export function Donut({ title, subtitle, slices }: { title: string; subtitle?: s
     <DataCard title={title} subtitle={subtitle} className="h-full">
       {empty ? (
         <div className="flex h-[260px] flex-col items-center justify-center gap-2 text-center">
-          <Inbox className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500">No data in this period</p>
+          <Inbox className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
+          <p className="text-sm font-medium text-muted-foreground">No data in this period</p>
         </div>
       ) : (
         <div className="h-[260px] w-full" role="img" aria-label={`${title} donut chart, total ${total}`}>

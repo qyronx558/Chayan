@@ -21,13 +21,13 @@ export async function sendPasswordResetEmail(email: string, token: string) {
     to: email,
     subject: "Reset Your Password - ChayanJobs",
     html: `
-      <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <h2 style="color:#1e3a5f">Reset Your Password</h2>
-        <p style="color:#555;line-height:1.6">You requested a password reset. Click the button below to set a new password. This link expires in 1 hour.</p>
-        <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin:16px 0">Reset Password</a>
-        <p style="color:#999;font-size:12px">If you didn't request this, ignore this email. Your password will remain unchanged.</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px">ChayanJobs - select right. serve right.</p>
+      <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+        <h2 style="color:#141210">Reset Your Password</h2>
+        <p style="color:#5c5850;line-height:1.6">You requested a password reset. Click the button below to set a new password. This link expires in 1 hour.</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#9b3426;color:#fff;text-decoration:none;border-radius:0;font-weight:600;margin:16px 0">Reset Password</a>
+        <p style="color:#5c5850;font-size:12px">If you didn't request this, ignore this email. Your password will remain unchanged.</p>
+        <hr style="border:none;border-top:1px solid #d8d0bf;margin:24px 0"/>
+        <p style="color:#5c5850;font-size:12px">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   })
@@ -51,12 +51,12 @@ export async function sendNewsletterWelcome(email: string) {
     to: email,
     subject: "Welcome to ChayanJobs Newsletter!",
     html: `
-      <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <h2 style="color:#1e3a5f">Welcome to ChayanJobs!</h2>
-        <p style="color:#555;line-height:1.6">You've subscribed to our newsletter. You'll now receive the latest government job alerts, exam notifications, and preparation tips directly in your inbox.</p>
-        <p style="color:#555;line-height:1.6">Stay tuned for updates!</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px">ChayanJobs - select right. serve right.</p>
+      <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+        <h2 style="color:#141210">Welcome to ChayanJobs!</h2>
+        <p style="color:#5c5850;line-height:1.6">You've subscribed to our newsletter. You'll now receive the latest government job alerts, exam notifications, and preparation tips directly in your inbox.</p>
+        <p style="color:#5c5850;line-height:1.6">Stay tuned for updates!</p>
+        <hr style="border:none;border-top:1px solid #d8d0bf;margin:24px 0"/>
+        <p style="color:#5c5850;font-size:12px">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   })
@@ -86,12 +86,12 @@ export async function sendNewsletterDigest(
     .map(
       (item) => `
       <tr>
-        <td style="padding:14px 18px;border-bottom:1px solid #eee">
-          <div style="font-size:11px;color:#0d9488;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${item.type}</div>
-          <div style="font-size:15px;font-weight:600;color:#111827;margin-top:2px">${item.title}</div>
-          <div style="font-size:13px;color:#6b7280;margin-top:4px">${item.detail}</div>
+        <td style="padding:14px 18px;border-bottom:1px solid #d8d0bf">
+          <div style="font-size:11px;color:#9b3426;font-weight:700;">${item.type}</div>
+          <div style="font-size:15px;font-weight:600;color:#141210;margin-top:2px">${item.title}</div>
+          <div style="font-size:13px;color:#5c5850;margin-top:4px">${item.detail}</div>
           <div style="margin-top:8px">
-            <a href="${baseUrl}${item.href}" style="display:inline-block;padding:8px 16px;background:#0d9488;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600">View Details</a>
+            <a href="${baseUrl}${item.href}" style="display:inline-block;padding:8px 16px;background:#9b3426;color:#fff;text-decoration:none;border-radius:0;font-size:13px;font-weight:600">View Details</a>
           </div>
         </td>
       </tr>`
@@ -99,27 +99,27 @@ export async function sendNewsletterDigest(
     .join("")
 
   const unsubscribeHtml = unsubscribeToken
-    ? `<a href="${baseUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}" style="color:#999">Unsubscribe</a>`
+    ? `<a href="${baseUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}" style="color:#5c5850">Unsubscribe</a>`
     : "You are receiving this because you subscribed to ChayanJobs job alerts."
 
   const html = `
-    <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-      <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
+    <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+      <div style="background:#141210;border-radius:0;padding:24px 28px">
         <div style="font-size:20px;font-weight:700;color:#fff">Your ChayanJobs Job Alert Digest</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+        <div style="font-size:13px;color:#efe9da;margin-top:4px">${items.length} fresh update${items.length === 1 ? "" : "s"} - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
-      <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+      <div style="border:1px solid #d8d0bf;border-top:none;border-radius:0">
         <table style="width:100%;border-collapse:collapse">
           ${itemsHtml}
           <tr>
             <td style="padding:18px">
-              <a href="${baseUrl}" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600">Browse All Updates</a>
+              <a href="${baseUrl}" style="display:inline-block;padding:10px 20px;background:#141210;color:#fff;text-decoration:none;border-radius:0;font-size:14px;font-weight:600">Browse All Updates</a>
             </td>
           </tr>
         </table>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-      <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | ${unsubscribeHtml}</p>
+      <hr style="border:none;border-top:1px solid #d8d0bf;margin:24px 0"/>
+      <p style="color:#5c5850;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | ${unsubscribeHtml}</p>
     </div>
   `
 
@@ -156,12 +156,12 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
     .map(
       (r) => `
       <tr>
-        <td style="padding:14px 18px;border-bottom:1px solid #eee">
-          <div style="font-size:11px;color:#0d9488;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${r.type}</div>
-          <div style="font-size:15px;font-weight:600;color:#111827;margin-top:2px">${r.title}</div>
-          <div style="font-size:13px;color:#6b7280;margin-top:4px">${r.detail}</div>
+        <td style="padding:14px 18px;border-bottom:1px solid #d8d0bf">
+          <div style="font-size:11px;color:#9b3426;font-weight:700;">${r.type}</div>
+          <div style="font-size:15px;font-weight:600;color:#141210;margin-top:2px">${r.title}</div>
+          <div style="font-size:13px;color:#5c5850;margin-top:4px">${r.detail}</div>
           <div style="margin-top:8px">
-            <a href="${r.href}" style="display:inline-block;padding:8px 16px;background:#0d9488;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600">View Details</a>
+            <a href="${r.href}" style="display:inline-block;padding:8px 16px;background:#9b3426;color:#fff;text-decoration:none;border-radius:0;font-size:13px;font-weight:600">View Details</a>
           </div>
         </td>
       </tr>`
@@ -169,28 +169,28 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
     .join("")
 
   const html = `
-    <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-      <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:24px 28px">
+    <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+      <div style="background:#141210;border-radius:0;padding:24px 28px">
         <div style="font-size:20px;font-weight:700;color:#fff">Hello ${name}, your application updates are here</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">ChayanJobs application tracker reminder - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+        <div style="font-size:13px;color:#efe9da;margin-top:4px">ChayanJobs application tracker reminder - ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
       </div>
-      <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+      <div style="border:1px solid #d8d0bf;border-top:none;border-radius:0">
         <table style="width:100%;border-collapse:collapse">
           <tr>
-            <td style="padding:16px 18px;background:#f8fafc;font-size:12px;color:#64748b">
+            <td style="padding:16px 18px;background:#efe9da;font-size:12px;color:#5c5850">
               You have ${reminders.length} upcoming deadline${reminders.length === 1 ? "" : "s"} for the jobs you're tracking. Don't miss them!
             </td>
           </tr>
           ${itemsHtml}
           <tr>
             <td style="padding:18px">
-              <a href="${getBaseUrl()}/applications" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600">Open My Applications</a>
+              <a href="${getBaseUrl()}/applications" style="display:inline-block;padding:10px 20px;background:#141210;color:#fff;text-decoration:none;border-radius:0;font-size:14px;font-weight:600">Open My Applications</a>
             </td>
           </tr>
         </table>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-      <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | You are receiving this because you are tracking applications.</p>
+      <hr style="border:none;border-top:1px solid #d8d0bf;margin:24px 0"/>
+      <p style="color:#5c5850;font-size:12px;text-align:center">ChayanJobs - select right. serve right. | You are receiving this because you are tracking applications.</p>
     </div>
   `
 
@@ -202,7 +202,7 @@ export async function sendApplicationReminderEmail(email: string, name: string, 
   const { data, error } = await resend.emails.send({
     from: `ChayanJobs <${fromEmail}>`,
     to: email,
-    subject: `⏰ ${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up - ChayanJobs`,
+    subject: `${reminders.length} application deadline${reminders.length === 1 ? "" : "s"} coming up - ChayanJobs`,
     html,
   })
 
@@ -225,23 +225,23 @@ export async function sendCompanyVerificationOtp(email: string, otp: string, com
   const safeCompany = companyName.replace(/[<>&"]/g, "")
   const subject = `Verify ${safeCompany} - your ChayanJobs employer code`
   const html = `
-    <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-      <div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px 12px 0 0;padding:20px 24px">
+    <div style="max-width:480px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+      <div style="background:#141210;border-radius:0;padding:20px 24px">
         <div style="font-size:18px;font-weight:700;color:#fff">ChayanJobs Employer Verification</div>
-        <div style="font-size:13px;color:#99f6e4;margin-top:4px">Confirm you own this work inbox</div>
+        <div style="font-size:13px;color:#efe9da;margin-top:4px">Confirm you own this work inbox</div>
       </div>
-      <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;padding:24px">
-        <p style="color:#374151;font-size:14px;line-height:1.6">You requested employer access for <strong>${safeCompany}</strong>. Enter this code in ChayanJobs (Employer Studio → Step 1):</p>
+      <div style="border:1px solid #d8d0bf;border-top:none;border-radius:0;padding:24px">
+        <p style="color:#5c5850;font-size:14px;line-height:1.6">You requested employer access for <strong>${safeCompany}</strong>. Enter this code in ChayanJobs (Employer Studio → Step 1):</p>
         <div style="text-align:center;margin:20px 0">
-          <span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:8px;color:#111827;background:#f3f4f6;border:1px dashed #9ca3af;border-radius:10px;padding:12px 20px 12px 28px">${otp}</span>
+          <span style="display:inline-block;font-size:32px;font-weight:700;letter-spacing:8px;color:#141210;background:#efe9da;border:1px dashed #5c5850;border-radius:0;padding:12px 20px 12px 28px">${otp}</span>
         </div>
-        <p style="color:#374151;font-size:13px">Valid for <strong>10 minutes</strong>, single use. After 5 wrong tries the code is locked and you must request a new one.</p>
-        <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 14px;margin-top:16px">
-          <p style="color:#92400e;font-size:12px;margin:0;line-height:1.6"><strong>Security:</strong> never share this code. ChayanJobs will NEVER ask for your password, OTP or bank details over email or phone. Only enter the code on <strong>chayanjobs.com</strong> - check the address bar before typing.</p>
+        <p style="color:#5c5850;font-size:13px">Valid for <strong>10 minutes</strong>, single use. After 5 wrong tries the code is locked and you must request a new one.</p>
+        <div style="background:#f5edd6;border:1px solid #9b3426;border-radius:0;padding:12px 14px;margin-top:16px">
+          <p style="color:#7f2a1f;font-size:12px;margin:0;line-height:1.6"><strong>Security:</strong> never share this code. ChayanJobs will NEVER ask for your password, OTP or bank details over email or phone. Only enter the code on <strong>chayanjobs.com</strong> - check the address bar before typing.</p>
         </div>
-        <p style="color:#9ca3af;font-size:12px;margin-top:16px">Didn't request this? Ignore this email - your account stays unchanged. If this repeats, reset your ChayanJobs password.</p>
+        <p style="color:#5c5850;font-size:12px;margin-top:16px">Didn't request this? Ignore this email - your account stays unchanged. If this repeats, reset your ChayanJobs password.</p>
       </div>
-      <p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:16px">ChayanJobs - select right. serve right. | Automated mail from noreply, do not reply.</p>
+      <p style="color:#5c5850;font-size:11px;text-align:center;margin-top:16px">ChayanJobs - select right. serve right. | Automated mail from noreply, do not reply.</p>
     </div>
   `
   if (!resend) {
@@ -301,46 +301,46 @@ export async function sendContactEmail(
     subject: options.reference ? `[${options.reference}] ${subject}` : `[ChayanJobs Contact] ${subject}`,
     text: `Reference: ${options.reference || "N/A"}\nFrom: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
     html: `
-      <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <div style="background:#0d1117;border-radius:8px 8px 0 0;padding:24px 28px">
+      <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+        <div style="background:#141210;border-radius:0;padding:24px 28px">
           <div style="font-size:20px;font-weight:700;color:#fff">${heading}</div>
-          <div style="font-size:13px;color:#9aa4b2;margin-top:4px">${subheading}</div>
+          <div style="font-size:13px;color:#efe9da;margin-top:4px">${subheading}</div>
         </div>
-        <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;padding:24px 28px">
+        <div style="border:1px solid #d8d0bf;border-top:none;border-radius:0;padding:24px 28px">
           <table style="width:100%;border-collapse:collapse">
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">From</td>
+              <td style="padding:12px 0;font-size:11px;color:#5c5850;">From</td>
             </tr>
             <tr>
-              <td style="padding:12px 0 24px 0;font-size:16px;font-weight:600;color:#111827">${safeName}</td>
+              <td style="padding:12px 0 24px 0;font-size:16px;font-weight:600;color:#141210">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Email</td>
+              <td style="padding:12px 0;font-size:11px;color:#5c5850;">Email</td>
             </tr>
             <tr>
-              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">
-                <a href="mailto:${safeEmail}" style="color:#0f766e;text-decoration:none">${safeEmail}</a>
+              <td style="padding:12px 0 24px 0;font-size:15px;color:#141210">
+                <a href="mailto:${safeEmail}" style="color:#9b3426;text-decoration:none">${safeEmail}</a>
               </td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Subject</td>
+              <td style="padding:12px 0;font-size:11px;color:#5c5850;">Subject</td>
             </tr>
             <tr>
-              <td style="padding:12px 0 24px 0;font-size:15px;color:#111827">${safeSubject}</td>
+              <td style="padding:12px 0 24px 0;font-size:15px;color:#141210">${safeSubject}</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:11px;color:#656d76;text-transform:uppercase;letter-spacing:0.05em">Message</td>
+              <td style="padding:12px 0;font-size:11px;color:#5c5850;">Message</td>
             </tr>
             <tr>
-              <td style="padding:12px 0;font-size:15px;color:#374151;line-height:1.7;white-space:pre-wrap">${safeMessage}</td>
+              <td style="padding:12px 0;font-size:15px;color:#5c5850;line-height:1.7;white-space:pre-wrap">${safeMessage}</td>
             </tr>
           </table>
-          <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e5e7eb">
-            <div style="font-size:12px;color:#999">You can reply directly to this email to respond to ${safeName}.</div>
+          <div style="margin-top:32px;padding-top:24px;border-top:1px solid #d8d0bf">
+            <div style="font-size:12px;color:#5c5850">You can reply directly to this email to respond to ${safeName}.</div>
           </div>
         </div>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
+        <hr style="border:none;border-top:1px solid #d8d0bf;margin:24px 0"/>
+        <p style="color:#5c5850;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   }, options.reference ? { idempotencyKey: `contact-team/${options.reference}` } : undefined)
@@ -372,16 +372,16 @@ export async function sendContactAutoReply(
     subject: `We received your message [${reference}]`,
     text: `Thanks ${name}, your message has been saved. Reference: ${reference}. We usually reply ${replyTime} on business days (Monday to Saturday, IST).`,
     html: `
-      <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Arial,sans-serif">
-        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:28px">
-          <div style="font-size:18px;font-weight:700;color:#0d1117">Thanks ${safeName}, we got your message</div>
-          <p style="color:#374151;font-size:14px;line-height:1.7">Your ${topicLabel.toLowerCase()} request is with the right team. Your reference number is <strong>${reference}</strong> — please include it in any follow-up.</p>
-          <p style="color:#374151;font-size:14px;line-height:1.7">We usually reply ${replyTime} on business days (Monday to Saturday, IST).</p>
-          <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb">
-            <p style="color:#656d76;font-size:12px;line-height:1.6;margin:0">ChayanJobs will never ask for your password, OTP, or payment over email. This mailbox does not receive replies.</p>
+      <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
+        <div style="border:1px solid #d8d0bf;border-radius:0;padding:28px">
+          <div style="font-size:18px;font-weight:700;color:#141210">Thanks ${safeName}, we got your message</div>
+          <p style="color:#5c5850;font-size:14px;line-height:1.7">Your ${topicLabel.toLowerCase()} request is with the right team. Your reference number is <strong>${reference}</strong> — please include it in any follow-up.</p>
+          <p style="color:#5c5850;font-size:14px;line-height:1.7">We usually reply ${replyTime} on business days (Monday to Saturday, IST).</p>
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid #d8d0bf">
+            <p style="color:#5c5850;font-size:12px;line-height:1.6;margin:0">ChayanJobs will never ask for your password, OTP, or payment over email. This mailbox does not receive replies.</p>
           </div>
         </div>
-        <p style="color:#999;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
+        <p style="color:#5c5850;font-size:12px;text-align:center">ChayanJobs - select right. serve right.</p>
       </div>
     `,
   }, { idempotencyKey: `contact-reply/${reference}` })

@@ -124,8 +124,8 @@ function ToolBtn({
       className={cn(
         "flex h-8 w-8 shrink-0 items-center justify-center rounded text-sm transition-colors",
         active
-          ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-          : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
+          ? "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
+          : "text-muted-foreground hover:bg-paper-3 dark:text-muted-foreground dark:hover:bg-ink",
         disabled && "cursor-not-allowed opacity-40",
       )}
     >
@@ -154,15 +154,15 @@ function Dropdown({
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center rounded text-sm transition-colors",
           open
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-            : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
+            ? "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
+            : "text-muted-foreground hover:bg-paper-3 dark:text-muted-foreground dark:hover:bg-ink",
         )}
       >
         {trigger}
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full z-50 mt-1 rounded-lg border border-gray-200 bg-white p-1.5 shadow-xl dark:border-gray-700 dark:bg-gray-900"
+          className="absolute left-0 top-full z-50 mt-1 rounded-lg border border-rule bg-background p-1.5  dark:border-ink dark:bg-ink"
           onClick={(e) => e.stopPropagation()}
         >
           {children}
@@ -173,7 +173,7 @@ function Dropdown({
 }
 
 const Divider = () => (
-  <div className="mx-1 h-6 w-px shrink-0 bg-gray-300 dark:bg-gray-600" />
+  <div className="mx-1 h-6 w-px shrink-0 bg-paper-3 dark:bg-ink-2" />
 )
 
 function DropItem({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
@@ -182,7 +182,7 @@ function DropItem({ onClick, children }: { onClick: () => void; children: React.
       type="button"
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm hover:bg-paper-3 dark:hover:bg-ink"
     >
       {children}
     </button>
@@ -257,7 +257,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       TaskItem.configure({ nested: true }),
       Subscript,
       Superscript,
-      Dropcursor.configure({ color: "#2563eb", width: 2 }),
+      Dropcursor.configure({ color: "var(--color-brick)", width: 2 }),
       CharacterCount.configure({ limit: 50000 }),
     ],
     content: value || "",
@@ -368,8 +368,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
     <div
       ref={editorRef}
       className={cn(
-        "overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700",
-        fullscreen && "fixed inset-4 z-[100] flex flex-col bg-background shadow-2xl",
+        "overflow-hidden rounded-lg border border-rule dark:border-ink",
+        fullscreen && "fixed inset-4 z-[100] flex flex-col bg-background ",
       )}
     >
       <input
@@ -382,8 +382,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
 
       {/* Image Toolbar (shown when image is selected) */}
       {isImageSelected && (
-        <div className="flex flex-wrap items-center gap-2 border-b bg-blue-50 px-4 py-2 dark:bg-blue-950">
-          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">Image</span>
+        <div className="flex flex-wrap items-center gap-2 border-b bg-paper-3 px-4 py-2 dark:bg-paper-3">
+          <span className="mr-1 text-xs font-semibold text-brick dark:text-brick">Image</span>
           <Divider />
           <div className="flex items-center gap-0.5">
             {ALIGN_OPTIONS.map((opt) => (
@@ -396,8 +396,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded text-xs transition-colors",
                   imgAttrs.align === opt.value
-                    ? "bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200"
-                    : "text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-800",
+                    ? "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick"
+                    : "text-brick hover:bg-paper-3 dark:text-brick dark:hover:bg-paper-3",
                 )}
               >
                 <opt.icon className="h-3.5 w-3.5" />
@@ -406,11 +406,11 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
           </div>
           <Divider />
           <div className="flex items-center gap-1">
-            <span className="text-xs text-blue-600 dark:text-blue-400">Size:</span>
+            <span className="text-xs text-brick dark:text-brick">Size:</span>
             <select
               value={imgAttrs.width || ""}
               onChange={(e) => updateImageAttr("width", e.target.value || null)}
-              className="rounded border border-blue-200 bg-white px-2 py-1 text-xs outline-none dark:border-blue-800 dark:bg-gray-800"
+              className="rounded border border-rule bg-background px-2 py-1 text-xs outline-none dark:border-rule dark:bg-ink"
             >
               {IMAGE_SIZES.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -421,9 +421,9 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
               placeholder="px"
               value={imgAttrs.width ? parseInt(imgAttrs.width) || "" : ""}
               onChange={(e) => updateImageAttr("width", e.target.value ? e.target.value + "px" : null)}
-              className="w-16 rounded border border-blue-200 bg-white px-2 py-1 text-xs outline-none dark:border-blue-800 dark:bg-gray-800"
+              className="w-16 rounded border border-rule bg-background px-2 py-1 text-xs outline-none dark:border-rule dark:bg-ink"
             />
-            <span className="text-xs text-blue-400">px</span>
+            <span className="text-xs text-brick">px</span>
           </div>
           <Divider />
           <button
@@ -432,7 +432,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
             onClick={() => {
               editor.chain().focus().deleteSelection().run()
             }}
-            className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+            className="rounded px-2 py-1 text-xs text-brick hover:bg-paper-2 dark:text-brick dark:hover:bg-paper-2"
           >
             Delete
           </button>
@@ -441,7 +441,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
 
       {/* Main Toolbar */}
       <div
-        className="flex flex-wrap items-center gap-0.5 border-b border-gray-300 bg-gray-50 p-1.5 dark:border-gray-700 dark:bg-gray-900"
+        className="flex flex-wrap items-center gap-0.5 border-b border-rule bg-paper-2 p-1.5 dark:border-ink dark:bg-ink"
         onClick={closeAllDropdowns}
       >
         {/* History */}
@@ -542,7 +542,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
         </ToolBtn>
 
         {showLinkInput && (
-          <div className="flex items-center gap-1 rounded border border-gray-300 bg-white p-1 dark:border-gray-600 dark:bg-gray-800">
+          <div className="flex items-center gap-1 rounded border border-rule bg-background p-1 dark:border-rule-2 dark:bg-ink">
             <input
               type="url"
               value={linkUrl}
@@ -552,13 +552,13 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
               placeholder="https://..."
               autoFocus
             />
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={applyLink} className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">Set</button>
+            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={applyLink} className="rounded bg-paper-3 px-2 py-1 text-xs text-paper hover:bg-paper-3">Set</button>
           </div>
         )}
 
         <ToolBtn onClick={handleImageButtonClick} title="Upload Image" active={uploading}>
           {uploading ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-rule-2 border-t-transparent" />
           ) : (
             <Image className="h-4 w-4" />
           )}
@@ -568,19 +568,19 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
           <div className="min-w-[180px]">
             {hasTable && (
               <>
-                <p className="px-2 py-1 text-xs font-medium text-gray-500">Table Actions</p>
+                <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Table Actions</p>
                 <DropItem onClick={() => { editor.chain().focus().addColumnBefore().run(); setShowTable(false) }}>Add Column Before</DropItem>
                 <DropItem onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTable(false) }}>Add Column After</DropItem>
                 <DropItem onClick={() => { editor.chain().focus().addRowBefore().run(); setShowTable(false) }}>Add Row Before</DropItem>
                 <DropItem onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTable(false) }}>Add Row After</DropItem>
-                <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
+                <div className="my-1 border-t border-rule dark:border-ink" />
                 <DropItem onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTable(false) }}>Delete Column</DropItem>
                 <DropItem onClick={() => { editor.chain().focus().deleteRow().run(); setShowTable(false) }}>Delete Row</DropItem>
                 <DropItem onClick={() => { editor.chain().focus().deleteTable().run(); setShowTable(false) }}>Delete Table</DropItem>
-                <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
+                <div className="my-1 border-t border-rule dark:border-ink" />
               </>
             )}
-            <p className="px-2 py-1 text-xs font-medium text-gray-500">Insert Table</p>
+            <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Insert Table</p>
             {[2, 3, 4, 5].map((n) => (
               <DropItem key={n} onClick={() => insertTable(n, n)}>
                 {n} x {n} Table
@@ -608,8 +608,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                 setShowFont(false)
               }}
               className={cn(
-                "flex w-full items-center gap-2 whitespace-nowrap rounded px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800",
-                editor.getAttributes("textStyle").fontFamily === font.value && "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+                "flex w-full items-center gap-2 whitespace-nowrap rounded px-3 py-1.5 text-left text-sm hover:bg-paper-3 dark:hover:bg-ink",
+                editor.getAttributes("textStyle").fontFamily === font.value && "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick",
               )}
               style={{ fontFamily: font.value }}
             >
@@ -634,8 +634,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                 setShowSize(false)
               }}
               className={cn(
-                "flex w-full items-center gap-2 whitespace-nowrap rounded px-3 py-1.5 text-left hover:bg-gray-100 dark:hover:bg-gray-800",
-                editor.getAttributes("textStyle").fontSize === size.value && "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+                "flex w-full items-center gap-2 whitespace-nowrap rounded px-3 py-1.5 text-left hover:bg-paper-3 dark:hover:bg-ink",
+                editor.getAttributes("textStyle").fontSize === size.value && "bg-paper-3 text-brick dark:bg-paper-3 dark:text-brick",
               )}
             >
               {size.label}
@@ -660,7 +660,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                   }
                   setShowColors(false)
                 }}
-                className="h-6 w-6 rounded border border-gray-200 hover:scale-110 dark:border-gray-600"
+                className="h-6 w-6 rounded border border-rule hover:scale-110 dark:border-rule-2"
                 style={{ backgroundColor: color }}
                 title={color}
               />
@@ -669,7 +669,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => { editor.chain().focus().unsetColor().run(); setShowColors(false) }}
-              className="col-span-6 mt-1 rounded bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400"
+              className="col-span-6 mt-1 rounded bg-paper-3 px-2 py-1 text-xs text-muted-foreground hover:bg-paper-3 dark:bg-ink dark:text-muted-foreground"
             >
               Remove Color
             </button>
@@ -688,7 +688,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                   editor.chain().focus().toggleHighlight({ color }).run()
                   setShowHighlight(false)
                 }}
-                className="h-6 w-6 rounded border border-gray-200 hover:scale-110 dark:border-gray-600"
+                className="h-6 w-6 rounded border border-rule hover:scale-110 dark:border-rule-2"
                 style={{ backgroundColor: color }}
                 title={color}
               />
@@ -697,7 +697,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => { editor.chain().focus().unsetHighlight().run(); setShowHighlight(false) }}
-              className="col-span-5 mt-1 rounded bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400"
+              className="col-span-5 mt-1 rounded bg-paper-3 px-2 py-1 text-xs text-muted-foreground hover:bg-paper-3 dark:bg-ink dark:text-muted-foreground"
             >
               Remove Highlight
             </button>
@@ -724,7 +724,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center justify-between border-t border-gray-300 bg-gray-50 px-4 py-1.5 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+      <div className="flex items-center justify-between border-t border-rule bg-paper-2 px-4 py-1.5 text-xs text-muted-foreground dark:border-ink dark:bg-ink dark:text-muted-foreground">
         <div className="flex items-center gap-4">
           <span>{words} words</span>
           <span>{chars} characters</span>

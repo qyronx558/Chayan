@@ -91,29 +91,29 @@ export default function LoginPage() {
     >
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign In</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Continue to your dashboard</p>
+          <h1 className="text-2xl font-bold text-foreground dark:text-paper">Sign In</h1>
+          <p className="mt-2 text-muted-foreground dark:text-muted-foreground">Continue to your dashboard</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-paper-3 p-1 dark:bg-ink">
           <button
             type="button"
             onClick={() => setMode("seeker")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "seeker" ? "bg-white text-gray-900 shadow dark:bg-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "seeker" ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
           >
             <User className="h-4 w-4" /> Jobseeker
           </button>
           <button
             type="button"
             onClick={() => setMode("employer")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "employer" ? "bg-white text-gray-900 shadow dark:bg-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "employer" ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
           >
             <Building2 className="h-4 w-4" /> Employer
           </button>
         </div>
 
         {mode === "employer" && (
-          <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800 dark:border-teal-800 dark:bg-teal-950/30 dark:text-teal-200">
+          <div className="rounded-xl border border-rule bg-paper-3 p-4 text-sm text-brick dark:border-rule dark:bg-paper-3 dark:text-brick">
             <p className="flex items-center gap-1.5 font-bold"><Briefcase className="h-4 w-4" /> Company login - 2 steps</p>
             <ol className="mt-1.5 list-decimal space-y-0.5 pl-5 text-[13px]">
               <li>Sign in below with your normal account (same as jobseekers).</li>
@@ -126,7 +126,7 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300"
+            className="rounded-xl border border-brick bg-paper-2 p-4 text-sm font-medium text-brick dark:border-brick dark:bg-paper-2 dark:text-brick"
             role="alert"
           >
             {shownError}
@@ -168,11 +168,11 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                className="w-4 h-4 rounded border-rule text-brick focus:ring-rule"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+              <span className="text-sm text-muted-foreground dark:text-muted-foreground">Remember me</span>
             </label>
-            <Link href="/forgot-password" className="text-sm font-medium text-teal-600 hover:text-teal-700">
+            <Link href="/forgot-password" className="text-sm font-medium text-brick hover:text-brick">
               Forgot password?
             </Link>
           </div>
@@ -192,14 +192,14 @@ export default function LoginPage() {
         </form>
 
         {mode === "employer" && (
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-muted-foreground">
             New company not listed? You can create it manually with domain right after login in Studio Step 1.
           </p>
         )}
 
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+          <Link href="/register" className="font-semibold text-brick hover:text-brick transition-colors">
             Create one
           </Link>
         </p>

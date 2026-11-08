@@ -58,19 +58,19 @@ export function TableOfContents({ className }: { className?: string }) {
   }
 
   return (
-    <nav className={cn("rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800", className)}>
+    <nav className={cn("rounded-xl border border-rule bg-background dark:border-ink dark:bg-ink", className)}>
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100"
+        className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-foreground dark:text-paper"
       >
         <span className="flex items-center gap-2">
-          <ListTree className="h-4 w-4 text-[#8A6D3B]" /> On this page
+          <ListTree className="h-4 w-4 text-brick" /> On this page
         </span>
-        {collapsed ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronUp className="h-4 w-4 text-gray-400" />}
+        {collapsed ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronUp className="h-4 w-4 text-muted-foreground" />}
       </button>
       {!collapsed && (
-        <ul className="space-y-1 border-t border-gray-100 px-3 py-3 dark:border-gray-700">
+        <ul className="space-y-1 border-t border-rule px-3 py-3 dark:border-ink">
           {headings.map((h) => (
             <li key={h.id} style={{ paddingLeft: h.level === 3 ? "1rem" : "0" }}>
               <button
@@ -79,11 +79,11 @@ export function TableOfContents({ className }: { className?: string }) {
                 className={cn(
                   "flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-[13px] leading-snug transition-colors",
                   active === h.id
-                    ? "bg-[#F4EDDE] font-semibold text-[#1B3A5C] dark:bg-blue-950 dark:text-blue-300"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-gray-200"
+                    ? "bg-paper-3 font-semibold text-brick dark:bg-paper-3 dark:text-brick"
+                    : "text-muted-foreground hover:bg-paper-2 hover:text-foreground dark:text-muted-foreground dark:hover:bg-ink/50 dark:hover:text-muted-foreground"
                 )}
               >
-                <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", active === h.id ? "bg-[#B08D57]" : "bg-gray-300 dark:bg-gray-600")} />
+                <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", active === h.id ? "bg-brick" : "bg-paper-3 dark:bg-ink-2")} />
                 {h.text}
               </button>
             </li>

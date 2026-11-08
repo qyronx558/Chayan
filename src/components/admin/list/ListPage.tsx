@@ -462,11 +462,11 @@ export default function ListPage<TRow extends BaseRow>({
           const meta = config.metaLine(r);
           return (
             <div className="min-w-0">
-              <p className="truncate text-[13.5px] font-semibold text-slate-900 dark:text-slate-100" title={r.title}>
+              <p className="truncate text-[13.5px] font-semibold text-foreground dark:text-paper" title={r.title}>
                 {r.title}
               </p>
               {meta.length > 0 && (
-                <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
+                <p className="mt-0.5 truncate text-xs text-muted-foreground dark:text-muted-foreground">
                   {meta.join("  •  ")}
                 </p>
               )}
@@ -493,15 +493,15 @@ export default function ListPage<TRow extends BaseRow>({
         header: () => <span className={T_HEAD_CELL}>Uploaded by</span>,
         cell: ({ row }) => {
           const u = config.uploaderOf(row.original);
-          if (!u) return <span className="text-xs text-slate-400">-</span>;
+          if (!u) return <span className="text-xs text-muted-foreground">-</span>;
           return (
             <span className="flex items-center gap-2" title={u.email}>
-              <Avatar className="h-7 w-7 shrink-0 border border-slate-200 dark:border-white/10">
-                <AvatarFallback className="bg-teal-700 text-[10px] font-bold text-white dark:bg-teal-600">
+              <Avatar className="h-7 w-7 shrink-0 border border-rule ">
+                <AvatarFallback className="bg-paper-3 text-[10px] font-bold text-paper dark:bg-paper-3">
                   {initials(u.name, u.email)}
                 </AvatarFallback>
               </Avatar>
-              <span className="max-w-[140px] truncate text-[13px] text-slate-600 dark:text-slate-300">
+              <span className="max-w-[140px] truncate text-[13px] text-muted-foreground dark:text-muted-foreground">
                 {u.name || u.email}
               </span>
             </span>
@@ -514,11 +514,11 @@ export default function ListPage<TRow extends BaseRow>({
         header: () => <span className={T_HEAD_CELL}>{config.dateLabel}</span>,
         cell: ({ row }) => {
           const d = config.dateOf(row.original);
-          if (!d) return <span className="text-xs text-slate-400">-</span>;
+          if (!d) return <span className="text-xs text-muted-foreground">-</span>;
           const t = new Date(d).getTime();
-          if (Number.isNaN(t)) return <span className="text-xs text-slate-400">-</span>;
+          if (Number.isNaN(t)) return <span className="text-xs text-muted-foreground">-</span>;
           return (
-            <span className="whitespace-nowrap text-[13px] tabular-nums text-slate-600 dark:text-slate-300" title={formatDate(d)}>
+            <span className="whitespace-nowrap text-[13px] tabular-nums text-muted-foreground dark:text-muted-foreground" title={formatDate(d)}>
               {formatDistanceToNow(new Date(t), { addSuffix: true })}
             </span>
           );
@@ -538,7 +538,7 @@ export default function ListPage<TRow extends BaseRow>({
                 <ExternalLink className="h-4 w-4" />
               </ActionButton>
               <ActionButton title={copiedId === r.id ? "Copied" : "Copy public link"} onClick={() => void copyLink(r)}>
-                {copiedId === r.id ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                {copiedId === r.id ? <Check className="h-4 w-4 text-foreground" /> : <Copy className="h-4 w-4" />}
               </ActionButton>
               {canEdit && (
                 <ActionButton title="Edit" onClick={() => setFormState({ open: true, row: r })}>
@@ -547,17 +547,17 @@ export default function ListPage<TRow extends BaseRow>({
               )}
               {canSubmit && !isSuper && config.submittable(r) && (
                 <ActionButton title="Submit for review" onClick={() => void doSubmit([r.id])}>
-                  <Send className="h-4 w-4 text-blue-600" />
+                  <Send className="h-4 w-4 text-brick" />
                 </ActionButton>
               )}
               {canVerify && pending && (
                 <ActionButton title="Verify" onClick={() => void doVerify([r.id])}>
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <CheckCircle2 className="h-4 w-4 text-foreground" />
                 </ActionButton>
               )}
               {canReject && pending && (
                 <ActionButton title="Reject with note" onClick={() => setRejectState({ ids: [r.id] })}>
-                  <XCircle className="h-4 w-4 text-amber-600" />
+                  <XCircle className="h-4 w-4 text-brick" />
                 </ActionButton>
               )}
               {canDelete && (
@@ -639,27 +639,27 @@ export default function ListPage<TRow extends BaseRow>({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-[12.5px] text-slate-400 dark:text-slate-500">
-            <Link href="/admin/dashboard" className="font-medium transition-colors hover:text-teal-600">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-[12.5px] text-muted-foreground dark:text-muted-foreground">
+            <Link href="/admin/dashboard" className="font-medium transition-colors hover:text-brick">
               Admin
             </Link>
             {config.crumbs.map((c) => (
               <span key={c.label} className="flex min-w-0 items-center gap-1">
                 <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                 {c.href ? (
-                  <Link href={c.href} className="truncate font-medium transition-colors hover:text-teal-600">
+                  <Link href={c.href} className="truncate font-medium transition-colors hover:text-brick">
                     {c.label}
                   </Link>
                 ) : (
-                  <span className="truncate font-semibold text-slate-700 dark:text-slate-200">{c.label}</span>
+                  <span className="truncate font-semibold text-foreground dark:text-muted-foreground">{c.label}</span>
                 )}
               </span>
             ))}
           </nav>
-          <h1 className="mt-1 truncate text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-slate-50">
+          <h1 className="mt-1 truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl dark:text-paper">
             {config.title}
           </h1>
-          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{config.description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground dark:text-muted-foreground">{config.description}</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {canAudit && (
@@ -694,7 +694,7 @@ export default function ListPage<TRow extends BaseRow>({
       />
 
       <Card className={T_CARD}>
-        <div className="space-y-2.5 border-b border-slate-100 p-3 sm:p-4 dark:border-white/[0.06]">
+        <div className="space-y-2.5 border-b border-rule p-3 sm:p-4 ">
           <ListToolbar
             q={input}
             onQ={setInput}
@@ -724,7 +724,7 @@ export default function ListPage<TRow extends BaseRow>({
           <Table className="saas-table" data-density={query.density}>
             <TableHeader className="sticky top-0 z-10">
               {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id} className="bg-slate-50/95 backdrop-blur hover:bg-slate-50/95 dark:bg-[#0b1220]/95">
+                <TableRow key={hg.id} className="bg-paper-2/95 hover:bg-paper-2/95 ">
                   {hg.headers.map((h) => (
                     <TableHead key={h.id} style={{ width: h.getSize() === 150 ? undefined : h.getSize() }}>
                       {flexRender(h.column.columnDef.header, h.getContext())}
@@ -746,11 +746,11 @@ export default function ListPage<TRow extends BaseRow>({
                 <TableRow>
                   <TableCell colSpan={6}>
                     <div className="flex flex-col items-center gap-2 py-12 text-center">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06]">
-                        <Inbox className="h-6 w-6 text-slate-400" />
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper-3 dark:bg-background/[0.06]">
+                        <Inbox className="h-6 w-6 text-muted-foreground" />
                       </span>
-                      <p className="font-semibold text-slate-700 dark:text-slate-200">No {config.plural.toLowerCase()} found</p>
-                      <p className="max-w-xs text-sm text-slate-400">
+                      <p className="font-semibold text-foreground dark:text-muted-foreground">No {config.plural.toLowerCase()} found</p>
+                      <p className="max-w-xs text-sm text-muted-foreground">
                         {query.tab !== "all" || query.q || activeFilterCount > 0
                           ? "Try a different search, tab or filter."
                           : `Get started by creating your first ${config.singular}.`}
@@ -772,7 +772,7 @@ export default function ListPage<TRow extends BaseRow>({
                       key={r.id}
                       data-selected={tr.getIsSelected()}
                       data-pending={moderation === "PENDING"}
-                      className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-teal-50/40 data-[selected=true]:bg-teal-50/70 dark:border-white/[0.06] dark:hover:bg-white/[0.03] dark:data-[selected=true]:bg-teal-950/40"
+                      className="group border-b border-rule transition-colors last:border-0 hover:bg-paper-3 data-[selected=true]:bg-paper-3  dark:hover:bg-background/[0.03] dark:data-[selected=true]:bg-paper-3"
                     >
                       {tr.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id} className={cn(query.density === "compact" && "py-2")}>
@@ -873,7 +873,7 @@ function ActionButton({
   children: React.ReactNode;
 }) {
   const cls =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-slate-200";
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground dark:text-muted-foreground dark:hover:bg-background/[0.06] dark:hover:text-muted-foreground";
   if (href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" title={title} className={cls}>
@@ -886,7 +886,7 @@ function ActionButton({
       type="button"
       title={title}
       onClick={onClick}
-      className={danger ? `${cls} hover:!bg-red-50 hover:!text-red-600 dark:hover:!bg-red-950/40 dark:hover:!text-red-400` : cls}
+      className={danger ? `${cls} hover:!bg-paper-2 hover:!text-brick dark:hover:!bg-paper-2 dark:hover:!text-brick` : cls}
     >
       {children}
     </button>

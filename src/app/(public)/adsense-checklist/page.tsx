@@ -66,13 +66,13 @@ const checklistItems = [
 export default function AdSenseChecklistPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-bold text-gray-900">AdSense Compliance Checklist</h1>
-      <p className="mb-8 text-sm text-gray-500">
+      <h1 className="mb-2 text-4xl font-bold text-foreground">AdSense Compliance Checklist</h1>
+      <p className="mb-8 text-sm text-muted-foreground">
         Use this checklist to verify ChayanJobs meets all Google AdSense requirements before applying.
       </p>
 
-      <div className="mb-8 rounded-lg border border-teal-200 bg-teal-50 p-4">
-        <p className="text-sm text-teal-800">
+      <div className="mb-8 rounded-lg border border-rule bg-paper-3 p-4">
+        <p className="text-sm text-brick">
           <strong>Recommendation:</strong> Wait until the site has been live for at least 2-3 months with
           consistent traffic before applying to AdSense. The most common rejection reasons are:
           insufficient content, lack of essential pages, and site age less than 6 months.
@@ -81,23 +81,23 @@ export default function AdSenseChecklistPage() {
 
       {checklistItems.map((section) => (
         <section key={section.category} className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900">{section.category}</h2>
+          <h2 className="mb-4 text-2xl font-semibold text-foreground">{section.category}</h2>
           <div className="space-y-2">
             {section.items.map((item) => (
               <div
                 key={item.label}
-                className="flex items-start gap-3 rounded-lg border border-gray-200 p-3"
+                className="flex items-start gap-3 rounded-lg border border-rule p-3"
               >
                 <span
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${
-                    item.status === "done" ? "bg-green-500" : "bg-yellow-500"
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-paper ${
+                    item.status === "done" ? "bg-paper-3" : "bg-paper-2"
                   }`}
                 >
                   {item.status === "done" ? "✓" : "!"}
                 </span>
                 <div>
-                  <p className="text-sm text-gray-700">{item.label}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm text-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">
                     {item.status === "done" ? "Completed" : "Needs attention"}
                   </p>
                 </div>
@@ -107,7 +107,7 @@ export default function AdSenseChecklistPage() {
         </section>
       ))}
 
-      <p className="text-sm text-gray-400">
+      <p className="text-sm text-muted-foreground">
         Last updated: July 15, 2026. Re-check before each AdSense application attempt.
       </p>
     </div>

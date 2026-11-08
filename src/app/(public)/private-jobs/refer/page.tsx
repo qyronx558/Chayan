@@ -26,9 +26,9 @@ export default function ReferJobPage() {
   return (
     <div className="container mx-auto max-w-2xl px-4 py-10">
       <h1 className="mb-2 text-3xl font-bold">Refer a private job</h1>
-      <p className="mb-6 text-gray-600">Found a genuine opening? Share the official apply link. We verify, score trust and publish - you get credit.</p>
+      <p className="mb-6 text-muted-foreground">Found a genuine opening? Share the official apply link. We verify, score trust and publish - you get credit.</p>
       <Card><CardHeader><CardTitle>Job referral</CardTitle></CardHeader><CardContent>
-        {done && <p className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">Thanks! Your referral is under review.</p>}
+        {done && <p className="mb-4 rounded-lg bg-paper-3 p-3 text-sm text-foreground">Thanks! Your referral is under review.</p>}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField control={form.control} name="title" render={({ field }) => <FormItem><FormLabel>Job title</FormLabel><FormControl><Input placeholder="e.g. Frontend Developer" {...field} /></FormControl><FormMessage /></FormItem>} />

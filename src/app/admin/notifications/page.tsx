@@ -150,7 +150,7 @@ export default function AdminNotifications() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Notifications</h1>
-          <p className="text-sm text-gray-500">Users with notification permissions enabled receive these instantly.</p>
+          <p className="text-sm text-muted-foreground">Users with notification permissions enabled receive these instantly.</p>
         </div>
         <Button onClick={openCreate}><Plus className="mr-1 h-4 w-4" /> Add Notification</Button>
       </div>
@@ -177,41 +177,41 @@ export default function AdminNotifications() {
                       <div className="flex items-center gap-1.5 font-medium">
                         <span className="truncate">{n.title}</span>
                         {n.isTrending && (
-                          <Badge variant="outline" className="shrink-0 gap-1 text-[10px] text-orange-600">
+                          <Badge variant="outline" className="shrink-0 gap-1 text-[10px] text-brick">
                             <TrendingUp className="h-3 w-3" /> Trending
                           </Badge>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-500">{n.category.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{n.category.name}</TableCell>
                     <TableCell>
                       {n.type ? (
                         <Badge variant="secondary" className="text-[10px]">{n.type.replace(/_/g, " ")}</Badge>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {n.officialUrl ? (
-                        <a href={n.officialUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline" title={n.officialUrl}>
+                        <a href={n.officialUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-brick hover:underline" title={n.officialUrl}>
                           <ExternalLink className="h-3 w-3" /> Official
                         </a>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-gray-500">{n.views}</TableCell>
+                    <TableCell className="text-muted-foreground">{n.views}</TableCell>
                     <TableCell>{formatDate(n.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(n)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(n.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(n.id)}><Trash2 className="h-4 w-4 text-brick" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {notifications.length === 0 && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-gray-500">No notifications found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">No notifications found</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -238,9 +238,9 @@ export default function AdminNotifications() {
                   <FormLabel>Slug</FormLabel>
                   <FormControl><Input {...field} /></FormControl>
                   {matchedContent ? (
-                    <p className="text-xs text-emerald-600">View Details button will link to: {matchedContent.title}</p>
+                    <p className="text-xs text-foreground">View Details button will link to: {matchedContent.title}</p>
                   ) : watchedSlug && contentData?.data?.length ? (
-                    <p className="text-xs text-amber-600">No content with this slug - the View Details button will be hidden.</p>
+                    <p className="text-xs text-brick">No content with this slug - the View Details button will be hidden.</p>
                   ) : null}
                   <FormMessage />
                 </FormItem>
@@ -293,7 +293,7 @@ export default function AdminNotifications() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-500">Choosing an item links this notification to the exact content so the "View Details" button works. You can also type the slug manually.</p>
+                  <p className="text-xs text-muted-foreground">Choosing an item links this notification to the exact content so the "View Details" button works. You can also type the slug manually.</p>
                 </div>
               )}
               <FormField control={form.control} name="content" render={({ field }) => (
@@ -311,7 +311,7 @@ export default function AdminNotifications() {
                   <FormControl>
                     <Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="https://bpsc.bih.nic.in/notification.pdf" />
                   </FormControl>
-                  <p className="text-xs text-gray-500">The "Official Link" button on the public notification card points here. Leave empty if not needed.</p>
+                  <p className="text-xs text-muted-foreground">The "Official Link" button on the public notification card points here. Leave empty if not needed.</p>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -319,7 +319,7 @@ export default function AdminNotifications() {
                 <FormItem className="flex items-center justify-between rounded-lg border p-3">
                   <div>
                     <Label htmlFor="isTrending" className="text-sm font-medium">Trending</Label>
-                    <p className="text-xs text-gray-500">Show in the trending notifications section</p>
+                    <p className="text-xs text-muted-foreground">Show in the trending notifications section</p>
                   </div>
                   <FormControl>
                     <Switch id="isTrending" checked={field.value} onCheckedChange={field.onChange} />
@@ -340,7 +340,7 @@ export default function AdminNotifications() {
       <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null) }}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Delete Notification</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">Are you sure? This action cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure? This action cannot be undone.</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => deleteId && deleteMutation.mutate(deleteId)} disabled={deleteMutation.isPending}>Delete</Button>

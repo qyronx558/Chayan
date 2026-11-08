@@ -13,15 +13,15 @@ export function DataCard({ title, subtitle, action, children, className }: DataC
   return (
     <section
       className={cn(
-        "rounded-xl border border-slate-200 bg-white dark:border-white/[0.06] dark:bg-[#0b1220]",
+        "rounded-xl border border-rule bg-background  ",
         className
       )}
     >
       <header className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5">
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+          <h2 className="truncate text-sm font-semibold text-foreground dark:text-paper">{title}</h2>
           {subtitle ? (
-            <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
+            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground dark:text-muted-foreground">{subtitle}</p>
           ) : null}
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}

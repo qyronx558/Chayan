@@ -50,7 +50,7 @@ export function JobPreferences({ form }: JobPreferencesProps) {
           <div className="space-y-1.5">
             <Label htmlFor="profile-dob">Date of birth</Label>
             <Input id="profile-dob" type="date" {...register("dateOfBirth")} />
-            <p className="text-xs text-slate-500 dark:text-slate-400">Used for age eligibility.</p>
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">Used for age eligibility.</p>
           </div>
         </div>
         <div className="space-y-2">
@@ -65,10 +65,10 @@ export function JobPreferences({ form }: JobPreferencesProps) {
                   aria-pressed={on}
                   onClick={() => toggle(states, s, (next) => setValue("preferredStates", next, { shouldDirty: true, shouldValidate: true }))}
                   className={cn(
-                    "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600",
+                    "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule",
                     on
-                      ? "border-teal-700 bg-teal-700 text-white dark:border-teal-500 dark:bg-teal-600"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-teal-700/40 hover:text-teal-700 dark:border-white/10 dark:bg-transparent dark:text-slate-300"
+                      ? "border-rule bg-paper-3 text-paper dark:border-rule dark:bg-paper-3"
+                      : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-brick  dark:bg-transparent dark:text-muted-foreground"
                   )}
                 >
                   {s}
@@ -89,10 +89,10 @@ export function JobPreferences({ form }: JobPreferencesProps) {
                   aria-pressed={on}
                   onClick={() => toggle(cats, c, (next) => setValue("interestedCategories", next, { shouldDirty: true, shouldValidate: true }))}
                   className={cn(
-                    "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600",
+                    "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule",
                     on
-                      ? "border-teal-700 bg-teal-700 text-white dark:border-teal-500 dark:bg-teal-600"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-teal-700/40 hover:text-teal-700 dark:border-white/10 dark:bg-transparent dark:text-slate-300"
+                      ? "border-rule bg-paper-3 text-paper dark:border-rule dark:bg-paper-3"
+                      : "border-rule bg-background text-muted-foreground hover:border-rule hover:text-brick  dark:bg-transparent dark:text-muted-foreground"
                   )}
                 >
                   {c}
@@ -101,7 +101,7 @@ export function JobPreferences({ form }: JobPreferencesProps) {
             })}
           </div>
         </div>
-        <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="text-xs leading-relaxed text-muted-foreground dark:text-muted-foreground">
           These details are used only to match jobs and alerts. We do not collect caste or religion.
         </p>
       </div>

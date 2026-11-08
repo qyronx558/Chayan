@@ -74,18 +74,18 @@ export default function ForgotPasswordPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-100 dark:bg-teal-900/30"
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-paper-3 dark:bg-paper-3"
           >
             {isSuccess ? (
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <CheckCircle2 className="h-8 w-8 text-foreground dark:text-foreground" />
             ) : (
-              <Mail className="h-8 w-8 text-teal-600 dark:text-teal-400" />
+              <Mail className="h-8 w-8 text-brick dark:text-brick" />
             )}
           </motion.div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground dark:text-paper">
             {isSuccess ? "Check Your Email" : "Reset Password"}
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-muted-foreground dark:text-muted-foreground">
             {isSuccess
               ? "If an account exists with that email, you will receive a password reset link shortly."
               : "Enter your email address and we'll send you a reset link."}
@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
 
         {isSuccess ? (
           <div className="space-y-4">
-            <div className="rounded-xl bg-green-50 p-4 text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300 border border-green-200 dark:border-green-800">
+            <div className="rounded-xl bg-paper-3 p-4 text-sm text-foreground dark:bg-paper-3 dark:text-foreground border border-rule dark:border-rule">
               <p className="font-medium">Reset email sent!</p>
               <p className="mt-1">Please check your inbox (and spam folder) for a link to reset your password. The link expires in 1 hour.</p>
             </div>
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
             </Button>
 
             <div className="text-center">
-              <Link href="/login" className="inline-flex items-center text-sm font-medium text-teal-600 hover:text-teal-700">
+              <Link href="/login" className="inline-flex items-center text-sm font-medium text-brick hover:text-brick">
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 Back to login
               </Link>

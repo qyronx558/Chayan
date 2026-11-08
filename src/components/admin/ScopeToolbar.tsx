@@ -58,7 +58,7 @@ export function ScopeToolbar({
         </SelectContent>
       </Select>
       <label
-        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-teal-600/40 hover:text-teal-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-rule bg-background px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-rule hover:text-brick dark:border-ink dark:bg-ink dark:text-muted-foreground"
         title="Show only admin uploads awaiting review (hides super-admin uploads)"
       >
         <Checkbox checked={queueOnly} onCheckedChange={(v) => onQueueOnlyChange(v === true)} />

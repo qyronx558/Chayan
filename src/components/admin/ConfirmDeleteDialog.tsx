@@ -19,15 +19,15 @@ export function ConfirmDeleteDialog({ open, title, itemLabel, onCancel, onConfir
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-paper-2 text-brick dark:bg-paper-2">
               <AlertTriangle className="h-4 w-4" />
             </span>
             {title}
           </DialogTitle>
         </DialogHeader>
-        <p className="text-sm leading-relaxed text-gray-500">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {itemLabel ? (
-            <>Delete <span className="font-medium text-gray-800 dark:text-gray-200">“{itemLabel}”</span>? This action cannot be undone.</>
+            <>Delete <span className="font-medium text-foreground dark:text-muted-foreground">“{itemLabel}”</span>? This action cannot be undone.</>
           ) : (
             "Are you sure? This action cannot be undone."
           )}

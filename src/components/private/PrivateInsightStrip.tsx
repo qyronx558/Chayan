@@ -44,16 +44,16 @@ export function PrivateInsightStrip(p: Props) {
   return (
     <section aria-label="Private job insights" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((c) => (
-        <div key={c.label} className={cn("rounded-2xl border p-4 shadow-sm", c.hot ? "border-red-200 bg-gradient-to-br from-red-50 to-orange-50 dark:border-red-900 dark:from-red-950/40" : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800")}>
-          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+        <div key={c.label} className={cn("border p-4", c.hot ? "border-brick bg-paper-2" : "border-rule bg-background")}>
+          <div className="mb-1.5 flex items-center gap-1.5 agate text-[11px] text-muted-foreground">
             <c.icon className="h-3.5 w-3.5" /> {c.label}
           </div>
-          <div className={cn("text-lg font-extrabold", c.hot ? "text-red-700" : "text-gray-900 dark:text-white")}>{c.value}</div>
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500"><Eye className="hidden h-3 w-3" />{c.sub}</p>
+          <div className={cn("text-lg font-bold", c.hot ? "text-brick" : "text-foreground dark:text-paper")}>{c.value}</div>
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><Eye className="hidden h-3 w-3" />{c.sub}</p>
         </div>
       ))}
       {p.remotePolicy === "REMOTE" && (
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 sm:col-span-2 xl:col-span-4"><Wifi className="h-3.5 w-3.5" /> Remote-friendly - confirm timezone, equipment and probation terms before applying.</p>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-brick sm:col-span-2 xl:col-span-4"><Wifi className="h-3.5 w-3.5" /> Remote-friendly - confirm timezone, equipment and probation terms before applying.</p>
       )}
     </section>
   )

@@ -8,16 +8,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 
 export interface SearchableFilterOption {
-  id: string
-  name: string
+ id: string
+ name: string
 }
 
 interface SearchableFilterProps {
-  value: string
-  options: SearchableFilterOption[]
-  allLabel: string
-  searchPlaceholder?: string
-  onChange: (id: string) => void
+ value: string
+ options: SearchableFilterOption[]
+ allLabel: string
+ searchPlaceholder?: string
+ onChange: (id: string) => void
 }
 
 /**
@@ -25,63 +25,63 @@ interface SearchableFilterProps {
  * Button trigger + popover with an inbuilt search input (cmdk).
  */
 export function SearchableFilter({
-  value,
-  options,
-  allLabel,
-  searchPlaceholder = "Search...",
-  onChange,
+ value,
+ options,
+ allLabel,
+ searchPlaceholder = "Search...",
+ onChange,
 }: SearchableFilterProps) {
-  const [open, setOpen] = useState(false)
-  const selected = options.find((o) => o.id === value)
+ const [open, setOpen] = useState(false)
+ const selected = options.find((o) => o.id === value)
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-10 w-full min-w-0 justify-between truncate bg-white px-3 py-2 text-sm font-normal"
+ return (
+  <Popover open={open} onOpenChange={setOpen}>
+   <PopoverTrigger asChild>
+    <Button
+     variant="outline"
+     role="combobox"
+     aria-expanded={open}
+     className="h-10 w-full min-w-0 justify-between truncate bg-background px-3 py-2 text-sm font-normal"
+    >
+     <span className="min-w-0 flex-1 truncate text-left">
+      {selected ? selected.name : allLabel}
+     </span>
+     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+   </PopoverTrigger>
+   <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[220px] p-0" align="start">
+    <Command>
+     <CommandInput placeholder={searchPlaceholder} />
+     <CommandList>
+      <CommandEmpty>No match found.</CommandEmpty>
+      <CommandGroup>
+       <CommandItem
+        value={`all ${allLabel}`}
+        onSelect={() => {
+         onChange("")
+         setOpen(false)
+        }}
+       >
+        <Check className={cn("mr-2 h-4 w-4", value === "" ? "opacity-100" : "opacity-0")} />
+        {allLabel}
+       </CommandItem>
+       {options.map((o) => (
+        <CommandItem
+         key={o.id}
+         value={o.name}
+         onSelect={() => {
+          onChange(o.id)
+          setOpen(false)
+         }}
         >
-          <span className="min-w-0 flex-1 truncate text-left">
-            {selected ? selected.name : allLabel}
-          </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[220px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList>
-            <CommandEmpty>No match found.</CommandEmpty>
-            <CommandGroup>
-              <CommandItem
-                value={`all ${allLabel}`}
-                onSelect={() => {
-                  onChange("")
-                  setOpen(false)
-                }}
-              >
-                <Check className={cn("mr-2 h-4 w-4", value === "" ? "opacity-100" : "opacity-0")} />
-                {allLabel}
-              </CommandItem>
-              {options.map((o) => (
-                <CommandItem
-                  key={o.id}
-                  value={o.name}
-                  onSelect={() => {
-                    onChange(o.id)
-                    setOpen(false)
-                  }}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", value === o.id ? "opacity-100" : "opacity-0")} />
-                  <span className="truncate">{o.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
+         <Check className={cn("mr-2 h-4 w-4", value === o.id ? "opacity-100" : "opacity-0")} />
+         <span className="truncate">{o.name}</span>
+        </CommandItem>
+       ))}
+      </CommandGroup>
+     </CommandList>
+    </Command>
+   </PopoverContent>
+  </Popover>
+ )
 }
