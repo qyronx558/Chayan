@@ -13,6 +13,7 @@ import type { ReactNode } from "react"
  */
 export function isApplicationModePath(pathname: string | null): boolean {
   if (!pathname) return false
+  if (pathname === "/browse") return true
   if (pathname.startsWith("/apply/") && pathname.endsWith("/start")) return true
   if (pathname.startsWith("/private-jobs/") && pathname.endsWith("/apply")) return true
   if (!pathname.endsWith("/view")) return false

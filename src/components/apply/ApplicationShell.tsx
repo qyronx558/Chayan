@@ -7,6 +7,7 @@ import { ApplicationTopBar } from "@/components/apply/ApplicationTopBar"
 import { ApplicationToolRail } from "@/components/apply/ApplicationToolRail"
 import { ApplicationIframe } from "@/components/apply/ApplicationIframe"
 import { ApplicationFloatingCTA } from "@/components/apply/ApplicationFloatingCTA"
+import { ApplicationFocusDock } from "@/components/apply/ApplicationFocusDock"
 import { ApplicationInfoDrawer } from "@/components/apply/ApplicationInfoDrawer"
 import { ApplicationFallback } from "@/components/apply/ApplicationFallback"
 import { ApplicationMobileMenu } from "@/components/apply/ApplicationMobileMenu"
@@ -24,6 +25,7 @@ type FrameStatus = "checking" | "allowed" | "blocked" | "unknown"
 type ViewMode = "direct" | "preview"
 
 const RAIL_STORAGE_KEY = "cj-apply-rail-collapsed"
+const FOCUS_STORAGE_KEY = "cj-viewer-focus"
 const LOAD_TIMEOUT_MS = 12000
 
 /**
@@ -56,14 +58,50 @@ export function ApplicationShell(props: ApplicationShellProps) {
  const currentUrl = activeTab?.url ?? officialUrl
  const isBlank = !currentUrl
  const currentHostname = currentUrl ? getExternalHostname(currentUrl) : "New tab"
- const [collapsed, setCollapsed] = useState(() => {
-  if (typeof window === "undefined") return false
+ const [collapsed, setCollapsed] = useState(false)
+ useEffect(() => {
   try {
-   return window.sessionStorage.getItem(RAIL_STORAGE_KEY) === "1"
+   if (window.sessionStorage.getItem(RAIL_STORAGE_KEY) === "1") setCollapsed(true) // eslint-disable-line react-hooks/set-state-in-effect
   } catch {
-   return false
+   // Ignore storage failures.
   }
- })
+ }, [])
+ // Focus mode (default ON): hides rail, title bar, tab strip and floating CTAs
+ // so the official page / PDF gets the whole screen. Toggle with the "F" key.
+ const [focus, setFocus] = useState(true)
+ // Restore saved preference after hydration (reading storage during the first
+ // render would make server and client HTML differ).
+ useEffect(() => {
+  try {
+   if (window.localStorage.getItem(FOCUS_STORAGE_KEY) === "0") setFocus(false) // eslint-disable-line react-hooks/set-state-in-effect
+  } catch {
+   // Ignore storage failures.
+  }
+ }, [])
+ const toggleFocus = useCallback(() => {
+  setFocus((prev) => {
+   try {
+    window.localStorage.setItem(FOCUS_STORAGE_KEY, prev ? "0" : "1")
+   } catch {
+    // Ignore storage failures.
+   }
+   return !prev
+  })
+ }, [])
+ const toggleFullscreen = useCallback(() => {
+  if (document.fullscreenElement) void document.exitFullscreen()
+  else void document.documentElement.requestFullscreen?.().catch(() => {})
+ }, [])
+ useEffect(() => {
+  const onKey = (e: KeyboardEvent) => {
+   const el = e.target as HTMLElement | null
+   if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return
+   if (e.metaKey || e.ctrlKey || e.altKey) return
+   if (e.key.toLowerCase() === "f") toggleFocus()
+  }
+  window.addEventListener("keydown", onKey)
+  return () => window.removeEventListener("keydown", onKey)
+ }, [toggleFocus])
  const [drawerOpen, setDrawerOpen] = useState(false)
  const [frameStatus, setFrameStatus] = useState<FrameStatus>("checking")
  const [checkIsPdf, setCheckIsPdf] = useState(false)
@@ -358,7 +396,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
  return (
   <div className="flex h-[100dvh] overflow-hidden bg-background text-foreground dark:bg-paper dark:text-paper">
    {/* Desktop left tool rail */}
-   <div className="hidden shrink-0 md:flex">
+   <div className={focus ? "hidden" : "hidden shrink-0 md:flex"}>
     <ApplicationToolRail
      collapsed={collapsed}
      onToggleCollapse={toggleCollapse}
@@ -374,6 +412,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
 
    {/* Main column: top bar + tabs + address + official website */}
    <div className="flex min-w-0 flex-1 flex-col">
+    {!focus && (
     <ApplicationTopBar
      type={type}
      title={title}
@@ -397,7 +436,9 @@ export function ApplicationShell(props: ApplicationShellProps) {
       />
      }
     />
+    )}
 
+    {(!focus || tabs.length > 1) && (
     <BrowserTabStrip
      tabs={tabs}
      activeId={activeId}
@@ -405,6 +446,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
      onClose={handleCloseTab}
      onNew={handleNewTab}
     />
+    )}
 
     <BrowserAddressBar
      currentUrl={currentUrl}
@@ -415,6 +457,16 @@ export function ApplicationShell(props: ApplicationShellProps) {
      onReload={reload}
      onShare={share}
      onOpenInNewTab={handleOpenInNewTab}
+     focus={focus}
+     onToggleFocus={toggleFocus}
+     onFullscreen={toggleFullscreen}
+     backHref={backHref}
+     backLabel={backLabel}
+     title={title}
+     downloadUrl={isDocument || isPdf ? downloadUrl : null}
+     downloadFilename={downloadFilename}
+     onDownload={handleDownload}
+     openUrl={currentUrl}
     />
 
     <div className="relative min-h-0 flex-1 bg-background dark:bg-background">
@@ -530,7 +582,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
     </div>
 
     {/* Mobile sticky bottom CTA bar (hidden on blank new-tab page) */}
-    {!isBlank ? (
+    {!isBlank && !focus ? (
      <div className="shrink-0 md:hidden">
       <ApplicationFloatingCTA
        variant="mobile"
@@ -547,8 +599,24 @@ export function ApplicationShell(props: ApplicationShellProps) {
     ) : null}
    </div>
 
+   {/* Focus-mode dock: Apply / Download stay one tap away at bottom-right */}
+   {!isBlank && focus ? (
+    <ApplicationFocusDock
+     officialUrl={currentUrl}
+     hostname={currentHostname}
+     applyLabel={isDocument ? "Open original" : "Apply Now"}
+     downloadUrl={isDocument || isPdf ? downloadUrl : null}
+     downloadFilename={downloadFilename}
+     onDownload={handleDownload}
+     onApply={handleApply}
+     onInfo={openInfo}
+     onReload={reload}
+     onExitFocus={toggleFocus}
+    />
+   ) : null}
+
    {/* Desktop floating CTA - hidden on blank new-tab page */}
-   {!isBlank ? (
+   {!isBlank && !focus ? (
     <ApplicationFloatingCTA
      variant="desktop"
      officialUrl={currentUrl}

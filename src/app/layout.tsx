@@ -10,6 +10,7 @@ import { HideOnAdmin } from "@/components/layout/HideOnAdmin"
 import { SpotlightTour } from "@/components/onboarding/SpotlightTour"
 import { ActivityTracker } from "@/components/layout/ActivityTracker"
 import { Tracker } from "@/components/analytics/Tracker"
+import { ExternalLinkInterceptor } from "@/components/shared/ExternalLinkInterceptor"
 import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
@@ -142,6 +143,7 @@ export default function RootLayout({
             <SpotlightTour />
           </HideOnAdmin>
           <ActivityTracker />
+          <ExternalLinkInterceptor />
           <Suspense fallback={null}>
             <Tracker />
           </Suspense>

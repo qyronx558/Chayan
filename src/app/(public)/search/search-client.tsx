@@ -165,6 +165,8 @@ export function SearchClient() {
   }
 
   const hits = data ? [...data.hits, ...extra] : []
+  const [selected, setSelected] = React.useState<string | null>(null)
+  const activeHit = hits.find((h) => h.id === selected) ?? hits[0] ?? null
   const tokens = data?.tokens ?? []
   const urlTarget = looksLikeUrl(input.trim()) ? normalizeExternalUrl(input.trim()) : null
   const activeFilters = (within ? 1 : 0) + (openOnly ? 1 : 0) + (sort !== "relevance" ? 1 : 0)
@@ -220,15 +222,15 @@ export function SearchClient() {
     <div className="min-h-[70vh] bg-gradient-to-b from-paper-2/70 to-background">
       {/* ── Command bar ── */}
       <div className="border-b border-rule bg-background/80 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 pb-4 pt-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1400px] px-4 pb-6 pt-12 sm:px-8 lg:px-10 lg:pt-16">
           <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brick">
             <Sparkles className="h-3.5 w-3.5" /> ChayanJobs Search
           </p>
-          <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
+          <h1 className="max-w-3xl font-display text-3xl font-bold leading-[1.1] tracking-tight sm:text-5xl">
             {urlQ ? <>Results for <span className="text-brick">“{urlQ}”</span></> : "Search every job, result & notice"}
           </h1>
 
-          <form onSubmit={submit} role="search" className="relative mt-4">
+          <form onSubmit={submit} role="search" className="relative mt-8 max-w-4xl">
             <div className={cn("flex items-center gap-3 rounded-2xl border bg-card px-4 shadow-sm transition-shadow", focused ? "border-brick shadow-lg ring-4 ring-brick/10" : "border-rule")}>
               {loading && urlQ ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brick" /> : <Search className="h-5 w-5 shrink-0 text-muted-foreground" />}
               <input
@@ -242,7 +244,7 @@ export function SearchClient() {
                 aria-label="Search ChayanJobs or open a website"
                 autoComplete="off"
                 spellCheck={false}
-                className="h-14 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+                className="h-16 min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground"
               />
               {input && (
                 <button type="button" aria-label="Clear" onClick={() => { setInput(""); update({ q: null }); inputRef.current?.focus() }} className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -305,7 +307,7 @@ export function SearchClient() {
           )}
 
           {/* Kind tabs with live counts */}
-          <div className="-mx-1 mt-4 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Filter by section">
+          <div className="-mx-1 mt-8 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Filter by section">
             <KindTab active={!type} onClick={() => update({ type: null })} icon={Search} label="All" count={data ? totalAll : null} />
             {SEARCH_KINDS.map((k) => (
               <KindTab key={k} active={type === k} onClick={() => update({ type: k })} icon={KIND_ICON[k]} label={SEARCH_KIND_META[k].label} count={data ? data.facets[k] : null} dim={!!data && data.facets[k] === 0} />
@@ -315,7 +317,7 @@ export function SearchClient() {
       </div>
 
       {/* ── Body ── */}
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[230px_1fr] lg:px-8">
+      <div className="mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:px-10 xl:grid-cols-[220px_minmax(0,1fr)_400px]">
         <aside className="hidden lg:block">
           <div className="sticky top-24">{Filters}</div>
         </aside>
@@ -341,9 +343,9 @@ export function SearchClient() {
           )}
 
           {loading ? (
-            <div className="space-y-3">
+            <div className="space-y-5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="animate-pulse rounded-2xl border border-rule bg-card p-5">
+                <div key={i} className="animate-pulse rounded-3xl border border-rule bg-card p-7">
                   <div className="mb-3 h-3 w-24 rounded bg-muted" />
                   <div className="mb-2 h-5 w-3/4 rounded bg-muted" />
                   <div className="h-3 w-1/2 rounded bg-muted" />
@@ -368,8 +370,8 @@ export function SearchClient() {
             </div>
           ) : (
             <>
-              <ul className="space-y-3">
-                {hits.map((h) => <HitCard key={`${h.kind}-${h.id}`} hit={h} tokens={tokens} />)}
+              <ul className="space-y-5">
+                {hits.map((h) => <HitCard key={`${h.kind}-${h.id}`} hit={h} tokens={tokens} selected={activeHit?.id === h.id} onSelect={() => setSelected(h.id)} />)}
               </ul>
               {data?.hasMore && (
                 <div className="mt-6 text-center">
@@ -381,6 +383,15 @@ export function SearchClient() {
             </>
           )}
         </main>
+
+        {/* Preview pane (xl+) */}
+        <aside className="hidden xl:block">
+          <div className="sticky top-24">
+            {activeHit && !loading ? <PreviewPane hit={activeHit} tokens={tokens} /> : (
+              <div className="rounded-3xl border border-dashed border-rule p-10 text-center text-sm text-muted-foreground">Select a result to preview it here.</div>
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   )
@@ -402,13 +413,13 @@ function KindTab({ active, onClick, icon: Icon, label, count, dim }: { active: b
   )
 }
 
-function HitCard({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
+function HitCard({ hit, tokens, selected, onSelect }: { hit: SearchHit; tokens: string[]; selected: boolean; onSelect: () => void }) {
   const Icon = KIND_ICON[hit.kind]
   const meta = SEARCH_KIND_META[hit.kind]
   return (
-    <li className="group relative rounded-2xl border border-rule bg-card p-4 shadow-sm transition-all hover:-translate-y-px hover:border-foreground/40 hover:shadow-md sm:p-5">
-      <div className="flex items-start gap-4">
-        <span className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted sm:flex"><Icon className="h-5 w-5" /></span>
+    <li onClick={onSelect} onMouseEnter={onSelect} className={cn("group relative cursor-pointer rounded-3xl border bg-card p-5 shadow-sm transition-all hover:shadow-md sm:p-7", selected ? "border-foreground/60 ring-2 ring-foreground/10" : "border-rule hover:border-foreground/40")}>
+      <div className="flex items-start gap-5">
+        <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-muted sm:flex"><Icon className="h-6 w-6" /></span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-brick">{meta.singular}</span>
@@ -417,8 +428,8 @@ function HitCard({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
             <span className="ml-auto text-xs text-muted-foreground">{formatDate(hit.date)}</span>
           </div>
 
-          <h2 className="mt-1.5 font-display text-lg font-bold leading-snug">
-            <Link href={hit.href} {...(hit.href.startsWith("/browse") ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="after:absolute after:inset-0 after:content-[''] hover:text-brick">
+          <h2 className="mt-2 font-display text-xl font-bold leading-snug sm:text-2xl">
+            <Link href={hit.href} {...(hit.href.startsWith("/browse") ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="hover:text-brick">
               <Highlight text={hit.title} tokens={tokens} />
             </Link>
           </h2>
@@ -434,7 +445,7 @@ function HitCard({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
           </div>
 
           {hit.actions.length > 0 && (
-            <div className="relative z-10 mt-4 flex flex-wrap gap-2">
+            <div className="relative z-10 mt-5 flex flex-wrap gap-2.5" onClick={(e) => e.stopPropagation()}>
               {hit.actions.map((a) => {
                 const AIcon = ACTION_ICON[a.kind] ?? FileText
                 return (
@@ -444,7 +455,7 @@ function HitCard({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={cn(
-                      "inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold transition-colors",
+                      "inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors",
                       a.primary ? "bg-foreground text-background hover:bg-brick hover:text-brick-ink" : "border border-rule bg-background hover:border-foreground/50"
                     )}
                   >
@@ -457,5 +468,59 @@ function HitCard({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
         </div>
       </div>
     </li>
+  )
+}
+
+function PreviewPane({ hit, tokens }: { hit: SearchHit; tokens: string[] }) {
+  const Icon = KIND_ICON[hit.kind]
+  const meta = SEARCH_KIND_META[hit.kind]
+  const facts = [
+    hit.subtitle ? { label: hit.kind === "private_job" ? "Company" : "Organisation", value: hit.subtitle } : null,
+    hit.location ? { label: "Location", value: hit.location } : null,
+    hit.vacancies != null ? { label: "Posts", value: hit.vacancies.toLocaleString() } : null,
+    hit.salary ? { label: "Salary", value: hit.salary } : null,
+    hit.lastDate ? { label: "Last date", value: formatDate(hit.lastDate) } : null,
+    { label: "Posted", value: formatDate(hit.date) },
+    hit.status ? { label: "Status", value: hit.status } : null,
+  ].filter(Boolean) as { label: string; value: string }[]
+  return (
+    <div className="overflow-hidden rounded-3xl border border-rule bg-card shadow-lg">
+      <div className="bg-gradient-to-br from-brick/15 via-muted to-card p-7">
+        <div className="flex items-center justify-between">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-sm"><Icon className="h-6 w-6" /></span>
+          <StateBadge hit={hit} />
+        </div>
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-wider text-brick">{meta.singular}</p>
+        <h3 className="mt-1 font-display text-2xl font-bold leading-snug"><Highlight text={hit.title} tokens={tokens} /></h3>
+      </div>
+      <div className="space-y-6 p-7">
+        {hit.snippet && <p className="text-sm leading-relaxed text-muted-foreground">{hit.snippet}</p>}
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          {facts.map((f) => (
+            <div key={f.label} className={f.label === "Organisation" || f.label === "Company" ? "col-span-2" : ""}>
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{f.label}</dt>
+              <dd className="mt-0.5 font-medium">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="space-y-2.5">
+          {hit.actions.map((a) => {
+            const AIcon = ACTION_ICON[a.kind] ?? FileText
+            return (
+              <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer"
+                className={cn("flex h-12 w-full items-center justify-between rounded-xl px-5 text-sm font-semibold transition-colors",
+                  a.primary ? "bg-foreground text-background hover:bg-brick hover:text-brick-ink" : "border border-rule hover:border-foreground/50")}>
+                <span className="flex items-center gap-2"><AIcon className="h-4 w-4" />{a.label}</span>
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            )
+          })}
+          <Link href={hit.href} {...(hit.href.startsWith("/browse") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="flex h-11 w-full items-center justify-center text-sm font-medium text-muted-foreground underline-offset-4 hover:text-brick hover:underline">
+            View full details &rarr;
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
