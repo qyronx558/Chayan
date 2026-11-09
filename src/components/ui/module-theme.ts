@@ -51,6 +51,9 @@ export interface ModuleTheme {
 const homeGrid = "grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 const listGrid = "grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3"
 
+/** Results grid used beside the listing filter rail (2 cols at lg, 3 at xl). */
+export const listGridWithSidebar = "grid gap-x-6 gap-y-9 sm:grid-cols-2 xl:grid-cols-3"
+
 export const moduleTheme: Record<UniversalModule, ModuleTheme> = {
  government: {
   icon: Briefcase,

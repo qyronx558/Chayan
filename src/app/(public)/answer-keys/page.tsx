@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { AnswerKeysClient } from "./answer-keys-client"
 
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 export default function AnswerKeysPage() {
-  return <AnswerKeysClient />
+  return (
+    <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading answer keys…</div>}>
+      <AnswerKeysClient />
+    </Suspense>
+  )
 }

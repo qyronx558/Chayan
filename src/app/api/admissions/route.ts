@@ -13,6 +13,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { buildDateRange, dateInDays, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +26,12 @@ export async function GET(request: NextRequest) {
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
     const sort = searchParams.get("sort") || "latest"
+    const hasPdf = searchParams.get("hasPdf") === "1"
+    const openNow = searchParams.get("openNow") === "1"
+    const closingSoon = searchParams.get("closingSoon") === "1"
+    const fromDate = searchParams.get("fromDate")
+    const toDate = searchParams.get("toDate")
+    const postedWithin = parsePostedWithin(searchParams.get("postedWithin"))
     const skip = (page - 1) * limit
 
     const where: Prisma.AdmissionWhereInput = {}
@@ -47,13 +54,37 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { department: { name: { contains: search, mode: "insensitive" } } },
+        { category: { name: { contains: search, mode: "insensitive" } } },
       ]
     }
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
+    if (hasPdf) where.pdfUrl = { not: null }
+    if (postedWithin > 0) where.createdAt = { gte: postedSince(postedWithin) }
+
+    const lastDateRange = buildDateRange(fromDate, toDate)
+    const lastDateFilter: { gte?: Date; lte?: Date } = {}
+    if (lastDateRange) Object.assign(lastDateFilter, lastDateRange)
+    if (openNow) lastDateFilter.gte = new Date()
+    if (closingSoon) {
+      lastDateFilter.gte = new Date()
+      lastDateFilter.lte = dateInDays(7)
+    }
+    if (Object.keys(lastDateFilter).length > 0) where.lastDate = lastDateFilter
 
     const baseWhere: Prisma.AdmissionWhereInput = { ...where }
+
+    const orderBy: Prisma.AdmissionOrderByWithRelationInput[] =
+      sort === "oldest"
+        ? [{ createdAt: "asc" }]
+        : sort === "last_date_asc"
+          ? [{ lastDate: "asc" }, { createdAt: "desc" }]
+          : sort === "last_date_desc"
+            ? [{ lastDate: "desc" }, { createdAt: "desc" }]
+            : sort === "start_date_asc"
+              ? [{ startDate: "asc" }, { createdAt: "desc" }]
+              : [{ createdAt: "desc" }]
 
     const session = isAdminScope && (includeCounts || tab === "draft") ? await auth() : null
 
@@ -75,7 +106,7 @@ export async function GET(request: NextRequest) {
         prisma.admission.findMany({
           where,
           include: { department: true, category: true },
-          orderBy: { createdAt: "desc" },
+          orderBy,
           take: CANDIDATE_POOL_SIZE,
         }),
         prisma.admission.count({ where }),
@@ -94,7 +125,7 @@ export async function GET(request: NextRequest) {
       prisma.admission.findMany({
         where,
         include: { department: true, category: true, ...CREATED_BY_SELECT },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip,
         take: limit,
       }),

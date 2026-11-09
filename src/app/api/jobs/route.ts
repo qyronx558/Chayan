@@ -13,6 +13,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { buildDateRange, dateInDays, parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +26,12 @@ export async function GET(request: NextRequest) {
     const stateId = searchParams.get("stateId") || ""
     const status = searchParams.get("status") || ""
     const qualification = searchParams.get("qualification") || ""
+    const minVacancies = parseNumber(searchParams.get("minVacancies"), 0)
+    const fromDate = searchParams.get("fromDate")
+    const toDate = searchParams.get("toDate")
+    const postedWithin = parsePostedWithin(searchParams.get("postedWithin"))
+    const closingSoon = searchParams.get("closingSoon") === "1"
+    const hasApplyLink = searchParams.get("hasApplyLink") === "1"
     const sort = searchParams.get("sort") || "latest"
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
@@ -53,6 +60,8 @@ export async function GET(request: NextRequest) {
         { advertisementNo: { contains: search, mode: "insensitive" } },
         { education: { contains: search, mode: "insensitive" } },
         { department: { name: { contains: search, mode: "insensitive" } } },
+        { category: { name: { contains: search, mode: "insensitive" } } },
+        { state: { name: { contains: search, mode: "insensitive" } } },
       ]
     }
 
@@ -61,6 +70,15 @@ export async function GET(request: NextRequest) {
     if (stateId) where.stateId = stateId
     if (status) where.status = status as "ACTIVE" | "EXPIRED" | "UPCOMING"
     if (qualification) where.education = { contains: qualification, mode: "insensitive" }
+    if (minVacancies > 0) where.totalVacancies = { gte: minVacancies }
+    if (hasApplyLink) where.applyLink = { not: null }
+
+    const lastDateRange = buildDateRange(fromDate, toDate)
+    const closingRange = closingSoon ? { gte: new Date(), lte: dateInDays(7) } : undefined
+    if (lastDateRange || closingRange) {
+      where.lastDate = { ...lastDateRange, ...closingRange }
+    }
+    if (postedWithin > 0) where.createdAt = { gte: postedSince(postedWithin) }
 
     const baseWhere: Prisma.JobWhereInput = { ...where }
 

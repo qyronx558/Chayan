@@ -13,6 +13,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { buildDateRange, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +26,11 @@ export async function GET(request: NextRequest) {
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
     const sort = searchParams.get("sort") || "latest"
+    const hasDownload = searchParams.get("hasDownload") === "1"
+    const upcoming = searchParams.get("upcoming") === "1"
+    const fromDate = searchParams.get("fromDate")
+    const toDate = searchParams.get("toDate")
+    const postedWithin = parsePostedWithin(searchParams.get("postedWithin"))
     const skip = (page - 1) * limit
 
     const where: Prisma.AdmitCardWhereInput = {}
@@ -47,13 +53,29 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { department: { name: { contains: search, mode: "insensitive" } } },
+        { category: { name: { contains: search, mode: "insensitive" } } },
       ]
     }
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
+    if (hasDownload) where.downloadUrl = { not: null }
+    const examDateRange = buildDateRange(fromDate, toDate)
+    if (upcoming && examDateRange) where.examDate = { ...examDateRange, gte: new Date() }
+    else if (upcoming) where.examDate = { gte: new Date() }
+    else if (examDateRange) where.examDate = examDateRange
+    if (postedWithin > 0) where.createdAt = { gte: postedSince(postedWithin) }
 
     const baseWhere: Prisma.AdmitCardWhereInput = { ...where }
+
+    const orderBy: Prisma.AdmitCardOrderByWithRelationInput[] =
+      sort === "oldest"
+        ? [{ createdAt: "asc" }]
+        : sort === "exam_date_asc"
+          ? [{ examDate: "asc" }, { createdAt: "desc" }]
+          : sort === "exam_date_desc"
+            ? [{ examDate: "desc" }, { createdAt: "desc" }]
+            : [{ createdAt: "desc" }]
 
     const session = isAdminScope && (includeCounts || tab === "draft") ? await auth() : null
 
@@ -75,7 +97,7 @@ export async function GET(request: NextRequest) {
         prisma.admitCard.findMany({
           where,
           include: { department: true, category: true, job: true },
-          orderBy: { createdAt: "desc" },
+          orderBy,
           take: CANDIDATE_POOL_SIZE,
         }),
         prisma.admitCard.count({ where }),
@@ -94,7 +116,7 @@ export async function GET(request: NextRequest) {
       prisma.admitCard.findMany({
         where,
         include: { department: true, category: true, job: true, ...CREATED_BY_SELECT },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip,
         take: limit,
       }),

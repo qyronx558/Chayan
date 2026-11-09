@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { AdmitCardsClient } from "./admit-cards-client"
 
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default function AdmitCardsPage() {
-  return <AdmitCardsClient />
+  return (
+    <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading admit cards…</div>}>
+      <AdmitCardsClient />
+    </Suspense>
+  )
 }

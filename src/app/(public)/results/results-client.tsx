@@ -1,223 +1,291 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Search, AlertCircle, Calendar, FileCheck2, X } from "lucide-react"
+import { AlertCircle, Calendar, FileCheck2 } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { SectionHero } from "@/components/layout/SectionHero"
 import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
 import { CardShareButton } from "@/components/ui/card-actions"
-import { moduleTheme } from "@/components/ui/module-theme"
+import { listGridWithSidebar } from "@/components/ui/module-theme"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import { formatDate } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import {
- useInfiniteScroll,
- appendUnique,
- PUBLIC_INFINITE_LIMIT as LIMIT,
-} from "@/hooks/useInfiniteScroll"
+import { ListingFilters } from "@/components/listing/ListingFilters"
+import { ListingLayout } from "@/components/listing/ListingLayout"
+import { ListingToolbar } from "@/components/listing/ListingToolbar"
+import type { ActiveFilterChip, FilterControl, QuickFilter, SortOption } from "@/components/listing/types"
+import { useDebouncedValue } from "@/hooks/useDebouncedValue"
+import { useFilterOptions } from "@/hooks/useFilterOptions"
+import { useInfiniteListing } from "@/hooks/useInfiniteListing"
+import { useListingQuerySync } from "@/hooks/useListingQuerySync"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface ResultData {
- id: string
- title: string
- slug: string
- description: string | null
- pdfUrl: string | null
- resultDate: string | null
- status: string | null
- createdAt: string
- department: { id: string; name: string; slug: string }
- category: { id: string; name: string; slug: string }
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  pdfUrl: string | null
+  resultDate: string | null
+  status: string | null
+  createdAt: string
+  department: { id: string; name: string; slug: string }
+  category: { id: string; name: string; slug: string }
 }
 
+const SORT_OPTIONS: SortOption[] = [
+  { value: "latest", label: "Newest" },
+  { value: "result_date_asc", label: "Result date (oldest)" },
+  { value: "oldest", label: "Oldest posted" },
+  { value: "trending", label: "Trending" },
+]
+
+const POSTED_OPTIONS = [
+  { value: "", label: "Any time" },
+  { value: "1", label: "Today" },
+  { value: "7", label: "Last 7 days" },
+  { value: "30", label: "Last 30 days" },
+]
+
 export function ResultsClient() {
- const [results, setResults] = useState<ResultData[]>([])
- const [total, setTotal] = useState(0)
- const [hasMore, setHasMore] = useState(false)
- const [loading, setLoading] = useState(true)
- const [loadingMore, setLoadingMore] = useState(false)
- const [error, setError] = useState("")
- const [loadMoreError, setLoadMoreError] = useState("")
- const [search, setSearch] = useState("")
- const [debouncedSearch, setDebouncedSearch] = useState("")
- const pageRef = useRef(1)
- const abortRef = useRef<AbortController | null>(null)
+  const searchParams = useSearchParams()
 
- useEffect(() => {
-  const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
-  return () => clearTimeout(timer)
- }, [search])
+  const [search, setSearch] = useState(searchParams.get("search") ?? "")
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("categoryId") ?? "")
+  const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get("departmentId") ?? "")
+  const [postedWithin, setPostedWithin] = useState(searchParams.get("postedWithin") ?? "")
+  const [hasPdf, setHasPdf] = useState(searchParams.get("hasPdf") === "1")
+  const [fromDate, setFromDate] = useState(searchParams.get("fromDate") ?? "")
+  const [toDate, setToDate] = useState(searchParams.get("toDate") ?? "")
+  const [sort, setSort] = useState(searchParams.get("sort") ?? "latest")
 
- const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
-  if (replace) {
-   setLoading(true)
-   setError("")
-  } else {
-   setLoadingMore(true)
-   setLoadMoreError("")
+  const debouncedSearch = useDebouncedValue(search.trim(), 300)
+  const { categories, departments } = useFilterOptions()
+
+  const params = useMemo(
+    () => ({
+      search: debouncedSearch,
+      categoryId: selectedCategory,
+      departmentId: selectedDepartment,
+      postedWithin,
+      hasPdf: hasPdf ? "1" : "",
+      fromDate,
+      toDate,
+      sort,
+    }),
+    [debouncedSearch, selectedCategory, selectedDepartment, postedWithin, hasPdf, fromDate, toDate, sort]
+  )
+
+  const {
+    items: results,
+    total,
+    hasMore,
+    loading,
+    refreshing,
+    loadingMore,
+    error,
+    loadMoreError,
+    loadMore,
+    retry,
+    sentinelRef,
+  } = useInfiniteListing<ResultData>({ endpoint: "/api/results", params })
+
+  useListingQuerySync({
+    search: debouncedSearch,
+    categoryId: selectedCategory,
+    departmentId: selectedDepartment,
+    postedWithin,
+    hasPdf: hasPdf ? "1" : "",
+    fromDate,
+    toDate,
+    sort,
+  })
+
+  const clearFilters = () => {
+    setSearch("")
+    setSelectedCategory("")
+    setSelectedDepartment("")
+    setPostedWithin("")
+    setHasPdf(false)
+    setFromDate("")
+    setToDate("")
+    setSort("latest")
   }
-  try {
-   const params = new URLSearchParams()
-   if (debouncedSearch) params.set("search", debouncedSearch)
-   params.set("page", String(pageNum))
-   params.set("limit", String(LIMIT))
 
-   const res = await fetch(`/api/results?${params}`, { signal })
-   const json = await res.json()
-   if (signal.aborted) return
-   if (json.success) {
-    setResults((prev) => (replace ? json.data : appendUnique(prev, json.data)))
-    setTotal(json.pagination.total ?? 0)
-    setHasMore(pageNum < (json.pagination.totalPages ?? 1))
-    pageRef.current = pageNum
-   } else if (replace) {
-    setError(json.error || "Failed to fetch results")
-   } else {
-    setLoadMoreError(json.error || "Failed to load more. Please retry.")
-   }
-  } catch {
-   if (signal.aborted) return
-   if (replace) setError("Failed to fetch results. Please try again.")
-   else setLoadMoreError("Failed to load more. Please retry.")
-  } finally {
-   if (!signal.aborted) {
-    if (replace) setLoading(false)
-    else setLoadingMore(false)
-   }
+  const hasActiveFilters = Boolean(
+    debouncedSearch || selectedCategory || selectedDepartment || postedWithin || hasPdf || fromDate || toDate
+  )
+
+  const activeCount = [
+    debouncedSearch,
+    selectedCategory,
+    selectedDepartment,
+    postedWithin,
+    hasPdf,
+    fromDate || toDate,
+  ].filter(Boolean).length
+
+  const categoryName = categories.find((item) => item.id === selectedCategory)?.name
+  const departmentName = departments.find((item) => item.id === selectedDepartment)?.name
+  const postedName = POSTED_OPTIONS.find((item) => item.value === postedWithin)?.label
+
+  const activeFilters: ActiveFilterChip[] = []
+  if (debouncedSearch) activeFilters.push({ id: "search", label: `Search: ${debouncedSearch}`, onRemove: () => setSearch("") })
+  if (categoryName) activeFilters.push({ id: "category", label: categoryName, onRemove: () => setSelectedCategory("") })
+  if (departmentName) activeFilters.push({ id: "department", label: departmentName, onRemove: () => setSelectedDepartment("") })
+  if (postedWithin) activeFilters.push({ id: "posted", label: postedName ?? `Posted within ${postedWithin}d`, onRemove: () => setPostedWithin("") })
+  if (hasPdf) activeFilters.push({ id: "pdf", label: "PDF available", onRemove: () => setHasPdf(false) })
+  if (fromDate || toDate) {
+    activeFilters.push({
+      id: "date",
+      label: `Result date: ${fromDate || "any"} → ${toDate || "any"}`,
+      onRemove: () => {
+        setFromDate("")
+        setToDate("")
+      },
+    })
   }
- }, [debouncedSearch])
 
- // Initial load + reset whenever the search query changes.
- useEffect(() => {
-  abortRef.current?.abort()
-  const controller = new AbortController()
-  abortRef.current = controller
-  pageRef.current = 1
-  setHasMore(false)
-  fetchPage(1, true, controller.signal)
-  return () => controller.abort()
- }, [fetchPage])
+  const quickFilters: QuickFilter[] = [
+    { id: "pdf", label: "PDF available", active: hasPdf, onToggle: () => setHasPdf((value) => !value) },
+    { id: "week", label: "This week", active: postedWithin === "7", onToggle: () => setPostedWithin((value) => (value === "7" ? "" : "7")) },
+  ]
 
- const loadMore = useCallback(() => {
-  if (loading || loadingMore || !hasMore) return
-  const controller = new AbortController()
-  abortRef.current = controller
-  fetchPage(pageRef.current + 1, false, controller.signal)
- }, [loading, loadingMore, hasMore, fetchPage])
+  const filters: FilterControl[] = [
+    {
+      kind: "searchable",
+      id: "category",
+      label: "Category",
+      allLabel: "All categories",
+      searchPlaceholder: "Search categories…",
+      options: categories,
+      value: selectedCategory,
+      onChange: setSelectedCategory,
+    },
+    {
+      kind: "searchable",
+      id: "department",
+      label: "Department",
+      allLabel: "All departments",
+      searchPlaceholder: "Search departments…",
+      options: departments,
+      value: selectedDepartment,
+      onChange: setSelectedDepartment,
+    },
+    { kind: "select", id: "posted", label: "Posted", value: postedWithin, options: POSTED_OPTIONS, onChange: setPostedWithin },
+    { kind: "dateRange", id: "resultDate", label: "Result date", from: fromDate, to: toDate, onChange: (from, to) => { setFromDate(from); setToDate(to) } },
+    { kind: "toggle", id: "pdf", label: "Has PDF", description: "Only results with a downloadable PDF", checked: hasPdf, onChange: setHasPdf },
+  ]
 
- const retryInitial = useCallback(() => {
-  abortRef.current?.abort()
-  const controller = new AbortController()
-  abortRef.current = controller
-  fetchPage(1, true, controller.signal)
- }, [fetchPage])
+  const visibleResults = filterValidItems(results)
 
- const sentinelRef = useInfiniteScroll({
-  hasMore,
-  isLoading: loading || loadingMore,
-  onLoadMore: loadMore,
- })
-
- return (
-  <div className="container mx-auto max-w-7xl px-4 py-8">
-   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-    <SectionHero
-     icon={FileCheck2}
-     badge="Results"
-     title="Exam Results"
-     subtitle="Download the latest government exam result PDFs and check your outcome in one place."
-     count={total}
-    />
-
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-     <div className="relative flex-1 max-w-md">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-       placeholder="Search results..."
-       value={search}
-       onChange={(e) => { setSearch(e.target.value) }}
-       className="pl-10 pr-10"
-      />
-      {search && (
-       <button
-        type="button"
-        onClick={() => { setSearch("") }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
-       >
-        <X className="h-4 w-4" />
-       </button>
-      )}
-     </div>
-    </div>
-{loading ? (
-     <div className={moduleTheme.result.listGrid}>
-      {Array.from({ length: LIMIT }).map((_, i) => (
-       <UniversalCardSkeleton key={i} />
-      ))}
-     </div>
-    ) : error ? (
-     <Card>
-      <CardContent className="flex flex-col items-center py-16">
-       <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-       <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
-       <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-       <Button onClick={retryInitial}>Try Again</Button>
-      </CardContent>
-     </Card>
-    ) : filterValidItems(results).length === 0 ? (
-     <UniversalCardEmpty title="No results found" hint="Try adjusting your search or check back later for new results." />
-    ) : (
-     <>
-      <div className="mb-4 text-sm text-muted-foreground">
-       Showing {filterValidItems(results).length} of {total} results
-      </div>
-      <div className={moduleTheme.result.listGrid}>
-       {filterValidItems(results).map((result) => (
-        <motion.div
-         key={result.id}
-         initial={{ opacity: 0, y: 24 }}
-         whileInView={{ opacity: 1, y: 0 }}
-         viewport={{ once: true, margin: "-40px" }}
-         transition={{ duration: 0.35 }}
-         className="h-full"
-        >
-         <UniversalCard
-         module="result"
-         title={cleanTitle(result.title)}
-         organization={result.department.name}
-         description={result.description}
-         metadata={result.resultDate ? [{ icon: Calendar, text: formatDate(result.resultDate) }] : []}
-         primaryCtaUrl={`/result/${result.slug}`}
-         save={<BookmarkButton resultId={result.id} />}
-         share={<CardShareButton title={cleanTitle(result.title)} url={`/result/${result.slug}`} />}
+  return (
+    <div className="container mx-auto max-w-7xl px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <SectionHero
+          icon={FileCheck2}
+          badge="Results"
+          title="Exam Results"
+          subtitle="Download the latest government exam result PDFs and check your outcome in one place."
+          count={total}
         />
-        </motion.div>
-       ))}
-      </div>
-      {loadingMore && (
-       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-         <UniversalCardSkeleton key={i} />
-        ))}
-       </div>
-      )}
-      <InfiniteListFooter
-       sentinelRef={sentinelRef}
-       hasMore={hasMore}
-       loadingMore={loadingMore}
-       loadMoreError={loadMoreError}
-       onLoadMore={loadMore}
-       onRetry={loadMore}
-       loadedCount={filterValidItems(results).length}
-       total={total}
-       label="results"
-      />
-     </>
-    )}
-   </motion.div>
-  </div>
- )
+
+        <ListingLayout
+          filters={
+            <ListingFilters
+              search={search}
+              onSearchChange={setSearch}
+              onSearchSubmit={() => setSearch((value) => value.trim())}
+              searchPlaceholder="Search results…"
+              filters={filters}
+              quickFilters={quickFilters}
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+              activeCount={activeCount}
+            />
+          }
+        >
+          <ListingToolbar
+            count={visibleResults.length}
+            total={total}
+            label="results"
+            refreshing={refreshing}
+            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+            activeFilters={activeFilters}
+            onClearAll={clearFilters}
+          />
+
+          {loading && results.length === 0 ? (
+            <div className={listGridWithSidebar}>
+              {Array.from({ length: 9 }).map((_, index) => (
+                <UniversalCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : error && results.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center py-16">
+                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
+                <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
+                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+                <Button onClick={retry}>Try Again</Button>
+              </CardContent>
+            </Card>
+          ) : visibleResults.length === 0 ? (
+            <UniversalCardEmpty
+              title="No results found"
+              hint="Try adjusting your search or filter criteria."
+              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+            />
+          ) : (
+            <>
+              <div className={listGridWithSidebar}>
+                {visibleResults.map((result) => (
+                  <motion.div
+                    key={result.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.35 }}
+                    className="h-full"
+                  >
+                    <UniversalCard
+                      module="result"
+                      title={cleanTitle(result.title)}
+                      organization={result.department.name}
+                      description={result.description}
+                      metadata={result.resultDate ? [{ icon: Calendar, text: formatDate(result.resultDate) }] : []}
+                      primaryCtaUrl={`/result/${result.slug}`}
+                      save={<BookmarkButton resultId={result.id} />}
+                      share={<CardShareButton title={cleanTitle(result.title)} url={`/result/${result.slug}`} />}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+              {loadingMore ? (
+                <div className={`mt-6 ${listGridWithSidebar}`}>
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <UniversalCardSkeleton key={index} />
+                  ))}
+                </div>
+              ) : null}
+              <InfiniteListFooter
+                sentinelRef={sentinelRef}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                loadMoreError={loadMoreError}
+                onLoadMore={loadMore}
+                onRetry={loadMore}
+                loadedCount={visibleResults.length}
+                total={total}
+                label="results"
+              />
+            </>
+          )}
+        </ListingLayout>
+      </motion.div>
+    </div>
+  )
 }

@@ -13,6 +13,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +26,8 @@ export async function GET(request: NextRequest) {
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
     const sort = searchParams.get("sort") || "latest"
+    const hasPdf = searchParams.get("hasPdf") === "1"
+    const postedWithin = parsePostedWithin(searchParams.get("postedWithin"))
     const skip = (page - 1) * limit
 
     const where: Prisma.AnswerKeyWhereInput = {}
@@ -47,13 +50,18 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { department: { name: { contains: search, mode: "insensitive" } } },
+        { category: { name: { contains: search, mode: "insensitive" } } },
       ]
     }
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
+    if (hasPdf) where.pdfUrl = { not: null }
+    if (postedWithin > 0) where.createdAt = { gte: postedSince(postedWithin) }
 
     const baseWhere: Prisma.AnswerKeyWhereInput = { ...where }
+
+    const orderBy: Prisma.AnswerKeyOrderByWithRelationInput = { createdAt: sort === "oldest" ? "asc" : "desc" }
 
     const session = isAdminScope && (includeCounts || tab === "draft") ? await auth() : null
 
@@ -75,7 +83,7 @@ export async function GET(request: NextRequest) {
         prisma.answerKey.findMany({
           where,
           include: { department: true, category: true, job: true },
-          orderBy: { createdAt: "desc" },
+          orderBy,
           take: CANDIDATE_POOL_SIZE,
         }),
         prisma.answerKey.count({ where }),
@@ -94,7 +102,7 @@ export async function GET(request: NextRequest) {
       prisma.answerKey.findMany({
         where,
         include: { department: true, category: true, job: true, ...CREATED_BY_SELECT },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip,
         take: limit,
       }),

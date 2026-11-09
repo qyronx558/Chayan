@@ -1,413 +1,485 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Search, AlertCircle, Filter, X, Building2, Wifi, Sparkles, Flag, Briefcase } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { AlertCircle, Flag, Sparkles, Wifi } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
-import { moduleTheme } from "@/components/ui/module-theme"
+import { listGridWithSidebar } from "@/components/ui/module-theme"
 import { filterValidItems } from "@/lib/card-helpers"
 import { PrivateJobCard } from "@/components/private/PrivateJobCard"
 import { JobRecommendations } from "@/components/jobs/JobRecommendations"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
- useInfiniteScroll,
- appendUnique,
- PUBLIC_INFINITE_LIMIT as LIMIT,
-} from "@/hooks/useInfiniteScroll"
+import { ListingFilters } from "@/components/listing/ListingFilters"
+import { ListingLayout } from "@/components/listing/ListingLayout"
+import { ListingToolbar } from "@/components/listing/ListingToolbar"
+import type { ActiveFilterChip, FilterControl, FilterOption, QuickFilter, SortOption } from "@/components/listing/types"
+import { useDebouncedValue } from "@/hooks/useDebouncedValue"
+import { useInfiniteListing } from "@/hooks/useInfiniteListing"
+import { useListingQuerySync } from "@/hooks/useListingQuerySync"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
-interface Company { id: string; name: string; logo?: string | null; verifiedStatus?: string }
+interface Company {
+  id: string
+  name: string
+  logo?: string | null
+  verifiedStatus?: string
+}
 
 interface PrivateJobData {
- id: string; title: string; slug: string; type: string; category?: string | null
- description?: string | null; location?: string | null; salary?: string | null
- salaryMin?: number | null; salaryMax?: number | null
- experience?: string | null; applicationUrl?: string | null
- applicationEmail?: string | null; lastDate?: string | null; status: string
- remotePolicy?: string | null; isFresherFriendly?: boolean; isWalkIn?: boolean
- skills?: string[]; trustScore?: number; views?: number
- company: Company; createdAt: string
+  id: string
+  title: string
+  slug: string
+  type: string
+  category?: string | null
+  description?: string | null
+  location?: string | null
+  salary?: string | null
+  salaryMin?: number | null
+  salaryMax?: number | null
+  experience?: string | null
+  applicationUrl?: string | null
+  applicationEmail?: string | null
+  lastDate?: string | null
+  status: string
+  remotePolicy?: string | null
+  isFresherFriendly?: boolean
+  isWalkIn?: boolean
+  skills?: string[]
+  trustScore?: number
+  views?: number
+  company: Company
+  createdAt: string
 }
 
-interface FilterOption { id: string; name: string }
+interface PrivateFilters {
+  companies: Company[]
+  locations: string[]
+  types: string[]
+  remotes: string[]
+  skills: string[]
+  categories: string[]
+}
+
+interface PrivateJobsPreset {
+  remote?: string
+  fresher?: string
+  walkin?: string
+}
 
 const typeLabels: Record<string, string> = {
- FULL_TIME: "Full-Time", PART_TIME: "Part-Time", INTERNSHIP: "Internship", CONTRACT: "Contract",
+  FULL_TIME: "Full-Time",
+  PART_TIME: "Part-Time",
+  INTERNSHIP: "Internship",
+  CONTRACT: "Contract",
 }
 
-export function PrivateJobsClient({ preset = {} as { remote?: string; fresher?: string; walkin?: string } }) {
- const [jobs, setJobs] = useState<PrivateJobData[]>([])
- const [total, setTotal] = useState(0)
- const [hasMore, setHasMore] = useState(false)
- const [loading, setLoading] = useState(true)
- const [loadingMore, setLoadingMore] = useState(false)
- const [error, setError] = useState("")
- const [loadMoreError, setLoadMoreError] = useState("")
- const [search, setSearch] = useState("")
- const [debouncedSearch, setDebouncedSearch] = useState("")
- const [typeFilter, setTypeFilter] = useState("")
- const [companyFilter, setCompanyFilter] = useState("")
- const [locationFilter, setLocationFilter] = useState("")
- const [remoteFilter, setRemoteFilter] = useState(preset.remote || "")
- const [skillFilter, setSkillFilter] = useState("")
- const [sort, setSort] = useState("new")
- const [fresherOnly, setFresherOnly] = useState(preset.fresher === "1")
- const [walkinOnly, setWalkinOnly] = useState(preset.walkin === "1")
- const pageRef = useRef(1)
- const abortRef = useRef<AbortController | null>(null)
+const SORT_OPTIONS: SortOption[] = [
+  { value: "new", label: "Newest" },
+  { value: "trust", label: "Most trusted" },
+  { value: "salary", label: "Highest salary" },
+  { value: "trending", label: "Trending" },
+]
 
- const [companies, setCompanies] = useState<FilterOption[]>([])
- const [locations, setLocations] = useState<string[]>([])
- const [types, setTypes] = useState<string[]>([])
- const [remotes, setRemotes] = useState<string[]>([])
- const [skills, setSkills] = useState<string[]>([])
+const REMOTE_OPTIONS = [
+  { value: "", label: "All modes" },
+  { value: "REMOTE", label: "Remote" },
+  { value: "HYBRID", label: "Hybrid" },
+  { value: "ONSITE", label: "On-site" },
+]
 
- const [showFilters, setShowFilters] = useState(false)
+const EXPERIENCE_OPTIONS = [
+  { value: "", label: "Any experience" },
+  { value: "0", label: "Fresher (0 yrs)" },
+  { value: "1", label: "1+ years" },
+  { value: "2", label: "2+ years" },
+  { value: "3", label: "3+ years" },
+  { value: "5", label: "5+ years" },
+]
 
- useEffect(() => {
-  fetch("/api/private-jobs/filters")
-   .then(r => r.json())
-   .then(d => {
-    if (d.success) {
-     setCompanies(d.data.companies || [])
-     setLocations(d.data.locations || [])
-     setTypes(d.data.types || [])
-     setRemotes(d.data.remotes || [])
-     setSkills(d.data.skills || [])
-    }
-   })
-   .catch(() => {})
- }, [])
+const POSTED_OPTIONS = [
+  { value: "", label: "Any time" },
+  { value: "1", label: "Today" },
+  { value: "7", label: "Last 7 days" },
+  { value: "30", label: "Last 30 days" },
+]
 
- useEffect(() => {
-  const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
-  return () => clearTimeout(timer)
- }, [search])
+const STATUS_OPTIONS = [
+  { value: "", label: "All status" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "EXPIRED", label: "Expired" },
+]
 
- const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
-  if (replace) {
-   setLoading(true)
-   setError("")
-  } else {
-   setLoadingMore(true)
-   setLoadMoreError("")
+export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset }) {
+  const searchParams = useSearchParams()
+
+  const [search, setSearch] = useState(searchParams.get("search") ?? "")
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") ?? "")
+  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") ?? "")
+  const [companyFilter, setCompanyFilter] = useState(searchParams.get("companyId") ?? "")
+  const [locationFilter, setLocationFilter] = useState(searchParams.get("location") ?? "")
+  const [remoteFilter, setRemoteFilter] = useState(searchParams.get("remote") ?? preset.remote ?? "")
+  const [skillFilter, setSkillFilter] = useState(searchParams.get("skill") ?? "")
+  const [expFilter, setExpFilter] = useState(searchParams.get("exp") ?? "")
+  const [minSalary, setMinSalary] = useState(searchParams.get("minSalary") ?? "")
+  const [minVacancies, setMinVacancies] = useState(searchParams.get("minVacancies") ?? "")
+  const [qualification, setQualification] = useState(searchParams.get("qualification") ?? "")
+  const [postedWithin, setPostedWithin] = useState(searchParams.get("postedWithin") ?? "")
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") ?? "")
+  const [sort, setSort] = useState(searchParams.get("sort") ?? "new")
+  const [fresherOnly, setFresherOnly] = useState(
+    searchParams.get("fresher") === "1" || preset.fresher === "1"
+  )
+  const [walkinOnly, setWalkinOnly] = useState(
+    searchParams.get("walkin") === "1" || preset.walkin === "1"
+  )
+
+  const debouncedSearch = useDebouncedValue(search.trim(), 300)
+  const debouncedQualification = useDebouncedValue(qualification.trim(), 300)
+
+  const [filterData, setFilterData] = useState<PrivateFilters>({
+    companies: [],
+    locations: [],
+    types: [],
+    remotes: [],
+    skills: [],
+    categories: [],
+  })
+
+  useEffect(() => {
+    fetch("/api/private-jobs/filters")
+      .then((response) => response.json())
+      .then((json) => {
+        if (json.success) {
+          setFilterData({
+            companies: json.data.companies ?? [],
+            locations: json.data.locations ?? [],
+            types: json.data.types ?? [],
+            remotes: json.data.remotes ?? [],
+            skills: json.data.skills ?? [],
+            categories: json.data.categories ?? [],
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const params = useMemo(
+    () => ({
+      search: debouncedSearch,
+      category: categoryFilter,
+      type: typeFilter,
+      companyId: companyFilter,
+      location: locationFilter,
+      remote: remoteFilter,
+      skill: skillFilter,
+      exp: expFilter,
+      minSalary: minSalary ? Number(minSalary) : "",
+      minVacancies: minVacancies ? Number(minVacancies) : "",
+      qualification: debouncedQualification,
+      postedWithin,
+      status: statusFilter,
+      fresher: fresherOnly ? "1" : "",
+      walkin: walkinOnly ? "1" : "",
+      sort,
+    }),
+    [
+      debouncedSearch,
+      categoryFilter,
+      typeFilter,
+      companyFilter,
+      locationFilter,
+      remoteFilter,
+      skillFilter,
+      expFilter,
+      minSalary,
+      minVacancies,
+      debouncedQualification,
+      postedWithin,
+      statusFilter,
+      fresherOnly,
+      walkinOnly,
+      sort,
+    ]
+  )
+
+  const {
+    items: jobs,
+    total,
+    hasMore,
+    loading,
+    refreshing,
+    loadingMore,
+    error,
+    loadMoreError,
+    loadMore,
+    retry,
+    sentinelRef,
+  } = useInfiniteListing<PrivateJobData>({ endpoint: "/api/private-jobs", params })
+
+  useListingQuerySync({
+    search: debouncedSearch,
+    category: categoryFilter,
+    type: typeFilter,
+    companyId: companyFilter,
+    location: locationFilter,
+    remote: remoteFilter,
+    skill: skillFilter,
+    exp: expFilter,
+    minSalary,
+    minVacancies,
+    qualification: debouncedQualification,
+    postedWithin,
+    status: statusFilter,
+    fresher: fresherOnly ? "1" : "",
+    walkin: walkinOnly ? "1" : "",
+    sort,
+  })
+
+  const clearFilters = () => {
+    setSearch("")
+    setCategoryFilter("")
+    setTypeFilter("")
+    setCompanyFilter("")
+    setLocationFilter("")
+    setRemoteFilter("")
+    setSkillFilter("")
+    setExpFilter("")
+    setMinSalary("")
+    setMinVacancies("")
+    setQualification("")
+    setPostedWithin("")
+    setStatusFilter("")
+    setSort("new")
+    setFresherOnly(false)
+    setWalkinOnly(false)
   }
-  try {
-   const params = new URLSearchParams()
-   if (debouncedSearch) params.set("search", debouncedSearch)
-   if (typeFilter && typeFilter !== "all") params.set("type", typeFilter)
-   if (companyFilter && companyFilter !== "all") params.set("companyId", companyFilter)
-   if (locationFilter && locationFilter !== "all") params.set("location", locationFilter)
-   if (remoteFilter && remoteFilter !== "all") params.set("remote", remoteFilter)
-   if (skillFilter && skillFilter !== "all") params.set("skill", skillFilter)
-   if (fresherOnly) params.set("fresher", "1")
-   if (walkinOnly) params.set("walkin", "1")
-   if (sort !== "new") params.set("sort", sort)
-   params.set("page", String(pageNum))
-   params.set("limit", String(LIMIT))
 
-   const res = await fetch(`/api/private-jobs?${params}`, { signal })
-   const json = await res.json()
-   if (signal.aborted) return
-   if (json.success) {
-    setJobs((prev) => (replace ? json.data : appendUnique(prev, json.data)))
-    setTotal(json.pagination.total ?? 0)
-    setHasMore(pageNum < (json.pagination.totalPages ?? 1))
-    pageRef.current = pageNum
-   } else if (replace) {
-    setError(json.error || "Failed to fetch private jobs")
-   } else {
-    setLoadMoreError(json.error || "Failed to load more. Please retry.")
-   }
-  } catch {
-   if (signal.aborted) return
-   if (replace) setError("Failed to fetch private jobs. Please try again.")
-   else setLoadMoreError("Failed to load more. Please retry.")
-  } finally {
-   if (!signal.aborted) {
-    if (replace) setLoading(false)
-    else setLoadingMore(false)
-   }
-  }
- }, [debouncedSearch, typeFilter, companyFilter, locationFilter, remoteFilter, skillFilter, fresherOnly, walkinOnly, sort])
+  const hasActiveFilters = Boolean(
+    debouncedSearch ||
+      categoryFilter ||
+      typeFilter ||
+      companyFilter ||
+      locationFilter ||
+      remoteFilter ||
+      skillFilter ||
+      expFilter ||
+      minSalary ||
+      minVacancies ||
+      debouncedQualification ||
+      postedWithin ||
+      statusFilter ||
+      fresherOnly ||
+      walkinOnly ||
+      sort !== "new"
+  )
 
- useEffect(() => {
-  abortRef.current?.abort()
-  const controller = new AbortController()
-  abortRef.current = controller
-  pageRef.current = 1
-  setHasMore(false)
-  fetchPage(1, true, controller.signal)
-  return () => controller.abort()
- }, [fetchPage])
+  const activeCount = [
+    debouncedSearch,
+    categoryFilter,
+    typeFilter,
+    companyFilter,
+    locationFilter,
+    remoteFilter,
+    skillFilter,
+    expFilter,
+    minSalary,
+    minVacancies,
+    debouncedQualification,
+    postedWithin,
+    statusFilter,
+    fresherOnly,
+    walkinOnly,
+  ].filter(Boolean).length
 
- const loadMore = useCallback(() => {
-  if (loading || loadingMore || !hasMore) return
-  const controller = new AbortController()
-  abortRef.current = controller
-  fetchPage(pageRef.current + 1, false, controller.signal)
- }, [loading, loadingMore, hasMore, fetchPage])
+  const companyOptions: FilterOption[] = filterData.companies.map((company) => ({ id: company.id, name: company.name }))
+  const locationOptions: FilterOption[] = filterData.locations.map((location) => ({ id: location, name: location }))
+  const skillOptions: FilterOption[] = filterData.skills.map((skill) => ({ id: skill, name: skill }))
+  const categoryOptions: FilterOption[] = filterData.categories.map((category) => ({ id: category, name: category }))
 
- const retryInitial = useCallback(() => {
-  abortRef.current?.abort()
-  const controller = new AbortController()
-  abortRef.current = controller
-  fetchPage(1, true, controller.signal)
- }, [fetchPage])
+  const typeOptions = [
+    { value: "", label: "All types" },
+    ...filterData.types.map((type) => ({ value: type, label: typeLabels[type] ?? type })),
+  ]
 
- const sentinelRef = useInfiniteScroll({
-  hasMore,
-  isLoading: loading || loadingMore,
-  onLoadMore: loadMore,
- })
+  const remoteOptions = [
+    ...REMOTE_OPTIONS,
+    ...filterData.remotes
+      .filter((remote) => !["REMOTE", "HYBRID", "ONSITE"].includes(remote))
+      .map((remote) => ({ value: remote, label: remote })),
+  ]
 
- const visibleJobs = filterValidItems(jobs)
+  const categoryName = categoryFilter || ""
+  const companyName = filterData.companies.find((company) => company.id === companyFilter)?.name
+  const typeName = typeLabels[typeFilter] ?? typeFilter
+  const expName = EXPERIENCE_OPTIONS.find((option) => option.value === expFilter)?.label
 
- const handleSearch = (e: React.FormEvent) => {
-  e.preventDefault()
-  setDebouncedSearch(search.trim())
- }
+  const activeFilters: ActiveFilterChip[] = []
+  if (debouncedSearch) activeFilters.push({ id: "search", label: `Search: ${debouncedSearch}`, onRemove: () => setSearch("") })
+  if (categoryFilter) activeFilters.push({ id: "category", label: categoryName, onRemove: () => setCategoryFilter("") })
+  if (companyName) activeFilters.push({ id: "company", label: companyName, onRemove: () => setCompanyFilter("") })
+  if (locationFilter) activeFilters.push({ id: "location", label: locationFilter, onRemove: () => setLocationFilter("") })
+  if (typeFilter) activeFilters.push({ id: "type", label: typeName, onRemove: () => setTypeFilter("") })
+  if (remoteFilter) activeFilters.push({ id: "remote", label: remoteFilter, onRemove: () => setRemoteFilter("") })
+  if (skillFilter) activeFilters.push({ id: "skill", label: skillFilter, onRemove: () => setSkillFilter("") })
+  if (expFilter) activeFilters.push({ id: "exp", label: expName ?? `${expFilter}+ years`, onRemove: () => setExpFilter("") })
+  if (minSalary) activeFilters.push({ id: "salary", label: `≥ ₹${Number(minSalary).toLocaleString("en-IN")}`, onRemove: () => setMinSalary("") })
+  if (minVacancies) activeFilters.push({ id: "vacancies", label: `${minVacancies}+ vacancies`, onRemove: () => setMinVacancies("") })
+  if (debouncedQualification) activeFilters.push({ id: "qualification", label: `Qualification: ${debouncedQualification}`, onRemove: () => setQualification("") })
+  if (postedWithin) activeFilters.push({ id: "posted", label: `Posted within ${postedWithin}d`, onRemove: () => setPostedWithin("") })
+  if (statusFilter) activeFilters.push({ id: "status", label: statusFilter, onRemove: () => setStatusFilter("") })
+  if (fresherOnly) activeFilters.push({ id: "fresher", label: "Freshers", onRemove: () => setFresherOnly(false) })
+  if (walkinOnly) activeFilters.push({ id: "walkin", label: "Walk-in", onRemove: () => setWalkinOnly(false) })
 
- const clearFilters = () => {
-  setSearch("")
-  setDebouncedSearch("")
-  setTypeFilter("")
-  setCompanyFilter("")
-  setLocationFilter("")
-  setRemoteFilter("")
-  setSkillFilter("")
-  setFresherOnly(false)
-  setWalkinOnly(false)
-  setSort("new")
- }
+  const quickFilters: QuickFilter[] = [
+    { id: "remote", label: "Remote", active: remoteFilter === "REMOTE", onToggle: () => setRemoteFilter((value) => (value === "REMOTE" ? "" : "REMOTE")) },
+    { id: "fresher", label: "Freshers", active: fresherOnly, onToggle: () => setFresherOnly((value) => !value) },
+    { id: "walkin", label: "Walk-ins", active: walkinOnly, onToggle: () => setWalkinOnly((value) => !value) },
+    { id: "highSalary", label: "High salary", active: minSalary === "1000000", onToggle: () => setMinSalary((value) => (value === "1000000" ? "" : "1000000")) },
+  ]
 
- const hasActiveFilters = debouncedSearch || typeFilter || companyFilter || locationFilter || remoteFilter || skillFilter || fresherOnly || walkinOnly || sort !== "new"
+  const filters: FilterControl[] = [
+    { kind: "select", id: "category", label: "Category", value: categoryFilter, options: [{ value: "", label: "All categories" }, ...categoryOptions.map((option) => ({ value: option.id, label: option.name }))], onChange: setCategoryFilter },
+    { kind: "searchable", id: "company", label: "Company", allLabel: "All companies", searchPlaceholder: "Search companies…", options: companyOptions, value: companyFilter, onChange: setCompanyFilter },
+    { kind: "searchable", id: "location", label: "Location", allLabel: "All locations", searchPlaceholder: "Search locations…", options: locationOptions, value: locationFilter, onChange: setLocationFilter },
+    { kind: "select", id: "type", label: "Job type", value: typeFilter, options: typeOptions, onChange: setTypeFilter },
+    { kind: "select", id: "remote", label: "Work mode", value: remoteFilter, options: remoteOptions, onChange: setRemoteFilter },
+    { kind: "searchable", id: "skill", label: "Skill", allLabel: "All skills", searchPlaceholder: "Search skills…", options: skillOptions, value: skillFilter, onChange: setSkillFilter },
+    { kind: "number", id: "minSalary", label: "Minimum salary (₹)", placeholder: "e.g. 600000", min: 0, value: minSalary, onChange: setMinSalary },
+    { kind: "select", id: "exp", label: "Experience", value: expFilter, options: EXPERIENCE_OPTIONS, onChange: setExpFilter },
+    { kind: "select", id: "status", label: "Status", value: statusFilter, options: STATUS_OPTIONS, onChange: setStatusFilter },
+    { kind: "text", id: "qualification", label: "Qualification", placeholder: "e.g. B.Tech, MBA", value: qualification, onChange: setQualification },
+    { kind: "number", id: "minVacancies", label: "Minimum vacancies", placeholder: "e.g. 5", min: 0, value: minVacancies, onChange: setMinVacancies },
+    { kind: "select", id: "postedWithin", label: "Posted", value: postedWithin, options: POSTED_OPTIONS, onChange: setPostedWithin },
+  ]
 
- return (
-  <div className="container mx-auto max-w-7xl px-4 py-8">
-   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-    <div className="mb-2 flex flex-wrap items-center gap-3">
-     <h1 className="font-display text-3xl font-bold text-foreground">Private jobs</h1>
-     <div className="flex gap-2 text-xs">
-      <Link href="/private-jobs/remote" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Wifi className="mr-1 inline h-3 w-3" />Remote</Link>
-      <Link href="/private-jobs/freshers" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Sparkles className="mr-1 inline h-3 w-3" />Freshers</Link>
-      <Link href="/private-jobs/walkins" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Flag className="mr-1 inline h-3 w-3" />Walk-ins</Link>
-      <Link href="/private-jobs/refer" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">+ Refer a job</Link>
-     </div>
-    </div>
-    <p className="mb-8 max-w-2xl text-muted-foreground">
-     Full-time, part-time, internships, and contract positions from top companies - with trust scores, tracking and prep.
-    </p>
+  const visibleJobs = filterValidItems(jobs)
 
-    {/* ── Search row - same structure as gov JobsClient ── */}
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-     <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-       placeholder="Search by title, company or skill..."
-       value={search}
-       onChange={(e) => setSearch(e.target.value)}
-       className="pl-10 pr-10"
-      />
-      {search && (
-       <button
-        type="button"
-        onClick={() => { setSearch("") }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-brick"
-       >
-        <X className="h-4 w-4" />
-       </button>
-      )}
-     </form>
-     <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setShowFilters(!showFilters)}
-      className="sm:hidden"
-     >
-      <Filter className="mr-2 h-4 w-4" />
-      Filters
-     </Button>
-     {hasActiveFilters && (
-      <Button variant="ghost" size="sm" onClick={clearFilters}>
-       <X className="mr-2 h-4 w-4" />
-       Clear Filters
-      </Button>
-     )}
-    </div>
+  return (
+    <div className="container mx-auto max-w-7xl px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="mb-2 flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-3xl font-bold text-foreground">Private jobs</h1>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Link href="/private-jobs/remote" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Wifi className="mr-1 inline h-3 w-3" />Remote</Link>
+            <Link href="/private-jobs/freshers" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Sparkles className="mr-1 inline h-3 w-3" />Freshers</Link>
+            <Link href="/private-jobs/walkins" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Flag className="mr-1 inline h-3 w-3" />Walk-ins</Link>
+            <Link href="/private-jobs/refer" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">+ Refer a job</Link>
+          </div>
+        </div>
+        <p className="mb-8 max-w-2xl text-muted-foreground">
+          Full-time, part-time, internships, and contract positions from top companies - with trust scores, tracking and prep.
+        </p>
 
-    {/* ── Filter grid - same grid positions as gov (1 / 2 / 4 cols) ── */}
-    <div className={`mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${showFilters ? "grid" : "hidden lg:grid"}`}>
-     <Select value={companyFilter} onValueChange={(v) => { setCompanyFilter(v === "all" ? "" : v) }}>
-      <SelectTrigger className="w-full">
-       <Building2 className="mr-1 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-       <SelectValue placeholder="All Companies" />
-      </SelectTrigger>
-      <SelectContent>
-       <SelectItem value="all">All Companies</SelectItem>
-       {companies.map(c => (
-        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-       ))}
-      </SelectContent>
-     </Select>
-
-     <Select value={locationFilter} onValueChange={(v) => { setLocationFilter(v === "all" ? "" : v) }}>
-      <SelectTrigger className="w-full">
-       <SelectValue placeholder="All Locations" />
-      </SelectTrigger>
-      <SelectContent>
-       <SelectItem value="all">All Locations</SelectItem>
-       {locations.map(l => (
-        <SelectItem key={l} value={l}>{l}</SelectItem>
-       ))}
-      </SelectContent>
-     </Select>
-
-     <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v === "all" ? "" : v) }}>
-      <SelectTrigger className="w-full">
-       <Briefcase className="mr-1 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-       <SelectValue placeholder="All Types" />
-      </SelectTrigger>
-      <SelectContent>
-       <SelectItem value="all">All Types</SelectItem>
-       {types.map(t => (
-        <SelectItem key={t} value={t}>{typeLabels[t] || t}</SelectItem>
-       ))}
-      </SelectContent>
-     </Select>
-
-     <Select value={remoteFilter} onValueChange={(v) => { setRemoteFilter(v === "all" ? "" : v) }}>
-      <SelectTrigger className="w-full">
-       <Wifi className="mr-1 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-       <SelectValue placeholder="Work mode" />
-      </SelectTrigger>
-      <SelectContent>
-       <SelectItem value="all">All modes</SelectItem>
-       <SelectItem value="REMOTE">Remote</SelectItem>
-       <SelectItem value="HYBRID">Hybrid</SelectItem>
-       <SelectItem value="ONSITE">On-site</SelectItem>
-       {remotes.filter(r => !["REMOTE", "HYBRID", "ONSITE"].includes(r)).map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-      </SelectContent>
-     </Select>
-
-     {skills.length > 0 && (
-      <Select value={skillFilter} onValueChange={(v) => { setSkillFilter(v === "all" ? "" : v) }}>
-       <SelectTrigger className="w-full">
-        <Sparkles className="mr-1 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <SelectValue placeholder="Skill" />
-       </SelectTrigger>
-       <SelectContent>
-        <SelectItem value="all">All skills</SelectItem>
-        {skills.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-       </SelectContent>
-      </Select>
-     )}
-
-     <Select value={sort} onValueChange={(v) => { setSort(v) }}>
-      <SelectTrigger className="w-full">
-       <SelectValue placeholder="Sort" />
-      </SelectTrigger>
-      <SelectContent>
-       <SelectItem value="new">Newest</SelectItem>
-       <SelectItem value="trust">Most trusted</SelectItem>
-       <SelectItem value="salary">Highest salary</SelectItem>
-      </SelectContent>
-     </Select>
-
-     <div className="flex items-center gap-2">
-      <Button variant={fresherOnly ? "default" : "outline"} size="sm" onClick={() => { setFresherOnly(!fresherOnly) }}>Freshers</Button>
-      <Button variant={walkinOnly ? "default" : "outline"} size="sm" onClick={() => { setWalkinOnly(!walkinOnly) }}>Walk-in</Button>
-     </div>
-    </div>
-
-    <div className="mb-6">
-     <JobRecommendations />
-    </div>
-
-    {loading ? (
-     <div className={moduleTheme.privateJob.listGrid}>
-      {Array.from({ length: LIMIT }).map((_, i) => (
-       <UniversalCardSkeleton key={i} />
-      ))}
-     </div>
-    ) : error ? (
-     <Card>
-      <CardContent className="flex flex-col items-center py-16">
-       <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-       <h3 className="mb-2 font-display text-lg font-semibold text-foreground">Something went wrong</h3>
-       <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-       <Button onClick={retryInitial}>Try Again</Button>
-      </CardContent>
-     </Card>
-    ) : visibleJobs.length === 0 ? (
-     <UniversalCardEmpty
-      title="No private jobs found"
-      hint="Try adjusting your search or filter criteria."
-      action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-     />
-    ) : (
-     <>
-      <div className="agate mb-4 text-sm text-muted-foreground">
-       Showing {visibleJobs.length} of {total} private jobs
-      </div>
-      <div className={moduleTheme.privateJob.listGrid}>
-       {visibleJobs.map((job) => (
-        <motion.div
-         key={job.id}
-         initial={{ opacity: 0, y: 24 }}
-         whileInView={{ opacity: 1, y: 0 }}
-         viewport={{ once: true, margin: "-40px" }}
-         transition={{ duration: 0.35 }}
-         className="h-full"
+        <ListingLayout
+          filters={
+            <ListingFilters
+              search={search}
+              onSearchChange={setSearch}
+              onSearchSubmit={() => setSearch((value) => value.trim())}
+              searchPlaceholder="Search title, company, skill, location…"
+              filters={filters}
+              quickFilters={quickFilters}
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+              activeCount={activeCount}
+            />
+          }
         >
-         <PrivateJobCard
-          id={job.id}
-          title={job.title}
-          slug={job.slug}
-          company={job.company.name}
-          type={job.type}
-          typeLabel={typeLabels[job.type] || job.type}
-          location={job.location}
-          remotePolicy={job.remotePolicy}
-          salary={job.salary}
-          salaryMin={job.salaryMin}
-          salaryMax={job.salaryMax}
-          experience={job.experience}
-          lastDate={job.lastDate}
-          trustScore={job.trustScore}
-          isFresherFriendly={job.isFresherFriendly}
-          isWalkIn={job.isWalkIn}
-          status={job.status}
-          variant="standard"
-         />
-        </motion.div>
-       ))}
-      </div>
-      {loadingMore && (
-       <div className={`mt-6 ${moduleTheme.privateJob.listGrid}`}>
-        {Array.from({ length: 3 }).map((_, i) => (
-         <UniversalCardSkeleton key={i} />
-        ))}
-       </div>
-      )}
-      <InfiniteListFooter
-       sentinelRef={sentinelRef}
-       hasMore={hasMore}
-       loadingMore={loadingMore}
-       loadMoreError={loadMoreError}
-       onLoadMore={loadMore}
-       onRetry={loadMore}
-       loadedCount={visibleJobs.length}
-       total={total}
-       label="private jobs"
-      />
-     </>
-    )}
-   </motion.div>
-  </div>
- )
+          <ListingToolbar
+            count={visibleJobs.length}
+            total={total}
+            label="private jobs"
+            refreshing={refreshing}
+            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+            activeFilters={activeFilters}
+            onClearAll={clearFilters}
+          />
+
+          <div className="mb-6">
+            <JobRecommendations />
+          </div>
+
+          {loading && jobs.length === 0 ? (
+            <div className={listGridWithSidebar}>
+              {Array.from({ length: 9 }).map((_, index) => (
+                <UniversalCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : error && jobs.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center py-16">
+                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
+                <h3 className="mb-2 font-display text-lg font-semibold text-foreground">Something went wrong</h3>
+                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+                <Button onClick={retry}>Try Again</Button>
+              </CardContent>
+            </Card>
+          ) : visibleJobs.length === 0 ? (
+            <UniversalCardEmpty
+              title="No private jobs found"
+              hint="Try adjusting your search or filter criteria."
+              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+            />
+          ) : (
+            <>
+              <div className={listGridWithSidebar}>
+                {visibleJobs.map((job) => (
+                  <motion.div
+                    key={job.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.35 }}
+                    className="h-full"
+                  >
+                    <PrivateJobCard
+                      id={job.id}
+                      title={job.title}
+                      slug={job.slug}
+                      company={job.company.name}
+                      type={job.type}
+                      typeLabel={typeLabels[job.type] || job.type}
+                      location={job.location}
+                      remotePolicy={job.remotePolicy}
+                      salary={job.salary}
+                      salaryMin={job.salaryMin}
+                      salaryMax={job.salaryMax}
+                      experience={job.experience}
+                      lastDate={job.lastDate}
+                      trustScore={job.trustScore}
+                      isFresherFriendly={job.isFresherFriendly}
+                      isWalkIn={job.isWalkIn}
+                      status={job.status}
+                      variant="standard"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+              {loadingMore ? (
+                <div className={`mt-6 ${listGridWithSidebar}`}>
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <UniversalCardSkeleton key={index} />
+                  ))}
+                </div>
+              ) : null}
+              <InfiniteListFooter
+                sentinelRef={sentinelRef}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                loadMoreError={loadMoreError}
+                onLoadMore={loadMore}
+                onRetry={loadMore}
+                loadedCount={visibleJobs.length}
+                total={total}
+                label="private jobs"
+              />
+            </>
+          )}
+        </ListingLayout>
+      </motion.div>
+    </div>
+  )
 }

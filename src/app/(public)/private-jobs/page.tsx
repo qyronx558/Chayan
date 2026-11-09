@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { PrivateJobsClient } from "./private-jobs-client"
 
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default function PrivateJobsPage() {
-  return <PrivateJobsClient />
+  return (
+    <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading private jobs…</div>}>
+      <PrivateJobsClient />
+    </Suspense>
+  )
 }

@@ -444,6 +444,9 @@ model Job {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([lastDate])
+  @@index([totalVacancies])
+  @@index([createdAt])
 }
 
 model Company {
@@ -528,6 +531,11 @@ model PrivateJob {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([category])
+  @@index([location])
+  @@index([expMin])
+  @@index([salaryMax])
+  @@index([createdAt])
 }
 
 model Result {
@@ -561,6 +569,8 @@ model Result {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([resultDate])
+  @@index([createdAt])
 }
 
 model AdmitCard {
@@ -594,6 +604,8 @@ model AdmitCard {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([examDate])
+  @@index([createdAt])
 }
 
 model AnswerKey {
@@ -625,6 +637,7 @@ model AnswerKey {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([createdAt])
 }
 
 model Admission {
@@ -656,6 +669,9 @@ model Admission {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([lastDate])
+  @@index([startDate])
+  @@index([createdAt])
 }
 
 model Syllabus {
@@ -689,6 +705,7 @@ model Syllabus {
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
+  @@index([createdAt])
 }
 
 model Notification {

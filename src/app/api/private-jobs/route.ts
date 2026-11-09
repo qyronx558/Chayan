@@ -15,6 +15,7 @@ import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
 import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
+import { parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,10 @@ export async function GET(request: NextRequest) {
     const fresher = searchParams.get("fresher") || ""
     const walkin = searchParams.get("walkin") || ""
     const skill = searchParams.get("skill") || ""
+    const category = searchParams.get("category") || ""
+    const qualification = searchParams.get("qualification") || ""
+    const minVacancies = parseNumber(searchParams.get("minVacancies"), 0)
+    const postedWithin = parsePostedWithin(searchParams.get("postedWithin"))
     const sort = searchParams.get("sort") || "new"
     const tab = searchParams.get("tab") || ""
     const includeCounts = searchParams.get("includeCounts") === "1"
@@ -57,6 +62,9 @@ export async function GET(request: NextRequest) {
         { title: { contains: search, mode: "insensitive" as const } },
         { company: { name: { contains: search, mode: "insensitive" as const } } },
         { skills: { has: search } },
+        { location: { contains: search, mode: "insensitive" as const } },
+        { category: { contains: search, mode: "insensitive" as const } },
+        { qualification: { contains: search, mode: "insensitive" as const } },
       ]
     }
     if (type && type !== "all") where.type = type as Prisma.PrivateJobWhereInput["type"]
@@ -72,6 +80,10 @@ export async function GET(request: NextRequest) {
     if (fresher === "1") where.isFresherFriendly = true
     if (walkin === "1") where.isWalkIn = true
     if (skill && skill !== "all") where.skills = { has: skill }
+    if (category && category !== "all") where.category = category
+    if (qualification) where.qualification = { contains: qualification, mode: "insensitive" }
+    if (minVacancies > 0) where.vacancies = { gte: minVacancies }
+    if (postedWithin > 0) where.createdAt = { gte: postedSince(postedWithin) }
 
     const baseWhere: Prisma.PrivateJobWhereInput = { ...where }
 

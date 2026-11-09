@@ -18,6 +18,8 @@ interface SearchableFilterProps {
  allLabel: string
  searchPlaceholder?: string
  onChange: (id: string) => void
+ /** Extra classes for the popover content (e.g. raise z-index inside a Sheet). */
+ popoverClassName?: string
 }
 
 /**
@@ -30,6 +32,7 @@ export function SearchableFilter({
  allLabel,
  searchPlaceholder = "Search...",
  onChange,
+ popoverClassName,
 }: SearchableFilterProps) {
  const [open, setOpen] = useState(false)
  const selected = options.find((o) => o.id === value)
@@ -49,7 +52,7 @@ export function SearchableFilter({
      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
     </Button>
    </PopoverTrigger>
-   <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[220px] p-0" align="start">
+   <PopoverContent className={cn("w-[var(--radix-popover-trigger-width)] min-w-[220px] p-0", popoverClassName)} align="start">
     <Command>
      <CommandInput placeholder={searchPlaceholder} />
      <CommandList>
