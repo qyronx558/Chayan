@@ -1,272 +1,174 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import {
- ExternalLink,
- FileText,
- ShieldCheck,
- Share2,
- Copy,
- Check,
- Eye,
- Users,
- Flag,
- Printer,
- Building2,
-} from "lucide-react"
+import { AlertTriangle, ArrowUpRight, ExternalLink, Eye, Flag, Mail, ShieldAlert, ShieldCheck } from "lucide-react"
 import { formatDate, formatCompact, cn } from "@/lib/utils"
-import { useActiveSection } from "@/components/shared/useActiveSection"
-import { Badge } from "@/components/ui/badge"
+import type { Deadline } from "@/lib/job-insights"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { toast } from "@/components/ui/toast"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { PrivateTracker } from "@/components/private/PrivateTracker"
-import { TrustBadge } from "@/components/private/TrustBadge"
+import { EmployerMonitorButton } from "@/components/private/EmployerMonitorButton"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
-
-interface RailSection {
- id: string
- label: string
-}
+import { ShareRow } from "@/components/shared/ShareRow"
 
 interface Props {
  privateJobId: string
  slug: string
  title: string
  company: string
- companySlug?: string | null
  companyWebsite?: string | null
- verifiedEmployer: boolean
  applicationUrl: string | null
  applicationEmail: string | null
  proofUrl: string | null
- trustScore: number
- trustReasons: string[]
- updatedAt: string | null
- createdAt: string | null
- viewsTotal: number | null
+ trust: { score: number; label: string; reasons: string[] }
+ deadline: Deadline
+ /** "Posted 3 days ago" */
+ postedLabel: string | null
  lastDate: string | null
- sections: RailSection[]
+ updatedAt: string | null
+ viewsTotal: number | null
+ onApplyClick: (kind: "APPLY" | "EMAIL") => void
 }
 
 /**
- * Private mirror of gov JobApplyRail.
- * Same card order and sticky behaviour: Apply → Verify → On this page → Share.
+ * Right rail. Order of thought for a job seeker:
+ * "is it open?" -> apply -> save/track -> "is it safe?" -> share.
  */
 export function PrivateApplyRail(p: Props) {
- const [copied, setCopied] = useState(false)
- const sectionIds = useMemo(() => p.sections.map((s) => s.id), [p.sections])
- const active = useActiveSection(sectionIds)
+ const [reportOpen, setReportOpen] = useState(false)
+ const [reason, setReason] = useState("")
+ const [details, setDetails] = useState("")
+ const [sending, setSending] = useState(false)
 
- const officialHost = (() => {
+ const closed = p.deadline.state === "closed"
+ const urgent = p.deadline.state === "urgent"
+ const { score } = p.trust
+ const safe = score >= 50
+ const risky = score < 30
+
+ const submitReport = async () => {
+  if (!reason.trim()) { toast("Enter a reason", "destructive"); return }
+  setSending(true)
   try {
-   const raw = p.companyWebsite || p.applicationUrl
-   if (!raw) return null
-   return new URL(raw.startsWith("http") ? raw : `https://${raw}`).hostname.replace(/^www\./, "")
+   const res = await fetch(`/api/private-jobs/${p.privateJobId}/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason, details }),
+   })
+   const json = await res.json()
+   if (json.success) {
+    toast("Reported - our team will review", "success")
+    setReportOpen(false); setReason(""); setDetails("")
+   } else toast(json.error || "Failed", "destructive")
   } catch {
-   return null
+   toast("Failed", "destructive")
+  } finally {
+   setSending(false)
   }
- })()
-
- const copyLink = async () => {
-  try {
-   await navigator.clipboard.writeText(window.location.href)
-   setCopied(true)
-   setTimeout(() => setCopied(false), 2000)
-  } catch {
-   // clipboard unavailable
-  }
- }
-
- const scrollTo = (id: string) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
  }
 
  return (
-  <div className="space-y-4 print:hidden lg:sticky lg:top-24 lg:self-start">
-   {/* ── Apply card (primary conversion) ── */}
-   <Card className="overflow-hidden border-rule">
-    <div aria-hidden="true" className="h-0.5 bg-brick" />
-    <CardHeader className="pb-3">
-     <CardTitle className="font-display text-base">Apply for this job</CardTitle>
-     {p.lastDate ? (
-      <p className="agate text-xs text-muted-foreground">
-       Last date:{" "}
-       <span className="font-semibold text-foreground">{formatDate(p.lastDate)}</span>
+  <aside aria-label="Apply" className="space-y-3 print:hidden lg:sticky lg:top-24 lg:self-start">
+   {/* ── Apply card ── */}
+   <div className="border border-rule bg-card shadow-[0_1px_0_var(--color-rule),0_12px_32px_-18px_rgb(0_0_0/0.35)]">
+    <div aria-hidden="true" className={cn("h-1", closed ? "bg-rule-2" : "bg-brick")} />
+    <div className="space-y-4 p-5">
+     <div>
+      <p className="agate text-[11px] uppercase tracking-wider text-muted-foreground">{closed ? "Status" : "Hiring status"}</p>
+      <p className={cn("mt-1 font-display text-2xl font-bold leading-tight", urgent ? "text-brick" : closed ? "text-muted-foreground" : "text-foreground")}>
+       {p.deadline.label}
       </p>
-     ) : (
-      <p className="agate text-xs text-muted-foreground">No deadline - apply anytime</p>
-     )}
-    </CardHeader>
-    <CardContent className="space-y-2.5">
-     {p.applicationUrl ? (
-      <Button className="w-full font-medium" size="lg" asChild>
-       <Link href={`/private-jobs/${p.slug}/apply`}>
-        <ExternalLink className="mr-2 h-4 w-4" /> Apply Now
+      {p.deadline.progress !== null && !closed ? (
+       <div className="mt-3 h-1.5 w-full bg-paper-3" role="progressbar" aria-valuenow={p.deadline.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+        <div className={cn("h-full", urgent ? "bg-brick" : "bg-ink")} style={{ width: `${p.deadline.progress}%` }} />
+       </div>
+      ) : null}
+      <p className="agate mt-2 text-xs text-muted-foreground">
+       {p.lastDate && !closed ? <>Last date <span className="font-semibold text-foreground">{formatDate(p.lastDate)}</span></> : p.postedLabel}
+       {p.lastDate && !closed && p.postedLabel ? <> · {p.postedLabel}</> : null}
+      </p>
+     </div>
+
+     {!closed && p.applicationUrl ? (
+      <Button className="h-11 w-full text-[15px] font-semibold" asChild>
+       <Link href={`/private-jobs/${p.slug}/apply`} onClick={() => p.onApplyClick("APPLY")}>
+        Apply now <ExternalLink className="ml-2 h-4 w-4" />
        </Link>
       </Button>
      ) : null}
-     {!p.applicationUrl && p.applicationEmail ? (
-      <Button className="w-full font-medium" size="lg" asChild>
-       <a href={`mailto:${p.applicationEmail}`}>
-        <ExternalLink className="mr-2 h-4 w-4" /> Apply via Email
+     {!closed && p.applicationEmail ? (
+      <Button variant={p.applicationUrl ? "outline" : "default"} className={cn("w-full", !p.applicationUrl && "h-11 text-[15px] font-semibold")} asChild>
+       <a href={`mailto:${p.applicationEmail}`} onClick={() => p.onApplyClick("EMAIL")}>
+        <Mail className="mr-2 h-4 w-4" /> Apply by email
        </a>
       </Button>
      ) : null}
-     {p.proofUrl ? (
-      <Button variant="outline" className="w-full" asChild>
-       <SmartExternalLink href={p.proofUrl} linkTitle="Official posting proof">
-        <FileText className="mr-2 h-4 w-4" /> Official Posting Proof
-       </SmartExternalLink>
-      </Button>
-     ) : null}
-     <div className="flex gap-2">
-      <div className="flex-1">
-       <PrivateTracker privateJobId={p.privateJobId} variant="full" className="w-full" />
-      </div>
-      <BookmarkButton privateJobId={p.privateJobId} size="default" variant="outline" />
-      <Button variant="outline" size="icon" onClick={() => window.print()} title="Print / Save PDF" aria-label="Print">
-       <Printer className="h-4 w-4" />
-      </Button>
-     </div>
-     {p.viewsTotal !== null && p.viewsTotal > 0 ? (
-      <div className="agate flex items-center gap-3 border-t border-rule pt-2.5 text-[11px] text-muted-foreground">
-       <span className="inline-flex items-center gap-1">
-        <Eye className="h-3 w-3" /> {formatCompact(p.viewsTotal)} views
-       </span>
-       {p.companySlug ? (
-        <Link href={`/companies/${p.companySlug}`} className="inline-flex items-center gap-1 font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2">
-         <Users className="h-3 w-3" /> More at {p.company}
-        </Link>
-       ) : null}
-      </div>
-     ) : null}
-    </CardContent>
-   </Card>
+     {closed ? <Button className="h-11 w-full" disabled>Applications closed</Button> : null}
 
-   {/* ── Verify / trust card ── */}
-   <Card className="border-rule">
-    <CardHeader className="pb-2">
-     <CardTitle className="flex items-center gap-2 font-display text-sm">
-      <ShieldCheck className="h-4 w-4 text-muted-foreground" /> Verify this job
-     </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-2 text-xs">
-     <div className="flex flex-wrap gap-1.5">
-      <TrustBadge score={p.trustScore} reasons={p.trustReasons} size="sm" />
-      {p.verifiedEmployer ? (
-       <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">
-        <Check className="mr-1 h-3 w-3" /> Verified employer
-       </Badge>
-      ) : null}
+     <div className="flex items-center gap-2 border-t border-rule pt-4">
+      <div className="min-w-0 flex-1"><PrivateTracker privateJobId={p.privateJobId} variant="full" className="w-full" /></div>
+      <BookmarkButton privateJobId={p.privateJobId} size="icon" variant="outline" />
      </div>
-     <dl className="space-y-1.5 text-muted-foreground">
-      <div className="flex justify-between gap-2">
-       <dt className="flex items-center gap-1">
-        <Building2 className="h-3 w-3" /> Company
-       </dt>
-       <dd className="text-right font-semibold text-foreground">{p.company}</dd>
-      </div>
-      {officialHost ? (
-       <div className="flex justify-between gap-2">
-        <dt>Official site</dt>
-        <dd className="truncate font-semibold">{officialHost}</dd>
-       </div>
-      ) : null}
-      {p.updatedAt ? (
-       <div className="flex justify-between gap-2">
-        <dt>Last verified</dt>
-        <dd className="font-semibold tabular-nums">{formatDate(p.updatedAt)}</dd>
-       </div>
-      ) : null}
-     </dl>
-     <div className="flex flex-wrap gap-1.5 pt-1">
-      {p.companyWebsite ? (
-       <SmartExternalLink
-        href={p.companyWebsite}
-        linkTitle={`${p.company} - official website`}
-        className="font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
-       >
-        Open company website
-       </SmartExternalLink>
-      ) : null}
-      <a
-       href="#discussion"
-       onClick={(e) => {
-        e.preventDefault()
-        document.getElementById("discussion")?.scrollIntoView({ behavior: "smooth" })
-       }}
-       className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground"
-      >
-       <Flag className="h-3 w-3" /> Report an error
-      </a>
+     <EmployerMonitorButton privateJobId={p.privateJobId} />
+     <ShareRow title={`${p.title} at ${p.company}`} />
+    </div>
+    {(p.viewsTotal ?? 0) > 0 ? (
+     <div className="agate flex items-center gap-1.5 border-t border-rule bg-paper-2 px-5 py-2.5 text-[11px] text-muted-foreground">
+      <Eye className="h-3.5 w-3.5" /> {formatCompact(p.viewsTotal)} views
      </div>
-     <p className="border-t border-rule pt-2 text-[11px] leading-relaxed text-muted-foreground">
-      Never pay registration fees. Cross-check role, salary & venue on the company site before applying.
+    ) : null}
+   </div>
+
+   {/* ── Safety: visible by default, not hidden in a tooltip ── */}
+   <div className={cn("border bg-card p-4 text-xs", risky ? "border-brick" : "border-rule")}>
+    <div className="flex items-center justify-between gap-3">
+     <p className="flex items-center gap-2 font-semibold text-foreground">
+      {safe ? <ShieldCheck className="h-4 w-4 text-muted-foreground" /> : <ShieldAlert className={cn("h-4 w-4", risky ? "text-brick" : "text-muted-foreground")} />}
+      Safety check
      </p>
-    </CardContent>
-   </Card>
-
-   {/* ── On this page (scroll-spy TOC) ── */}
-   {p.sections.length > 1 ? (
-    <Card className="hidden border-rule lg:block">
-     <CardHeader className="pb-2">
-      <CardTitle className="font-display text-sm">On this page</CardTitle>
-     </CardHeader>
-     <CardContent className="p-2">
-      {p.sections.map((s) => (
-       <button
-        key={s.id}
-        type="button"
-        onClick={() => scrollTo(s.id)}
-        className={cn(
-         "flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition-colors",
-         active === s.id
-          ? "bg-paper-2 font-semibold text-foreground"
-          : "text-muted-foreground hover:text-brick",
-        )}
-       >
-        <span className={cn("h-1.5 w-1.5", active === s.id ? "bg-brick" : "bg-rule-2")} />
-        {s.label}
-       </button>
+     <span className={cn("agate text-[11px] uppercase tracking-wider", risky ? "text-brick" : "text-muted-foreground")}>{p.trust.label} · {score}/100</span>
+    </div>
+    <div className="mt-2 h-1.5 w-full bg-paper-3" role="meter" aria-valuenow={score} aria-valuemin={0} aria-valuemax={100} aria-label="Trust score">
+     <div className={cn("h-full", risky ? "bg-brick" : "bg-ink")} style={{ width: `${score}%` }} />
+    </div>
+    {p.trust.reasons.length > 0 ? (
+     <ul className="mt-3 space-y-1 text-muted-foreground">
+      {p.trust.reasons.slice(0, 4).map((r) => (
+       <li key={r} className="flex gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 bg-current" />{r}</li>
       ))}
-     </CardContent>
-    </Card>
-   ) : null}
-
-   {/* ── Share (single, consolidated) ── */}
-   <Card className="border-rule">
-    <CardContent className="flex items-center gap-2 p-3.5">
-     <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-      <Share2 className="h-3.5 w-3.5" /> Share
-     </span>
-     <div className="ml-auto flex gap-1.5">
-      <Button variant="outline" size="sm" onClick={copyLink} className="h-8 text-xs">
-       {copied ? <Check className="mr-1 h-3.5 w-3.5 text-brick" /> : <Copy className="mr-1 h-3.5 w-3.5" />}
-       {copied ? "Copied" : "Copy"}
-      </Button>
-      <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-       <a
-        href={`https://wa.me/?text=${encodeURIComponent(`${p.title} at ${p.company} - ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-       >
-        WhatsApp
-       </a>
-      </Button>
-      <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-       <a
-        href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}&text=${encodeURIComponent(`${p.title} at ${p.company}`)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-       >
-        Telegram
-       </a>
-      </Button>
+     </ul>
+    ) : null}
+    <p className="mt-3 flex gap-2 border-t border-rule pt-2.5 leading-relaxed text-muted-foreground">
+     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+     <span>Genuine employers never ask for registration, security or training fees. Confirm the role on the company site before sharing documents.</span>
+    </p>
+    <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+     {p.proofUrl ? (
+      <SmartExternalLink href={p.proofUrl} linkTitle="Official posting proof" className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2 hover:text-brick">
+       Posting proof <ArrowUpRight className="h-3 w-3" />
+      </SmartExternalLink>
+     ) : null}
+     {p.companyWebsite ? (
+      <SmartExternalLink href={p.companyWebsite} linkTitle={`${p.company} - official website`} className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2 hover:text-brick">
+       Company site <ArrowUpRight className="h-3 w-3" />
+      </SmartExternalLink>
+     ) : null}
+     <button type="button" onClick={() => setReportOpen((v) => !v)} className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-brick">
+      <Flag className="h-3 w-3" /> Report this job
+     </button>
+    </div>
+    {reportOpen ? (
+     <div className="mt-3 space-y-2 border-t border-rule pt-3">
+      <Input placeholder="Reason, e.g. asks for a registration fee" value={reason} onChange={(e) => setReason(e.target.value)} />
+      <Textarea placeholder="Details (optional)" value={details} onChange={(e) => setDetails(e.target.value)} rows={3} />
+      <Button size="sm" variant="destructive" disabled={sending} onClick={submitReport}>{sending ? "Submitting..." : "Submit report"}</Button>
      </div>
-    </CardContent>
-   </Card>
-  </div>
+    ) : null}
+   </div>
+  </aside>
  )
 }

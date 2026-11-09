@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
+import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
@@ -45,6 +46,8 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
     include: { department: true },
   })
 
+  const journey = await getJourney(answerKey.jobId, "answer-key")
+
   const breadCrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -66,6 +69,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
         className="mb-6"
       />
 <DocumentDetail
+        journey={journey}
         kind="answer-key"
         tracking={{ entityType: "ANSWER_KEY", entityId: answerKey.id }}
         title={answerKey.title}

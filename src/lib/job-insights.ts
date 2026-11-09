@@ -1,4 +1,5 @@
 import { stripHtmlToText } from "@/lib/blog-prose"
+import { formatDate } from "@/lib/utils"
 
 /** Split plain or newline text into clean steps. Shared so parsing never invents data. */
 export function stepify(text: string | null | undefined): string[] {
@@ -59,6 +60,8 @@ export function parseFeeBars(applicationFee: string | null | undefined): FeeBar[
     if (!m && !freeMatch) continue
     const amount = freeMatch ? 0 : parseInt(m![1].replace(/,/g, ""), 10)
     if (!isFinite(amount) || amount > 100000) continue
+    // A bare year ("Notification 2026") is not a fee - require a currency marker for year-like numbers.
+    if (!freeMatch && amount >= 1990 && amount <= 2100 && !/(?:₹|rs\.?|inr|rupees?)\s*[\d,]+/i.test(chunk)) continue
     const label = labelFor(chunk)
     if (seen.has(label)) continue
     seen.add(label)
@@ -212,4 +215,86 @@ export function feeKpi(applicationFee: string | null | undefined): string | null
   const plain = stripHtmlToText(applicationFee).replace(/\s+/g, " ").trim()
   if (!plain) return null
   return plain.length > 42 ? `${plain.slice(0, 42).trim()}…` : plain
+}
+
+/**
+ * Plain-text value when it is short enough to live in a "key fact" tile, else null.
+ * Decides where a field is shown: tile (short) vs full section (long) - never both.
+ */
+export function shortFact(value: string | null | undefined, max = 32): string | null {
+  if (!value) return null
+  const t = stripHtmlToText(value).replace(/\s+/g, " ").trim()
+  if (!t || t.length > max) return null
+  return t
+}
+
+export type DeadlineState = "none" | "upcoming" | "open" | "urgent" | "closed"
+
+export interface Deadline {
+  state: DeadlineState
+  daysLeft: number | null
+  /** Short human label, e.g. "12 days left", "Closes today", "Opens 12 Dec 2026". */
+  label: string
+  /** % of application window elapsed (null when start/last date missing). */
+  progress: number | null
+}
+
+/** Single source of truth for application-window state, shared by hero, rail and mobile bar. */
+export function getDeadline(
+  startDate: string | null | undefined,
+  lastDate: string | null | undefined,
+  status: string | null | undefined,
+  nowMs = Date.now(),
+): Deadline {
+  const last = lastDate ? new Date(lastDate).getTime() : NaN
+  const start = startDate ? new Date(startDate).getTime() : NaN
+  const hasLast = isFinite(last)
+  const progress = windowProgress(startDate, lastDate, nowMs)
+
+  if (status === "EXPIRED" || (hasLast && last <= nowMs)) {
+    return { state: "closed", daysLeft: null, label: "Applications closed", progress }
+  }
+  if ((isFinite(start) && start > nowMs) || (status === "UPCOMING" && !(isFinite(start) && start <= nowMs))) {
+    return {
+      state: "upcoming",
+      daysLeft: null,
+      label: isFinite(start) ? `Opens ${formatDate(startDate)}` : "Opening soon",
+      progress,
+    }
+  }
+  if (!hasLast) return { state: "none", daysLeft: null, label: "Applications open", progress }
+
+  const daysLeft = Math.ceil((last - nowMs) / 86400000)
+  const label = daysLeft <= 1 ? "Closes today" : `${daysLeft} days left`
+  return { state: daysLeft <= 7 ? "urgent" : "open", daysLeft, label, progress }
+}
+
+export interface DateRow {
+  label: string
+  /** Formatted date when parseable, otherwise the raw stored text (never dropped). */
+  value: string
+  ms: number | null
+  /** Closing-type date - highlighted. */
+  key: boolean
+}
+
+/** Rows for the dates section: stored importantDates, plus start/last date if not already listed. */
+export function buildDateRows(
+  importantDates: Record<string, string> | null | undefined,
+  startDate: string | null | undefined,
+  lastDate: string | null | undefined,
+): DateRow[] {
+  const rows: DateRow[] = []
+  const add = (label: string, raw: string | null | undefined) => {
+    if (!raw || typeof raw !== "string" || !raw.trim()) return
+    const t = new Date(raw).getTime()
+    const ok = isFinite(t)
+    rows.push({ label, value: ok ? formatDate(raw) : raw.trim(), ms: ok ? t : null, key: /last|clos|end/i.test(label) })
+  }
+  if (importantDates && typeof importantDates === "object") {
+    for (const [label, raw] of Object.entries(importantDates)) add(label, raw)
+  }
+  if (!rows.some((r) => /start|begin|open/i.test(r.label))) add("Applications open", startDate)
+  if (!rows.some((r) => /last|clos|end/i.test(r.label))) add("Last date to apply", lastDate)
+  return rows.sort((a, b) => (a.ms ?? Infinity) - (b.ms ?? Infinity))
 }

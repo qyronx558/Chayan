@@ -109,7 +109,7 @@ export function BookmarkButton({
    size={size}
    disabled={loading}
    onClick={handleToggle}
-   className={`h-8 w-8 rounded-lg border-rule bg-background text-muted-foreground hover:border-rule hover:bg-paper-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-rule focus-visible:ring-offset-1 ${className}`}
+   className={`h-8 w-8 !px-0 !py-0 rounded-lg border-rule bg-background text-muted-foreground hover:border-rule hover:bg-paper-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-rule focus-visible:ring-offset-1 ${className}`}
    aria-label={isBookmarked ? "Saved. Remove bookmark" : "Save this item"}
    title={isBookmarked ? "Saved" : "Save"}
   >

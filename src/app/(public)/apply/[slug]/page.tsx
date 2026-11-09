@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { stripHtmlToText } from "@/lib/blog-prose"
+import { getJourney } from "@/lib/doc-journey"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -61,6 +62,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     _sum: { views: true },
   })
   const viewsTotal = viewsAgg._sum.views ?? 0
+  const journey = await getJourney(job.id, "notification")
   // Single timestamp per request for stable related-job badges (server render).
   // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
   const nowMs = Date.now()
@@ -113,6 +115,9 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         title={job.title}
         department={job.department.name}
         departmentId={job.department.id}
+        category={{ id: job.category.id, name: job.category.name }}
+        state={job.state ? { id: job.state.id, name: job.state.name } : null}
+        status={job.status}
         advertisementNo={job.advertisementNo}
         totalVacancies={job.totalVacancies}
         salary={job.salary}
@@ -134,12 +139,15 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         slug={job.slug}
         updatedAt={job.updatedAt?.toISOString() || null}
         viewsTotal={viewsTotal}
+        journey={journey}
       />
 <JobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="JOB" entityId={job.id} />
 
-      <DiscussionSection postType="JOB" postId={job.id} path={`/apply/${job.slug}`} />
-{relatedJobs.length > 0 && (
+      <div className="mt-12">
+        <DiscussionSection postType="JOB" postId={job.id} path={`/apply/${job.slug}`} />
+      </div>
+      {relatedJobs.length > 0 && (
         <section className="mt-12">
           <div className="mb-6 flex items-end justify-between gap-3">
             <div>

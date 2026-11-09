@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 import { buildBrowseUrl, normalizeExternalUrl } from "@/lib/apply-room"
 
@@ -25,6 +26,7 @@ interface SmartExternalLinkProps {
  * when the URL is invalid (never for valid external URLs).
  */
 export function SmartExternalLink({ href, children, className, title, linkTitle, from, onClick }: SmartExternalLinkProps) {
+ const pathname = usePathname()
  const normalized = normalizeExternalUrl(href)
  if (!normalized) {
   return (
@@ -33,13 +35,7 @@ export function SmartExternalLink({ href, children, className, title, linkTitle,
    </a>
   )
  }
- const browseHref =
-  typeof window !== "undefined"
-   ? buildBrowseUrl(normalized, {
-     title: linkTitle ?? undefined,
-     from: from ?? window.location.pathname,
-    })
-   : buildBrowseUrl(normalized, { title: linkTitle ?? undefined, from });
+ const browseHref = buildBrowseUrl(normalized, { title: linkTitle ?? undefined, from: from ?? pathname })
 
  return (
   <Link href={browseHref} className={className} title={title || normalized} onClick={onClick}>

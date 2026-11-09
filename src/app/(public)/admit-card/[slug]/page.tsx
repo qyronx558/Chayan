@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { formatDate, getBaseUrl } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
+import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
@@ -45,6 +46,8 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
     include: { department: true },
   })
 
+  const journey = await getJourney(admitCard.jobId, "admit-card")
+
   const breadCrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -66,6 +69,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
         className="mb-6"
       />
 <DocumentDetail
+        journey={journey}
         kind="admit-card"
         tracking={{ entityType: "ADMIT_CARD", entityId: admitCard.id }}
         title={admitCard.title}

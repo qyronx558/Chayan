@@ -1,36 +1,36 @@
 "use client"
 
-import {
- FileText, ExternalLink, Printer,
- Calendar, CalendarClock, CalendarPlus, Users, IndianRupee, MapPin,
- GraduationCap, Briefcase, Wallet, Hash, AlarmClock, ShieldCheck,
- ListChecks, ClipboardList, UserRound, Clock, BadgeCheck, Eye,
-} from "lucide-react"
-import { useState, useEffect } from "react"
+import { useMemo, useState, useEffect, type ReactNode } from "react"
 import Link from "next/link"
-import { formatDate, formatCompact, cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import {
+ Briefcase, CalendarClock, CalendarDays, Check, ClipboardList, ExternalLink, FileText,
+ GraduationCap, IndianRupee, ListChecks, MapPin, Route, UserRound, Users, Wallet, Hash,
+ type LucideIcon,
+} from "lucide-react"
+import { formatDate, cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
-import { JobQuickSummary } from "@/components/jobs/JobQuickSummary"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
-import { JobInsightDashboard } from "@/components/jobs/JobInsightDashboard"
-import { JobTimeline } from "@/components/jobs/JobTimeline"
 import { JobDocumentsChecklist } from "@/components/jobs/JobDocumentsChecklist"
 import { JobSelectionStepper } from "@/components/jobs/JobSelectionStepper"
+import { DocumentJourney } from "@/components/documents/DocumentJourney"
+import type { JourneyStage } from "@/lib/doc-journey"
 import { JobApplyRail } from "@/components/jobs/JobApplyRail"
 import { RichTextView } from "@/components/shared/RichTextView"
-import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
-import { containsHtml } from "@/lib/blog-prose"
-import { feeKpi, stepify, windowProgress } from "@/lib/job-insights"
+import { useActiveSection } from "@/components/shared/useActiveSection"
+import { containsHtml, stripHtmlToText } from "@/lib/blog-prose"
+import {
+ buildDateRows, feeKpi, formatRupees, getDeadline, parseFeeBars, shortFact, stepify,
+} from "@/lib/job-insights"
 
 interface JobDetailContentProps {
  jobId: string
  title: string
  department: string
  departmentId: string
+ category: { id: string; name: string }
+ state: { id: string; name: string } | null
+ status: string
  advertisementNo: string | null
  totalVacancies: number | null
  salary: string | null
@@ -52,533 +52,337 @@ interface JobDetailContentProps {
  slug: string
  updatedAt?: string | null
  viewsTotal?: number | null
+ journey?: JourneyStage[] | null
+}
+
+/* ── Small layout primitives ─────────────────────────────── */
+
+function Section({ id, icon: Icon, title, hint, children }: {
+ id: string
+ icon: LucideIcon
+ title: string
+ hint?: string
+ children: ReactNode
+}) {
+ return (
+  <section id={id} className="scroll-mt-32 border border-rule bg-card">
+   <header className="flex items-center gap-3 border-b border-rule px-4 py-3 sm:px-5">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-ink text-paper">
+     <Icon className="h-4 w-4" />
+    </span>
+    <h2 className="font-display text-lg font-bold leading-none text-foreground">{title}</h2>
+    {hint ? <span className="agate ml-auto hidden text-[11px] text-muted-foreground sm:block">{hint}</span> : null}
+   </header>
+   <div className="p-4 sm:p-5">{children}</div>
+  </section>
+ )
+}
+
+function Chip({ href, children }: { href: string; children: ReactNode }) {
+ return (
+  <Link
+   href={href}
+   className="agate border border-rule px-2 py-0.5 text-[11px] uppercase tracking-wider text-muted-foreground transition-colors hover:border-brick hover:text-brick"
+  >
+   {children}
+  </Link>
+ )
 }
 
 export function JobDetailContent({
- jobId,
- title,
- department,
- advertisementNo,
- totalVacancies,
- salary,
- location,
- ageLimit,
- ageRelaxation,
- education,
- selectionProcess,
- applicationFee,
- importantDates,
- documentsRequired,
- howToApply,
- officialNotification,
- officialWebsite,
- applyLink,
- experience,
- startDate,
- lastDate,
- slug,
- updatedAt = null,
- viewsTotal = null,
+ jobId, title, department, departmentId, category, state, status,
+ advertisementNo, totalVacancies, salary, location, ageLimit, ageRelaxation, education,
+ selectionProcess, applicationFee, importantDates, documentsRequired, howToApply,
+ officialNotification, officialWebsite, applyLink, experience, startDate, lastDate,
+ slug, updatedAt = null, viewsTotal = null, journey = null,
 }: JobDetailContentProps) {
  const [now, setNow] = useState(() => Date.now())
-
  useEffect(() => {
-  const timer = setInterval(() => setNow(Date.now()), 30000)
-  return () => clearInterval(timer)
+  const t = setInterval(() => setNow(Date.now()), 60000)
+  return () => clearInterval(t)
  }, [])
 
- const dates: { label: string; date: string }[] = importantDates
-  ? Object.entries(importantDates).map(([label, date]) => ({ label, date }))
-  : []
-
- const lastDateMs = lastDate ? new Date(lastDate).getTime() : null
- const diff = lastDateMs ? lastDateMs - now : null
- const daysLeft = diff !== null ? Math.floor(diff / 86400000) : null
- const hoursLeft = diff !== null ? Math.floor((diff % 86400000) / 3600000) : null
- const minsLeft = diff !== null ? Math.floor((diff % 3600000) / 60000) : null
- const isUrgent = diff !== null && diff > 0 && diff <= 7 * 86400000
- const isClosed = diff !== null && diff <= 0
+ const deadline = getDeadline(startDate, lastDate, status, now)
+ const closed = deadline.state === "closed"
+ const urgent = deadline.state === "urgent"
  const canApply = Boolean(applyLink || officialWebsite)
- const progress = windowProgress(startDate, lastDate, now)
- const feeShort = feeKpi(applicationFee)
 
- const heroKpis = [
-  totalVacancies ? { icon: Users, label: "Vacancies", value: totalVacancies.toLocaleString("en-IN") } : null,
-  lastDate ? { icon: CalendarClock, label: "Last date", value: formatDate(lastDate), urgent: isUrgent } : null,
-  feeShort ? { icon: Wallet, label: "Fee", value: feeShort } : null,
- ].filter((k): k is NonNullable<typeof k> => k !== null)
+ /* ── Where does each field live? Short -> fact tile. Long -> its section. Never both. ── */
+ const salaryTile = shortFact(salary, 30)
+ const ageTile = shortFact(ageLimit, 26)
+ const eduTile = shortFact(education, 36)
+ const feeBars = useMemo(() => parseFeeBars(applicationFee), [applicationFee])
+ const feeFlat = shortFact(applicationFee, 30)
+ const feeTile = feeBars.length >= 2 ? feeKpi(applicationFee) : feeFlat
+ const feeNeedsSection = Boolean(applicationFee) && !feeFlat
 
- const details: { icon: typeof Hash; label: string; value: string | null }[] = [
-  { icon: Hash, label: "Advertisement No", value: advertisementNo },
-  { icon: Users, label: "Total Vacancies", value: totalVacancies ? totalVacancies.toLocaleString("en-IN") : null },
-  { icon: IndianRupee, label: "Salary / Pay Scale", value: salary },
-  { icon: MapPin, label: "Location", value: location },
-  { icon: UserRound, label: "Age Limit", value: ageLimit },
-  { icon: UserRound, label: "Age Relaxation", value: ageRelaxation },
-  { icon: GraduationCap, label: "Education Qualification", value: education },
-  { icon: Briefcase, label: "Experience", value: experience },
-  { icon: Wallet, label: "Application Fee", value: applicationFee },
-  { icon: CalendarPlus, label: "Application Begin", value: startDate ? formatDate(startDate) : null },
-  { icon: CalendarClock, label: "Last Date to Apply", value: lastDate ? formatDate(lastDate) : null },
- ].filter((item) => item.value)
+ const facts = [
+  totalVacancies
+   ? { icon: Users, label: "Vacancies", value: totalVacancies.toLocaleString("en-IN") }
+   : null,
+  lastDate
+   ? { icon: CalendarClock, label: "Last date", value: formatDate(lastDate), sub: deadline.label, hot: urgent }
+   : null,
+  salaryTile ? { icon: IndianRupee, label: "Salary", value: salaryTile } : null,
+  eduTile ? { icon: GraduationCap, label: "Qualification", value: eduTile } : null,
+  ageTile ? { icon: UserRound, label: "Age limit", value: ageTile } : null,
+  feeTile ? { icon: Wallet, label: "Fee", value: feeTile } : null,
+ ].filter((f): f is NonNullable<typeof f> => f !== null)
 
- const sections = [
-  { id: "job-details", label: "Vacancy Details", icon: ClipboardList, show: details.length > 0 },
-  { id: "important-dates", label: "Important Dates", icon: Calendar, show: dates.length > 0 },
-  {
-   id: "eligibility", label: "Eligibility", icon: GraduationCap,
-   show: Boolean(education || ageLimit || experience || selectionProcess),
-  },
-  { id: "fees", label: "Application Fees", icon: Wallet, show: Boolean(applicationFee) },
-  { id: "documents", label: "Documents", icon: ListChecks, show: Boolean(documentsRequired) },
-  { id: "how-to-apply", label: "How to Apply", icon: FileText, show: Boolean(howToApply) },
- ].filter((s) => s.show)
+ /* Eligibility: only what is NOT already a tile */
+ const eligibility: { label: string; icon: LucideIcon; html: string }[] = [
+  !eduTile && education ? { label: "Qualification", icon: GraduationCap, html: education } : null,
+  !ageTile && ageLimit ? { label: "Age limit", icon: UserRound, html: ageLimit } : null,
+  ageRelaxation ? { label: "Age relaxation", icon: UserRound, html: ageRelaxation } : null,
+  experience ? { label: "Experience", icon: Briefcase, html: experience } : null,
+  !salaryTile && salary ? { label: "Salary / pay scale", icon: IndianRupee, html: salary } : null,
+ ].filter((x): x is NonNullable<typeof x> => x !== null)
 
- const scrollTo = (id: string) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
- }
-
+ const dateRows = buildDateRows(importantDates, startDate, lastDate)
+ const showDates = dateRows.length >= 2
  const howSteps = stepify(howToApply)
 
+ const sections = [
+  { id: "journey", label: "Journey", show: Boolean(journey) },
+  { id: "dates", label: "Dates", show: showDates },
+  { id: "eligibility", label: "Eligibility", show: eligibility.length > 0 },
+  { id: "selection", label: "Selection", show: Boolean(selectionProcess) },
+  { id: "fee", label: "Fee", show: feeNeedsSection },
+  { id: "documents", label: "Documents", show: Boolean(documentsRequired) },
+  { id: "how-to-apply", label: "How to apply", show: Boolean(howToApply) },
+ ].filter((s) => s.show)
+
+ const active = useActiveSection(sections.map((s) => s.id))
+ const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+
+ const pill =
+  closed ? { text: "Closed", cls: "border-rule-2 text-muted-foreground" }
+  : urgent ? { text: "Closing soon", cls: "border-brick bg-brick text-brick-ink" }
+  : deadline.state === "upcoming" ? { text: "Upcoming", cls: "border-ink text-foreground" }
+  : { text: "Open", cls: "border-ink text-foreground" }
+
  return (
-  <div className="space-y-6 [scroll-behavior:smooth]">
-   {/* ── Header / Masthead + KPI strip ─────── */}
-   <header className="border-b-2 border-rule-2 pb-5">
-    <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-     {advertisementNo && (
-      <span className="agate text-xs text-muted-foreground">Advt No: {advertisementNo}</span>
-     )}
-     <span className="agate inline-flex items-center gap-1 text-xs text-muted-foreground">
-      <BadgeCheck className="h-3.5 w-3.5" /> Verified
-     </span>
-     {isUrgent && (
-      <span className="agate inline-flex items-center gap-1 text-xs text-brick">
-       <AlarmClock className="h-3.5 w-3.5" /> Closing Soon
+  <div className="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+   {/* ═════════ MAIN COLUMN ═════════ */}
+   <div className="min-w-0 space-y-6">
+    {/* ── Hero ── */}
+    <header>
+     <div className="flex flex-wrap items-center gap-1.5">
+      <span className={cn("agate inline-flex items-center gap-1.5 border px-2 py-0.5 text-[11px] uppercase tracking-wider", pill.cls)}>
+       <span className={cn("h-1.5 w-1.5 rounded-full bg-current", urgent && "animate-pulse")} /> {pill.text}
       </span>
-     )}
-     {isClosed && (
-      <span className="agate inline-flex items-center gap-1 text-xs text-brick">
-       <Clock className="h-3.5 w-3.5" /> Closed
-      </span>
-     )}
-     {totalVacancies ? (
-      <span className="agate text-xs text-muted-foreground">{totalVacancies.toLocaleString("en-IN")} Vacancies</span>
-     ) : null}
-    </div>
+      <Chip href={`/jobs?categoryId=${category.id}`}>{category.name}</Chip>
+      {state ? <Chip href={`/jobs?stateId=${state.id}`}>{state.name}</Chip> : null}
+     </div>
 
-    <h1 className="font-display text-[2rem] font-bold leading-[1.08] text-foreground sm:text-[2.6rem]">{title}</h1>
-    <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-     <span className="font-medium text-foreground">{department}</span>
-     {location && (
-      <span className="agate flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-4 w-4" />{location}</span>
-     )}
-     {viewsTotal !== null && viewsTotal > 0 ? (
-      <span className="agate flex items-center gap-1 text-xs text-muted-foreground"><Eye className="h-4 w-4" />{formatCompact(viewsTotal)} views</span>
-     ) : null}
-    </p>
+     <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-foreground sm:text-[2.5rem]">{title}</h1>
 
-    <div className="mt-5 flex flex-wrap items-center gap-2 print:hidden">
-     {canApply ? (
-      <Button size="sm" className="font-medium" asChild>
-       <Link href={`/apply/${slug}/start`}>
-        <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
-       </Link>
-      </Button>
-     ) : null}
-     <ApplicationTracker jobId={jobId} variant="full" />
-     <BookmarkButton jobId={jobId} size="default" variant="outline" />
-     <Button variant="outline" size="icon" onClick={() => window.print()} title="Print">
-      <Printer className="h-4 w-4" />
-     </Button>
-    </div>
+     <p className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+      <Link href={`/jobs?departmentId=${departmentId}`} className="font-semibold text-foreground underline-offset-4 hover:text-brick hover:underline">
+       {department}
+      </Link>
+      {location ? (
+       <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{location}</span>
+      ) : null}
+      {advertisementNo ? (
+       <span className="agate inline-flex items-center gap-1.5 text-xs"><Hash className="h-3.5 w-3.5" />{/^\s*(advt|advertisement)/i.test(advertisementNo) ? advertisementNo : `Advt ${advertisementNo}`}</span>
+      ) : null}
+     </p>
 
-    {/* KPI strip - 30-second scan */}
-    {heroKpis.length > 0 ? (
-     <dl className="mt-6 grid grid-cols-1 border-y border-rule sm:grid-cols-3">
-      {heroKpis.map((k, i) => (
-       <div key={k.label} className={cn(
-        "flex items-center gap-3 px-1 py-2.5 sm:px-4",
-        i > 0 && "border-t border-rule sm:border-l sm:border-t-0",
-       )}>
-        <span className={cn(
-         "flex h-8 w-8 shrink-0 items-center justify-center",
-         k.urgent ? "text-brick" : "text-muted-foreground",
-        )}>
-         <k.icon className="h-4 w-4" />
-        </span>
-        <div className="min-w-0">
-         <dt className="agate text-[10px] text-muted-foreground">{k.label}</dt>
-         <dd className={cn("truncate text-sm font-semibold", k.urgent ? "text-brick" : "text-foreground")} title={k.value}>{k.value}</dd>
-        </div>
+     {/* Mobile/tablet only: desktop gets these in the sticky rail */}
+     <div className="mt-4 flex items-center gap-2 lg:hidden print:hidden">
+      <ApplicationTracker jobId={jobId} variant="full" />
+      <BookmarkButton jobId={jobId} size="default" variant="outline" />
+     </div>
+    </header>
+
+    {/* ── Key facts: the 10-second scan. Each value appears here once. ── */}
+    {facts.length > 0 ? (
+     <dl className={cn("grid grid-cols-2 border-b border-r border-rule bg-card", facts.length === 4 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
+      {facts.map((f) => (
+       <div key={f.label} className="min-w-0 border-l border-t border-rule px-4 py-3.5">
+        <dt className="agate flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+         <f.icon className="h-3.5 w-3.5" /> {f.label}
+        </dt>
+        <dd className={cn("mt-1.5 font-display text-xl font-bold leading-tight tabular-nums sm:text-2xl", "hot" in f && f.hot ? "text-brick" : "text-foreground")}>
+         {f.value}
+        </dd>
+        {"sub" in f && f.sub ? (
+         <p className={cn("agate mt-0.5 text-xs", "hot" in f && f.hot ? "font-semibold text-brick" : "text-muted-foreground")}>{f.sub}</p>
+        ) : null}
        </div>
       ))}
      </dl>
     ) : null}
-   </header>
 
-   {/* ── Data-first insight dashboard (graphs + snapshot) ── */}
-   <JobInsightDashboard
-    totalVacancies={totalVacancies}
-    salary={salary}
-    applicationFee={applicationFee}
-    ageLimit={ageLimit}
-    education={education}
-    startDate={startDate}
-    lastDate={lastDate}
-   />
-
-   {/* ── 2-column premium layout ── */}
-   <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-    {/* Main column */}
-    <div className="min-w-0 space-y-6">
-     {/* ── Live Countdown ── */}
-     {lastDateMs && !isClosed && (
-      <div
-       role="status"
-       aria-live="polite"
-       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-rule p-4",
-        isUrgent && "border-brick bg-paper-2",
-       )}
-      >
-       <span className={cn(
-        "flex items-center gap-2 text-base font-semibold",
-        isUrgent ? "text-brick" : "text-foreground",
-       )}>
-        <AlarmClock className="h-6 w-6" /> Time Left to Apply
-       </span>
-       <div className="flex items-center gap-2">
-        {[
-         { value: daysLeft, unit: "Days" },
-         { value: hoursLeft, unit: "Hrs" },
-         { value: minsLeft, unit: "Min" },
-        ].map((t) => (
-         <div key={t.unit} className="border border-rule px-3.5 py-2 text-center">
-          <div className={cn("text-xl font-bold leading-none tabular-nums", isUrgent ? "text-brick" : "text-foreground")}>
-           {t.value !== null ? t.value : 0}
-          </div>
-          <div className="agate mt-0.5 text-[10px] text-muted-foreground">{t.unit}</div>
-         </div>
-        ))}
-       </div>
-       <p className="agate ml-auto text-xs text-muted-foreground">
-        Final date: <span className="font-semibold text-foreground">{formatDate(lastDate!)}</span>
-       </p>
-      </div>
-     )}
-
-     {/* ── Quick Navigation pills ── */}
-     {sections.length > 1 && (
-      <nav aria-label="Job sections" className="flex gap-2 overflow-x-auto pb-1">
+    {/* ── Sticky section nav ── */}
+    {sections.length > 2 ? (
+     <nav
+      aria-label="Job sections"
+      className="sticky top-[65px] z-30 -mx-4 border-b border-rule bg-background/95 px-4 backdrop-blur print:hidden sm:mx-0 sm:px-0"
+     >
+      <ul className="flex gap-1 overflow-x-auto">
        {sections.map((s) => (
-        <button
-         key={s.id}
-         type="button"
-         onClick={() => scrollTo(s.id)}
-         className="flex shrink-0 items-center gap-1.5 border border-rule px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"
-        >
-         <s.icon className="h-3.5 w-3.5" /> {s.label}
-        </button>
+        <li key={s.id} className="shrink-0">
+         <button
+          type="button"
+          onClick={() => goTo(s.id)}
+          className={cn(
+           "relative px-3 py-3 text-[13px] font-medium transition-colors",
+           active === s.id ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+          )}
+         >
+          {s.label}
+          <span className={cn("absolute inset-x-3 -bottom-px h-0.5", active === s.id ? "bg-brick" : "bg-transparent")} />
+         </button>
+        </li>
        ))}
-      </nav>
-     )}
+      </ul>
+     </nav>
+    ) : null}
 
-     {/* ── 2-min TL;DR summary (share lives here only - deduped) ── */}
-     <JobQuickSummary
-      title={title}
-      department={department}
-      slug={slug}
-      totalVacancies={totalVacancies}
-      lastDate={lastDate}
-      applicationFee={applicationFee}
-      ageLimit={ageLimit}
-      education={education}
-     />
+    {journey ? <div id="journey" className="scroll-mt-32"><DocumentJourney stages={journey} /></div> : null}
 
-     {/* ── Job Details Table ── */}
-     {details.length > 0 && (
-      <section id="job-details" className="scroll-mt-24">
-       <Card className="overflow-hidden border-rule">
-        <CardHeader className="border-b border-rule bg-paper-2">
-         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <ClipboardList className="h-5 w-5 text-muted-foreground" /> Vacancy Details
-         </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-         <Table>
-          <TableBody>
-           {details.map((item) => (
-            <TableRow key={item.label} className="border-rule">
-             <TableCell className="w-44 font-medium text-muted-foreground sm:w-56">
-              <span className="flex items-center gap-2">
-               <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" /> {item.label}
-              </span>
-             </TableCell>
-             <TableCell>
-              {containsHtml(item.value) ? (
-               <RichTextView html={item.value} />
-              ) : (
-               <span className="whitespace-pre-line">{item.value}</span>
-              )}
-             </TableCell>
-            </TableRow>
-           ))}
-          </TableBody>
-         </Table>
-        </CardContent>
-       </Card>
-      </section>
-     )}
+    {/* ── Dates ── */}
+    {showDates ? (
+     <Section id="dates" icon={CalendarDays} title="Important dates">
+      <ol className="grid gap-x-8 sm:grid-cols-2">
+       {dateRows.map((r) => {
+        const done = r.ms !== null && r.ms < now
+        return (
+         <li key={r.label} className="flex items-center gap-3 border-b border-rule py-2.5 last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0">
+          <span
+           className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center border text-paper",
+            done ? "border-ink bg-ink" : r.key ? "border-brick bg-brick" : "border-rule bg-transparent",
+           )}
+          >
+           {done ? <Check className="h-3 w-3" /> : null}
+          </span>
+          <span className={cn("min-w-0 flex-1 text-sm", done ? "text-muted-foreground" : "text-foreground")}>{r.label}</span>
+          <span className={cn("agate shrink-0 text-sm tabular-nums", r.key && !done ? "font-bold text-brick" : "font-semibold text-foreground")}>{r.value}</span>
+         </li>
+        )
+       })}
+      </ol>
+     </Section>
+    ) : null}
 
-     {/* ── Important Dates: visual timeline + table ── */}
-     {dates.length > 0 && (
-      <section id="important-dates" className="scroll-mt-24">
-       <Card className="overflow-hidden border-rule">
-        <CardHeader className="border-b border-rule bg-paper-2">
-         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <Calendar className="h-5 w-5 text-muted-foreground" /> Important Dates
-         </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5 p-4 sm:p-6">
-         <JobTimeline importantDates={importantDates} startDate={startDate} lastDate={lastDate} />
-         <div className="overflow-hidden border border-rule">
-          <Table>
-           <TableBody>
-            {dates.map((d, i) => {
-             const isKeyDate = /begin|start|last|clos/i.test(d.label)
-             return (
-              <TableRow key={d.label} className="border-rule">
-               <TableCell className="w-10 text-center">
-                <span className="agate inline-flex h-6 w-6 items-center justify-center border border-rule text-xs text-muted-foreground">
-                 {i + 1}
-                </span>
-               </TableCell>
-               <TableCell className="font-medium text-foreground">{d.label}</TableCell>
-               <TableCell className="text-right">
-                <Badge variant="outline" className={cn("agate border-rule font-normal", isKeyDate ? "border-brick text-brick" : "text-muted-foreground")}>
-                 {d.date}
-                </Badge>
-               </TableCell>
-              </TableRow>
-             )
-            })}
-           </TableBody>
-          </Table>
-         </div>
-        </CardContent>
-       </Card>
-      </section>
-     )}
+    {/* ── Eligibility ── */}
+    {eligibility.length > 0 ? (
+     <Section id="eligibility" icon={GraduationCap} title="Eligibility">
+      <dl className="divide-y divide-rule">
+       {eligibility.map((e) => (
+        <div key={e.label} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
+         <dt className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <e.icon className="h-4 w-4 shrink-0 text-muted-foreground" /> {e.label}
+         </dt>
+         <dd className="min-w-0 text-sm"><RichTextView html={e.html} /></dd>
+        </div>
+       ))}
+      </dl>
+     </Section>
+    ) : null}
 
-     {/* ── Eligibility + visual selection stepper ── */}
-     {(education || ageLimit || experience || selectionProcess) && (
-      <section id="eligibility" className="scroll-mt-24">
-       <Card className="border-rule">
-        <CardHeader className="border-b border-rule bg-paper-2">
-         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <GraduationCap className="h-5 w-5 text-muted-foreground" /> Eligibility Criteria
-         </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5 p-4 sm:p-6">
-         <div className="flex flex-wrap gap-2">
-          {education && !containsHtml(education) && (
-           <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">
-            <GraduationCap className="mr-1 h-3 w-3" /> {education}
-           </Badge>
-          )}
-          {ageLimit && (
-           <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">
-            <UserRound className="mr-1 h-3 w-3" /> Age: {ageLimit}
-           </Badge>
-          )}
-          {experience && (
-           <Badge variant="outline" className="agate border-rule font-normal text-muted-foreground">
-            <Briefcase className="mr-1 h-3 w-3" /> {experience}
-           </Badge>
-          )}
-         </div>
-         {education && containsHtml(education) && (
-          <div>
-           <p className="mb-2 text-sm font-semibold text-foreground">
-            Education Qualification
+    {/* ── Selection ── */}
+    {selectionProcess ? (
+     <Section id="selection" icon={Route} title="Selection process">
+      <JobSelectionStepper selectionProcess={selectionProcess} />
+     </Section>
+    ) : null}
+
+    {/* ── Fee (only when it adds more than the tile) ── */}
+    {feeNeedsSection ? (
+     <Section id="fee" icon={Wallet} title="Application fee">
+      {feeBars.length >= 2 ? (
+       <>
+        <ul className="grid grid-cols-2 border-b border-r border-rule sm:grid-cols-3">
+         {feeBars.map((b) => (
+          <li key={b.label} className="border-l border-t border-rule px-4 py-3">
+           <p className="agate text-[11px] uppercase tracking-wider text-muted-foreground">{b.label}</p>
+           <p className={cn("mt-1 font-display text-xl font-bold tabular-nums", b.amount === 0 ? "text-muted-foreground" : "text-foreground")}>
+            {formatRupees(b.amount)}
            </p>
-           <RichTextView html={education} />
-          </div>
-         )}
-         {ageRelaxation && (
-          <div>
-           <p className="mb-1 text-sm font-semibold text-foreground">Age Relaxation</p>
-           <RichTextView html={ageRelaxation} className="text-muted-foreground" />
-          </div>
-         )}
-         {selectionProcess && (
-          <div>
-           <p className="mb-3 text-sm font-semibold text-foreground">Selection Process</p>
-           <JobSelectionStepper selectionProcess={selectionProcess} />
-          </div>
-         )}
-        </CardContent>
-       </Card>
-      </section>
-     )}
-
-     {/* ── Application Fees (full text; chart lives in dashboard) ── */}
-     {applicationFee && (
-      <section id="fees" className="scroll-mt-24">
-       <Card className="border-rule bg-paper-2">
-        <CardHeader>
-         <CardTitle className="flex items-center gap-2 font-display text-lg text-foreground">
-          <Wallet className="h-5 w-5 text-muted-foreground" /> Application Fee
-         </CardTitle>
-        </CardHeader>
-        <CardContent>
-         <RichTextView html={applicationFee} />
-         <p className="agate mt-2 text-[11px] text-muted-foreground">Category-wise comparison chart shown in the insights panel above (when parseable).</p>
-        </CardContent>
-       </Card>
-      </section>
-     )}
-
-     {/* ── Documents Required: interactive checklist ── */}
-     {documentsRequired && (
-      <section id="documents" className="scroll-mt-24">
-       <Card className="border-rule">
-        <CardHeader className="border-b border-rule bg-paper-2">
-         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <ListChecks className="h-5 w-5 text-muted-foreground" /> Documents Required
-         </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-         <JobDocumentsChecklist key={jobId} jobId={jobId} documentsRequired={documentsRequired} />
-        </CardContent>
-       </Card>
-      </section>
-     )}
-
-     {/* ── How to Apply: vertical timeline + mid CTA ── */}
-     {howToApply && (
-      <section id="how-to-apply" className="scroll-mt-24">
-       <Card className="border-rule">
-        <CardHeader className="border-b border-rule bg-paper-2">
-         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <FileText className="h-5 w-5 text-muted-foreground" /> How to Apply
-         </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-         {containsHtml(howToApply) ? (
-          <RichTextView html={howToApply} />
-         ) : howSteps.length > 1 ? (
-          <div>
-           <ol className="relative space-y-4 border-l border-rule pl-6">
-            {howSteps.map((step, i) => (
-             <li key={i} className="relative">
-              <span className="agate absolute -left-[37px] flex h-6 w-6 items-center justify-center bg-ink text-xs text-paper">
-               {i + 1}
-              </span>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">{step}</p>
-             </li>
-            ))}
-           </ol>
-           {canApply && !isClosed ? (
-            <div className="mt-5 flex flex-wrap items-center gap-3 border-y border-rule bg-paper-2 p-4">
-             <p className="text-sm font-semibold text-foreground">Ready with documents? Don&apos;t wait for the last date.</p>
-             <Button className="font-medium" asChild>
-              <Link href={`/apply/${slug}/start`}>
-               <ExternalLink className="mr-2 h-4 w-4" /> Apply Online Now
-              </Link>
-             </Button>
-            </div>
-           ) : null}
-          </div>
-         ) : (
-          <div className="whitespace-pre-line text-sm text-foreground">{howToApply}</div>
-         )}
-        </CardContent>
-       </Card>
-      </section>
-     )}
-
-     {/* ── Trust / Verify Note ── */}
-     <div className="flex items-start gap-3 border-y border-rule bg-paper-2 p-4">
-      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-      <div className="text-sm text-muted-foreground">
-       <p className="font-semibold text-foreground">Important Note</p>
-       <p className="mt-0.5">
-        This is not a government website. Always verify all details (fees, dates, eligibility) from the{" "}
-        {officialWebsite ? (
-         <SmartExternalLink href={officialWebsite} linkTitle={`${title} - official notification`} className="font-medium text-brick underline">
-          official notification
-         </SmartExternalLink>
-        ) : (
-         <span className="font-medium text-brick">official notification</span>
-        )}{" "}
-        before applying. We recommend applying only through the official website.
-       </p>
-      </div>
-     </div>
-
-     {/* ── Bottom Actions (3rd Apply CTA) ── */}
-     <div className="flex flex-wrap gap-3 pt-2">
-      {officialNotification && (
-       <Button variant="outline" size="lg" asChild>
-        <SmartExternalLink href={officialNotification} linkTitle={`${title} - official notification`}>
-         <FileText className="mr-2 h-5 w-5" /> Download Official Notification
-        </SmartExternalLink>
-       </Button>
+          </li>
+         ))}
+        </ul>
+        {stripHtmlToText(applicationFee).length > 160 ? (
+         <div className="mt-4 text-sm"><RichTextView html={applicationFee} /></div>
+        ) : null}
+       </>
+      ) : (
+       <RichTextView html={applicationFee} />
       )}
-      {canApply ? (
-       <Button size="lg" className="font-medium" asChild>
-        <Link href={`/apply/${slug}/start`}>
-         <ExternalLink className="mr-2 h-5 w-5" /> Apply Online
-        </Link>
-       </Button>
-      ) : null}
-     </div>
-    </div>
+     </Section>
+    ) : null}
 
-    {/* Sticky conversion rail */}
-    <JobApplyRail
-     jobId={jobId}
-     slug={slug}
-     title={title}
-     department={department}
-     advertisementNo={advertisementNo}
-     officialNotification={officialNotification}
-     officialWebsite={officialWebsite}
-     applyLink={applyLink}
-     updatedAt={updatedAt}
-     viewsTotal={viewsTotal}
-     lastDate={lastDate}
-     sections={sections.map((s) => ({ id: s.id, label: s.label }))}
-    />
+    {/* ── Documents ── */}
+    {documentsRequired ? (
+     <Section id="documents" icon={ListChecks} title="Documents required" hint="Tick as you collect · saved on this device">
+      <JobDocumentsChecklist key={jobId} jobId={jobId} documentsRequired={documentsRequired} />
+     </Section>
+    ) : null}
+
+    {/* ── How to apply ── */}
+    {howToApply ? (
+     <Section id="how-to-apply" icon={FileText} title="How to apply">
+      {containsHtml(howToApply) ? (
+       <RichTextView html={howToApply} />
+      ) : howSteps.length > 1 ? (
+       <ol className="space-y-4">
+        {howSteps.map((step, i) => (
+         <li key={i} className="flex gap-3.5">
+          <span className="agate flex h-7 w-7 shrink-0 items-center justify-center bg-ink text-xs text-paper">{i + 1}</span>
+          <p className="whitespace-pre-line pt-0.5 text-sm leading-relaxed text-foreground">{step}</p>
+         </li>
+        ))}
+       </ol>
+      ) : (
+       <div className="whitespace-pre-line text-sm leading-relaxed text-foreground">{howToApply}</div>
+      )}
+     </Section>
+    ) : null}
+
+    {/* Nothing structured was filled in - don't leave the reader with an empty page */}
+    {facts.length === 0 && sections.length === 0 ? (
+     <div className="flex items-start gap-3 border border-rule bg-paper-2 p-5 text-sm text-muted-foreground">
+      <ClipboardList className="mt-0.5 h-5 w-5 shrink-0" />
+      <p>Detailed information for this vacancy has not been published yet. Please read the official notification for full details.</p>
+     </div>
+    ) : null}
    </div>
 
-   {/* ── Sticky Mobile Apply Bar with window progress (never printed) ── */}
-   <div className="sticky bottom-0 z-40 -mx-4 mt-4 border-t border-rule bg-background print:hidden lg:hidden">
-    {progress !== null && !isClosed ? (
-     <div className="h-1 w-full bg-paper-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
-      <div className={cn("h-full", progress > 85 ? "bg-brick" : "bg-ink")} style={{ width: `${progress}%` }} />
+   {/* ═════════ STICKY RAIL (desktop) / stacked (mobile) ═════════ */}
+   <JobApplyRail
+    jobId={jobId}
+    slug={slug}
+    title={title}
+    department={department}
+    officialNotification={officialNotification}
+    officialWebsite={officialWebsite}
+    canApply={canApply}
+    deadline={deadline}
+    lastDate={lastDate}
+    updatedAt={updatedAt}
+    viewsTotal={viewsTotal}
+   />
+
+   {/* ── Mobile apply bar (never printed) ── */}
+   <div className="sticky bottom-0 z-40 -mx-4 border-t border-rule bg-background/95 backdrop-blur print:hidden lg:hidden lg:col-span-2">
+    {deadline.progress !== null && !closed && deadline.state !== "upcoming" ? (
+     <div className="h-1 w-full bg-paper-3" role="progressbar" aria-valuenow={deadline.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+      <div className={cn("h-full", urgent ? "bg-brick" : "bg-ink")} style={{ width: `${deadline.progress}%` }} />
      </div>
     ) : null}
     <div className="flex items-center gap-3 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
      <div className="min-w-0 flex-1">
       <p className="truncate text-sm font-semibold text-foreground">{title}</p>
-      <p className={cn(
-       "agate flex items-center gap-1.5 text-xs",
-       isClosed || isUrgent ? "text-brick" : "text-muted-foreground",
-      )}>
-       {isClosed ? <Clock className="h-4 w-4" /> : <AlarmClock className="h-4 w-4" />}
-       {isClosed
-        ? "Applications closed"
-        : daysLeft !== null
-         ? `${daysLeft} days left to apply`
-         : "Applications open"}
-      </p>
+      <p className={cn("agate text-xs", closed || urgent ? "text-brick" : "text-muted-foreground")}>{deadline.label}</p>
      </div>
-     {canApply ? (
-      <Button className="font-medium" asChild>
+     {canApply && !closed ? (
+      <Button className="h-10 shrink-0 px-5 font-semibold" asChild>
        <Link href={`/apply/${slug}/start`}>
-        <ExternalLink className="mr-1.5 h-4 w-4" /> Apply Now
+        Apply now <ExternalLink className="ml-1.5 h-4 w-4" />
        </Link>
       </Button>
      ) : null}
