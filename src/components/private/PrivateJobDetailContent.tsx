@@ -435,7 +435,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
      {canApply && !closed ? (
       job.applicationUrl ? (
        <Button className="h-10 shrink-0 px-5 font-semibold" asChild>
-        <Link href={`/private-jobs/${job.slug}/apply`} onClick={() => trackClick("APPLY")}>Apply now <ExternalLink className="ml-1.5 h-4 w-4" /></Link>
+        <Link href={`/private-jobs/${job.slug}/apply`} target="_blank" rel="noopener noreferrer" onClick={() => trackClick("APPLY")}>Apply now <ExternalLink className="ml-1.5 h-4 w-4" /></Link>
        </Button>
       ) : (
        <Button className="h-10 shrink-0 px-5 font-semibold" asChild>

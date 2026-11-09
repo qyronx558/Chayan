@@ -30,7 +30,7 @@ export function SmartExternalLink({ href, children, className, title, linkTitle,
  const normalized = normalizeExternalUrl(href)
  if (!normalized) {
   return (
-   <a href={href} className={className} title={title}>
+   <a href={href} target="_blank" rel="noopener noreferrer" className={className} title={title}>
     {children}
    </a>
   )
@@ -38,7 +38,7 @@ export function SmartExternalLink({ href, children, className, title, linkTitle,
  const browseHref = buildBrowseUrl(normalized, { title: linkTitle ?? undefined, from: from ?? pathname })
 
  return (
-  <Link href={browseHref} className={className} title={title || normalized} onClick={onClick}>
+  <Link href={browseHref} target="_blank" rel="noopener noreferrer" className={className} title={title || normalized} onClick={onClick}>
    {children}
   </Link>
  )

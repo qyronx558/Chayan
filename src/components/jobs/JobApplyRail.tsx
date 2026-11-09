@@ -112,7 +112,7 @@ export function JobApplyRail(p: Props) {
      <div className="space-y-2">
       {p.canApply && !closed ? (
        <Button className="h-11 w-full text-[15px] font-semibold" asChild>
-        <Link href={`/apply/${p.slug}/start`}>
+        <Link href={`/apply/${p.slug}/start`} target="_blank" rel="noopener noreferrer">
          Apply now <ExternalLink className="ml-2 h-4 w-4" />
         </Link>
        </Button>

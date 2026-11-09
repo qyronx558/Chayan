@@ -95,7 +95,7 @@ export function PrivateApplyRail(p: Props) {
 
      {!closed && p.applicationUrl ? (
       <Button className="h-11 w-full text-[15px] font-semibold" asChild>
-       <Link href={`/private-jobs/${p.slug}/apply`} onClick={() => p.onApplyClick("APPLY")}>
+       <Link href={`/private-jobs/${p.slug}/apply`} target="_blank" rel="noopener noreferrer" onClick={() => p.onApplyClick("APPLY")}>
         Apply now <ExternalLink className="ml-2 h-4 w-4" />
        </Link>
       </Button>

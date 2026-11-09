@@ -367,7 +367,7 @@ export function DocumentDetail({
      {downloadUrl ? (
       <Button className="h-10 shrink-0 px-5 font-semibold" asChild>
        {viewerActive ? (
-        <Link href={viewerHref as string}><FileText className="mr-1.5 h-4 w-4" /> Open</Link>
+        <Link href={viewerHref as string} target="_blank" rel="noopener noreferrer"><FileText className="mr-1.5 h-4 w-4" /> Open</Link>
        ) : (
         <a href={downloadUrl} target="_blank" rel="noopener noreferrer"><FileText className="mr-1.5 h-4 w-4" /> Open</a>
        )}

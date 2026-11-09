@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { runSearch } from "@/lib/search-engine"
+import type { SearchHit, SearchKind } from "@/lib/search-types"
 
 const searchSelect = {
   id: true,
@@ -27,6 +29,36 @@ export async function GET(request: NextRequest) {
       : ""
     const category = typeFilter ? "" : categoryParam
     const wants = (type: (typeof TYPE_FILTERS)[number]) => !typeFilter || typeFilter === type
+
+    // Fast path: ranked, typo-tolerant engine for plain text queries (hero dropdown,
+    // header dialog). Falls through to the legacy id-filter query otherwise.
+    if (q.trim() && !category && !department && !state && !status) {
+      const legacyKinds: Record<string, SearchKind> = {
+        jobs: "job", privateJobs: "private_job", results: "result",
+        admitCards: "admit_card", answerKeys: "answer_key", blogs: "blog",
+      }
+      try {
+        const res = await runSearch({
+          q,
+          kind: typeFilter ? (typeFilter as SearchKind) : null,
+          pageSize: 30,
+        })
+        const pick = (kind: SearchKind) => res.hits.filter((h) => h.kind === kind).slice(0, limit)
+        const shape = (h: SearchHit) => ({
+          id: h.id, title: h.title, slug: h.slug, createdAt: h.date,
+          department: { name: h.subtitle ?? "" }, company: { name: h.subtitle ?? "" }, category: { name: h.subtitle ?? "" },
+        })
+        const data = Object.fromEntries(
+          Object.entries(legacyKinds).map(([key, kind]) => [key, pick(kind).map(shape)])
+        )
+        return NextResponse.json(
+          { success: true, data },
+          { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } }
+        )
+      } catch {
+        // fall back to legacy query below
+      }
+    }
 
     const baseWhere: Record<string, unknown> = {}
     if (q) {

@@ -45,7 +45,7 @@ export function DocumentSideRail(p: Props) {
           {p.downloadUrl ? (
             <Button className="h-11 w-full text-[15px] font-semibold" asChild>
               {p.viewerHref ? (
-                <Link href={p.viewerHref}><FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}</Link>
+                <Link href={p.viewerHref} target="_blank" rel="noopener noreferrer"><FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}</Link>
               ) : (
                 <a href={p.downloadUrl} target="_blank" rel="noopener noreferrer"><FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}</a>
               )}

@@ -381,7 +381,7 @@ export function JobDetailContent({
      </div>
      {canApply && !closed ? (
       <Button className="h-10 shrink-0 px-5 font-semibold" asChild>
-       <Link href={`/apply/${slug}/start`}>
+       <Link href={`/apply/${slug}/start`} target="_blank" rel="noopener noreferrer">
         Apply now <ExternalLink className="ml-1.5 h-4 w-4" />
        </Link>
       </Button>
