@@ -75,7 +75,7 @@ export function MessageForm() {
         </div>
         <p className="mt-3 text-[15px] leading-relaxed text-[var(--cp-muted)]">
           Your {sent.topicLabel.toLowerCase()} request is with the right team. Your reference number is{" "}
-          <span className="break-all font-mono font-semibold text-[var(--cp-ink)]">{sent.reference}</span> — please
+          <span className="break-all font-mono font-semibold text-[var(--cp-ink)]">{sent.reference}</span> - please
           include it in any follow-up. We usually reply {sent.reply} on business days.
         </p>
         <button

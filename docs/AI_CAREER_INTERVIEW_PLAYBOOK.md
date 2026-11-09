@@ -40,7 +40,7 @@ Software developer with hands-on experience in [your actual contribution] to Cha
 
 **PROFESSIONAL EXPERIENCE**
 
-**[Actual job title] — [Employer]** | [Location] | [Month Year–Month Year]
+**[Actual job title] - [Employer]** | [Location] | [Month Year–Month Year]
 
 - [Action you took] for [specific problem], using [relevant skill], resulting in [verified outcome and measurement context].
 - [Backend, automation, integration or data responsibility you personally owned], with [evidence-backed scope or result].
@@ -50,7 +50,7 @@ Software developer with hands-on experience in [your actual contribution] to Cha
 
 **PROJECTS**
 
-**ChayanJobs — Job Discovery and Resume Matching Platform** | [Actual dates]  
+**ChayanJobs - Job Discovery and Resume Matching Platform** | [Actual dates]  
 [Repository URL] | [Live demo URL]  
 TypeScript, Next.js, PostgreSQL, Prisma, Auth.js
 
@@ -63,7 +63,7 @@ TypeScript, Next.js, PostgreSQL, Prisma, Auth.js
 
 **EDUCATION**
 
-**[Degree / qualification] — [Institution]** | [Graduation year]  
+**[Degree / qualification] - [Institution]** | [Graduation year]  
 [Optional: relevant coursework or verified academic achievement]
 
 **CERTIFICATIONS / ADDITIONAL WORK**
@@ -82,7 +82,7 @@ Keep the same contact, employment and education details. Replace the headline, s
 
 Software developer building AI application workflows with **Python, FastAPI, PostgreSQL and [actual embedding/LLM technology]**. Implemented [completed semantic retrieval or cited Q&A feature] for ChayanJobs and evaluated it on **[actual number] held-out examples** against [actual baseline]. Combines document processing and API development with [personally demonstrated reliability or evaluation skill].
 
-**TECHNICAL SKILLS — retain only completed, demonstrated skills**
+**TECHNICAL SKILLS - retain only completed, demonstrated skills**
 
 - **Python backend:** Python, FastAPI, Pydantic, async I/O, HTTP APIs, pytest.
 - **Retrieval and LLM applications:** embeddings, cosine similarity, lexical/semantic retrieval, RAG, source citations, structured extraction, prompt design.
@@ -90,7 +90,7 @@ Software developer building AI application workflows with **Python, FastAPI, Pos
 - **Data and reliability:** PostgreSQL, [pgvector if used], SQL, background processing, idempotency, bounded retries, request tracing, access control.
 - **Product integration:** TypeScript, Next.js, Git, [actual deployment and CI tools].
 
-**CHAYANJOBS — AI PROJECT BULLETS**
+**CHAYANJOBS - AI PROJECT BULLETS**
 
 - Built a **Python/FastAPI [actual workflow]** over **[N] approved job records**, improving **[metric] from [baseline] to [new result]** on **[Q] held-out, labeled queries**.
 - Implemented **[completed document Q&A/extraction feature]** with **[actual provenance/citation checks]**, measuring **[numerator]/[denominator]** correct or supported outputs on **[dataset description]**.
@@ -109,7 +109,7 @@ Use the job's exact role title in your objective or target headline when appropr
 | **Junior ML Engineer** | **Python, pandas/NumPy, scikit-learn, statistics, splits, F1** | Training a modest model against a simple baseline | Reproducible training, leakage controls, untouched test results |
 | **LLM Application Engineer** | **Retrieval, context assembly, schema validation, tools, latency/cost** | A reliable retrieve-answer-validate workflow | Retrieval and generation evaluations, versioned outputs |
 | **AI Backend Engineer** | **Python/FastAPI, SQL, async, durable jobs, idempotency, observability** | Processing documents despite retries and provider failures | API/worker implementation, failure traces, load measurements |
-| **Python Developer — AI/ML** | **Python fundamentals, typing, pytest, SQL, API clients, data processing** | A clean Python service integrated into the product | Runnable code, tests of real failures, debugging ability |
+| **Python Developer - AI/ML** | **Python fundamentals, typing, pytest, SQL, API clients, data processing** | A clean Python service integrated into the product | Runnable code, tests of real failures, debugging ability |
 | **AI Solutions Engineer** | **Requirements discovery, architecture, integrations, demos, cost/ROI** | Turning an aspirant/editor problem into a measurable workflow | Working demo, explicit assumptions, measured task outcomes |
 
 The existing code supports the document/backend stories. The Python, retrieval, generation and training columns are learning and implementation priorities until you supply independent evidence.
@@ -132,7 +132,7 @@ This is a project-based recommendation, not a survey of current openings or a pr
 | Applied AI Engineer | Real user workflow and deterministic baseline | Resume/job semantic matching with measured comparison | Problem framing, baselines, experiments, shipping |
 | Generative AI Engineer | Product integration foundation | Cited Q&A plus structured extraction | Generation failures, schemas, evals, provider failures |
 | AI Backend Engineer | APIs, database, auth, retries, caching | Python/FastAPI service and durable worker | Async I/O, queues, idempotency, observability |
-| Python Developer — AI/ML | Transferable backend concepts | A Python service you can code and debug independently | Python, typing, pytest, SQL, APIs, packaging |
+| Python Developer - AI/ML | Transferable backend concepts | A Python service you can code and debug independently | Python, typing, pytest, SQL, APIs, packaging |
 | AI Solutions Engineer | Product demo and end-to-end workflows | Configurable demo, architecture and cost proposal | Discovery, explaining tradeoffs, integration, ROI |
 | Junior Machine Learning Engineer | Existing heuristic recommendation baseline | Train/evaluate one modest supervised model | Statistics, leakage, splits, metrics, deployment |
 
@@ -180,7 +180,7 @@ Numbers that still need external proof: monthly active users, request volume, up
 
 ### Version you can adapt now
 
-**ChayanJobs — Job Discovery and Resume Matching Platform**  
+**ChayanJobs - Job Discovery and Resume Matching Platform**  
 Next.js, TypeScript, PostgreSQL, Prisma, Auth.js
 
 - Developed resume ingestion for **2 document formats (PDF/DOCX)** with a **5 MiB upload cap**, extracting skills, education, experience, and location for personalized discovery.
@@ -243,13 +243,13 @@ Additional review findings: the recommendation window excludes older jobs; searc
 
 ## 5. Features to add and what each teaches
 
-### P0 — Correctness and evidence foundation
+### P0 - Correctness and evidence foundation
 
 Fix the four demonstrated matcher limitations. Add focused regression coverage for those real failures. Establish consented or synthetic resume fixtures and manually labeled job/query examples. Record dataset versions, label rules, difficult examples, and the baseline before tuning.
 
 Deliverable: a reproducible baseline report with errors, not a new model. This is the foundation for credible numerical resume claims.
 
-### P1 — Python semantic job retrieval
+### P1 - Python semantic job retrieval
 
 **Product benefit:** find relevant jobs when the resume and description use different wording.
 
@@ -261,7 +261,7 @@ Deliverable: a reproducible baseline report with errors, not a new model. This i
 
 **Proof:** labeled relevance judgments, baseline and new ranked lists, nDCG@10/Recall@10, latency distributions, corpus size and machine details. Sentence Transformers documents retrieval evaluators with these metrics in its [evaluation reference](https://www.sbert.net/docs/package_reference/sentence_transformer/evaluation.html). pgvector documents exact/approximate search and cosine distance in its [official repository](https://github.com/pgvector/pgvector).
 
-### P2 — Notification Q&A with citations
+### P2 - Notification Q&A with citations
 
 **Product benefit:** answer “What is the fee?”, “Which date is the deadline?” and “What qualification is required?” using an approved source notification.
 
@@ -273,7 +273,7 @@ Start with a deterministic retrieval-then-answer workflow. A simple controlled p
 
 **Proof:** answerable and unanswerable evaluation cases, citation support labels, exact date/fee checks, repeated generation runs, latency and token/cost records. Keep age and eligibility calculations deterministic and tied to the notification; the LLM can explain verified results.
 
-### P3 — Structured extraction with human review
+### P3 - Structured extraction with human review
 
 **Product benefit:** prepare a draft job record from a notification PDF for an editor to approve.
 
@@ -283,7 +283,7 @@ Start with a deterministic retrieval-then-answer workflow. A simple controlled p
 
 **Proof:** a manually annotated PDF set, field-level metrics, date/fee exact match, parse failure count, and paired manual-versus-assisted editor timings. Count review and correction time when estimating savings.
 
-### P4 — AI backend reliability
+### P4 - AI backend reliability
 
 **Product benefit:** uploads and AI calls recover from transient failure without duplicate processing or uncontrolled cost.
 
@@ -291,7 +291,7 @@ Start with a deterministic retrieval-then-answer workflow. A simple controlled p
 
 **Learn to defend:** at-least-once delivery, deduplication versus exactly-once effects, worker crashes, partial writes, cancellation, provider timeouts, 429s, circuit breaking, and private-data retention. Async I/O helps waiting on services; CPU-heavy OCR/embedding work needs appropriate worker execution. See [FastAPI's concurrency guidance](https://fastapi.tiangolo.com/async/).
 
-### Optional ML track — A small supervised model
+### Optional ML track - A small supervised model
 
 After you have enough representative, human-labeled examples, compare TF-IDF plus a linear model with embeddings and the rules baseline. Suitable tasks include job category classification or relevance prediction. Do not train against the current heuristic score and then claim independent accuracy.
 
@@ -363,7 +363,7 @@ These are high-value preparation questions inferred from the project and roles, 
 23. **Can SSE scale across instances?** The current subscriber Set is process-local. A shared event system and connection/replay design would be required for cross-instance delivery guarantees.
 24. **How are schema changes deployed?** A manually triggered workflow with a single concurrency group runs migrations separately from builds. Committed migrations do not prove successful production application.
 
-### Retrieval and LLM applications — proposed additions
+### Retrieval and LLM applications - proposed additions
 
 25. **What is an embedding?** A learned vector representation used for similarity; demonstrate where semantic similarity helps and where exact dates/identifiers still matter.
 26. **Why cosine similarity?** Compare direction rather than raw magnitude; know how normalization changes the relationship with dot product and Euclidean distance.
@@ -438,41 +438,41 @@ Before an interview, you should be able to answer: **What did I own? What does t
 
 Use this answer pattern: **define the skill → connect it to a product flow → explain the design choice → name the evidence → acknowledge a limitation**. Definitions below describe concepts; proposed examples are not completed application features.
 
-### A. Python and typed API development — highest priority for Python/backend roles
+### A. Python and typed API development - highest priority for Python/backend roles
 
 **Meaning:** Python fundamentals let you transform data, handle errors and implement services. Type hints and request/response models make contracts clearer; validation checks actual incoming values.
 
-**Product connection — PLANNED:** a FastAPI endpoint takes an authenticated resume/profile reference, loads the authorized profile, retrieves candidate jobs and returns typed recommendations. It should return job IDs and score explanations, rather than loosely formatted text the frontend must interpret.
+**Product connection - PLANNED:** a FastAPI endpoint takes an authenticated resume/profile reference, loads the authorized profile, retrieves candidate jobs and returns typed recommendations. It should return job IDs and score explanations, rather than loosely formatted text the frontend must interpret.
 
 **Practice answer:** “The existing product's backend is TypeScript. My proposed Python boundary is a retrieval service, because I want to use and evaluate Python retrieval tooling. I would keep ownership checks explicit, validate request and response shapes, set deadlines for external calls, and return structured failures. I would only claim FastAPI experience after building and debugging that service.”
 
 **Follow-ups to practice:** mutable defaults; list versus generator; dictionary/set lookup; exception handling; context managers; Python environments; dependency locking; unit versus integration tests. These are practical coding topics even when the vacancy emphasizes LLMs.
 
-### B. Document processing and information extraction — strongest existing AI-adjacent skill
+### B. Document processing and information extraction - strongest existing AI-adjacent skill
 
 **Meaning:** turn a document into text, then turn text into structured fields. Text extraction, field extraction and field verification are separate steps.
 
-**Product connection — IMPLEMENTED:** PDF parsing or Mammoth DOCX extraction produces raw text; dictionary/regex functions extract profile attributes; Prisma stores the result. OCR is not established by this path.
+**Product connection - IMPLEMENTED:** PDF parsing or Mammoth DOCX extraction produces raw text; dictionary/regex functions extract profile attributes; Prisma stores the result. OCR is not established by this path.
 
 **Practice answer:** “The existing parser supports PDF and DOCX. A successfully parsed file can still produce incorrect profile fields. I would evaluate skill extraction with precision and recall, and education or experience with explicit matching rules. A scanned PDF may require a separate OCR path. The MIME and size checks are useful gates, but they do not prove extraction quality.”
 
 **Example:** if the gold skills are `{Python, SQL}` and output is `{Python, SQL, Java}`, precision is **2/3**, recall is **2/2**, and F1 is **0.80**. This is a teaching example, not a project result.
 
-### C. SQL, PostgreSQL and data modeling — highest priority across backend roles
+### C. SQL, PostgreSQL and data modeling - highest priority across backend roles
 
 **Meaning:** model entities and relationships, enforce invariants and retrieve data efficiently. ORM methods still produce queries whose plans and transaction behavior matter.
 
-**Product connection — IMPLEMENTED:** users, resumes, jobs, applications and contact tickets are stored through Prisma. Think about one resume per user, ownership, active-job filters, unique ticket identifiers and delivery-state transitions.
+**Product connection - IMPLEMENTED:** users, resumes, jobs, applications and contact tickets are stored through Prisma. Think about one resume per user, ownership, active-job filters, unique ticket identifiers and delivery-state transitions.
 
 **Practice answer:** “I would start with the query shape and data distribution, inspect the plan, then choose an index. The schema's 193 explicit index declarations describe scope; they do not prove faster search. The current substring search and latest-300 candidate limit have different bottlenecks, so I would measure them separately.”
 
 **Follow-ups:** joins, unique versus ordinary indexes, composite index order, transactions, isolation, offset versus keyset pagination, connection pooling. Be able to write a query for active jobs and explain what happens as rows increase.
 
-### D. Embeddings and semantic retrieval — highest priority for Applied AI/LLM roles
+### D. Embeddings and semantic retrieval - highest priority for Applied AI/LLM roles
 
 **Meaning:** an embedding model maps text to a numerical vector. A retrieval system compares query/profile vectors with job vectors to identify candidates with related meaning.
 
-**Product connection — PLANNED:** a query such as “build Python APIs” could retrieve “backend services using FastAPI,” even without identical wording. Exact exam codes and hard constraints still need explicit handling.
+**Product connection - PLANNED:** a query such as “build Python APIs” could retrieve “backend services using FastAPI,” even without identical wording. Exact exam codes and hard constraints still need explicit handling.
 
 **Practice answer:** “I would precompute job embeddings, compute a query/profile embedding when needed, and retrieve candidates after enforcing the appropriate visibility constraints. I would compare this with a lexical baseline. Embedding similarity is relevance evidence, not proof that a candidate meets every qualification.”
 
@@ -480,81 +480,81 @@ Use this answer pattern: **define the skill → connect it to a product flow →
 
 **Follow-ups:** model dimension, normalization, exact/approximate nearest neighbors, versioned embeddings, re-embedding after model changes, multilingual queries and expired records.
 
-### E. RAG and evidence-grounded answers — highest priority for GenAI/LLM roles
+### E. RAG and evidence-grounded answers - highest priority for GenAI/LLM roles
 
 **Meaning:** retrieve relevant material, assemble context, then ask a language model to answer using that material. Retrieval quality and answer quality need separate diagnosis.
 
-**Product connection — PLANNED:** “What is the application fee for this notification?” retrieves an approved notification section and returns a short answer with a valid page reference.
+**Product connection - PLANNED:** “What is the application fee for this notification?” retrieves an approved notification section and returns a short answer with a valid page reference.
 
 **Practice answer:** “I would first check whether the fee appears in the retrieved evidence. If retrieval missed the correct page, prompt changes alone will not solve it. If the evidence is present but the generated answer is wrong, I would inspect context assembly and generation. I would validate citations and abstain when the source does not establish the answer.”
 
 **Follow-ups:** chunking, top-k, reranking, source versions, conflicting amendments, context limits, unanswerable questions and evidence freshness.
 
-### F. Prompt design and structured outputs — important for generation roles
+### F. Prompt design and structured outputs - important for generation roles
 
 **Meaning:** give clear task instructions, delimit untrusted source content, specify allowed outputs and define missing-data behavior. Schema validation controls output shape; semantic verification checks the actual claim.
 
-**Product connection — PLANNED:** extract `deadline`, `fee`, `qualification`, `sourcePage` and `unknownFields` into a typed record for editor review.
+**Product connection - PLANNED:** extract `deadline`, `fee`, `qualification`, `sourcePage` and `unknownFields` into a typed record for editor review.
 
 **Practice answer:** “I would require source-backed fields and use null or an explicit unknown state when the document omits a value. A syntactically valid date can still be the wrong date, so I would compare critical fields with source spans and validation rules. I would version prompts and evaluate changes on fixed examples.”
 
 **Follow-ups:** malformed outputs, truncation, retry limits, contradictory source text, tools with side effects and prompt injection. Do not rely on an LLM's self-reported confidence as calibrated confidence.
 
-### G. Evaluation and experiment design — highest priority for all AI roles
+### G. Evaluation and experiment design - highest priority for all AI roles
 
 **Meaning:** define success, choose representative examples, establish a baseline, then compare under the same conditions. A compelling demo and a reliable evaluation answer different questions.
 
-**Product connection — IMPLEMENTED BASELINE, PLANNED AI EVALUATION:** the existing scorer gives a comparison point. The evidence script exposes deterministic failures; it does not establish recommendation accuracy over real users.
+**Product connection - IMPLEMENTED BASELINE, PLANNED AI EVALUATION:** the existing scorer gives a comparison point. The evidence script exposes deterministic failures; it does not establish recommendation accuracy over real users.
 
 **Practice answer:** “I would separate development queries from untouched test queries, write label guidelines, and keep duplicate notifications together when splitting. For ranking I would use nDCG@10 and Recall@10. For Q&A I would measure answer correctness, claim support and correct abstention separately. I would report raw counts as well as rates.”
 
 **Example:** **18 supported answers out of 20 reviewed** is 90% on that sample. It is insufficient to claim 90% accuracy on every notification and language. Identify what was labeled and how cases were selected.
 
-### H. Async I/O and background jobs — highest priority for AI backend roles
+### H. Async I/O and background jobs - highest priority for AI backend roles
 
 **Meaning:** async I/O allows useful work while waiting on external operations. Durable background jobs allow work to resume after the initial request and survive application restarts when properly persisted.
 
-**Product connection — PLANNED:** return a document-processing job reference after acceptance; a worker performs extraction and embedding; the client reads pending/running/completed/failed state.
+**Product connection - PLANNED:** return a document-processing job reference after acceptance; a worker performs extraction and embedding; the client reads pending/running/completed/failed state.
 
 **Practice answer:** “A slow provider call and CPU-heavy OCR are different workloads. I would await network I/O with bounded concurrency, but run long or CPU-heavy processing in suitable workers. I would store job state durably, make processing repeatable and define what happens after a crash between an external effect and a state update.”
 
 **Follow-ups:** cancellation, queue backlog, concurrency caps, poison jobs, dead-letter handling, per-user fairness and worker shutdown.
 
-### I. Idempotency, retries and transactions — strongest existing backend story
+### I. Idempotency, retries and transactions - strongest existing backend story
 
 **Meaning:** a repeated request should not unintentionally repeat its intended effect. Retries require limits and safe effect handling; a database transaction only covers operations inside its boundary.
 
-**Product connection — IMPLEMENTED:** contact submission uses a UUID-derived reference, stores the ticket transactionally, then attempts delivery. Delivery uses a conditional database claim and distinct provider idempotency keys for team and acknowledgment messages.
+**Product connection - IMPLEMENTED:** contact submission uses a UUID-derived reference, stores the ticket transactionally, then attempts delivery. Delivery uses a conditional database claim and distinct provider idempotency keys for team and acknowledgment messages.
 
 **Practice answer:** “If the initial response is lost, the client can retry using the same key. The route checks for the stored reference and compares the payload. Ticket persistence occurs before delivery, so provider failure can leave a saved ticket for retry. A finite lease and provider idempotency reduce duplicate risk, but I would not call this an unconditional exactly-once guarantee.”
 
 **Follow-ups:** identical key/different payload, concurrent submissions, lease expiry, attempt exhaustion and missing provider credentials. The current retry delay is fixed; exponential backoff is a proposed improvement.
 
-### J. Authentication, authorization and privacy — essential across roles
+### J. Authentication, authorization and privacy - essential across roles
 
 **Meaning:** authentication establishes identity; authorization decides what that identity can do. AI retrieval and derived data need the same ownership boundaries as ordinary APIs.
 
-**Product connection — IMPLEMENTED AUTH, PLANNED AI SCOPING:** resume routes check sessions. Future retrieval must prevent one user's query from accessing another user's private resume, vector, cached answer or logs.
+**Product connection - IMPLEMENTED AUTH, PLANNED AI SCOPING:** resume routes check sessions. Future retrieval must prevent one user's query from accessing another user's private resume, vector, cached answer or logs.
 
 **Practice answer:** “I would scope access before returning data, derive identity from the authenticated session and verify resource ownership. Cache keys and embedding storage must preserve those boundaries. I would document deletion for raw text and derived artifacts, and avoid logging full resume content.”
 
 **Follow-ups:** role changes, stale JWT claims, service-to-service authentication, secrets, deletion/retention and malicious retrieved instructions.
 
-### K. Observability, latency and cost — important for AI/backend/solutions roles
+### K. Observability, latency and cost - important for AI/backend/solutions roles
 
 **Meaning:** trace a request through stages so quality, speed, failures and variable costs can be explained. An average alone can hide slow or expensive cases.
 
-**Product connection — PLANNED AI INSTRUMENTATION:** record parsing, retrieval and generation timings, model version, input/output token counts, retry count and outcome using a request ID. Keep private content out of routine traces.
+**Product connection - PLANNED AI INSTRUMENTATION:** record parsing, retrieval and generation timings, model version, input/output token counts, retry count and outcome using a request ID. Keep private content out of routine traces.
 
 **Practice answer:** “I would measure end-to-end p95 and stage timings at a declared workload. I would separate cold requests, time-to-first-token and complete-answer latency. For cost, I would include retries and failed calls, record the pricing date and distinguish variable inference from hosting and storage.”
 
 **Follow-ups:** provider outage, alert thresholds, sampled quality review, stale indexes, regression rollback and cache invalidation.
 
-### L. Statistics and supervised learning — highest priority for Junior ML roles
+### L. Statistics and supervised learning - highest priority for Junior ML roles
 
 **Meaning:** learn parameters from labeled data and estimate performance on unseen examples. Baselines, splits, leakage prevention and uncertainty are as important as the algorithm name.
 
-**Product connection — PLANNED:** classify job categories or learn relevance from appropriately labeled examples. Start with a simple model and compare against heuristic or majority baselines.
+**Product connection - PLANNED:** classify job categories or learn relevance from appropriately labeled examples. Start with a simple model and compare against heuristic or majority baselines.
 
 **Practice answer:** “I would define the label and unit of prediction first. I would fit preprocessing on training data only, tune on validation data and report final test results once. For imbalanced categories, I would inspect macro-F1 and the confusion matrix. I would avoid using the current scorer's output as independent ground truth.”
 
@@ -571,7 +571,7 @@ Use these as practice prompts, not memorized claims. Answer from completed work 
 | Junior ML Engineer | “How would you train and validate job classification?” | Labels, baseline, splits, preprocessing, imbalance, error analysis | Actual training script and untouched test report when completed |
 | LLM Application Engineer | “Design notification Q&A end to end.” | Ingestion, chunk metadata, retrieval, context, generation, output checks, evaluation | Source-to-answer trace with failure cases |
 | AI Backend Engineer | “What if document processing crashes halfway through?” | Durable state, idempotency, worker claim, partial effects, retries and recovery | Existing contact flow; separate proposed AI worker state machine |
-| Python Developer — AI/ML | “Implement a reliable retrieval endpoint.” | Python fundamentals, schemas, ownership, errors, timeouts, tests | Runnable Python code you wrote and can debug |
+| Python Developer - AI/ML | “Implement a reliable retrieval endpoint.” | Python fundamentals, schemas, ownership, errors, timeouts, tests | Runnable Python code you wrote and can debug |
 | AI Solutions Engineer | “An editor wants to halve publishing time. What do you propose?” | Discovery, current timing, assisted draft/review flow, acceptance criteria, cost and risks | Measured paired tasks when available; clearly labeled proposal otherwise |
 
 ### Three useful longer answers

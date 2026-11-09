@@ -8,11 +8,9 @@ import { formatCompact, formatDate } from "@/lib/utils"
 import { getReadingTimeMinutes } from "@/lib/blog-prose"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
-import { CardShareButton } from "@/components/ui/card-actions"
-import { moduleTheme } from "@/components/ui/module-theme"
+import { BlogCard } from "@/components/blog/BlogCard"
+import { UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import {
  useInfiniteScroll,
@@ -179,284 +177,267 @@ export function BlogClient() {
   return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12)
  }, [posts])
 
+ const toCard = (p: BlogPost) => ({
+  id: p.id,
+  title: cleanTitle(p.title),
+  slug: p.slug,
+  excerpt: p.excerpt,
+  image: p.image,
+  views: p.views,
+  createdAt: p.createdAt,
+  readingTime: getReadingTimeMinutes(p.content),
+  category: p.category,
+ })
+
+ const topicTabs = [{ id: "all", name: "All topics", slug: null as string | null, color: null as string | null }, ...categories]
+ const activeCategoryName = categories.find((c) => c.slug === activeCategory)?.name
+
  return (
-  <div className="container mx-auto max-w-7xl px-4 py-8">
-   {/* - Editorial masthead: solid ink, brass rule, no neon gradients - */}
-   <header className="relative mb-6 overflow-hidden rounded-2xl border-t-2 border-brick bg-ink p-6 text-paper sm:p-8">
-    <div className="relative flex flex-wrap items-end justify-between gap-6">
-     <div className="min-w-0 max-w-2xl">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-       <Badge className="border border-brick bg-transparent font-medium text-brick"><Sparkles className="mr-1 h-3 w-3" /> Blog</Badge>
-       {total ? <Badge className="bg-background/10 text-muted-foreground">{total} articles</Badge> : null}
-       <Link href="/rss/blog" className="inline-flex items-center gap-1 rounded-full bg-background/10 px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-background/20">
-        <Rss className="h-3 w-3" /> RSS
+  <div className="pb-16">
+   {/* Masthead */}
+   <header className="border-b-2 border-ink bg-background">
+    <div className="container mx-auto max-w-7xl px-4 pb-8 pt-10 sm:pt-14">
+     <div className="flex flex-wrap items-end justify-between gap-8">
+      <div className="min-w-0 max-w-3xl">
+       <div className="mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <span className="h-0.5 w-8 bg-brick" aria-hidden />
+        The ChayanJobs Journal
+        {total ? <span className="font-medium normal-case tracking-normal">· {total} articles</span> : null}
+       </div>
+       <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl">
+        Guides that get you <span className="text-brick">hired</span>.
+       </h1>
+       <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+        Exam strategy, career playbooks, AI and money skills. Practical, fact-checked and updated every week.
+       </p>
+      </div>
+      <div className="w-full max-w-md">
+       <div className="relative">
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+         placeholder="Search guides, topics, tags…"
+         value={input}
+         onChange={(e) => setInput(e.target.value)}
+         className="h-12 border-ink bg-background pl-11 pr-10 text-base"
+         aria-label="Search articles"
+        />
+        {input && (
+         <button type="button" onClick={() => setInput("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-brick">
+          <X className="h-4 w-4" />
+         </button>
+        )}
+       </div>
+       <Link href="/rss/blog" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-brick">
+        <Rss className="h-3.5 w-3.5" /> Subscribe via RSS
        </Link>
       </div>
-      <h1 className="text-3xl font-bold leading-tight tracking-tight text-paper sm:text-4xl">ChayanJobs Blog</h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-       Career guides, exam prep, AI and money skills - practical, fact-checked, updated weekly.
-      </p>
-     </div>
-     <div className="relative w-full max-w-md">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-       placeholder="Search articles, topics, tags…"
-       value={input}
-       onChange={(e) => setInput(e.target.value)}
-       className="border-white/15 bg-background/10 pl-10 pr-10 text-paper placeholder:text-muted-foreground focus-visible:outline-brick"
-       aria-label="Search articles"
-      />
-      {input && (
-       <button type="button" onClick={() => setInput("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-brick">
-        <X className="h-4 w-4" />
-       </button>
-      )}
      </div>
     </div>
 
+    {/* Sticky topic tabs */}
     {categories.length > 0 && (
-     <div className="relative mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-5">
-      <button
-       type="button"
-       onClick={() => { setActiveCategory(null) }}
-       className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${!activeCategory ? "bg-paper-2 text-ink" : "bg-background/5 text-muted-foreground hover:bg-background/15"}`}
-      >
-       All Topics
-      </button>
-      {categories.map((cat) => (
-       <button
-        key={cat.id}
-        type="button"
-        onClick={() => { setActiveCategory(activeCategory === cat.slug ? null : cat.slug) }}
-        className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${activeCategory === cat.slug ? "bg-paper-2 text-ink" : "bg-background/5 text-muted-foreground hover:bg-background/15"}`}
-       >
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.color || "var(--color-brick)" }} />
-        {cat.name}
-       </button>
-      ))}
-     </div>
+     <nav aria-label="Topics" className="sticky top-16 z-20 border-t border-rule bg-background/95 backdrop-blur">
+      <div className="container mx-auto max-w-7xl px-4">
+       <div className="-mx-1 flex gap-1 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {topicTabs.map((cat) => {
+         const active = cat.slug === activeCategory
+         return (
+          <button
+           key={cat.id}
+           type="button"
+           aria-pressed={active}
+           onClick={() => setActiveCategory(cat.slug && activeCategory === cat.slug ? null : cat.slug)}
+           className={`flex shrink-0 items-center gap-2 border px-4 py-2 text-sm font-bold transition-colors ${active ? "border-ink bg-ink text-paper" : "border-transparent text-muted-foreground hover:border-rule hover:text-foreground"}`}
+          >
+           {cat.slug && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.color || "var(--color-brick)" }} aria-hidden />}
+           {cat.name}
+          </button>
+         )
+        })}
+       </div>
+      </div>
+     </nav>
     )}
    </header>
 
-   {/* - Trending strip: restrained serif numerals, brass on hover - */}
-   {popular.length > 0 && !isFiltered && (
-    <section className="mb-8" aria-label="Trending articles">
-     <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-muted-foreground dark:text-muted-foreground">
-      <Flame className="h-4 w-4 text-brick" /> Trending now
-     </h2>
-     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-      {popular.map((post, i) => (
-       <Link key={post.id} href={`/blog/${post.slug}`} className="group flex gap-3 rounded-xl border border-rule bg-background p-3.5 transition-colors hover:border-brick/60 dark:border-ink dark:bg-ink">
-        <span className="font-serif text-2xl font-black text-muted-foreground transition-colors group-hover:text-brick dark:text-foreground">{String(i + 1).padStart(2, "0")}</span>
-        <span>
-         <span className="line-clamp-3 text-[13px] font-semibold leading-snug text-foreground group-hover:text-brick dark:text-paper">{post.title}</span>
-         <span className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground" title={`${post.views.toLocaleString("en-IN")} views`}><Eye className="h-3 w-3" /> {formatCompact(post.views)} views</span>
-        </span>
-       </Link>
-      ))}
-     </div>
-    </section>
-   )}
-
-   {/* - Featured: photographic scrim only (no color gradient wash) - */}
-   {featured && (
-    <section className="mb-8 grid gap-5 lg:grid-cols-2" aria-label="Featured article">
-     <Link href={`/blog/${featured.slug}`} className="group relative min-h-[280px] overflow-hidden rounded-2xl sm:min-h-[340px]">
-      {featured.image ? (
-       <Image src={featured.image} alt={featured.title} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
-      ) : (
-       <div className="absolute inset-0 bg-ink" />
-      )}
-      <div className="absolute inset-0 bg-ink/70" />
-      <div className="absolute inset-x-0 bottom-0 p-6">
-       <div className="mb-2 flex items-center gap-2">
-        <Badge className="border border-brick bg-transparent font-medium text-brick">Featured</Badge>
-        {featured.category && <Badge className="bg-background/15 text-paper">{featured.category.name}</Badge>}
-       </div>
-       <h2 className="line-clamp-3 text-2xl font-bold leading-tight text-paper sm:text-[1.7rem]">{featured.title}</h2>
-       {featured.excerpt && <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{featured.excerpt}</p>}
-       <p className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{formatDate(featured.createdAt)}</span>
-        <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{getReadingTimeMinutes(featured.content)} min</span>
-        <span className="flex items-center gap-1 font-bold text-paper">Read story <ArrowRight className="h-3.5 w-3.5" /></span>
-       </p>
-      </div>
-     </Link>
-     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-      {posts.slice(1, 5).map((post) => (
-       <Link key={post.id} href={`/blog/${post.slug}`} className="group flex gap-3 rounded-2xl border border-rule bg-background p-3 transition-colors hover:border-brick/60 dark:border-ink dark:bg-ink">
-        {post.image ? (
-         <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-paper-3">
-          <Image src={post.image} alt="" fill sizes="120px" className="object-cover" />
-         </span>
+   <div className="container mx-auto max-w-7xl px-4 pt-10">
+    {/* Featured + top stories */}
+    {featured && (
+     <section className="mb-12 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" aria-label="Featured article">
+      <Link href={`/blog/${featured.slug}`} className="group block">
+       <div className="relative aspect-[16/9] w-full overflow-hidden bg-ink">
+        {featured.image ? (
+         <Image src={featured.image} alt="" fill priority sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
         ) : (
-         <span className="flex h-20 w-24 shrink-0 items-center justify-center rounded-xl bg-ink text-lg font-black text-paper">{post.title.charAt(0)}</span>
+         <div className="flex h-full items-end p-8"><span className="h-0.5 w-16 bg-brick" aria-hidden /></div>
         )}
-        <span className="min-w-0">
-         {post.category && <span className="text-[11px] font-bold text-brick dark:text-brick">{post.category.name}</span>}
-         <span className="line-clamp-2 block text-sm font-bold leading-snug text-foreground group-hover:text-brick dark:text-paper">{post.title}</span>
-         <span className="mt-1 block text-[11px] text-muted-foreground">{formatDate(post.createdAt)} · {getReadingTimeMinutes(post.content)} min · {formatCompact(post.views)} views</span>
-        </span>
-       </Link>
-      ))}
-     </div>
-    </section>
-   )}
+        <span className="absolute left-0 top-0 bg-brick px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brick-ink">Featured</span>
+       </div>
+       <div className="pt-5">
+        {featured.category && <span className="text-xs font-bold uppercase tracking-wide text-brick">{featured.category.name}</span>}
+        <h2 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight text-foreground group-hover:text-brick sm:text-4xl">{featured.title}</h2>
+        {featured.excerpt && <p className="mt-3 line-clamp-3 text-base leading-7 text-muted-foreground">{featured.excerpt}</p>}
+        <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+         <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{formatDate(featured.createdAt)}</span>
+         <span className="flex items-center gap-1.5"><Clock3 className="h-4 w-4" />{getReadingTimeMinutes(featured.content)} min read</span>
+         <span className="ml-auto flex items-center gap-1 font-bold text-foreground group-hover:text-brick">Read the story <ArrowRight className="h-4 w-4" /></span>
+        </p>
+       </div>
+      </Link>
 
-   {/* ── Toolbar ── */}
-   <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-    <p className="text-sm text-muted-foreground" role="status">
-     {loading ? "Loading articles…" : <>Showing <b className="text-foreground dark:text-paper">{posts.length}</b> of <b className="text-foreground dark:text-paper">{total}</b> articles</>}
-    </p>
-    <div className="flex items-center gap-2">
-     <div className="flex rounded-full border border-rule bg-background p-1 text-xs font-bold dark:border-ink dark:bg-ink" role="tablist" aria-label="Sort articles">
-      {(["latest", "popular", "quick"] as SortKey[]).map((k) => (
-       <button
-        key={k}
-        type="button"
-        role="tab"
-        aria-selected={sort === k}
-        onClick={() => { setSort(k) }}
-        className={`rounded-full px-3 py-1.5 transition-colors ${sort === k ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground dark:text-muted-foreground"}`}
-       >
-        {k === "latest" ? "Latest" : k === "popular" ? "Most read" : "Quick reads"}
+      <div className="lg:border-l lg:border-rule lg:pl-8">
+       <h2 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <Sparkles className="h-4 w-4 text-brick" /> Top stories
+       </h2>
+       <ol className="divide-y divide-rule">
+        {posts.slice(1, 5).map((post, i) => (
+         <li key={post.id}>
+          <Link href={`/blog/${post.slug}`} className="group flex gap-4 py-4">
+           <span className="font-display text-3xl font-bold leading-none text-rule group-hover:text-brick">{i + 1}</span>
+           <span className="min-w-0">
+            {post.category && <span className="text-[11px] font-bold uppercase tracking-wide text-brick">{post.category.name}</span>}
+            <span className="line-clamp-2 block font-display text-lg font-bold leading-snug text-foreground group-hover:text-brick">{cleanTitle(post.title)}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{formatDate(post.createdAt)} · {getReadingTimeMinutes(post.content)} min read</span>
+           </span>
+          </Link>
+         </li>
+        ))}
+       </ol>
+      </div>
+     </section>
+    )}
+
+    {/* Toolbar */}
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-4">
+     <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
+      {activeCategoryName ?? (search ? `Results for "${search}"` : "Latest articles")}
+     </h2>
+     <div className="flex items-center gap-3">
+      <p className="hidden text-sm text-muted-foreground sm:block" role="status">
+       {loading ? "Loading…" : <><b className="text-foreground">{posts.length}</b> of <b className="text-foreground">{total}</b></>}
+      </p>
+      <div className="flex border border-rule text-xs font-bold" role="tablist" aria-label="Sort articles">
+       {(["latest", "popular", "quick"] as SortKey[]).map((k) => (
+        <button
+         key={k}
+         type="button"
+         role="tab"
+         aria-selected={sort === k}
+         onClick={() => setSort(k)}
+         className={`px-3 py-2 transition-colors ${sort === k ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
+        >
+         {k === "latest" ? "Latest" : k === "popular" ? "Most read" : "Quick reads"}
+        </button>
+       ))}
+      </div>
+      <div className="hidden border border-rule sm:flex" aria-label="Change view">
+       <button type="button" onClick={() => setView("grid")} aria-label="Grid view" aria-pressed={view === "grid"} className={`p-2 ${view === "grid" ? "bg-ink text-paper" : "text-muted-foreground"}`}>
+        <LayoutGrid className="h-4 w-4" />
        </button>
-      ))}
-     </div>
-     <div className="flex rounded-full border border-rule bg-background p-1 dark:border-ink dark:bg-ink" aria-label="Change view">
-      <button type="button" onClick={() => setView("grid")} aria-label="Grid view" aria-pressed={view === "grid"} className={`rounded-full p-1.5 ${view === "grid" ? "bg-ink text-paper dark:bg-background dark:text-foreground" : "text-muted-foreground"}`}>
-       <LayoutGrid className="h-4 w-4" />
-      </button>
-      <button type="button" onClick={() => setView("list")} aria-label="List view" aria-pressed={view === "list"} className={`rounded-full p-1.5 ${view === "list" ? "bg-ink text-paper dark:bg-background dark:text-foreground" : "text-muted-foreground"}`}>
-       <Rows3 className="h-4 w-4" />
-      </button>
+       <button type="button" onClick={() => setView("list")} aria-label="List view" aria-pressed={view === "list"} className={`p-2 ${view === "list" ? "bg-ink text-paper" : "text-muted-foreground"}`}>
+        <Rows3 className="h-4 w-4" />
+       </button>
+      </div>
      </div>
     </div>
-   </div>
 
-   {/* ── Main + sidebar ── */}
-   <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-    <div>
-     {loading ? (
-      <div className={moduleTheme.blog.listGrid}>
-       {Array.from({ length: 6 }).map((_, i) => (
-        <UniversalCardSkeleton key={i} />
-       ))}
-      </div>
-     ) : error ? (
-      <Card><CardContent className="flex flex-col items-center py-16">
-       <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-       <h3 className="mb-2 text-lg font-semibold">Something went wrong</h3>
-       <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-       <Button onClick={retryInitial}>Try Again</Button>
-      </CardContent></Card>
-     ) : gridPosts.length === 0 ? (
-      <UniversalCardEmpty
-       title="No articles found"
-       hint="Try a different search or category."
-       action={<Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>}
-      />
-     ) : view === "grid" ? (
-      <div className={moduleTheme.blog.listGrid}>
-       {gridPosts.map((post) => (
-        <div key={post.id} className="h-full">
-         <UniversalCard
-          module="blog"
-          title={cleanTitle(post.title)}
-          organization={post.category?.name}
-          description={post.excerpt}
-          metadata={[
-           { icon: Calendar, text: formatDate(post.createdAt) },
-           { icon: Clock3, text: `${getReadingTimeMinutes(post.content)} min read` },
-           { icon: Eye, text: `${formatCompact(post.views)} views` },
-          ]}
-          primaryCtaUrl={`/blog/${post.slug}`}
-          share={<CardShareButton title={cleanTitle(post.title)} url={`/blog/${post.slug}`} />}
-         />
-        </div>
-       ))}
-      </div>
-     ) : (
-      <div className="space-y-4">
-       {gridPosts.map((post) => (
-        <UniversalCard
-         key={post.id}
-         module="blog"
-         variant="wide"
-         title={cleanTitle(post.title)}
-         organization={post.category?.name}
-         description={post.excerpt}
-         metadata={[
-          { icon: Calendar, text: formatDate(post.createdAt) },
-          { icon: Clock3, text: `${getReadingTimeMinutes(post.content)} min read` },
-          { icon: Eye, text: `${formatCompact(post.views)} views` },
-         ]}
-         primaryCtaUrl={`/blog/${post.slug}`}
-         share={<CardShareButton title={cleanTitle(post.title)} url={`/blog/${post.slug}`} />}
-        />
-       ))}
-      </div>
-     )}
-     {!loading && !error && gridPosts.length > 0 && (
-      <>
-       {loadingMore && (
-        <div className={`mt-6 ${moduleTheme.blog.listGrid}`}>
-         {Array.from({ length: 2 }).map((_, i) => (
-          <UniversalCardSkeleton key={i} />
-         ))}
-        </div>
-       )}
-       <InfiniteListFooter
-        sentinelRef={sentinelRef}
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        loadMoreError={loadMoreError}
-        onLoadMore={loadMore}
-        onRetry={loadMore}
-        loadedCount={posts.length}
-        total={total}
-        label="articles"
-       />
-      </>
-     )}
-    </div>
-
-    <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
-     <div className="rounded-2xl border border-rule bg-background p-5 dark:border-ink dark:bg-ink">
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-muted-foreground"><Flame className="h-4 w-4 text-brick" /> Most read</h3>
-      <div className="space-y-3">
-       {popular.slice(0, 4).map((p, i) => (
-        <Link key={p.id} href={`/blog/${p.slug}`} className="group flex gap-3" title={`${p.views.toLocaleString("en-IN")} views`}>
-         <span className="font-serif text-xl font-black text-muted-foreground group-hover:text-brick">{i + 1}</span>
-         <span>
-          <span className="line-clamp-2 block text-sm font-semibold leading-snug text-foreground group-hover:text-brick dark:text-muted-foreground">{p.title}</span>
-          <span className="mt-0.5 block text-[11px] text-muted-foreground">{formatCompact(p.views)} views</span>
-         </span>
-        </Link>
-       ))}
-       {popular.length === 0 && <p className="text-sm text-muted-foreground">Fresh reads dropping soon.</p>}
-      </div>
-     </div>
-
-     {tagCloud.length > 0 && (
-      <div className="rounded-2xl border border-rule bg-background p-5 dark:border-ink dark:bg-ink">
-       <h3 className="mb-3 text-sm font-bold text-muted-foreground">Explore tags</h3>
-       <div className="flex flex-wrap gap-1.5">
-        {tagCloud.map(([tag]) => (
-         <Link key={tag} href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, "-")}`}>
-          <Badge variant="secondary" className="transition-colors hover:bg-ink hover:text-brick">#{tag}</Badge>
-         </Link>
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+     <div className="min-w-0">
+      {loading ? (
+       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+         <UniversalCardSkeleton key={i} />
         ))}
        </div>
-      </div>
-     )}
+      ) : error ? (
+       <Card><CardContent className="flex flex-col items-center py-16">
+        <AlertCircle className="mb-4 h-12 w-12 text-brick" />
+        <h3 className="mb-2 text-lg font-semibold">Something went wrong</h3>
+        <p className="mb-4 text-sm text-muted-foreground">{error}</p>
+        <Button onClick={retryInitial}>Try Again</Button>
+       </CardContent></Card>
+      ) : gridPosts.length === 0 ? (
+       <UniversalCardEmpty
+        title="No articles found"
+        hint="Try a different search or topic."
+        action={<Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>}
+       />
+      ) : view === "grid" ? (
+       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {gridPosts.map((post) => (
+         <BlogCard key={post.id} post={toCard(post)} />
+        ))}
+       </div>
+      ) : (
+       <div>
+        {gridPosts.map((post) => (
+         <BlogCard key={post.id} post={toCard(post)} variant="wide" />
+        ))}
+       </div>
+      )}
+      {!loading && !error && gridPosts.length > 0 && (
+       <>
+        {loadingMore && (
+         <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 2 }).map((_, i) => (
+           <UniversalCardSkeleton key={i} />
+          ))}
+         </div>
+        )}
+        <InfiniteListFooter
+         sentinelRef={sentinelRef}
+         hasMore={hasMore}
+         loadingMore={loadingMore}
+         loadMoreError={loadMoreError}
+         onLoadMore={loadMore}
+         onRetry={loadMore}
+         loadedCount={posts.length}
+         total={total}
+         label="articles"
+        />
+       </>
+      )}
+     </div>
 
-     <Link href="/jobs" className="group block overflow-hidden rounded-2xl border-t-2 border-brick bg-ink p-5 text-paper transition-colors">
-      <p className="flex items-center gap-2 text-sm font-bold text-paper"><Briefcase className="h-4 w-4 text-paper" /> Reading? Start applying.</p>
-      <p className="mt-1 text-xs leading-5 text-muted-foreground">Fresh government jobs matched to these guides.</p>
-      <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-paper">Browse jobs <ArrowRight className="h-3.5 w-3.5" /></span>
-     </Link>
-    </aside>
+     <aside className="space-y-6 lg:sticky lg:top-36 lg:self-start">
+      <Link href="/jobs" className="group block border-t-4 border-brick bg-ink p-6 text-paper">
+       <p className="flex items-center gap-2 font-display text-xl font-bold"><Briefcase className="h-5 w-5" /> Done reading? Start applying.</p>
+       <p className="mt-2 text-sm leading-6 opacity-80">Fresh government and private jobs, updated daily, matched to these guides.</p>
+       <span className="mt-4 inline-flex items-center gap-1.5 bg-brick px-4 py-2 text-sm font-bold text-brick-ink transition-transform group-hover:translate-x-0.5">
+        Browse jobs <ArrowRight className="h-4 w-4" />
+       </span>
+      </Link>
+
+      <div className="border border-rule p-5">
+       <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground"><Flame className="h-4 w-4 text-brick" /> Most read</h3>
+       <div className="divide-y divide-rule">
+        {popular.slice(0, 5).map((p, i) => (
+         <Link key={p.id} href={`/blog/${p.slug}`} className="group flex gap-3 py-3 first:pt-0 last:pb-0" title={`${p.views.toLocaleString("en-IN")} views`}>
+          <span className="font-display text-2xl font-bold leading-none text-rule group-hover:text-brick">{i + 1}</span>
+          <span className="min-w-0">
+           <span className="line-clamp-2 block text-sm font-bold leading-snug text-foreground group-hover:text-brick">{cleanTitle(p.title)}</span>
+           <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" />{formatCompact(p.views)} views</span>
+          </span>
+         </Link>
+        ))}
+        {popular.length === 0 && <p className="text-sm text-muted-foreground">Fresh reads dropping soon.</p>}
+       </div>
+      </div>
+
+      {tagCloud.length > 0 && (
+       <div className="border border-rule p-5">
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Explore tags</h3>
+        <div className="flex flex-wrap gap-1.5">
+         {tagCloud.map(([tag]) => (
+          <Link key={tag} href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, "-")}`} className="border border-rule px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">
+           #{tag}
+          </Link>
+         ))}
+        </div>
+       </div>
+      )}
+     </aside>
+    </div>
    </div>
   </div>
  )

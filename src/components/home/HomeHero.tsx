@@ -248,7 +248,7 @@ export function HomeHero() {
                     formatCompact(value)
                   ) : (
                     <span className="text-paper/35" aria-label="No data yet">
-                      —
+                      -
                     </span>
                   )}
                 </dd>

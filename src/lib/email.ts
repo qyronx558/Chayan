@@ -375,7 +375,7 @@ export async function sendContactAutoReply(
       <div style="max-width:560px;margin:0 auto;padding:24px;font-family:Georgia,'Times New Roman',serif">
         <div style="border:1px solid #d8d0bf;border-radius:0;padding:28px">
           <div style="font-size:18px;font-weight:700;color:#141210">Thanks ${safeName}, we got your message</div>
-          <p style="color:#5c5850;font-size:14px;line-height:1.7">Your ${topicLabel.toLowerCase()} request is with the right team. Your reference number is <strong>${reference}</strong> — please include it in any follow-up.</p>
+          <p style="color:#5c5850;font-size:14px;line-height:1.7">Your ${topicLabel.toLowerCase()} request is with the right team. Your reference number is <strong>${reference}</strong> - please include it in any follow-up.</p>
           <p style="color:#5c5850;font-size:14px;line-height:1.7">We usually reply ${replyTime} on business days (Monday to Saturday, IST).</p>
           <div style="margin-top:24px;padding-top:20px;border-top:1px solid #d8d0bf">
             <p style="color:#5c5850;font-size:12px;line-height:1.6;margin:0">ChayanJobs will never ask for your password, OTP, or payment over email. This mailbox does not receive replies.</p>

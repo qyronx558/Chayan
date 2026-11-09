@@ -68,3 +68,8 @@ report.json
 lighthouse-perf.json
 .vercel
 .env*
+
+# local-only design skill
+.claude/
+skills-lock.json
+session-ses_*.md
