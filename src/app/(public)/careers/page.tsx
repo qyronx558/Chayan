@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
-import { Fraunces } from "next/font/google"
 import { ArrowDown, Mail } from "lucide-react"
 import { CareersApplySection } from "@/components/careers/CareersApplySection"
 import { careersFormConfig } from "@/lib/careers"
 import { cn } from "@/lib/utils"
 
-const serif = Fraunces({ subsets: ["latin"], weight: ["500", "600"] })
 
 export const metadata: Metadata = {
   title: "Careers",
@@ -53,7 +51,7 @@ export default function CareersPage() {
               </p>
               <h1
                 className={cn(
-                  serif.className,
+                  "font-display",
                   "mt-3 text-balance text-4xl font-medium leading-[1.08] tracking-tight text-foreground md:text-5xl dark:text-paper"
                 )}
               >
