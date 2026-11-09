@@ -1,5 +1,7 @@
-export { HeroSection } from "./HeroSection"
+export { HomeHero } from "./HomeHero"
+export { HomeCTA } from "./HomeCTA"
 export { LatestJobs } from "./LatestJobs"
+export { LatestUpdatesBoard } from "./LatestUpdatesBoard"
 export { LatestResults } from "./LatestResults"
 export { LatestAdmitCards } from "./LatestAdmitCards"
 export { LatestAnswerKeys } from "./LatestAnswerKeys"

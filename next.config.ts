@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   output: process.env.DOCKER === "true" ? "standalone" : undefined,
   images: {
     remotePatterns: [

@@ -136,10 +136,11 @@ export function JobsByQualification({ className }: { className?: string }) {
  }
 
  return (
-  <section className={cn("bg-paper-2 py-16", className)}>
+  <section className={cn("bg-paper-2 py-12 sm:py-16", className)}>
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div className="mb-8 flex flex-wrap items-end justify-between gap-3 border-b border-rule pb-2">
      <div>
+      <p className="agate mb-1 text-[10px] text-brick">03</p>
       <h2 className="font-display text-[1.6rem] font-bold leading-tight text-foreground sm:text-[1.9rem]">Jobs by qualification</h2>
       <p className="mt-1 text-sm text-muted-foreground">Find government jobs matching your educational qualification</p>
      </div>

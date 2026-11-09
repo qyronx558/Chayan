@@ -158,7 +158,7 @@ export function TrendingNow({ className }: { className?: string }) {
  if (!loading && (!data || flat.length === 0)) return null
 
  return (
-  <section className={cn("py-16", className)}>
+  <section className={cn("py-12 sm:py-16", className)}>
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div className="mb-6 flex min-w-0 items-end justify-between gap-3 border-b border-rule pb-2">
      <div className="flex min-w-0 items-baseline gap-2.5">

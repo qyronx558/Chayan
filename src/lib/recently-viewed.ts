@@ -117,6 +117,27 @@ export function getViewedItems(): ViewedItem[] {
   }
 }
 
+const EMPTY_ITEMS: ViewedItem[] = []
+let snapshotRaw: string | null = null
+let snapshotItems: ViewedItem[] = EMPTY_ITEMS
+let snapshotInitialized = false
+
+/** Stable snapshot for useSyncExternalStore; referenced by raw storage value. */
+export function getViewedItemsSnapshot(): ViewedItem[] {
+  if (typeof window === "undefined") return EMPTY_ITEMS
+  let raw: string | null = null
+  try {
+    raw = localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return snapshotItems
+  }
+  if (snapshotInitialized && raw === snapshotRaw) return snapshotItems
+  snapshotInitialized = true
+  snapshotRaw = raw
+  snapshotItems = getViewedItems()
+  return snapshotItems
+}
+
 export function recordView(input: { href: string; title: string; type?: ViewedItemType }) {
   try {
     if (isHistoryPaused()) return

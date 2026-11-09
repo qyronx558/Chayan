@@ -55,10 +55,12 @@ export function LatestJobs({ className }: LatestJobsProps) {
  const grid = moduleTheme.government.homeGrid
 
  return (
-  <section className={cn("py-16", className)}>
+  <section className={cn("py-12 sm:py-16", className)}>
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <SectionHeader
      icon={Briefcase}
+     index="01"
+     kicker="The live desk"
      title="Latest Government Jobs"
      subtitle={
       tab === "trending" && trendingMeta && !trendingMeta.fallback

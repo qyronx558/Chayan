@@ -47,11 +47,30 @@ const FILTERS: { label: string; value: string }[] = [
 ]
 
 export function SearchClient() {
- const router = useRouter()
  const searchParams = useSearchParams()
- const initialQ = searchParams.get("q") ?? ""
- const [query, setQuery] = React.useState(initialQ)
+ const urlQuery = searchParams.get("q") ?? ""
  const [category, setCategory] = React.useState("")
+ return (
+  <SearchClientInner
+   key={urlQuery}
+   initialQuery={urlQuery}
+   category={category}
+   onCategoryChange={setCategory}
+  />
+ )
+}
+
+function SearchClientInner({
+ initialQuery,
+ category,
+ onCategoryChange,
+}: {
+ initialQuery: string
+ category: string
+ onCategoryChange: (value: string) => void
+}) {
+ const router = useRouter()
+ const [query, setQuery] = React.useState(initialQuery)
  // Fixed batch size (numbered pager + Rows selector removed; universal
  // search API caps `limit` at 20 and has no page/skip support).
  const pageSize = 12
@@ -59,14 +78,9 @@ export function SearchClient() {
  const [loading, setLoading] = React.useState(false)
  const [error, setError] = React.useState("")
 
- // Keep input in sync when navigating between /search?q=... links
- React.useEffect(() => {
-  setQuery(searchParams.get("q") ?? "")
- }, [searchParams])
-
  React.useEffect(() => {
   const controller = new AbortController()
-  const q = (searchParams.get("q") ?? "").trim()
+  const q = query.trim()
   const run = async () => {
    setLoading(true)
    setError("")
@@ -94,7 +108,7 @@ export function SearchClient() {
    clearTimeout(t)
    controller.abort()
   }
- }, [searchParams, category, pageSize])
+ }, [query, category, pageSize])
 
  const submit = (e: React.FormEvent) => {
   e.preventDefault()
@@ -103,7 +117,7 @@ export function SearchClient() {
  }
 
  const grouped = React.useMemo(() => groupUniversalItems(items), [items])
- const activeQ = (searchParams.get("q") ?? "").trim()
+ const activeQ = query.trim()
  const total = items.length
 
  return (
@@ -150,7 +164,7 @@ export function SearchClient() {
       type="button"
       variant={category === f.value ? "default" : "outline"}
       size="sm"
-      onClick={() => setCategory(f.value)}
+      onClick={() => onCategoryChange(f.value)}
       className="h-8 px-3 text-xs"
      >
       {f.label}

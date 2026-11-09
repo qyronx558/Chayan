@@ -60,11 +60,12 @@ export function LatestPrivateJobs({ className }: { className?: string }) {
  const theme = moduleTheme.privateJob
 
  return (
-  <section className={cn("py-16", className)}>
+  <section className={cn("py-12 sm:py-16", className)}>
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <SectionHeader
      icon={theme.icon}
      iconClassName={theme.iconBg}
+     index="04"
      title="Latest Private Jobs"
      subtitle={
       tab === "trending" && trendingMeta && !trendingMeta.fallback

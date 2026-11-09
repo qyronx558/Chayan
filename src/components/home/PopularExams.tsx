@@ -42,7 +42,7 @@ export function PopularExams({ className }: { className?: string }) {
 
  if (error) {
   return (
-   <section className={cn("py-16", className)}>
+  <section className={cn("py-12 sm:py-16", className)}>
     <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
      <p className="text-brick">Failed to load exams. Please try again later.</p>
     </div>
@@ -55,6 +55,7 @@ export function PopularExams({ className }: { className?: string }) {
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <SectionHeader
      icon={BookOpen}
+     index="05"
      title="Popular exams"
      subtitle="Upcoming examination schedules"
      viewAllHref="/jobs"

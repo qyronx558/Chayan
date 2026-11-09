@@ -50,11 +50,12 @@ export function LatestBlog() {
  if (!busy && posts.length === 0) return null
 
  return (
-  <section className="py-16">
+  <section className="py-12 sm:py-16">
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <SectionHeader
      icon={theme.icon}
      iconClassName={theme.iconBg}
+     index="06"
      title="From the Blog"
      subtitle={
       tab === "trending" && trendingMeta && !trendingMeta.fallback

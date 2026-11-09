@@ -13,13 +13,20 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const q = searchParams.get("q") || ""
-    const category = searchParams.get("category") || ""
+    const categoryParam = searchParams.get("category") || ""
     const department = searchParams.get("department") || ""
     const state = searchParams.get("state") || ""
     const status = searchParams.get("status") || ""
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
     const limit = Math.min(20, Math.max(1, parseInt(searchParams.get("limit") || "5")))
-    const skip = (page - 1) * limit
+
+    // UI filters send a content type (job, private_job, ...), while other
+    // callers send a real category id. Support both without breaking either.
+    const TYPE_FILTERS = ["job", "private_job", "result", "admit_card", "answer_key", "blog"] as const
+    const typeFilter = (TYPE_FILTERS as readonly string[]).includes(categoryParam)
+      ? categoryParam
+      : ""
+    const category = typeFilter ? "" : categoryParam
+    const wants = (type: (typeof TYPE_FILTERS)[number]) => !typeFilter || typeFilter === type
 
     const baseWhere: Record<string, unknown> = {}
     if (q) {
@@ -50,25 +57,25 @@ export async function GET(request: NextRequest) {
         where: jobWhere,
         select: { ...searchSelect, department: { select: { name: true } } },
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("job") ? limit : 0,
       }),
       prisma.result.findMany({
         where: baseWhere,
         select: searchSelect,
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("result") ? limit : 0,
       }),
       prisma.admitCard.findMany({
         where: baseWhere,
         select: searchSelect,
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("admit_card") ? limit : 0,
       }),
       prisma.answerKey.findMany({
         where: baseWhere,
         select: searchSelect,
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("answer_key") ? limit : 0,
       }),
       prisma.privateJob.findMany({
         where: q
@@ -81,13 +88,13 @@ export async function GET(request: NextRequest) {
           : {},
         select: { id: true, title: true, slug: true, company: { select: { name: true } }, createdAt: true },
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("private_job") ? limit : 0,
       }),
       prisma.blogPost.findMany({
         where: blogWhere,
         select: { id: true, title: true, slug: true, category: { select: { name: true } }, createdAt: true },
         orderBy: { createdAt: "desc" },
-        take: limit,
+        take: wants("blog") ? limit : 0,
       }),
     ])
 

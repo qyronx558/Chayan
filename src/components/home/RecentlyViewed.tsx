@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import {
  History,
@@ -19,14 +19,13 @@ import {
  Play,
  ChevronLeft,
  ChevronRight,
- Compass,
- RotateCcw,
+  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/components/ui/section-header"
 import {
  clearViewedItems,
- getViewedItems,
+ getViewedItemsSnapshot,
  isHistoryPaused,
  onViewedUpdate,
  removeViewedItem,
@@ -56,23 +55,19 @@ const FILTERS: { value: ViewedItemType | "all"; label: string }[] = [
  { value: "blog", label: "Articles" },
 ]
 
+const emptySubscribe = () => () => {}
+const EMPTY_ITEMS: ViewedItem[] = []
+
 export function RecentlyViewed({ className }: { className?: string }) {
- const [mounted, setMounted] = useState(false)
- const [items, setItems] = useState<ViewedItem[]>([])
- const [paused, setPaused] = useState(false)
+ const mounted = useSyncExternalStore(
+  emptySubscribe,
+  () => true,
+  () => false
+ )
+ const items = useSyncExternalStore(onViewedUpdate, getViewedItemsSnapshot, () => EMPTY_ITEMS)
+ const paused = useSyncExternalStore(onViewedUpdate, isHistoryPaused, () => false)
  const [filter, setFilter] = useState<ViewedItemType | "all">("all")
  const scrollerRef = useRef<HTMLDivElement>(null)
-
- const refresh = useCallback(() => {
-  setItems(getViewedItems())
-  setPaused(isHistoryPaused())
- }, [])
-
- useEffect(() => {
-  setMounted(true)
-  refresh()
-  return onViewedUpdate(refresh)
- }, [refresh])
 
  const counts = useMemo(() => {
   const map = new Map<string, number>()
@@ -89,10 +84,10 @@ export function RecentlyViewed({ className }: { className?: string }) {
   scrollerRef.current?.scrollBy({ left: dir * 340, behavior: "smooth" })
  }
 
- if (!mounted) return null
+  if (!mounted || items.length === 0) return null
 
- return (
-  <section className={cn("py-16 pt-0", className)} aria-label="Recently viewed">
+  return (
+  <section className={cn("py-12 sm:py-16", className)} aria-label="Recently viewed">
    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <SectionHeader
      icon={History}
@@ -182,32 +177,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
      </div>
     </div>
 
-    {items.length === 0 ? (
-     <div className="flex flex-col items-start gap-3 border-y border-rule bg-paper-2 px-6 py-10">
-      <Compass className="h-6 w-6 text-muted-foreground" />
-      <div>
-       <p className="font-display text-lg font-bold text-foreground">Nothing here yet</p>
-       <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
-        Every job, result, admit card or article you open will show up here
-        so you can jump back in one tap.
-       </p>
-      </div>
-      <div className="mt-1 flex flex-wrap gap-2">
-       <Link
-        href="/jobs"
-        className="bg-ink px-4 py-2 text-xs font-semibold text-paper transition-colors hover:bg-foreground/90"
-       >
-        Browse jobs
-       </Link>
-       <Link
-        href="/results"
-        className="border border-rule px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-brick hover:text-brick"
-       >
-        Check results
-       </Link>
-      </div>
-     </div>
-    ) : visible.length === 0 ? (
+    {visible.length === 0 ? (
      <div className="flex flex-col items-start gap-2 border-y border-rule bg-paper-2 px-6 py-10">
       <RotateCcw className="h-5 w-5 text-muted-foreground" />
       <p className="text-sm font-semibold text-foreground">No visits in this category yet</p>
