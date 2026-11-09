@@ -1,30 +1,39 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
+ ArrowBigDown,
  ArrowBigUp,
+ Award,
  BadgeCheck,
+ Bold,
  CheckCircle2,
+ ChevronDown,
+ ChevronUp,
+ Code,
  CornerDownRight,
  Flag,
+ Italic,
+ Link2,
+ List,
+ ListOrdered,
  MessageSquare,
- Minus,
  MoreHorizontal,
  Pencil,
  Pin,
- Plus,
+ Quote,
+ Share2,
  ShieldCheck,
+ Strikethrough,
  Trash2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import type { CommentDTO, PostType } from "./types"
 
 const REPUTATION_THRESHOLD = 50
-const MAX_INDENT_LEVEL = 6
+const MAX_INDENT_LEVEL = 8
 const REPLIES_PAGE_SIZE = 5
 
 function initials(name: string): string {
@@ -39,15 +48,166 @@ function initials(name: string): string {
 
 function TimeAgo({ date }: { date: string | Date }) {
  const [timeAgo, setTimeAgo] = useState("")
-
  useEffect(() => {
   const update = () => setTimeAgo(formatDistanceToNow(new Date(date), { addSuffix: true }))
   update()
   const interval = setInterval(update, 30000)
   return () => clearInterval(interval)
  }, [date])
+ return <span>{timeAgo}</span>
+}
 
- return <span className="agate text-[11px] text-muted-foreground">{timeAgo}</span>
+function formatMarkdown(text: string) {
+ return text
+  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  .replace(/\*(.+?)\*/g, '<em>$1</em>')
+  .replace(/~~(.+?)~~/g, '<del>$1</del>')
+  .replace(/`(.+?)`/g, '<code class="bg-paper-3 px-1 py-0.5 text-xs font-mono text-foreground">$1</code>')
+  .replace(/^&gt;\s*(.+)/gm, '<blockquote class="border-l-2 border-rule pl-2 italic text-muted-foreground">$1</blockquote>')
+  .replace(/@([\w\s.-]{2,40}?)(?=\s|$)/g, '<span class="font-bold text-brick">@$1</span>')
+}
+
+function RedditComposer({
+ value,
+ onChange,
+ placeholder,
+ onSubmit,
+ onCancel,
+ submitLabel = "Comment",
+ disabled,
+ autoFocus,
+ compact,
+}: {
+ value: string
+ onChange: (v: string) => void
+ placeholder?: string
+ onSubmit: () => void
+ onCancel?: () => void
+ submitLabel?: string
+ disabled?: boolean
+ autoFocus?: boolean
+ compact?: boolean
+}) {
+ const textareaRef = useRef<HTMLTextAreaElement>(null)
+ const [focused, setFocused] = useState(false)
+
+ useEffect(() => {
+  if (autoFocus && textareaRef.current) textareaRef.current.focus()
+ }, [autoFocus])
+
+ function wrapSelection(before: string, after: string) {
+  const ta = textareaRef.current
+  if (!ta) return
+  const start = ta.selectionStart
+  const end = ta.selectionEnd
+  const selected = value.substring(start, end)
+  const newText = value.substring(0, start) + before + selected + after + value.substring(end)
+  onChange(newText)
+  setTimeout(() => {
+   ta.focus()
+   ta.selectionStart = start + before.length
+   ta.selectionEnd = end + before.length
+  }, 0)
+ }
+
+ function insertAtCursor(text: string) {
+  const ta = textareaRef.current
+  if (!ta) return
+  const start = ta.selectionStart
+  const newText = value.substring(0, start) + text + value.substring(start)
+  onChange(newText)
+  setTimeout(() => {
+   ta.focus()
+   ta.selectionStart = ta.selectionEnd = start + text.length
+  }, 0)
+ }
+
+ const toolbarButtons = [
+  { icon: Bold, action: () => wrapSelection("**", "**"), title: "Bold" },
+  { icon: Italic, action: () => wrapSelection("*", "*"), title: "Italic" },
+  { icon: Strikethrough, action: () => wrapSelection("~~", "~~"), title: "Strikethrough" },
+  { icon: Code, action: () => wrapSelection("`", "`"), title: "Inline code" },
+  { icon: Quote, action: () => insertAtCursor("\n> "), title: "Quote" },
+  { icon: List, action: () => insertAtCursor("\n- "), title: "Bullet list" },
+  { icon: ListOrdered, action: () => insertAtCursor("\n1. "), title: "Numbered list" },
+  { icon: Link2, action: () => wrapSelection("[", "](url)"), title: "Link" },
+ ]
+
+ const handleKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); onSubmit() }
+  if (e.key === "Escape" && onCancel) onCancel()
+ }
+
+ return (
+  <div
+   className={cn(
+    "overflow-hidden border transition-colors",
+    focused ? "border-brick" : "border-rule dark:border-ink"
+   )}
+  >
+   {/* Toolbar */}
+   <div className="flex items-center gap-0.5 border-b border-rule bg-paper-2 px-2 py-1 dark:border-ink dark:bg-paper-2">
+    {toolbarButtons.map((btn, i) => (
+     <button
+      key={i}
+      type="button"
+      onClick={btn.action}
+      title={btn.title}
+      className="p-1 text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground"
+     >
+      <btn.icon className="h-3.5 w-3.5" />
+     </button>
+    ))}
+   </div>
+   {/* Text area */}
+   <textarea
+    ref={textareaRef}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    onFocus={() => setFocused(true)}
+    onBlur={() => setFocused(false)}
+    onKeyDown={handleKeyDown}
+    placeholder={placeholder || "What are your thoughts?"}
+    rows={compact ? 3 : 4}
+    maxLength={10000}
+    className={cn(
+     "w-full resize-y bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none dark:bg-ink dark:text-foreground",
+     compact && "text-[13px]"
+    )}
+   />
+   {/* Footer */}
+   <div className="flex items-center justify-between border-t border-rule bg-paper-2/50 px-3 py-1.5 dark:border-ink dark:bg-paper-2/50">
+    <span className="text-[11px] text-muted-foreground">
+     {value.length > 0 && `${value.length}/10,000`}
+     {!value.length && "Markdown · Ctrl+Enter to submit"}
+    </span>
+    <div className="flex items-center gap-2">
+     {onCancel && (
+      <button
+       type="button"
+       onClick={onCancel}
+       className="px-3 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground"
+      >
+       Cancel
+      </button>
+     )}
+     <button
+      type="button"
+      onClick={onSubmit}
+      disabled={disabled || !value.trim()}
+      className={cn(
+       "px-4 py-1 text-xs font-bold transition-all",
+       value.trim() && !disabled
+        ? "bg-brick text-brick-ink hover:bg-brick/80"
+        : "cursor-not-allowed bg-paper-3 text-muted-foreground"
+      )}
+     >
+      {submitLabel}
+     </button>
+    </div>
+   </div>
+  </div>
+ )
 }
 
 interface CommentItemProps {
@@ -68,11 +228,8 @@ interface CommentItemProps {
  onLoadReplies: (parentId: string, cursor?: string) => Promise<{ comments: CommentDTO[]; nextCursor: string | null }>
 }
 
-/**
- * Reddit-style comment row: slim vote rail on the left, single meta
- * line (avatar + user + time), collapsible body, thread line for
- * nested replies. All data handling unchanged - presentation only.
- */
+export { RedditComposer }
+
 export function CommentItem({
  comment,
  depth = 0,
@@ -99,10 +256,21 @@ export function CommentItem({
  const [editText, setEditText] = useState(comment.content)
  const [menuOpen, setMenuOpen] = useState(false)
  const [collapsed, setCollapsed] = useState(false)
+ const menuRef = useRef<HTMLDivElement>(null)
 
  const withinEditWindow = comment.canEdit ?? false
- const isNested = depth > 0
  const hasMoreReplies = replyCursor !== null && replyList.length < comment.replyCount
+ const childCount = Math.max(comment.replyCount, replyList.length)
+
+ useEffect(() => {
+  function handleClickOutside(e: MouseEvent) {
+   if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+  }
+  if (menuOpen) document.addEventListener("mousedown", handleClickOutside)
+  return () => document.removeEventListener("mousedown", handleClickOutside)
+ }, [menuOpen])
+
+ useEffect(() => { setReplyList(comment.replies || []) }, [comment.replies])
 
  async function submitReply() {
   if (!replyText.trim()) return
@@ -123,342 +291,415 @@ export function CommentItem({
   }
  }
 
+ function handleShare() {
+  const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`
+  navigator.clipboard.writeText(url).then(() => toast("Link copied!", "success"))
+ }
+
  const showThreadControls = !locked && currentUserId && comment.status === "APPROVED"
- const childCount = Math.max(comment.replyCount, replyList.length)
+ const indentPx = Math.min(depth, MAX_INDENT_LEVEL) * 20
 
  return (
   <div
-   className={cn(
-    "py-2",
-    isNested && "ml-1 border-l border-rule pl-2 hover:border-rule-2",
-    depth > MAX_INDENT_LEVEL && "max-w-[calc(100%-1.5rem)]"
-   )}
-   style={depth > MAX_INDENT_LEVEL ? { marginLeft: `${MAX_INDENT_LEVEL * 1.5}rem` } : undefined}
+   id={`comment-${comment.id}`}
+   className="group/comment relative"
+   style={{ paddingLeft: depth > 0 ? `${indentPx}px` : undefined }}
   >
-   <div className="flex gap-1.5">
-    {/* ── Vote rail ── */}
-    <div className="flex w-6 shrink-0 flex-col items-center pt-0.5">
-     <button
-      type="button"
-      onClick={() => onUpvote(comment.id)}
-      disabled={!currentUserId}
-      aria-label="Upvote"
-      className={cn(
-       "rounded p-0.5 transition-colors",
-       currentUserId
-        ? comment.hasUpvoted
-         ? "text-brick"
-         : "text-muted-foreground hover:text-brick"
-        : "cursor-not-allowed opacity-50"
-      )}
-     >
-      <ArrowBigUp className={cn("h-4 w-4", comment.hasUpvoted && "fill-current")} />
-     </button>
-     <span className={cn(
-      "text-[11px] font-bold tabular-nums",
-      comment.hasUpvoted ? "text-brick" : "text-muted-foreground"
-     )}>
-      {comment.upvoteCount > 0 ? comment.upvoteCount : "•"}
-     </span>
-    </div>
-
-    {/* ── Content ── */}
-    <div className="min-w-0 flex-1">
-     {/* Meta line */}
-     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-      <button
-       type="button"
-       onClick={() => setCollapsed((v) => !v)}
-       aria-label={collapsed ? "Expand comment" : "Collapse comment"}
-       className="p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-      >
-       {collapsed ? <Plus className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-      </button>
-      <span
-       className={cn(
-        "flex h-5 w-5 items-center justify-center text-[8px] font-bold select-none",
-        comment.isOfficial
-         ? "bg-ink text-paper"
-         : "border border-rule text-muted-foreground"
-       )}
-      >
-       {comment.isOfficial ? <ShieldCheck className="h-3 w-3" /> : initials(comment.user.name)}
-      </span>
-      <span className="text-xs font-medium text-foreground">{comment.user.name}</span>
-
-      {!comment.isOfficial && comment.user.helpfulCount >= REPUTATION_THRESHOLD && (
-       <span className="agate inline-flex items-center gap-0.5 border border-rule px-1.5 py-px text-[10px] text-muted-foreground">
-        <BadgeCheck className="h-2.5 w-2.5" />
-        {Math.floor(comment.user.helpfulCount / REPUTATION_THRESHOLD) * REPUTATION_THRESHOLD}+ helpful
-       </span>
-      )}
-
-      {comment.isOfficial && (
-       <span className="agate border border-brick px-1.5 py-px text-[10px] text-brick">
-        ChayanJobs team
-       </span>
-      )}
-
-      {comment.isBestAnswer && (
-       <span className="agate inline-flex items-center gap-0.5 border border-rule px-1.5 py-px text-[10px] text-muted-foreground">
-        <CheckCircle2 className="h-2.5 w-2.5" /> Best answer
-       </span>
-      )}
-
-      {comment.kind === "QUESTION" && depth === 0 && (
-       <span className="agate border border-rule px-1.5 py-px text-[10px] text-muted-foreground">
-        Question
-       </span>
-      )}
-
-      <TimeAgo date={comment.createdAt} />
-      {comment.editedAt && (
-       <span className="agate text-[11px] italic text-muted-foreground">(edited)</span>
-      )}
-      {collapsed && childCount > 0 && (
-       <span className="agate text-[11px] text-muted-foreground">({childCount} {childCount === 1 ? "reply" : "replies"})</span>
-      )}
-     </div>
-
-     {!collapsed && (
-      <>
-       {/* Body */}
-       <div className={cn(
-        "mt-1 rounded-lg px-2.5 py-1.5",
-        comment.isOfficial && "border border-brick bg-paper-2"
-       )}>
-        {editing ? (
-         <div className="space-y-1.5 py-1">
-          <Textarea
-           value={editText}
-           onChange={(e) => setEditText(e.target.value)}
-           rows={2}
-           className="bg-background text-[13px]"
-          />
-          <div className="flex justify-end gap-1.5">
-           <Button
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => {
-             onEdit(comment.id, editText.trim())
-             setEditing(false)
-            }}
-           >
-            Save
-           </Button>
-           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditing(false)}>
-            Cancel
-           </Button>
-          </div>
-         </div>
-        ) : (
-         <p className="whitespace-pre-wrap break-words text-[13px] leading-relaxed text-foreground">
-          {comment.content.split(/(@[\w\s.-]{2,40}?)(?=\s|$)/g).map((part, i) =>
-           part.startsWith("@") ? (
-            <span key={i} className="font-medium text-brick">
-             {part}
-            </span>
-           ) : (
-            part
-           )
-          )}
-         </p>
-        )}
-
-        {comment.imageUrl && (
-         <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-           src={comment.imageUrl}
-           alt="Attachment"
-           className="max-h-36 max-w-[240px] cursor-zoom-in border border-rule object-cover"
-          />
-         </a>
-        )}
-
-        {comment.status === "PENDING_REVIEW" && (
-         <p className="mt-1.5 border border-brick bg-paper-2 px-2 py-1 text-[11px] text-brick">
-          Held for moderation review{comment.flaggedReasons.length > 0 ? ` (${comment.flaggedReasons.join(", ").replace(/_/g, " ")})` : ""}.
-         </p>
-        )}
-       </div>
-
-       {/* Action row */}
-       {comment.status === "APPROVED" && !editing && (
-        <div className="mt-0.5 flex flex-wrap items-center">
-         {showThreadControls && (
-          <button
-           type="button"
-           onClick={() => setReplyOpen((v) => !v)}
-           className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-brick"
-          >
-           <MessageSquare className="h-3 w-3" />
-           Reply
-          </button>
-         )}
-
-         {canMarkBestAnswer && comment.parentId && (
-          <button
-           type="button"
-           onClick={() => onBestAnswer(comment.id)}
-           className={cn(
-            "inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-semibold transition-colors",
-            comment.isBestAnswer
-             ? "text-foreground dark:text-foreground"
-             : "text-muted-foreground hover:text-brick"
-           )}
-          >
-           <CheckCircle2 className="h-3 w-3" />
-           {comment.isBestAnswer ? "Unmark" : "Best answer"}
-          </button>
-         )}
-
-         {(withinEditWindow || isAdmin) && (
-          <div className="relative">
-           <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            className="p-1 text-muted-foreground transition-colors hover:text-foreground"
-            aria-label="More actions"
-           >
-            <MoreHorizontal className="h-3.5 w-3.5" />
-           </button>
-           {menuOpen && (
-            <div className="absolute left-0 top-full z-10 mt-1 w-36 overflow-hidden border border-rule bg-background">
-             {withinEditWindow && (
-              <button
-               type="button"
-               onClick={() => {
-                setMenuOpen(false)
-                setEditText(comment.content)
-                setEditing(true)
-               }}
-               className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-foreground hover:bg-paper-2"
-              >
-               <Pencil className="h-3.5 w-3.5" /> Edit
-               <span className="agate ml-auto text-[10px] text-muted-foreground">15 min</span>
-              </button>
-             )}
-             <button
-              type="button"
-              onClick={() => {
-               setMenuOpen(false)
-               if (confirm("Delete this comment?")) onDelete(comment.id)
-              }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-brick hover:bg-paper-2"
-             >
-              <Trash2 className="h-3.5 w-3.5" /> Delete
-             </button>
-            </div>
-           )}
-          </div>
-         )}
-
-         {!comment.isOwn && currentUserId && (
-          <button
-           type="button"
-           onClick={() => onReport(comment.id)}
-           className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-brick"
-          >
-           <Flag className="h-3 w-3" />
-           Report
-          </button>
-         )}
-
-         {isAdmin && depth === 0 && (
-          <button
-           type="button"
-           onClick={() =>
-            fetch("/api/admin/discussion", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify(
-              comment.isPinned
-               ? { action: "unpin", commentId: comment.id }
-               : { action: "pin", commentId: comment.id, postType, postId },
-             ),
-            }).then(() => toast(comment.isPinned ? "Comment unpinned" : "Comment pinned", "success"))
-           }
-           className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-brick transition-colors hover:underline"
-          >
-           <Pin className="h-3 w-3" />
-           {comment.isPinned ? "Unpin" : "Pin"}
-          </button>
-         )}
-        </div>
-       )}
-
-       {/* Reply composer */}
-       {replyOpen && currentUserId && (
-        <div className="mt-1.5 flex gap-1.5">
-         <div className="relative flex-1">
-          <Textarea
-           value={replyText}
-           onChange={(e) => setReplyText(e.target.value)}
-           placeholder={`Reply to ${comment.user.name}…`}
-           rows={2}
-           className="bg-background pr-16 text-[13px]"
-          />
-          <Button
-           size="sm"
-           onClick={submitReply}
-           disabled={!replyText.trim()}
-           className="absolute bottom-1 right-1 h-7 px-3 text-xs"
-          >
-           Reply
-          </Button>
-         </div>
-        </div>
-       )}
-      </>
-     )}
-    </div>
-   </div>
-
-   {/* Nested replies */}
-   {!collapsed && replyList.length > 0 && (
-    <div className="mt-0.5">
-     {replyList.map((r) => (
-      <CommentItem
-       key={r.id}
-       comment={{ ...r, replies: r.replies || [] }}
-       depth={depth + 1}
-       postType={postType}
-       postId={postId}
-       currentUserId={currentUserId}
-       isAdmin={isAdmin}
-       locked={locked}
-       canMarkBestAnswer={(currentUserId && currentUserId === comment.user.id) || isAdmin}
-       onUpvote={onUpvote}
-       onReply={onReply}
-       onReport={onReport}
-       onDelete={onDelete}
-       onEdit={onEdit}
-       onBestAnswer={onBestAnswer}
-       onLoadReplies={onLoadReplies}
-      />
-     ))}
-    </div>
-   )}
-
-   {/* Load more replies */}
-   {!collapsed && hasMoreReplies && (
+   {/* Thread line — click to collapse */}
+   {depth > 0 && (
     <button
      type="button"
-     onClick={loadMoreReplies}
-     disabled={loadingReplies}
-     className="ml-8 mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-brick hover:underline disabled:opacity-50"
+     onClick={() => setCollapsed((v) => !v)}
+     className="absolute left-0 top-0 bottom-0 z-10 flex w-5 cursor-pointer items-center justify-center"
+     style={{ left: `${indentPx - 12}px` }}
+     aria-label={collapsed ? "Expand thread" : "Collapse thread"}
     >
-     <CornerDownRight className="h-3 w-3" />
-     {loadingReplies ? "Loading…" : `View ${Math.min(REPLIES_PAGE_SIZE, comment.replyCount - replyList.length)} more ${comment.replyCount - replyList.length === 1 ? "reply" : "replies"}`}
+     <div
+      className={cn(
+       "h-full w-0.5 transition-colors",
+       collapsed
+        ? "bg-brick"
+        : "bg-rule hover:bg-brick dark:bg-ink dark:hover:bg-brick"
+      )}
+     />
     </button>
    )}
 
-   {!collapsed && !hasMoreReplies && replyList.length > 0 && comment.replyCount > replyList.length && (
-    <p className="ml-8 mt-1 agate text-[11px] text-muted-foreground">
-     {comment.replyCount - replyList.length} more {comment.replyCount - replyList.length === 1 ? "reply" : "replies"} hidden
-    </p>
-   )}
+   <div className={cn("py-2", depth === 0 && "pt-3")}>
+    {/* Collapsed */}
+    {collapsed ? (
+     <div className="flex items-center gap-2 py-1">
+      <button
+       type="button"
+       onClick={() => setCollapsed(false)}
+       className="flex items-center gap-1 text-[11px] text-brick hover:underline"
+      >
+       <ChevronDown className="h-3 w-3" />
+       <UserAvatar comment={comment} size="xs" />
+       <span className="font-bold text-foreground">{comment.user.name}</span>
+       <span className="text-muted-foreground">
+        · {comment.upvoteCount} point{comment.upvoteCount !== 1 && "s"} · <TimeAgo date={comment.createdAt} />
+        {childCount > 0 && <> · {childCount} {childCount === 1 ? "child" : "children"}</>}
+       </span>
+      </button>
+     </div>
+    ) : (
+     <>
+      {/* Comment header */}
+      <div className="flex items-start gap-2">
+       {/* Vote column — top-level only */}
+       {depth === 0 && (
+        <div className="flex flex-col items-center gap-0.5 pt-0.5">
+         <button
+          type="button"
+          onClick={() => onUpvote(comment.id)}
+          disabled={!currentUserId}
+          aria-label="Upvote"
+          className={cn(
+           "p-0.5 transition-colors",
+           currentUserId
+            ? comment.hasUpvoted
+             ? "text-brick"
+             : "text-muted-foreground hover:text-brick"
+            : "cursor-not-allowed opacity-40"
+          )}
+         >
+          <ArrowBigUp className={cn("h-5 w-5", comment.hasUpvoted && "fill-current")} />
+         </button>
+         <span className={cn(
+          "text-xs font-bold tabular-nums",
+          comment.hasUpvoted ? "text-brick" : "text-foreground"
+         )}>
+          {comment.upvoteCount}
+         </span>
+         <button
+          type="button"
+          disabled={!currentUserId}
+          className="p-0.5 text-muted-foreground transition-colors hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-40"
+          aria-label="Downvote"
+         >
+          <ArrowBigDown className="h-5 w-5" />
+         </button>
+        </div>
+       )}
+
+       {/* Content */}
+       <div className="min-w-0 flex-1">
+        {/* User line */}
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+         <UserAvatar comment={comment} size="sm" />
+         <span className="text-xs font-bold text-foreground">{comment.user.name}</span>
+
+         {comment.isOfficial && (
+          <span className="inline-flex items-center gap-0.5 border border-brick px-1.5 py-px text-[10px] font-bold text-brick">
+           <ShieldCheck className="h-2.5 w-2.5" /> MOD
+          </span>
+         )}
+
+         {!comment.isOfficial && comment.user.helpfulCount >= REPUTATION_THRESHOLD && (
+          <span className="inline-flex items-center gap-0.5 border border-rule px-1.5 py-px text-[10px] font-semibold text-muted-foreground">
+           <BadgeCheck className="h-2.5 w-2.5" />
+           {Math.floor(comment.user.helpfulCount / REPUTATION_THRESHOLD) * REPUTATION_THRESHOLD}+ helpful
+          </span>
+         )}
+
+         {comment.isBestAnswer && (
+          <span className="inline-flex items-center gap-0.5 border border-brick bg-brick/10 px-1.5 py-px text-[10px] font-bold text-brick">
+           <CheckCircle2 className="h-2.5 w-2.5" /> Best Answer
+          </span>
+         )}
+
+         {comment.kind === "QUESTION" && depth === 0 && (
+          <span className="border border-rule px-1.5 py-px text-[10px] font-bold text-muted-foreground">
+           Question
+          </span>
+         )}
+
+         <span className="text-[11px] text-muted-foreground">
+          · <TimeAgo date={comment.createdAt} />
+         </span>
+         {comment.editedAt && (
+          <span className="text-[11px] italic text-muted-foreground">(edited)</span>
+         )}
+         {comment.isPinned && (
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-brick">
+           <Pin className="h-2.5 w-2.5" /> Pinned
+          </span>
+         )}
+
+         {/* Collapse for top-level */}
+         {depth === 0 && (
+          <button
+           type="button"
+           onClick={() => setCollapsed(true)}
+           className="ml-auto p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+           aria-label="Collapse"
+          >
+           <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+         )}
+        </div>
+
+        {/* Body */}
+        {editing ? (
+         <div className="mt-2">
+          <RedditComposer
+           value={editText}
+           onChange={setEditText}
+           onSubmit={() => { onEdit(comment.id, editText.trim()); setEditing(false) }}
+           onCancel={() => setEditing(false)}
+           submitLabel="Save edits"
+           compact
+           autoFocus
+          />
+         </div>
+        ) : (
+         <div className={cn(
+          "mt-1 text-sm leading-relaxed text-foreground",
+          comment.isOfficial && "border-l-2 border-brick bg-paper-2 px-3 py-2"
+         )}>
+          <div
+           className="break-words [&_blockquote]:my-1 [&_code]:text-[12px] [&_del]:text-muted-foreground [&_strong]:font-bold"
+           dangerouslySetInnerHTML={{ __html: formatMarkdown(comment.content) }}
+          />
+
+          {comment.imageUrl && (
+           <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+             src={comment.imageUrl}
+             alt="Attachment"
+             className="max-h-48 max-w-xs cursor-zoom-in border border-rule object-cover transition-transform hover:scale-[1.02] dark:border-ink"
+            />
+           </a>
+          )}
+
+          {comment.status === "PENDING_REVIEW" && (
+           <div className="mt-2 flex items-center gap-1.5 border border-brick bg-brick/10 px-3 py-2 text-xs font-semibold text-brick">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+            Awaiting moderation{comment.flaggedReasons.length > 0 ? ` — ${comment.flaggedReasons.join(", ").replace(/_/g, " ")}` : ""}
+           </div>
+          )}
+         </div>
+        )}
+
+        {/* Action bar */}
+        {comment.status === "APPROVED" && !editing && (
+         <div className="mt-0.5 flex flex-wrap items-center gap-0.5">
+          {/* Inline vote for nested */}
+          {depth > 0 && (
+           <div className="mr-1 flex items-center gap-0.5">
+            <button
+             type="button"
+             onClick={() => onUpvote(comment.id)}
+             disabled={!currentUserId}
+             className={cn(
+              "p-0.5 transition-colors",
+              currentUserId
+               ? comment.hasUpvoted ? "text-brick" : "text-muted-foreground hover:text-brick"
+               : "cursor-not-allowed opacity-40"
+             )}
+            >
+             <ArrowBigUp className={cn("h-4 w-4", comment.hasUpvoted && "fill-current")} />
+            </button>
+            <span className={cn(
+             "text-[11px] font-bold tabular-nums",
+             comment.hasUpvoted ? "text-brick" : "text-foreground"
+            )}>
+             {comment.upvoteCount}
+            </span>
+            <button
+             type="button"
+             disabled={!currentUserId}
+             className="p-0.5 text-muted-foreground transition-colors hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+             <ArrowBigDown className="h-4 w-4" />
+            </button>
+           </div>
+          )}
+
+          {showThreadControls && (
+           <ActionButton icon={MessageSquare} label="Reply" onClick={() => setReplyOpen((v) => !v)} active={replyOpen} />
+          )}
+
+          <ActionButton icon={Share2} label="Share" onClick={handleShare} />
+
+          {canMarkBestAnswer && comment.parentId && (
+           <ActionButton
+            icon={Award}
+            label={comment.isBestAnswer ? "Unmark" : "Best answer"}
+            onClick={() => onBestAnswer(comment.id)}
+            active={comment.isBestAnswer}
+           />
+          )}
+
+          {!comment.isOwn && currentUserId && (
+           <ActionButton icon={Flag} label="Report" onClick={() => onReport(comment.id)} />
+          )}
+
+          {(withinEditWindow || isAdmin) && (
+           <div className="relative" ref={menuRef}>
+            <ActionButton icon={MoreHorizontal} label="" onClick={() => setMenuOpen((v) => !v)} />
+            {menuOpen && (
+             <div className="absolute left-0 top-full z-20 mt-1 min-w-[160px] overflow-hidden border border-rule bg-background dark:border-ink dark:bg-ink">
+              {withinEditWindow && (
+               <button
+                type="button"
+                onClick={() => { setMenuOpen(false); setEditText(comment.content); setEditing(true) }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-foreground transition-colors hover:bg-paper-2 dark:hover:bg-paper-3"
+               >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+                <span className="ml-auto text-[10px] text-muted-foreground">15 min</span>
+               </button>
+              )}
+              <button
+               type="button"
+               onClick={() => { setMenuOpen(false); if (confirm("Delete this comment?")) onDelete(comment.id) }}
+               className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-brick transition-colors hover:bg-brick/10"
+              >
+               <Trash2 className="h-3.5 w-3.5" /> Delete
+              </button>
+              {isAdmin && depth === 0 && (
+               <button
+                type="button"
+                onClick={() => {
+                 setMenuOpen(false)
+                 fetch("/api/admin/discussion", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(
+                   comment.isPinned
+                    ? { action: "unpin", commentId: comment.id }
+                    : { action: "pin", commentId: comment.id, postType, postId },
+                  ),
+                 }).then(() => toast(comment.isPinned ? "Unpinned" : "Pinned", "success"))
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-foreground transition-colors hover:bg-paper-2 dark:hover:bg-paper-3"
+               >
+                <Pin className="h-3.5 w-3.5" /> {comment.isPinned ? "Unpin" : "Pin"}
+               </button>
+              )}
+             </div>
+            )}
+           </div>
+          )}
+         </div>
+        )}
+
+        {/* Reply composer */}
+        {replyOpen && currentUserId && (
+         <div className="mt-2 max-w-xl">
+          <RedditComposer
+           value={replyText}
+           onChange={setReplyText}
+           placeholder={`Reply to ${comment.user.name}…`}
+           onSubmit={submitReply}
+           onCancel={() => { setReplyOpen(false); setReplyText("") }}
+           submitLabel="Reply"
+           compact
+           autoFocus
+          />
+         </div>
+        )}
+       </div>
+      </div>
+
+      {/* Nested replies */}
+      {replyList.length > 0 && (
+       <div className="mt-0.5">
+        {replyList.map((r) => (
+         <CommentItem
+          key={r.id}
+          comment={{ ...r, replies: r.replies || [] }}
+          depth={depth + 1}
+          postType={postType}
+          postId={postId}
+          currentUserId={currentUserId}
+          isAdmin={isAdmin}
+          locked={locked}
+          canMarkBestAnswer={(currentUserId && currentUserId === comment.user.id) || isAdmin}
+          onUpvote={onUpvote}
+          onReply={onReply}
+          onReport={onReport}
+          onDelete={onDelete}
+          onEdit={onEdit}
+          onBestAnswer={onBestAnswer}
+          onLoadReplies={onLoadReplies}
+         />
+        ))}
+       </div>
+      )}
+
+      {/* Load more replies */}
+      {hasMoreReplies && (
+       <button
+        type="button"
+        onClick={loadMoreReplies}
+        disabled={loadingReplies}
+        className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-brick transition-colors hover:underline disabled:opacity-50"
+        style={{ marginLeft: `${Math.min(depth + 1, MAX_INDENT_LEVEL) * 20 + 8}px` }}
+       >
+        <CornerDownRight className="h-3 w-3" />
+        {loadingReplies
+         ? "Loading…"
+         : `${Math.min(REPLIES_PAGE_SIZE, comment.replyCount - replyList.length)} more ${comment.replyCount - replyList.length === 1 ? "reply" : "replies"}`}
+       </button>
+      )}
+     </>
+    )}
+   </div>
   </div>
+ )
+}
+
+function UserAvatar({ comment, size = "sm" }: { comment: CommentDTO; size?: "xs" | "sm" }) {
+ const dim = size === "xs" ? "h-4 w-4 text-[7px]" : "h-6 w-6 text-[9px]"
+ if (comment.user.image) {
+  return (
+   /* eslint-disable-next-line @next/next/no-img-element */
+   <img src={comment.user.image} alt={comment.user.name} className={cn("object-cover", dim)} />
+  )
+ }
+ return (
+  <span
+   className={cn(
+    "flex items-center justify-center font-bold select-none",
+    dim,
+    comment.isOfficial
+     ? "bg-brick text-brick-ink"
+     : "bg-ink text-paper dark:bg-paper-3 dark:text-foreground"
+   )}
+  >
+   {initials(comment.user.name)}
+  </span>
+ )
+}
+
+function ActionButton({
+ icon: Icon,
+ label,
+ onClick,
+ active,
+}: {
+ icon: React.ComponentType<{ className?: string }>
+ label: string
+ onClick: () => void
+ active?: boolean
+}) {
+ return (
+  <button
+   type="button"
+   onClick={onClick}
+   className={cn(
+    "inline-flex items-center gap-1 px-2 py-1 text-[11px] font-bold transition-colors",
+    active
+     ? "bg-paper-3 text-foreground"
+     : "text-muted-foreground hover:bg-paper-2 hover:text-foreground"
+   )}
+  >
+   <Icon className="h-3.5 w-3.5" />
+   {label}
+  </button>
  )
 }

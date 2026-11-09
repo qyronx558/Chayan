@@ -2,13 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useSession } from "next-auth/react"
-import { Image as ImageIcon, Lock, MessageSquare, Search, ShieldCheck, X } from "lucide-react"
+import {
+ Bell,
+ BellOff,
+ ChevronDown,
+ Flame,
+ Image as ImageIcon,
+ Lock,
+ MessageCircle,
+ Search,
+ ShieldCheck,
+ Sparkles,
+ TrendingUp,
+ X,
+ Zap,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
-import { CommentItem } from "./CommentItem"
+import { CommentItem, RedditComposer } from "./CommentItem"
 import type {
  CommentDTO,
  FilterKey,
@@ -17,20 +30,19 @@ import type {
  ThreadMeta,
 } from "./types"
 
-const SORTS: { key: SortKey; label: string }[] = [
- { key: "top", label: "Top" },
- { key: "newest", label: "Newest" },
- { key: "controversial", label: "Controversial" },
+const SORTS: { key: SortKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+ { key: "top", label: "Top", icon: TrendingUp },
+ { key: "newest", label: "New", icon: Sparkles },
+ { key: "controversial", label: "Hot", icon: Flame },
 ]
 
 const FILTERS: { key: FilterKey; label: string }[] = [
- { key: "all", label: "All" },
+ { key: "all", label: "All Comments" },
  { key: "questions", label: "Questions" },
  { key: "answers", label: "Answers" },
- { key: "announcements", label: "Announcements" },
+ { key: "announcements", label: "Official" },
 ]
 
-/** Client-side image compression: max 1280px, JPEG q0.7 - keeps uploads small before Cloudinary */
 async function compressImage(file: File): Promise<Blob> {
  const bitmap = await createImageBitmap(file)
  const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height))
@@ -63,19 +75,23 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  })
  const [nextCursor, setNextCursor] = useState<string | null>(null)
  const [loading, setLoading] = useState(true)
- const [sort, setSort] = useState<SortKey>("newest")
+ const [sort, setSort] = useState<SortKey>("top")
  const [filter, setFilter] = useState<FilterKey>("all")
  const [search, setSearch] = useState("")
  const [searchInput, setSearchInput] = useState("")
+ const [searchOpen, setSearchOpen] = useState(false)
  const [connected, setConnected] = useState(false)
  const [reconnecting, setReconnecting] = useState(false)
+ const [sortDropdown, setSortDropdown] = useState(false)
  const eventSourceRef = useRef<EventSource | null>(null)
+ const sortRef = useRef<HTMLDivElement>(null)
 
  const [content, setContent] = useState("")
  const [kind, setKind] = useState<"GENERAL" | "QUESTION">("GENERAL")
  const [imageUrl, setImageUrl] = useState<string | null>(null)
  const [uploading, setUploading] = useState(false)
  const [submitting, setSubmitting] = useState(false)
+ const [composerExpanded, setComposerExpanded] = useState(false)
  const [captcha, setCaptcha] = useState<{
   required: boolean
   question?: string
@@ -83,18 +99,20 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  }>({ required: false })
  const [captchaAnswer, setCaptchaAnswer] = useState("")
 
- // SSE event handler - defined before useEffect
+ useEffect(() => {
+  function handleClick(e: MouseEvent) {
+   if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortDropdown(false)
+  }
+  if (sortDropdown) document.addEventListener("mousedown", handleClick)
+  return () => document.removeEventListener("mousedown", handleClick)
+ }, [sortDropdown])
+
  const handleSSEEvent = useCallback((data: any) => {
-  // Kept for future granular events, but we now refetch on thread-update
   console.debug("SSE event:", data.type)
  }, [])
 
  async function loadReplies(parentId: string, cursor?: string) {
-  const params = new URLSearchParams({
-   postType,
-   postId,
-   parentId,
-  })
+  const params = new URLSearchParams({ postType, postId, parentId })
   if (cursor) params.set("cursor", cursor)
   const res = await fetch(`/api/comments?${params}`)
   const json = await res.json()
@@ -105,12 +123,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   async (opts?: { cursor?: string; append?: boolean }) => {
    setLoading(true)
    try {
-    const params = new URLSearchParams({
-     postType,
-     postId,
-     sort,
-     filter,
-    })
+    const params = new URLSearchParams({ postType, postId, sort, filter })
     if (search) params.set("q", search)
     if (opts?.cursor) params.set("cursor", opts.cursor)
     const res = await fetch(`/api/comments?${params}`)
@@ -129,63 +142,41 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   [postType, postId, sort, filter, search]
  )
 
- // Keep the live stream listener in sync with the active filters without
- // reconnecting the stream whenever a user changes sort or search.
  const fetchCommentsRef = useRef(fetchComments)
- useEffect(() => {
-  fetchCommentsRef.current = fetchComments
- }, [fetchComments])
-
+ useEffect(() => { fetchCommentsRef.current = fetchComments }, [fetchComments])
  useEffect(() => {
   const t = setTimeout(fetchComments, 0)
   return () => clearTimeout(t)
  }, [fetchComments])
 
- // Debounced search
  useEffect(() => {
   const t = setTimeout(() => setSearch(searchInput), 300)
   return () => clearTimeout(t)
  }, [searchInput])
 
- // SSE Connection for real-time updates
+ // SSE
  useEffect(() => {
   let disposed = false
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined
 
   const connect = () => {
    if (disposed) return
-   if (eventSourceRef.current) {
-    eventSourceRef.current.close()
-   }
+   if (eventSourceRef.current) eventSourceRef.current.close()
 
    const es = new EventSource(`/api/comments/stream?postType=${postType}&postId=${postId}`)
    eventSourceRef.current = es
 
-   es.onopen = () => {
-    setConnected(true)
-    setReconnecting(false)
-   }
-
+   es.onopen = () => { setConnected(true); setReconnecting(false) }
    es.onmessage = (event) => {
-    try {
-     const data = JSON.parse(event.data)
-     handleSSEEvent(data)
-    } catch {
-     // ignore parse errors
-    }
+    try { handleSSEEvent(JSON.parse(event.data)) } catch {}
    }
-
    es.addEventListener("thread-update", (event) => {
     try {
      const data = JSON.parse(event.data)
      setMeta((m) => ({ ...m, total: data.commentCount }))
-     // Refetch comments to get latest nested replies
      fetchCommentsRef.current()
-    } catch {
-     // ignore
-    }
+    } catch {}
    })
-
    es.onerror = () => {
     if (disposed) return
     setConnected(false)
@@ -196,13 +187,10 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   }
 
   connect()
-
   return () => {
    disposed = true
    if (reconnectTimer) clearTimeout(reconnectTimer)
-   if (eventSourceRef.current) {
-    eventSourceRef.current.close()
-   }
+   if (eventSourceRef.current) eventSourceRef.current.close()
   }
  }, [postType, postId, handleSSEEvent])
 
@@ -214,11 +202,8 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
    fd.append("image", new File([compressed], "comment.jpg", { type: "image/jpeg" }))
    const res = await fetch("/api/comments/upload", { method: "POST", body: fd })
    const json = await res.json()
-   if (json.success) {
-    setImageUrl(json.data.url)
-   } else {
-    toast(json.error || "Upload failed", "destructive")
-   }
+   if (json.success) setImageUrl(json.data.url)
+   else toast(json.error || "Upload failed", "destructive")
   } catch {
    toast("Image processing failed", "destructive")
   } finally {
@@ -253,11 +238,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
     if (json.code === "CAPTCHA_REQUIRED" || res.status === 429) {
      const capRes = await fetch("/api/comments/captcha")
      const capJson = await capRes.json()
-     setCaptcha({
-      required: true,
-      question: capJson.data.question,
-      token: capJson.data.token,
-     })
+     setCaptcha({ required: true, question: capJson.data.question, token: capJson.data.token })
     }
     toast(json.error || "Please verify you are human", "destructive")
     return
@@ -269,7 +250,6 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
    }
 
    if (parentId) {
-    // Insert reply into the right comment thread
     setComments((prev) =>
      prev.map((c) =>
       c.id === parentId
@@ -296,6 +276,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
     setContent("")
     setImageUrl(null)
     setKind("GENERAL")
+    setComposerExpanded(false)
    }
    if (captcha.required && !json.code) {
     setCaptcha({ required: false })
@@ -312,28 +293,17 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   const res = await fetch(`/api/comments/${id}/upvote`, { method: "POST" })
   const json = await res.json()
   if (json.success) {
-   setComments((prev) =>
-    prev.map((c) =>
-     c.id === id
-      ? {
-        ...c,
-        hasUpvoted: json.data.hasUpvoted,
-        upvoteCount: c.upvoteCount + (json.data.hasUpvoted ? 1 : -1),
-       }
-      : {
-        ...c,
-        replies: c.replies?.map((r) =>
-         r.id === id
-          ? {
-            ...r,
-            hasUpvoted: json.data.hasUpvoted,
-            upvoteCount: r.upvoteCount + (json.data.hasUpvoted ? 1 : -1),
-           }
-          : r
-        ),
-       }
-    )
-   )
+   const updateComment = (c: CommentDTO): CommentDTO => {
+    if (c.id === id) {
+     return {
+      ...c,
+      hasUpvoted: json.data.hasUpvoted,
+      upvoteCount: c.upvoteCount + (json.data.hasUpvoted ? 1 : -1),
+     }
+    }
+    return { ...c, replies: c.replies?.map(updateComment) }
+   }
+   setComments((prev) => prev.map(updateComment))
   } else {
    toast(json.error, "destructive")
   }
@@ -343,7 +313,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   if (!confirm("Report this comment for moderation review?")) return
   const res = await fetch(`/api/comments/${id}/report`, { method: "POST" })
   const json = await res.json()
-  if (json.success) toast("Reported. Our moderators will review it.", "success")
+  if (json.success) toast("Reported — our moderators will review it.", "success")
   else toast(json.error, "destructive")
  }
 
@@ -356,11 +326,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
      .filter((c) => c.id !== id)
      .map((c) =>
       c.replies?.some((r) => r.id === id)
-       ? {
-         ...c,
-         replyCount: c.replyCount - 1,
-         replies: c.replies!.filter((r) => r.id !== id),
-        }
+       ? { ...c, replyCount: c.replyCount - 1, replies: c.replies!.filter((r) => r.id !== id) }
        : c.replies?.some((r) => r.parentId === id)
         ? { ...c, replyCount: Math.max(0, c.replyCount - 1), replies: c.replies!.filter((r) => r.parentId !== id) }
         : c
@@ -400,7 +366,6 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
    .then((r) => r.json())
    .then((json) => {
     if (json.success) {
-     // Best answer ordering lives server-side; refresh to re-sort threads
      fetchComments()
      toast(json.data.isBestAnswer ? "Marked as best answer" : "Best answer removed", "success")
     } else {
@@ -418,7 +383,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   const json = await res.json()
   if (json.success) {
    setMeta((m) => ({ ...m, following: json.data.following }))
-   toast(json.data.following ? "Following this discussion" : "Unfollowed", "success")
+   toast(json.data.following ? "You'll be notified of new comments" : "Unfollowed", "success")
   } else {
    toast(json.error, "destructive")
   }
@@ -435,9 +400,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  }
 
  async function bulkDeleteFlagged() {
-  const res = await fetch(
-   `/api/admin/discussion?postType=${postType}&postId=${postId}`
-  )
+  const res = await fetch(`/api/admin/discussion?postType=${postType}&postId=${postId}`)
   const json = await res.json()
   if (!json.success || json.data.length === 0) {
    toast("No flagged comments pending review", "default")
@@ -456,107 +419,291 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   }
  }
 
- const adminControls = meta.isAdmin
+ const currentSort = SORTS.find((s) => s.key === sort) || SORTS[0]
 
  return (
   <section className="mt-8">
-   <div className="overflow-hidden rounded-xl border border-rule bg-background dark:border-ink dark:bg-ink">
-    {/* Compact header */}
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-rule px-3 py-2.5 sm:px-4 dark:border-ink">
-     <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-tight text-foreground dark:text-paper">
-      <MessageSquare className="h-4 w-4 text-brick" />
-      Discussion
-      <span className="rounded-full bg-paper-3 px-1.5 py-px text-[11px] font-bold tabular-nums text-muted-foreground dark:bg-ink dark:text-muted-foreground">
-       {meta.total}
-      </span>
-     </h2>
-     <div className="ml-auto flex items-center gap-1.5">
-      <div className="flex overflow-hidden rounded-full border border-rule dark:border-ink">
-       {SORTS.map((s) => (
+   <div className="overflow-hidden border border-rule bg-background dark:border-ink dark:bg-ink">
+    {/* ─── Header ─── */}
+    <div className="border-b border-rule bg-ink px-4 py-3 dark:border-ink dark:bg-paper-2">
+     <div className="flex items-center justify-between">
+      <h2 className="flex items-center gap-2 font-display text-base font-bold text-paper dark:text-foreground">
+       <MessageCircle className="h-5 w-5" />
+       Discussion
+       <span className="border border-paper/30 px-2 py-0.5 text-xs font-bold tabular-nums text-paper/80 dark:border-rule dark:text-muted-foreground">
+        {meta.total}
+       </span>
+      </h2>
+      <div className="flex items-center gap-2">
+       {/* Live indicator */}
+       <span className="flex items-center gap-1.5 border border-paper/20 px-2 py-0.5 dark:border-rule">
+        <span className={cn(
+         "h-2 w-2",
+         connected
+          ? "bg-brick-ink dark:bg-brick animate-pulse"
+          : "bg-brick dark:bg-brick"
+        )} style={connected ? { boxShadow: "0 0 4px var(--color-brick)" } : undefined} />
+        <span className="text-[11px] font-semibold text-paper/90 dark:text-muted-foreground">
+         {connected ? "Live" : reconnecting ? "Reconnecting…" : "Offline"}
+        </span>
+       </span>
+       {/* Follow */}
+       {currentUserId && (
         <button
-         key={s.key}
          type="button"
-         onClick={() => setSort(s.key)}
+         onClick={toggleFollow}
          className={cn(
-          "px-2.5 py-1 text-[11px] font-semibold transition-colors",
-          sort === s.key
-           ? "bg-ink text-paper dark:bg-background dark:text-foreground"
-           : "bg-background text-muted-foreground hover:bg-paper-2 dark:bg-ink dark:text-muted-foreground dark:hover:bg-ink"
+          "flex items-center gap-1 border px-2.5 py-1 text-[11px] font-bold transition-colors",
+          meta.following
+           ? "border-brick bg-brick text-brick-ink"
+           : "border-paper/30 text-paper hover:bg-paper/10 dark:border-rule dark:text-foreground dark:hover:bg-paper-3"
          )}
         >
-         {s.label}
+         {meta.following ? <BellOff className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+         {meta.following ? "Following" : "Follow"}
         </button>
-       ))}
+       )}
       </div>
-      {currentUserId && (
-       <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={toggleFollow}>
-        {meta.following ? "Following" : "Follow"}
-       </Button>
+     </div>
+    </div>
+
+    {/* ─── Sort bar + filters ─── */}
+    <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-paper-2/50 px-4 py-2 dark:border-ink dark:bg-paper-2/50">
+     {/* Sort dropdown */}
+     <div className="relative" ref={sortRef}>
+      <button
+       type="button"
+       onClick={() => setSortDropdown((v) => !v)}
+       className="flex items-center gap-1.5 border border-rule bg-paper-3 px-3 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-paper-2 dark:border-ink dark:bg-paper-3 dark:text-foreground dark:hover:bg-paper-2"
+      >
+       <currentSort.icon className="h-3.5 w-3.5" />
+       {currentSort.label}
+       <ChevronDown className="h-3 w-3 text-muted-foreground" />
+      </button>
+      {sortDropdown && (
+       <div className="absolute left-0 top-full z-20 mt-1 min-w-[140px] overflow-hidden border border-rule bg-background dark:border-ink dark:bg-ink">
+        {SORTS.map((s) => (
+         <button
+          key={s.key}
+          type="button"
+          onClick={() => { setSort(s.key); setSortDropdown(false) }}
+          className={cn(
+           "flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors",
+           sort === s.key
+            ? "bg-brick text-brick-ink font-bold"
+            : "text-foreground hover:bg-paper-2 dark:text-foreground dark:hover:bg-paper-3"
+          )}
+         >
+          <s.icon className="h-3.5 w-3.5" />
+          {s.label}
+         </button>
+        ))}
+       </div>
       )}
-      {adminControls && (
+     </div>
+
+     {/* Filter pills */}
+     <div className="flex items-center gap-1">
+      {FILTERS.map((f) => (
+       <button
+        key={f.key}
+        type="button"
+        onClick={() => setFilter(f.key)}
+        className={cn(
+         "border px-2.5 py-1 text-[11px] font-bold transition-colors",
+         filter === f.key
+          ? "border-ink bg-ink text-paper dark:border-rule dark:bg-foreground dark:text-background"
+          : "border-rule text-muted-foreground hover:border-ink hover:text-foreground dark:border-ink dark:text-muted-foreground dark:hover:border-rule dark:hover:text-foreground"
+        )}
+       >
+        {f.label}
+       </button>
+      ))}
+     </div>
+
+     {/* Search */}
+     <div className="ml-auto flex items-center gap-1.5">
+      {searchOpen ? (
+       <div className="relative">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+         value={searchInput}
+         onChange={(e) => setSearchInput(e.target.value)}
+         placeholder="Search comments…"
+         className="h-8 w-48 pl-8 text-xs"
+         autoFocus
+        />
+        <button
+         type="button"
+         onClick={() => { setSearchOpen(false); setSearchInput(""); setSearch("") }}
+         className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+         <X className="h-3 w-3" />
+        </button>
+       </div>
+      ) : (
+       <button
+        type="button"
+        onClick={() => setSearchOpen(true)}
+        className="p-1.5 text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground"
+       >
+        <Search className="h-4 w-4" />
+       </button>
+      )}
+
+      {/* Admin controls */}
+      {meta.isAdmin && (
        <>
-        <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={toggleLock}>
-         <Lock className="mr-1 h-3 w-3" />
+        <button
+         type="button"
+         onClick={toggleLock}
+         className="flex items-center gap-1 border border-brick px-2.5 py-1 text-[11px] font-bold text-brick transition-colors hover:bg-brick hover:text-brick-ink"
+        >
+         <Lock className="h-3 w-3" />
          {meta.locked ? "Unlock" : "Lock"}
-        </Button>
-        <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={bulkDeleteFlagged}>
+        </button>
+        <button
+         type="button"
+         onClick={bulkDeleteFlagged}
+         className="border border-rule px-2.5 py-1 text-[11px] font-bold text-muted-foreground transition-colors hover:border-ink hover:text-foreground"
+        >
          Review flagged
-        </Button>
+        </button>
        </>
       )}
-      <span className="flex items-center gap-1" title={connected ? "Live updates on" : "Live updates off"}>
-       <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "bg-paper-3" : "bg-paper-2")} />
-       <span className="text-[11px] text-muted-foreground">
-        {connected ? "Live" : reconnecting ? "…" : "Off"}
-       </span>
-      </span>
      </div>
     </div>
 
-    {/* Slim filters + search */}
-    <div className="flex flex-wrap items-center gap-1.5 border-b border-rule px-3 py-2 sm:px-4 dark:border-ink">
-     {FILTERS.map((f) => (
-      <button
-       key={f.key}
-       type="button"
-       onClick={() => setFilter(f.key)}
-       className={cn(
-        "rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors",
-        filter === f.key
-         ? "border-ink bg-ink text-paper"
-         : "border-rule text-muted-foreground hover:border-rule-2 hover:text-foreground dark:border-ink dark:text-muted-foreground dark:hover:text-paper"
-       )}
-      >
-       {f.label}
-      </button>
-     ))}
-     <div className="relative ml-auto w-full sm:w-48">
-      <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-      <Input
-       value={searchInput}
-       onChange={(e) => setSearchInput(e.target.value)}
-       placeholder="Search comments…"
-       className="h-7 pl-7 text-xs"
-      />
-     </div>
-    </div>
-
+    {/* Locked banner */}
     {meta.locked && (
-     <div className="flex items-center gap-1.5 border-b border-rule bg-paper-2 px-3 py-1.5 text-xs text-brick sm:px-4 dark:border-ink">
-      <Lock className="h-3 w-3" /> Locked - new comments are disabled.
+     <div className="flex items-center gap-2 border-b border-brick bg-brick/10 px-4 py-2 text-sm font-semibold text-brick">
+      <Lock className="h-4 w-4 shrink-0" />
+      This discussion has been locked by moderators. New comments are disabled.
      </div>
     )}
 
-    {/* Pinned official comment */}
+    {/* ─── Composer ─── */}
+    <div className="border-b border-rule px-4 py-3 dark:border-ink">
+     {currentUserId ? (
+      meta.locked ? null : composerExpanded ? (
+       <div className="space-y-2">
+        {/* Type toggle */}
+        <div className="flex items-center gap-2">
+         <div className="flex overflow-hidden border border-rule dark:border-ink">
+          {(["GENERAL", "QUESTION"] as const).map((k) => (
+           <button
+            key={k}
+            type="button"
+            onClick={() => setKind(k)}
+            className={cn(
+             "px-3 py-1 text-xs font-bold transition-colors",
+             kind === k
+              ? "bg-ink text-paper dark:bg-foreground dark:text-background"
+              : "text-muted-foreground hover:bg-paper-2 dark:hover:bg-paper-3"
+            )}
+           >
+            {k === "GENERAL" ? "Comment" : "Question"}
+           </button>
+          ))}
+         </div>
+         {imageUrl && (
+          <div className="relative">
+           {/* eslint-disable-next-line @next/next/no-img-element */}
+           <img src={imageUrl} alt="" className="h-10 w-10 border border-rule object-cover" />
+           <button
+            type="button"
+            onClick={() => setImageUrl(null)}
+            className="absolute -right-1 -top-1 bg-brick p-0.5 text-brick-ink"
+           >
+            <X className="h-2.5 w-2.5" />
+           </button>
+          </div>
+         )}
+        </div>
+
+        {/* Rich composer */}
+        <RedditComposer
+         value={content}
+         onChange={setContent}
+         placeholder={kind === "QUESTION" ? "Ask a question about this post…" : "What are your thoughts?"}
+         onSubmit={() => submit()}
+         onCancel={() => { setComposerExpanded(false); setContent("") }}
+         submitLabel={submitting ? "Posting…" : "Comment"}
+         disabled={submitting || uploading}
+         autoFocus
+        />
+
+        {/* Extra actions */}
+        <div className="flex items-center gap-2">
+         <label className="inline-flex cursor-pointer items-center gap-1.5 border border-rule px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:border-ink hover:text-foreground dark:border-ink dark:hover:border-rule dark:hover:text-foreground">
+          <ImageIcon className="h-3.5 w-3.5" />
+          {uploading ? "Uploading…" : "Add Image"}
+          <input
+           type="file"
+           accept="image/*"
+           className="hidden"
+           disabled={uploading || Boolean(imageUrl)}
+           onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0])}
+          />
+         </label>
+         {captcha.required && (
+          <div className="flex items-center gap-2 border border-rule bg-paper-2 px-3 py-1.5 dark:border-ink dark:bg-paper-2">
+           <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+           <span className="text-xs text-foreground">{captcha.question}</span>
+           <Input
+            value={captchaAnswer}
+            onChange={(e) => setCaptchaAnswer(e.target.value)}
+            className="h-7 w-20 text-xs"
+            placeholder="Answer"
+           />
+          </div>
+         )}
+        </div>
+       </div>
+      ) : (
+       /* Collapsed composer — click to expand */
+       <div className="flex items-center gap-3">
+        <UserBubble session={session} />
+        <button
+         type="button"
+         onClick={() => setComposerExpanded(true)}
+         className="flex-1 border border-rule bg-paper-2/50 px-4 py-2.5 text-left text-sm text-muted-foreground transition-all hover:border-ink hover:bg-paper-2 dark:border-ink dark:bg-paper-2 dark:hover:border-rule dark:hover:bg-paper-3"
+        >
+         Add a comment…
+        </button>
+       </div>
+      )
+     ) : (
+      <div className="flex items-center gap-3 bg-paper-2/50 px-4 py-3 dark:bg-paper-2">
+       <MessageCircle className="h-5 w-5 text-muted-foreground" />
+       <p className="text-sm text-foreground">
+        <a href="/login" className="font-bold text-brick underline hover:text-brick/80">
+         Log in
+        </a>{" "}
+        or{" "}
+        <a href="/register" className="font-bold text-brick underline hover:text-brick/80">
+         Sign up
+        </a>{" "}
+        to join the discussion
+       </p>
+      </div>
+     )}
+    </div>
+
+    {/* ─── Pinned comment ─── */}
     {meta.pinnedComment && !search && filter === "all" && (
-     <div className="border-b border-l-2 border-b-gray-100 border-l-blue-600 bg-paper-3 px-1 py-0.5 sm:px-2 dark:border-ink dark:bg-paper-3">
+     <div className="border-b border-l-2 border-b-rule border-l-brick bg-paper-2/50 px-4 dark:border-b-ink">
+      <div className="flex items-center gap-1.5 py-1.5">
+       <PinIcon className="h-3 w-3 text-brick" />
+       <span className="text-[11px] font-bold uppercase tracking-wide text-brick">Pinned by moderators</span>
+      </div>
       <CommentItem
        comment={{ ...meta.pinnedComment, replies: [], visibleReplyCount: 0 }}
        depth={0}
        postType={postType}
        postId={postId}
        currentUserId={currentUserId}
-       isAdmin={adminControls}
+       isAdmin={meta.isAdmin}
        locked={meta.locked}
        canMarkBestAnswer={false}
        onUpvote={handleUpvote}
@@ -570,137 +717,113 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
      </div>
     )}
 
-    {/* Composer */}
-    <div className="border-b border-rule bg-paper-2/60 px-3 py-2.5 sm:px-4 dark:border-ink dark:bg-ink/30">
-     {currentUserId ? (
-      meta.locked ? null : (
-       <div className="space-y-1.5">
-        <Textarea
-         value={content}
-         onChange={(e) => setContent(e.target.value)}
-         placeholder="Join the discussion…"
-         rows={2}
-         maxLength={5000}
-         className="bg-background text-[13px] dark:bg-ink"
-        />
-        {imageUrl && (
-         <div className="relative inline-block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt="" className="h-20 w-20 rounded-md border border-rule object-cover" />
-          <button
-           type="button"
-           onClick={() => setImageUrl(null)}
-           className="absolute -right-1.5 -top-1.5 rounded-full bg-ink p-0.5 text-paper"
-           aria-label="Remove image"
-          >
-           <X className="h-3 w-3" />
-          </button>
-         </div>
-        )}
-        {captcha.required && (
-         <div className="flex items-center gap-2 rounded-md border border-rule bg-paper-2 px-3 py-2">
-          <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-foreground">{captcha.question}</span>
-          <Input
-           value={captchaAnswer}
-           onChange={(e) => setCaptchaAnswer(e.target.value)}
-           className="h-8 w-20"
-           placeholder="Answer"
-          />
-         </div>
-        )}
-        <div className="flex items-center justify-between gap-2">
-         <div className="flex items-center gap-1.5">
-          <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-rule bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-paper-2 dark:border-ink dark:bg-ink dark:text-muted-foreground">
-           <ImageIcon className="h-3 w-3" />
-           {uploading ? "…" : "Image"}
-           <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={uploading || Boolean(imageUrl)}
-            onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0])}
-           />
-          </label>
-          {!content && (
-           <div className="flex overflow-hidden rounded-full border border-rule dark:border-ink">
-            {(["GENERAL", "QUESTION"] as const).map((k) => (
-             <button
-              key={k}
-              type="button"
-              onClick={() => setKind(k)}
-              className={cn(
-               "px-2 py-1 text-[11px] font-semibold",
-               kind === k ? "bg-ink text-paper dark:bg-background dark:text-foreground" : "bg-background text-muted-foreground hover:bg-paper-2 dark:bg-ink dark:text-muted-foreground"
-              )}
-             >
-              {k === "GENERAL" ? "Comment" : "Question"}
-             </button>
-            ))}
-           </div>
-          )}
-         </div>
-         <Button className="h-7 px-3 text-xs" onClick={() => submit()} disabled={!content.trim() || submitting || uploading}>
-          {submitting ? "Posting…" : "Post"}
-         </Button>
-        </div>
-       </div>
-      )
-     ) : (
-      <p className="rounded-md bg-paper-2 px-3 py-2 text-[13px] text-muted-foreground dark:bg-ink dark:text-muted-foreground">
-       <a href="/login" className="font-medium text-brick hover:underline">
-        Sign in
-       </a>{" "}
-       to join the discussion.
-      </p>
-     )}
-    </div>
-
-    {/* Comment list */}
-    <div className="divide-y divide-rule100 px-3 sm:px-4 dark:divide-rule800">
+    {/* ─── Comment list ─── */}
+    <div className="divide-y divide-rule/50 dark:divide-ink/50">
      {loading && comments.length === 0 ? (
-      <div className="space-y-1.5 py-3">
+      <div className="space-y-3 px-4 py-4">
        {[...Array(3)].map((_, i) => (
-        <div key={i} className="h-10 animate-pulse rounded-lg bg-paper-2 dark:bg-ink" />
+        <div key={i} className="flex gap-3">
+         <div className="h-8 w-8 animate-pulse bg-paper-3 dark:bg-paper-3" />
+         <div className="flex-1 space-y-2">
+          <div className="h-3 w-32 animate-pulse bg-paper-3 dark:bg-paper-3" />
+          <div className="h-4 w-full animate-pulse bg-paper-3 dark:bg-paper-3" />
+          <div className="h-4 w-3/4 animate-pulse bg-paper-3 dark:bg-paper-3" />
+         </div>
+        </div>
        ))}
       </div>
      ) : comments.length === 0 ? (
-      <p className="py-6 text-center text-[13px] text-muted-foreground">
-       No comments yet - be the first to share.
-      </p>
+      <div className="flex flex-col items-center gap-3 py-12 text-center">
+       <div className="bg-paper-3 p-4 dark:bg-paper-3">
+        <MessageCircle className="h-8 w-8 text-muted-foreground" />
+       </div>
+       <div>
+        <p className="text-sm font-bold text-foreground">No comments yet</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+         Be the first to share your thoughts!
+        </p>
+       </div>
+      </div>
      ) : (
-      comments.map((comment) => (
-       <CommentItem
-        key={comment.id}
-        comment={comment}
-        depth={0}
-        postType={postType}
-        postId={postId}
-        currentUserId={currentUserId}
-        isAdmin={adminControls}
-        locked={meta.locked}
-        canMarkBestAnswer={false}
-        onUpvote={handleUpvote}
-        onReply={(parentId, text) => submit(parentId, text)}
-        onReport={handleReport}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-        onBestAnswer={handleBestAnswer}
-        onLoadReplies={loadReplies}
-       />
-      ))
+      <div className="px-4">
+       {comments.map((comment) => (
+        <CommentItem
+         key={comment.id}
+         comment={comment}
+         depth={0}
+         postType={postType}
+         postId={postId}
+         currentUserId={currentUserId}
+         isAdmin={meta.isAdmin}
+         locked={meta.locked}
+         canMarkBestAnswer={false}
+         onUpvote={handleUpvote}
+         onReply={(parentId, text) => submit(parentId, text)}
+         onReport={handleReport}
+         onDelete={handleDelete}
+         onEdit={handleEdit}
+         onBestAnswer={handleBestAnswer}
+         onLoadReplies={loadReplies}
+        />
+       ))}
+      </div>
      )}
     </div>
 
     {/* Load more */}
     {nextCursor && (
-     <div className="border-t border-rule px-3 py-2 text-center sm:px-4 dark:border-ink">
-      <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => fetchComments({ cursor: nextCursor, append: true })}>
+     <div className="border-t border-rule px-4 py-3 text-center dark:border-ink">
+      <Button
+       variant="outline"
+       onClick={() => fetchComments({ cursor: nextCursor, append: true })}
+       className="px-6 text-xs font-bold"
+      >
        Load more comments
       </Button>
      </div>
     )}
+
+    {/* Footer */}
+    <div className="flex items-center justify-between border-t border-rule bg-paper-2/30 px-4 py-2 dark:border-ink dark:bg-paper-2/30">
+     <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+      <span className="font-semibold">{meta.total} comment{meta.total !== 1 && "s"}</span>
+      <span>·</span>
+      <span className="flex items-center gap-1">
+       <Zap className="h-3 w-3" />
+       Real-time {connected ? "active" : "paused"}
+      </span>
+     </div>
+     <span className="text-[11px] text-muted-foreground">
+      Sorted by {currentSort.label.toLowerCase()}
+     </span>
+    </div>
    </div>
   </section>
+ )
+}
+
+function UserBubble({ session }: { session: any }) {
+ const user = session?.user
+ if (!user) return null
+ if (user.image) {
+  return (
+   /* eslint-disable-next-line @next/next/no-img-element */
+   <img src={user.image} alt={user.name || ""} className="h-8 w-8 object-cover" />
+  )
+ }
+ const name = user.name || "U"
+ return (
+  <span className="flex h-8 w-8 items-center justify-center bg-ink text-xs font-bold text-paper dark:bg-paper-3 dark:text-foreground">
+   {name.charAt(0).toUpperCase()}
+  </span>
+ )
+}
+
+function PinIcon({ className }: { className?: string }) {
+ return (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+   <line x1="12" y1="17" x2="12" y2="22" />
+   <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+  </svg>
  )
 }
