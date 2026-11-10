@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "Start 2FA setup first" }, { status: 400 })
       }
 
-      if (!verifyTOTP(secret, token)) {
+      if (!(await verifyTOTP(secret, token))) {
         return NextResponse.json({ success: false, error: "Invalid code. Check your authenticator app and try again." }, { status: 400 })
       }
 
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
       }
 
       const secret = user?.["twoFactorSecret"] as string | null
-      if (!secret || !verifyTOTP(secret, token)) {
+      if (!secret || !(await verifyTOTP(secret, token))) {
         return NextResponse.json({ success: false, error: "Invalid code" }, { status: 400 })
       }
 

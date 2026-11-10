@@ -77,7 +77,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const has2FA = user.twoFactorEnabled === true && typeof user.twoFactorSecret === "string"
         if (has2FA) {
           const code = (credentials.totpCode as string | undefined) || ""
-          if (!code || !/^\d{6}$/.test(code) || !verifyTOTP(user.twoFactorSecret as string, code)) {
+          if (!code || !/^\d{6}$/.test(code) || !(await verifyTOTP(user.twoFactorSecret as string, code))) {
             throw new Error("2FA_INVALID")
           }
         }
