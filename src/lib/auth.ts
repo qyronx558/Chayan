@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
+import { verifyTOTP } from "./totp"
 import type { DefaultSession } from "next-auth"
 
 type Role = "USER" | "ADMIN" | "SUPER_ADMIN"
@@ -46,26 +47,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        totpCode: { label: "2FA Code", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
+        let user: Record<string, unknown> | null = null
+        try {
+          user = await (prisma.user.findUnique as (a: unknown) => Promise<Record<string, unknown> | null>)({
+            where: { email: credentials.email as string },
+            select: {
+              id: true, email: true, name: true, password: true,
+              role: true, image: true,
+              twoFactorEnabled: true, twoFactorSecret: true,
+            },
+          })
+        } catch {
+          user = await (prisma.user.findUnique as (a: unknown) => Promise<Record<string, unknown> | null>)({
+            where: { email: credentials.email as string },
+            select: { id: true, email: true, name: true, password: true, role: true, image: true },
+          })
+        }
 
         if (!user || !user.password) return null
 
-        const isValid = await compare(credentials.password as string, user.password)
-
+        const isValid = await compare(credentials.password as string, user.password as string)
         if (!isValid) return null
 
+        const has2FA = user.twoFactorEnabled === true && typeof user.twoFactorSecret === "string"
+        if (has2FA) {
+          const code = (credentials.totpCode as string | undefined) || ""
+          if (!code || !/^\d{6}$/.test(code) || !verifyTOTP(user.twoFactorSecret as string, code)) {
+            throw new Error("2FA_INVALID")
+          }
+        }
+
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role as Role,
-          image: user.image,
+          id: user.id as string,
+          email: user.email as string,
+          name: user.name as string | null,
+          role: (user.role as Role) || "USER",
+          image: user.image as string | null,
         }
       },
     }),
