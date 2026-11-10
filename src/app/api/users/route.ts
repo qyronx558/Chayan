@@ -5,6 +5,7 @@ import { registerSchema } from "@/lib/validations"
 import { profileUpdateSchema } from "@/lib/profile-schemas"
 import { isSchemaMismatchError } from "@/lib/prisma-errors"
 import { hash } from "bcryptjs"
+import { clientIp, ipRules, rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
 
 const db = prisma as unknown as {
   user: {
@@ -27,6 +28,10 @@ export async function POST(request: NextRequest) {
       )
     }
     const { name, email, password } = validation.data
+    const ipLimit = ipRules("register", clientIp(request), 20, 3600)
+    if (ipLimit.length > 0 && !(await rateLimit(ipLimit)).ok) {
+      return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
+    }
     const existing = await db.user.findUnique({ where: { email } })
     if (existing) {
       return NextResponse.json({ success: false, error: "Email already registered" }, { status: 400 })

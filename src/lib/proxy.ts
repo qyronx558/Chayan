@@ -1,27 +1,54 @@
 import { lookup } from "node:dns/promises"
+import { isIP } from "node:net"
 import { normalizeExternalUrl } from "@/lib/apply-room"
 
 const MAX_BYTES = 2 * 1024 * 1024
 const FETCH_TIMEOUT_MS = 10000
 
-function isPrivateIp(ip: string): boolean {
-  const v = ip.trim().toLowerCase()
-  if (v === "localhost" || v === "::1" || v === "::ffff:127.0.0.1") return true
-  if (v.startsWith("127.") || v.startsWith("0.")) return true
-  if (v === "169.254.169.254" || v.startsWith("169.254.")) return true
-  if (v.startsWith("10.") || v.startsWith("192.168.")) return true
-  const m172 = v.match(/^172\.(\d+)\./)
-  if (m172) {
-    const n = Number(m172[1])
-    if (n >= 16 && n <= 31) return true
+function isPrivateIpv4(ip: string): boolean {
+  const parts = ip.split(".").map((n) => Number(n))
+  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true
+  const [a, b] = parts
+  if (a === 0 || a === 10 || a === 127) return true
+  if (a === 100 && b >= 64 && b <= 127) return true // carrier-grade NAT
+  if (a === 169 && b === 254) return true // link-local + cloud metadata
+  if (a === 172 && b >= 16 && b <= 31) return true
+  if (a === 192 && b === 168) return true
+  if (a === 192 && b === 0) return true
+  if (a === 198 && (b === 18 || b === 19)) return true
+  if (a >= 224) return true // multicast + reserved
+  return false
+}
+
+function isPrivateIpv6(ip: string): boolean {
+  const v = ip.toLowerCase().split("%")[0]
+  if (v === "::" || v === "::1") return true
+  // IPv4-mapped / compatible / NAT64 forms carry an IPv4 address inside.
+  const dotted = v.match(/(\d{1,3}(?:\.\d{1,3}){3})$/)
+  if (dotted) return isPrivateIpv4(dotted[1])
+  const mapped = v.match(/^(?:::ffff:|64:ff9b::)([0-9a-f]{1,4}):([0-9a-f]{1,4})$/)
+  if (mapped) {
+    const hi = parseInt(mapped[1], 16)
+    const lo = parseInt(mapped[2], 16)
+    return isPrivateIpv4(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`)
   }
-  if (v.startsWith("fc") || v.startsWith("fd") || v === "::") return true
-  if (v.endsWith(".internal") || v.endsWith(".local") || v.endsWith(".localhost")) return true
+  if (v.startsWith("::ffff:") || v.startsWith("64:ff9b:")) return true
+  if (/^f[cd]/.test(v)) return true // unique local
+  if (/^fe[89ab]/.test(v)) return true // link-local
+  if (v.startsWith("ff")) return true // multicast
+  return false
+}
+
+function isPrivateIp(ip: string): boolean {
+  const v = ip.trim().toLowerCase().replace(/^\[|\]$/g, "")
+  const kind = isIP(v)
+  if (kind === 4) return isPrivateIpv4(v)
+  if (kind === 6) return isPrivateIpv6(v)
   return false
 }
 
 function isBlockedHostname(hostname: string): boolean {
-  const h = hostname.trim().toLowerCase().replace(/\.$/, "")
+  const h = hostname.trim().toLowerCase().replace(/\.$/, "").replace(/^\[|\]$/g, "")
   if (!h) return true
   if (h === "localhost" || h === "metadata.google.internal") return true
   if (h.endsWith(".internal") || h.endsWith(".local") || h.endsWith(".localhost")) return true
@@ -29,20 +56,65 @@ function isBlockedHostname(hostname: string): boolean {
   return false
 }
 
-/** Resolve hostname and refuse private / metadata IPs (SSRF guard). */
+/**
+ * Resolve hostname and refuse private / metadata IPs (SSRF guard).
+ * Fails closed: a host that cannot be resolved is not fetched.
+ */
 export async function assertPublicTarget(url: URL): Promise<void> {
+  if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("Blocked address")
   if (isBlockedHostname(url.hostname)) {
     throw new Error("Blocked address")
   }
+  const host = url.hostname.replace(/^\[|\]$/g, "")
+  if (isIP(host)) return
+  let records: { address: string }[]
   try {
-    const records = await lookup(url.hostname, { all: true })
-    for (const r of records) {
-      if (isPrivateIp(r.address)) throw new Error("Blocked address")
-    }
-  } catch (err) {
-    if ((err as Error)?.message === "Blocked address") throw err
-    // If DNS fails, let the fetch fail naturally rather than blocking preview.
+    records = await lookup(host, { all: true })
+  } catch {
+    throw new Error("Could not resolve the official site")
   }
+  if (records.length === 0) throw new Error("Could not resolve the official site")
+  for (const r of records) {
+    if (isPrivateIp(r.address)) throw new Error("Blocked address")
+  }
+}
+
+const MAX_REDIRECTS = 5
+
+/**
+ * fetch() that validates every hop. Redirects are followed by hand so a public
+ * URL cannot bounce the server to an internal address.
+ */
+export async function safeFetch(
+  url: URL | string,
+  init: Omit<RequestInit, "redirect"> = {}
+): Promise<{ res: Response; finalUrl: string }> {
+  let current = new URL(url.toString())
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (current.username || current.password) throw new Error("Blocked address")
+    await assertPublicTarget(current)
+    const res = await fetch(current.toString(), { ...init, redirect: "manual" })
+    if (res.status >= 300 && res.status < 400 && res.status !== 304) {
+      const location = res.headers.get("location")
+      if (!location) return { res, finalUrl: current.toString() }
+      try {
+        await res.body?.cancel()
+      } catch {
+        // ignore
+      }
+      let next: URL
+      try {
+        next = new URL(location, current)
+      } catch {
+        throw new Error("Official site sent an invalid redirect")
+      }
+      if (next.protocol !== "http:" && next.protocol !== "https:") throw new Error("Blocked address")
+      current = next
+      continue
+    }
+    return { res, finalUrl: current.toString() }
+  }
+  throw new Error("Official site redirected too many times")
 }
 
 export function validateProxyTarget(raw: string | null | undefined): URL {
@@ -83,13 +155,16 @@ function isPdfLink(url: URL): boolean {
 const CJ_FRAME_SCRIPT =
   `<script data-cj-frame="1">(function(){` +
   `function u(a){var r=a.getAttribute('href')||'';if(!r||r.charCodeAt(0)===35)return null;` +
+  // Links already rewritten to our own routes carry the official URL in ?url=.
+  // Unwrap it, otherwise <base> would resolve "/api/proxy" against the official host.
+  `var m=/^[/](?:api[/](?:proxy|doc)|browse)[?]url=([^&]+)/.exec(r);if(m){try{r=decodeURIComponent(m[1]);}catch(e){return null;}}` +
   `if(/^(javascript|data|vbscript|mailto|tel|sms|ftp|file|blob):/i.test(r))return null;` +
   `try{var b=new URL(r,document.baseURI).href;if(!/^https?:/i.test(b))return null;return b;}catch(e){return null;}}` +
   `function h(e){var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;` +
   `var t=u(a);if(!t)return;` +
   `var n=e.ctrlKey||e.metaKey||e.shiftKey||e.button===1||((a.getAttribute('target')||'').toLowerCase()==='_blank');` +
   `e.preventDefault();try{e.stopPropagation();}catch(_){}` +
-  `try{window.parent.postMessage({type:'cj-open-tab',url:t,newTab:!!n},window.location.origin);}catch(_){}}` +
+  `try{window.parent.postMessage({type:'cj-open-tab',url:t,newTab:!!n},'*');}catch(_){}}` +
   `document.addEventListener('click',h,true);document.addEventListener('auxclick',h,true);` +
   `})();</script>`
 
@@ -108,7 +183,7 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
 
   // Base without target: relative resources resolve to the official site.
   // The injected frame script upgrades every click into a ChayanJobs tab.
-  const baseTag = `<base href="${officialUrl}">`
+  const baseTag = `<base href="${officialUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")}">`
   if (/<head[^>]*>/i.test(out)) {
     out = out.replace(/<head[^>]*>/i, (m) => `${m}${baseTag}${CJ_FRAME_SCRIPT}`)
   } else if (/<html[^>]*>/i.test(out)) {
@@ -165,9 +240,8 @@ export async function fetchOfficialHtml(url: URL): Promise<{ html: string; final
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
-    const res = await fetch(url.toString(), {
+    const { res, finalUrl } = await safeFetch(url, {
       method: "GET",
-      redirect: "follow",
       signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; ChayanJobsPreview/1.0; +https://ChayanJobs.in)",
@@ -187,7 +261,7 @@ export async function fetchOfficialHtml(url: URL): Promise<{ html: string; final
     const buf = await res.arrayBuffer()
     if (buf.byteLength > MAX_BYTES) throw new Error("Page too large to preview")
     const html = new TextDecoder("utf-8", { fatal: false }).decode(buf)
-    return { html, finalUrl: res.url || url.toString() }
+    return { html, finalUrl }
   } finally {
     clearTimeout(timeout)
   }

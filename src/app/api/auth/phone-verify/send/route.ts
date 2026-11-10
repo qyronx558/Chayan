@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { sendOTPSMS, formatPhoneNumber, isValidIndianPhoneNumber, isDevSmsMode } from "@/lib/sms"
-import { createHash } from "crypto"
+import { createHash, randomInt } from "crypto"
+import { rateLimit } from "@/lib/rate-limit"
 
 const db = prisma as unknown as Record<string, {
   findUnique: (a: unknown) => Promise<Record<string, unknown> | null>
@@ -40,7 +41,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "Too many codes requested. Try again in 10 minutes." }, { status: 429 })
       }
     } catch { undefined }
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    // Works even when the code table is missing, so SMS cost cannot be run up.
+    if (!(await rateLimit([{ key: `phone-send:user:${session.user.id}`, max: 5, windowSec: 600 }])).ok) {
+      return NextResponse.json({ success: false, error: "Too many codes requested. Try again in 10 minutes." }, { status: 429 })
+    }
+    const otp = randomInt(100000, 1000000).toString()
     const codeHash = createHash("sha256").update(otp).digest("hex")
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
     let storedHashed = false

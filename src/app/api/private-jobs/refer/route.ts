@@ -3,9 +3,14 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { jobReferralSchema } from "@/lib/validations"
 import { normalizeExternalUrl } from "@/lib/apply-room"
+import { isAdmin } from "@/lib/roles"
 
 export async function GET() {
   try {
+    const session = await auth()
+    if (!session?.user || !isAdmin(session.user.role)) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
     const items = await prisma.jobReferral.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "desc" },

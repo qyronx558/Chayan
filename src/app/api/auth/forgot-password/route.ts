@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendPasswordResetEmail } from "@/lib/email"
 import crypto from "crypto"
+import { clientIp, ipRules, rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +10,12 @@ export async function POST(request: NextRequest) {
     if (!email || typeof email !== "string") {
       return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 })
     }
+
+    const limit = await rateLimit([
+      { key: `forgot:email:${email.trim().toLowerCase().slice(0, 200)}`, max: 3, windowSec: 3600 },
+      ...ipRules("forgot", clientIp(request), 20, 3600),
+    ])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
 
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
@@ -20,7 +27,8 @@ export async function POST(request: NextRequest) {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { resetToken: token, resetTokenExpiry: expiry },
+      // Only a hash is stored: a database leak cannot be turned into password resets.
+      data: { resetToken: crypto.createHash("sha256").update(token).digest("hex"), resetTokenExpiry: expiry },
     })
 
     const result = await sendPasswordResetEmail(email, token)
@@ -29,9 +37,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: "If an account exists, a reset email has been sent." })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Something went wrong" },
+      { success: false, error: "Something went wrong" },
       { status: 500 }
     )
   }

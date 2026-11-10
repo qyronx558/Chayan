@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { isSchemaMismatchError } from "@/lib/prisma-errors"
 import { z } from "zod"
 import { compare, hash } from "bcryptjs"
+import { rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
+import { invalidateAuthState } from "@/lib/auth-state"
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -29,6 +31,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
     const { currentPassword, newPassword } = validation.data
+    const limit = await rateLimit([{ key: `password-change:user:${user.id}`, max: 10, windowSec: 900 }])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     const valid = await compare(currentPassword, user.password)
     if (!valid) {
       return NextResponse.json({ success: false, error: "Current password is incorrect" }, { status: 400 })
@@ -47,6 +51,7 @@ export async function PUT(request: NextRequest) {
         data: { password: hashed },
       })
     }
+    invalidateAuthState(user.id)
     try {
       const client = prisma as unknown as {
         session: { deleteMany: (a: unknown) => Promise<unknown> }

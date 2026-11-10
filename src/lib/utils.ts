@@ -143,3 +143,11 @@ export function timeAgo(date: Date | string | null | undefined): string {
   }
   return formatDate(d)
 }
+
+/**
+ * JSON for an inline <script type="application/ld+json">. Escapes "<" so text
+ * such as "</script>" inside a title can never close the tag and inject markup.
+ */
+export function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c")
+}

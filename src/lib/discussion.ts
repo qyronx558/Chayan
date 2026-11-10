@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "crypto"
+import { createHmac, randomBytes, timingSafeEqual } from "crypto"
 
 export const EDIT_WINDOW_MS = 15 * 60 * 1000
 export const RATE_LIMIT_MS = 30 * 1000
@@ -84,8 +84,12 @@ export function moderateContent(content: string): FlagReason[] {
   return reasons
 }
 
+// Without AUTH_SECRET a random per-process key is used, never a value that
+// is readable in the source code.
+const fallbackSecret = randomBytes(32).toString("hex")
+
 function secret(): string {
-  return process.env.AUTH_SECRET || "ChayanJobs-discussion-dev-secret"
+  return process.env.AUTH_SECRET || fallbackSecret
 }
 
 export function issueCaptcha(): { question: string; token: string } {

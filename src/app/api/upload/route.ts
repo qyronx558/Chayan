@@ -26,7 +26,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 })
     }
 
-    const folder = (formData.get("folder") as string) || "ChayanJobs"
+    if (typeof file === "string" || !file.type.startsWith("image/")) {
+      return NextResponse.json({ success: false, error: "Only image files can be uploaded" }, { status: 400 })
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ success: false, error: "Image must be under 10MB" }, { status: 400 })
+    }
+
+    // The folder comes from the browser: keep it to a plain relative path.
+    const requestedFolder = formData.get("folder")
+    const folder =
+      typeof requestedFolder === "string" && /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+){0,3}$/.test(requestedFolder)
+        ? requestedFolder
+        : "ChayanJobs"
     const transform = (formData.get("transform") as string) || ""
     const buffer = Buffer.from(await file.arrayBuffer())
 

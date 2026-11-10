@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { sendWelcomeSMS } from "@/lib/sms"
 import { createHash, timingSafeEqual } from "crypto"
+import { rateLimit } from "@/lib/rate-limit"
 
 const db = prisma as unknown as Record<string, {
   findUnique: (a: unknown) => Promise<Record<string, unknown> | null>
@@ -32,8 +33,12 @@ export async function POST(request: NextRequest) {
     }
     const body = await request.json()
     const { otp } = body as { otp?: string }
-    if (!otp || otp.length !== 6) {
+    if (typeof otp !== "string" || !/^\d{6}$/.test(otp)) {
       return NextResponse.json({ success: false, error: "Enter the 6-digit code" }, { status: 400 })
+    }
+    // Hard cap on guesses per user, whichever storage path holds the code.
+    if (!(await rateLimit([{ key: `phone-verify:user:${session.user.id}`, max: 8, windowSec: 600 }])).ok) {
+      return NextResponse.json({ success: false, error: "Too many attempts. Request a new code." }, { status: 429 })
     }
     const candidate = createHash("sha256").update(otp).digest("hex")
     try {
@@ -41,11 +46,12 @@ export async function POST(request: NextRequest) {
         where: { userId: session.user.id, expiresAt: { gt: new Date() } },
         orderBy: { createdAt: "desc" }, take: 3,
       })
-      const match = rows.find((r) => hashesEqual(String(r["codeHash"] ?? ""), candidate))
+      const live = rows.filter((r) => Number(r["attempts"] ?? 0) < Number(r["maxAttempts"] ?? 5))
+      if (rows.length > 0 && live.length === 0) {
+        return NextResponse.json({ success: false, error: "Too many attempts. Request a new code." }, { status: 429 })
+      }
+      const match = live.find((r) => hashesEqual(String(r["codeHash"] ?? ""), candidate))
       if (match) {
-        if ((match["attempts"] as number) >= (match["maxAttempts"] as number)) {
-          return NextResponse.json({ success: false, error: "Too many attempts. Request a new code." }, { status: 429 })
-        }
         await db.phoneVerificationCode.deleteMany({ where: { userId: session.user.id } }).catch(() => undefined)
         await db.user.update({ where: { id: session.user.id }, data: { phoneVerifiedAt: new Date() } }).catch(() => undefined)
         try {
@@ -65,7 +71,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: "Phone number verified successfully!" })
       }
       if (rows.length > 0) {
-        await db.phoneVerificationCode.updateMany({ where: { userId: session.user.id }, data: {} }).catch(() => undefined)
+        await db.phoneVerificationCode.updateMany({ where: { userId: session.user.id }, data: { attempts: { increment: 1 } } }).catch(() => undefined)
         return NextResponse.json({ success: false, error: "Invalid OTP. Please try again." }, { status: 400 })
       }
     } catch { undefined }
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
       await db.user.update({ where: { id: session.user.id }, data: { resetToken: null, resetTokenExpiry: null } }).catch(() => undefined)
       return NextResponse.json({ success: false, error: "OTP has expired. Please request a new OTP." }, { status: 400 })
     }
-    if (user["resetToken"] !== otp) {
+    if (String(user["resetToken"]) !== otp) {
       return NextResponse.json({ success: false, error: "Invalid OTP. Please try again." }, { status: 400 })
     }
     await db.user.update({ where: { id: session.user.id }, data: { resetToken: null, resetTokenExpiry: null, phoneVerifiedAt: new Date() } }).catch(() => undefined)

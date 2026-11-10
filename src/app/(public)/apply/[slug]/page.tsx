@@ -9,7 +9,7 @@ import { JobViewTracker } from "@/components/jobs/JobViewTracker"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatDate, getBaseUrl } from "@/lib/utils"
+import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { stripHtmlToText } from "@/lib/blog-prose"
 import { getJourney } from "@/lib/doc-journey"
 
@@ -100,8 +100,8 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <BreadcrumbNav
         segments={[

@@ -1,6 +1,6 @@
 import { lookup } from "node:dns/promises"
 import { normalizeExternalUrl } from "@/lib/apply-room"
-import { validateProxyTarget, assertPublicTarget } from "@/lib/proxy"
+import { validateProxyTarget, safeFetch } from "@/lib/proxy"
 
 export const DOC_MAX_BYTES = 25 * 1024 * 1024
 const DOC_TIMEOUT_MS = 15000
@@ -9,13 +9,11 @@ const ALLOWED_PDF_TYPES = ["application/pdf", "application/octet-stream", "binar
 
 /** Fetch an official PDF server-side with SSRF + size + type guards. */
 export async function fetchOfficialPdf(url: URL): Promise<{ buffer: ArrayBuffer; contentType: string; finalUrl: string }> {
-  await assertPublicTarget(url)
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), DOC_TIMEOUT_MS)
   try {
-    const res = await fetch(url.toString(), {
+    const { res, finalUrl } = await safeFetch(url, {
       method: "GET",
-      redirect: "follow",
       signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; ChayanJobsDocViewer/1.0; +https://chayanjobs.com)",
@@ -27,17 +25,18 @@ export async function fetchOfficialPdf(url: URL): Promise<{ buffer: ArrayBuffer;
 
     const contentType = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase()
     const isPdfType = ALLOWED_PDF_TYPES.some((t) => contentType.includes(t))
-    const looksPdf = /\.pdf(\?|#|$)/i.test(res.url || url.toString())
+    const looksPdf = /\.pdf(\?|#|$)/i.test(finalUrl)
     if (!isPdfType && !looksPdf) throw new Error("Document is not a PDF")
 
     const buf = await res.arrayBuffer()
     if (buf.byteLength === 0) throw new Error("Empty document")
     if (buf.byteLength > DOC_MAX_BYTES) throw new Error("Document too large")
     // Magic-byte check: %PDF
-    const head = new TextDecoder("ascii").decode(buf.slice(0, 5))
-    if (head !== "%PDF-" && !isPdfType) throw new Error("Document is not a PDF")
+    // The PDF header may sit after a little leading junk, so scan the first 1KB.
+    const head = new TextDecoder("latin1").decode(buf.slice(0, 1024))
+    if (!head.includes("%PDF-")) throw new Error("Document is not a PDF")
 
-    return { buffer: buf, contentType: "application/pdf", finalUrl: res.url || url.toString() }
+    return { buffer: buf, contentType: "application/pdf", finalUrl }
   } finally {
     clearTimeout(timeout)
   }

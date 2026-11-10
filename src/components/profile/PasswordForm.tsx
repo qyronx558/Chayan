@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { signOut } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -44,10 +45,13 @@ export function PasswordForm({ passwordChangedAt, hasPassword, onChanged }: Pass
         toast(json.error || "Failed to change password", "destructive")
         return
       }
-      toast("Password updated. Other sessions signed out.", "success")
+      toast("Password updated. Please sign in again.", "success")
       reset()
       setOpen(false)
       onChanged()
+      // Every session issued before the change is now invalid, including this
+      // one, so send the user to a clean sign-in instead of a broken page.
+      await signOut({ callbackUrl: "/login" })
     } catch {
       toast("Failed to change password", "destructive")
     } finally {

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
-import { BLOG_PROSE_CLASSES, containsHtml, renderRichHtml } from "@/lib/blog-prose"
+import { BLOG_PROSE_CLASSES, containsHtml } from "@/lib/blog-prose"
+import { renderRichHtml } from "@/lib/rich-html"
 
 interface RichTextViewProps {
  html: string | null | undefined

@@ -90,8 +90,10 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
         return
       }
       const data = json.data as { backupCodes?: string[] }
-      setBackupCodes(data.backupCodes ?? [])
-      setStep("backup")
+      const codes = data.backupCodes ?? []
+      setBackupCodes(codes)
+      if (codes.length > 0) setStep("backup")
+      else closeSetup()
       onChanged(true)
       toast("Two-factor authentication enabled", "success")
     } catch {

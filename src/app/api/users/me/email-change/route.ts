@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { MIGRATION_REQUIRED_MESSAGE, isSchemaMismatchError } from "@/lib/prisma-errors"
 import { randomBytes } from "crypto"
+import { rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
 
 const db = prisma as unknown as {
   user: {
@@ -16,9 +17,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    const limit = await rateLimit([{ key: `email-change:user:${session.user.id}`, max: 5, windowSec: 3600 }])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     const body = await request.json()
     const newEmail = typeof (body as { newEmail?: unknown }).newEmail === "string" ? ((body as { newEmail: string }).newEmail.trim().toLowerCase()) : ""
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+    if (newEmail.length > 254 || /[<>"]/.test(newEmail) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
       return NextResponse.json({ success: false, error: "Enter a valid email address" }, { status: 400 })
     }
     const taken = await db.user.findUnique({ where: { email: newEmail } })
@@ -46,7 +49,8 @@ export async function POST(request: NextRequest) {
         }).catch(() => undefined)
       }
     } catch { undefined }
-    return NextResponse.json({ success: true, data: { pendingEmail: newEmail, token } })
+    // The token proves inbox ownership, so it only ever travels by email.
+    return NextResponse.json({ success: true, data: { pendingEmail: newEmail } })
   } catch (error) {
     if (isSchemaMismatchError(error)) {
       return NextResponse.json({ success: false, error: MIGRATION_REQUIRED_MESSAGE }, { status: 503 })
@@ -62,6 +66,8 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const token = typeof (body as { token?: unknown }).token === "string" ? (body as { token: string }).token : ""
     if (!token) return NextResponse.json({ success: false, error: "Confirmation token is required" }, { status: 400 })
+    const limit = await rateLimit([{ key: `email-confirm:user:${session.user.id}`, max: 10, windowSec: 3600 }])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     const user = await db.user.findUnique({ where: { id: session.user.id } })
     if (!user || user["emailChangeToken"] !== token) {
       return NextResponse.json({ success: false, error: "Invalid or expired confirmation link" }, { status: 400 })

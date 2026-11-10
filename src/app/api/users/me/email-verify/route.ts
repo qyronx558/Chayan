@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { randomBytes } from "crypto"
+import { rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
 
 const db = prisma as unknown as {
   user: {
@@ -17,6 +18,8 @@ export async function POST() {
     const user = await db.user.findUnique({ where: { id: session.user.id } })
     if (!user) return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
     if (user["emailVerified"]) return NextResponse.json({ success: true, data: { already: true } })
+    const limit = await rateLimit([{ key: `email-verify:user:${session.user.id}`, max: 5, windowSec: 3600 }])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     const token = randomBytes(32).toString("hex")
     await db.user.update({
       where: { id: session.user.id },
@@ -36,7 +39,8 @@ export async function POST() {
         }).catch(() => undefined)
       }
     } catch { undefined }
-    return NextResponse.json({ success: true, data: { sent: true, token } })
+    // The token proves inbox ownership, so it only ever travels by email.
+    return NextResponse.json({ success: true, data: { sent: true } })
   } catch (error) {
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to send verification email" }, { status: 500 })
   }
@@ -49,6 +53,8 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const token = typeof (body as { token?: unknown }).token === "string" ? (body as { token: string }).token : ""
     if (!token) return NextResponse.json({ success: false, error: "Token is required" }, { status: 400 })
+    const limit = await rateLimit([{ key: `email-verify-confirm:user:${session.user.id}`, max: 10, windowSec: 3600 }])
+    if (!limit.ok) return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     const user = await db.user.findUnique({ where: { id: session.user.id } })
     if (!user || user["resetToken"] !== `email-${token}`) {
       return NextResponse.json({ success: false, error: "Invalid or expired link" }, { status: 400 })

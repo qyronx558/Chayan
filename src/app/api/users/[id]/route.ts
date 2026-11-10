@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { profileSchema, roleUpdateSchema } from "@/lib/validations"
 import { writeAuditLog } from "@/lib/moderation"
+import { invalidateAuthState } from "@/lib/auth-state"
 
 export async function GET(
   request: NextRequest,
@@ -120,6 +121,7 @@ export async function PUT(
           },
         }),
       ])
+      invalidateAuthState(id)
       return NextResponse.json({ success: true, data: user })
     }
 
@@ -209,6 +211,7 @@ export async function DELETE(
         },
       }),
     ])
+    invalidateAuthState(id)
     return NextResponse.json({ success: true, message: "User deleted" })
   } catch (error) {
     return NextResponse.json(

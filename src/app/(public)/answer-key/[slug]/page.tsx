@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { getBaseUrl } from "@/lib/utils"
+import { getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
@@ -60,7 +60,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
       <BreadcrumbNav
         segments={[
           { label: "Answer Keys", href: "/answer-keys" },

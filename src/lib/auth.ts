@@ -1,13 +1,19 @@
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
 import { verifyTOTP } from "./totp"
+import { clientIp, loginRules, rateLimit } from "./rate-limit"
+import { loadAuthState } from "./auth-state"
 import type { DefaultSession } from "next-auth"
 
 type Role = "USER" | "ADMIN" | "SUPER_ADMIN"
+
+class RateLimitedSignin extends CredentialsSignin {
+  code = "rate_limited"
+}
 
 declare module "next-auth" {
   interface User {
@@ -49,8 +55,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
         totpCode: { label: "2FA Code", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null
+        if (typeof credentials.email !== "string" || typeof credentials.password !== "string") return null
+
+        // Brute-force guard: caps password and 2FA-code guessing per account and per IP.
+        const limit = await rateLimit(loginRules("login", credentials.email, clientIp(request)))
+        if (!limit.ok) throw new RateLimitedSignin()
 
         let user: Record<string, unknown> | null = null
         try {
@@ -106,8 +117,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true
     },
     async jwt({ token, user, account, trigger, session }) {
-      if (trigger === "update" && session) {
-        token = { ...token, ...session }
+      // `session` here is sent by the browser. Copy only harmless display fields;
+      // never let it set id, role or anything else that grants access.
+      if (trigger === "update" && session && typeof session === "object") {
+        const incoming = session as Record<string, unknown>
+        if (typeof incoming.name === "string") token.name = incoming.name.slice(0, 120)
+        if (incoming.image === null) token.image = null
+        else if (typeof incoming.image === "string" && /^https:\/\//i.test(incoming.image)) {
+          token.image = incoming.image.slice(0, 1000)
+        }
+      }
+      if (user) token.authAt = Date.now()
+
+      // Keep long-lived tokens in step with the database. Skipped in the edge
+      // middleware (no database there); API routes and pages run this check.
+      if (!user && typeof token.id === "string" && process.env.NEXT_RUNTIME !== "edge") {
+        const state = await loadAuthState(token.id).catch(() => null)
+        if (state) {
+          token.role = state.role
+          if (
+            state.passwordChangedAt &&
+            typeof token.authAt === "number" &&
+            state.passwordChangedAt > token.authAt + 2000
+          ) {
+            return null
+          }
+        }
       }
       if (user) {
         if (user.id) {

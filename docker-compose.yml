@@ -9,7 +9,9 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/govjobs?schema=public
-      - AUTH_SECRET=${AUTH_SECRET:-your-super-secret-key-change-in-production}
+      # No built-in default: a known secret would let anyone forge login sessions.
+      # Generate one with: openssl rand -hex 32
+      - AUTH_SECRET=${AUTH_SECRET:?Set AUTH_SECRET in your .env file (openssl rand -hex 32)}
       - AUTH_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_NAME=ChayanJobs
@@ -23,7 +25,8 @@ services:
   db:
     image: postgres:16-alpine
     ports:
-      - "5432:5432"
+      # Reachable from this machine only, never from the network.
+      - "127.0.0.1:5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -39,7 +42,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped

@@ -4,7 +4,7 @@ import Image from "next/image"
 import type { Metadata } from "next"
 import { cache } from "react"
 import { prisma } from "@/lib/prisma"
-import { formatCompact, formatDate, getBaseUrl, timeAgo } from "@/lib/utils"
+import { formatCompact, formatDate, getBaseUrl, timeAgo, safeJsonLd } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +16,8 @@ import { ViewTracker } from "@/components/blog/ViewTracker"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { TableOfContents } from "@/components/blog/TableOfContents"
-import { BLOG_PROSE_CLASSES, prepareArticleHtml, getReadingTimeMinutes, extractTakeaways, extractFaq } from "@/lib/blog-prose"
+import { BLOG_PROSE_CLASSES, getReadingTimeMinutes, extractTakeaways, extractFaq } from "@/lib/blog-prose"
+import { prepareArticleHtml } from "@/lib/rich-html"
 import { AuthorCard } from "@/components/blog/AuthorCard"
 import { KeyTakeaways } from "@/components/blog/KeyTakeaways"
 import { FaqBlock } from "@/components/blog/FaqBlock"
@@ -146,9 +147,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         <ReadingProgress />
         <ViewTracker slug={post.slug} />
         <EntityViewTracker entityType="BLOG" entityId={post.id} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-        {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleLd) }} />
+        {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />}
 
         <div className="print:hidden">
           <BreadcrumbNav

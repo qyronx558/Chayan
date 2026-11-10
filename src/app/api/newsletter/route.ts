@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sendNewsletterWelcome } from "@/lib/email"
 import { prisma } from "@/lib/prisma"
+import { clientIp, ipRules, rateLimit, TOO_MANY_ATTEMPTS } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function POST(request: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json({ success: false, error: "Invalid email address" }, { status: 400 })
+    }
+
+    if (email.length > 254) {
+      return NextResponse.json({ success: false, error: "Invalid email address" }, { status: 400 })
+    }
+    const ipLimit = ipRules("newsletter", clientIp(request), 10, 3600)
+    if (ipLimit.length > 0 && !(await rateLimit(ipLimit)).ok) {
+      return NextResponse.json({ success: false, error: TOO_MANY_ATTEMPTS }, { status: 429 })
     }
 
     const existing = await prisma.newsletter.findUnique({ where: { email } })

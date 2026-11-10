@@ -3,7 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { formatCompact, formatDate, getBaseUrl } from "@/lib/utils"
+import { formatCompact, formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { getReadingTimeMinutes } from "@/lib/blog-prose"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Badge } from "@/components/ui/badge"
@@ -49,7 +49,7 @@ export default async function BlogTagPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <BreadcrumbNav
         segments={[

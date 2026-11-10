@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { normalizeExternalUrl, getExternalHostname, headersBlockFraming, headersIndicatePdf } from "@/lib/apply-room"
+import { assertPublicTarget, safeFetch } from "@/lib/proxy"
 
 /**
  * GET /api/apply/check?url=<external-url>
@@ -17,6 +18,18 @@ export async function GET(req: NextRequest) {
 
   const hostname = getExternalHostname(normalized)
 
+  // SSRF guard: never probe internal or metadata addresses.
+  try {
+    const target = new URL(normalized)
+    if (target.username || target.password) throw new Error("Blocked address")
+    await assertPublicTarget(target)
+  } catch (err) {
+    if (err instanceof Error && err.message === "Blocked address") {
+      return NextResponse.json({ ok: false, error: "Invalid URL" }, { status: 400 })
+    }
+    return NextResponse.json({ ok: true, hostname, frameable: null as boolean | null, proxyable: true, reason: "unreachable" })
+  }
+
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 8000)
@@ -25,23 +38,21 @@ export async function GET(req: NextRequest) {
     // gov servers reject HEAD.
     let res: Response | null = null
     try {
-      res = await fetch(normalized, {
+      res = (await safeFetch(normalized, {
         method: "HEAD",
-        redirect: "follow",
         signal: controller.signal,
-      })
+      })).res
     } catch {
       res = null
     }
 
     if (!res || !res.ok) {
       try {
-        res = await fetch(normalized, {
+        res = (await safeFetch(normalized, {
           method: "GET",
-          redirect: "follow",
           headers: { Range: "bytes=0-0" },
           signal: controller.signal,
-        })
+        })).res
       } catch {
         res = null
       }

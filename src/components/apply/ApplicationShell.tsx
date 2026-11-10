@@ -216,7 +216,9 @@ export function ApplicationShell(props: ApplicationShellProps) {
  // are verified so only our own frame can drive navigation.
  useEffect(() => {
   const onFrameMessage = (e: MessageEvent) => {
-   if (e.origin !== window.location.origin) return
+   // Proxied pages are sandboxed, so their origin is opaque ("null"). The
+   // source check below is what proves the message came from our own frame.
+   if (e.origin !== window.location.origin && e.origin !== "null") return
    if (!iframeRef.current || e.source !== iframeRef.current.contentWindow) return
    const data = e.data as { type?: unknown; url?: unknown; newTab?: unknown } | null
    if (!data || data.type !== "cj-open-tab" || typeof data.url !== "string") return

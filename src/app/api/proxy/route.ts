@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import {
   validateProxyTarget,
-  assertPublicTarget,
   fetchOfficialHtml,
   rewriteHtmlForPreview,
 } from "@/lib/proxy"
@@ -23,7 +22,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await assertPublicTarget(target)
     const { html, finalUrl } = await fetchOfficialHtml(target)
     const rewritten = rewriteHtmlForPreview(html, finalUrl)
 
@@ -33,7 +31,12 @@ export async function GET(req: NextRequest) {
         "Content-Type": "text/html; charset=utf-8",
         "Referrer-Policy": "no-referrer",
         "Cache-Control": "private, max-age=120",
-        "Content-Security-Policy": "frame-ancestors 'self'",
+        // The page is third-party HTML served from our domain. The sandbox
+        // (without allow-same-origin) gives it an opaque origin, so its scripts
+        // can never read our cookies or call our APIs as the signed-in user,
+        // whether it is framed or opened directly.
+        "Content-Security-Policy":
+          "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation-by-user-activation; frame-ancestors 'self'",
         "X-Content-Type-Options": "nosniff",
       },
     })

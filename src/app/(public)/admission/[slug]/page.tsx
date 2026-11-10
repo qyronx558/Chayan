@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { formatDate, getBaseUrl } from "@/lib/utils"
+import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
@@ -57,7 +57,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadCrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
       <BreadcrumbNav
         segments={[
           { label: "Admissions", href: "/admissions" },

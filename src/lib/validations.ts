@@ -31,7 +31,7 @@ export const registerSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters").max(200, "Password is too long"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -170,7 +170,13 @@ export const discussionCommentSchema = z.object({
   postId: z.string().min(1, "postId is required"),
   parentId: z.string().nullable().optional(),
   kind: z.enum(["GENERAL", "QUESTION", "ANSWER"]).default("GENERAL"),
-  imageUrl: z.string().url().nullable().optional(),
+  imageUrl: z
+    .string()
+    .url()
+    .max(1000)
+    .refine((v) => /^https:\/\/res\.cloudinary\.com\//i.test(v), "Image must be uploaded through the comment box")
+    .nullable()
+    .optional(),
   captchaToken: z.string().optional(),
   captchaAnswer: z.string().optional(),
   path: z.string().max(500).optional(),

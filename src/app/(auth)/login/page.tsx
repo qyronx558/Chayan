@@ -60,6 +60,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email: data.email, password: data.password }),
       })
       const checkJson = await checkRes.json().catch(() => ({ requires2FA: false }))
+      if (checkRes.status === 429) {
+        toast("Too many attempts. Please wait a few minutes and try again.", "destructive")
+        return
+      }
 
       if ((checkJson as { requires2FA?: boolean }).requires2FA) {
         setSavedCredentials({ email: data.email, password: data.password })
@@ -77,7 +81,12 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        toast("Invalid email or password. Please try again.", "destructive")
+        toast(
+          result.code === "rate_limited"
+            ? "Too many attempts. Please wait a few minutes and try again."
+            : "Invalid email or password. Please try again.",
+          "destructive"
+        )
         return
       }
 
@@ -102,7 +111,12 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        toast("Invalid authenticator code. Please try again.", "destructive")
+        toast(
+          result.code === "rate_limited"
+            ? "Too many attempts. Please wait a few minutes and try again."
+            : "Invalid authenticator code. Please try again.",
+          "destructive"
+        )
         setTotpCode("")
         return
       }

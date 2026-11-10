@@ -57,8 +57,18 @@ function TimeAgo({ date }: { date: string | Date }) {
  return <span>{timeAgo}</span>
 }
 
-function formatMarkdown(text: string) {
+function escapeHtml(text: string) {
  return text
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;")
+}
+
+// Comment text is user input: escape it first, then apply the markdown subset.
+function formatMarkdown(text: string) {
+ return escapeHtml(text ?? "")
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   .replace(/\*(.+?)\*/g, '<em>$1</em>')
   .replace(/~~(.+?)~~/g, '<del>$1</del>')
@@ -122,16 +132,23 @@ function RedditComposer({
   }, 0)
  }
 
+ // Plain data only: the textarea ref is read inside the click handler, never during render.
  const toolbarButtons = [
-  { icon: Bold, action: () => wrapSelection("**", "**"), title: "Bold" },
-  { icon: Italic, action: () => wrapSelection("*", "*"), title: "Italic" },
-  { icon: Strikethrough, action: () => wrapSelection("~~", "~~"), title: "Strikethrough" },
-  { icon: Code, action: () => wrapSelection("`", "`"), title: "Inline code" },
-  { icon: Quote, action: () => insertAtCursor("\n> "), title: "Quote" },
-  { icon: List, action: () => insertAtCursor("\n- "), title: "Bullet list" },
-  { icon: ListOrdered, action: () => insertAtCursor("\n1. "), title: "Numbered list" },
-  { icon: Link2, action: () => wrapSelection("[", "](url)"), title: "Link" },
- ]
+  { icon: Bold, wrap: ["**", "**"], title: "Bold" },
+  { icon: Italic, wrap: ["*", "*"], title: "Italic" },
+  { icon: Strikethrough, wrap: ["~~", "~~"], title: "Strikethrough" },
+  { icon: Code, wrap: ["`", "`"], title: "Inline code" },
+  { icon: Quote, insert: "\n> ", title: "Quote" },
+  { icon: List, insert: "\n- ", title: "Bullet list" },
+  { icon: ListOrdered, insert: "\n1. ", title: "Numbered list" },
+  { icon: Link2, wrap: ["[", "](url)"], title: "Link" },
+ ] as const
+
+ function runToolbarAction(index: number) {
+  const btn = toolbarButtons[index]
+  if ("wrap" in btn) wrapSelection(btn.wrap[0], btn.wrap[1])
+  else insertAtCursor(btn.insert)
+ }
 
  const handleKeyDown = (e: React.KeyboardEvent) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); onSubmit() }
@@ -151,7 +168,7 @@ function RedditComposer({
      <button
       key={i}
       type="button"
-      onClick={btn.action}
+      onClick={() => runToolbarAction(i)}
       title={btn.title}
       className="p-1 text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground"
      >
