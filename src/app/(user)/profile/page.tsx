@@ -5,11 +5,9 @@ import { useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Bell, FileText, ListChecks, Shield, User } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Bell, Database, FileText, ListChecks, Settings, Shield, User } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
 import {
   buildMilestones,
   buildStrengthSteps,
@@ -22,6 +20,8 @@ import {
 import { profileUpdateSchema, type ProfileUpdateInput } from "@/lib/profile-schemas"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { StatsStrip } from "@/components/profile/StatsStrip"
+import { QuickActions } from "@/components/profile/QuickActions"
+import { ProfileSidebar, ProfileMobileTabs, type SidebarItem } from "@/components/profile/ProfileSidebar"
 import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm"
 import { JobPreferences } from "@/components/profile/JobPreferences"
 import { RoleAccessCard } from "@/components/profile/RoleAccessCard"
@@ -36,10 +36,12 @@ import { UnsavedChangesBar } from "@/components/profile/UnsavedChangesBar"
 import { TwoFactorCard } from "@/components/profile/TwoFactorCard"
 import { DeleteAccountCard } from "@/components/profile/DeleteAccountCard"
 import { ActivityList, type ActivityEvent } from "@/components/profile/ActivityList"
+import { DataPrivacyTab } from "@/components/profile/DataPrivacyTab"
+import { SettingsTab } from "@/components/profile/SettingsTab"
 
-type TabKey = "profile" | "resume" | "security" | "notifications" | "activity"
+type TabKey = "profile" | "resume" | "security" | "notifications" | "settings" | "data" | "activity"
 
-const VALID_TABS: TabKey[] = ["profile", "resume", "security", "notifications", "activity"]
+const VALID_TABS: TabKey[] = ["profile", "resume", "security", "notifications", "settings", "data", "activity"]
 
 function ProfilePageInner() {
   const { data: session, status, update } = useSession()
@@ -362,77 +364,75 @@ function ProfilePageInner() {
     toast(`Confirmation link sent to ${next}`, "success")
   }
 
+  function handlePrefsChange(key: string, value: boolean | string) {
+    const next = { ...prefs, [key]: value }
+    setPrefs(next)
+    fetch("/api/user/notifications/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(next),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const json = await res.json().catch(() => ({}))
+          toast((json as { error?: string }).error || "Could not save preference", "destructive")
+        }
+      })
+      .catch(() => toast("Could not save preference", "destructive"))
+  }
+
   if (loading || !profile) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="mx-auto w-full max-w-6xl px-4 py-6">
         <Skeleton className="h-36 rounded-xl" />
-        <Skeleton className="mt-4 h-24 rounded-xl" />
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">
+        <Skeleton className="mt-4 h-16 rounded-xl" />
+        <div className="mt-4 grid gap-4 lg:grid-cols-[220px_1fr]">
+          <Skeleton className="hidden h-64 rounded-xl lg:block" />
           <Skeleton className="h-96 rounded-xl" />
-          <div className="space-y-4">
-            <Skeleton className="h-48 rounded-xl" />
-            <Skeleton className="h-48 rounded-xl" />
-          </div>
         </div>
       </div>
     )
   }
 
-  const tabs: { key: TabKey; label: string; icon: typeof User; dot?: boolean }[] = [
+  const sidebarItems: SidebarItem[] = [
     { key: "profile", label: "Profile", icon: User },
     { key: "resume", label: "Resume", icon: FileText },
     { key: "security", label: "Security", icon: Shield, dot: !twoFactor },
     { key: "notifications", label: "Notifications", icon: Bell },
+    { key: "settings", label: "Settings", icon: Settings },
+    { key: "data", label: "Data & Privacy", icon: Database },
     ...(admin ? [{ key: "activity" as TabKey, label: "Activity", icon: ListChecks }] : []),
   ]
 
-  return (
-    <div className="mx-auto w-full max-w-5xl min-w-0 px-4 py-6 pb-24">
-      <ProfileHeader profile={profile} strengthPct={strength.pct} onAvatarChange={onAvatarChange} />
-      <div className="mt-4">
-        <StatsStrip admin={admin} stats={stats} />
-      </div>
-      <Tabs value={activeTab} onValueChange={(v) => setTab(v as TabKey)} className="mt-4 w-full">
-        <TabsList className="no-scrollbar flex h-auto w-full items-center justify-start gap-1 overflow-x-auto rounded-none border-b border-rule bg-transparent p-0 ">
-          {tabs.map((t) => (
-            <TabsTrigger
-              key={t.key}
-              value={t.key}
-              className={cn(
-                "relative shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule data-[state=active]:border-rule data-[state=active]:bg-transparent data-[state=active]:text-brick data-[state=active]: dark:text-muted-foreground dark:data-[state=active]:text-brick"
-              )}
-            >
-              <span className="flex items-center gap-1.5">
-                <t.icon className="h-4 w-4" aria-hidden="true" />
-                {t.label}
-                {t.dot ? <span className="h-1.5 w-1.5 rounded-full bg-paper-2" aria-label="Action needed" /> : null}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <TabsContent value="profile" className="mt-4">
-          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+  const p = profile!
+
+  function renderContent() {
+    switch (activeTab) {
+      case "profile":
+        return (
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0 space-y-4">
               <PersonalInfoForm
                 form={form}
-                email={profile.email}
-                emailVerified={!!profile.emailVerifiedAt}
-                phoneVerified={!!profile.phoneVerifiedAt}
+                email={p.email}
+                emailVerified={!!p.emailVerifiedAt}
+                phoneVerified={!!p.phoneVerifiedAt}
                 onRequestEmailVerify={handleEmailVerify}
                 onSendPhoneCode={handleSendPhoneCode}
                 onConfirmPhoneCode={handleConfirmPhoneCode}
                 onChangeEmail={handleChangeEmail}
               />
-              {!admin ? <JobPreferences form={form} /> : <RoleAccessCard role={profile.role} sections={profile.editableSections} />}
+              {!admin ? <JobPreferences form={form} /> : <RoleAccessCard role={p.role} sections={p.editableSections} />}
             </div>
             <div className="min-w-0 space-y-4">
               <ProfileStrengthCard pct={strength.pct} done={strength.done} total={strength.total} steps={steps} onJump={onJump} />
-              <AccountDetailsCard accountType={profile.role} signInMethod={profile.signInMethod} emailVerified={!!profile.emailVerifiedAt} memberSince={profile.memberSince} />
+              <AccountDetailsCard accountType={p.role} signInMethod={p.signInMethod} emailVerified={!!p.emailVerifiedAt} memberSince={p.memberSince} />
               {!admin ? <MilestonesCard milestones={milestones} /> : null}
             </div>
           </div>
-        </TabsContent>
-        <TabsContent value="resume" className="mt-4">
+        )
+      case "resume":
+        return (
           <ResumeCard
             resume={resume}
             loading={resumeLoading}
@@ -441,24 +441,62 @@ function ProfilePageInner() {
               fetchMe().catch(() => undefined)
             }}
           />
-        </TabsContent>
-        <TabsContent value="security" className="mt-4">
+        )
+      case "security":
+        return (
           <div className="space-y-4">
             <TwoFactorCard enabled={twoFactor} admin={admin} onChanged={setTwoFactor} />
-            <PasswordForm passwordChangedAt={profile.passwordChangedAt} hasPassword={profile.signInMethod === "Password"} onChanged={() => fetchMe().catch(() => undefined)} />
+            <PasswordForm passwordChangedAt={p.passwordChangedAt} hasPassword={p.signInMethod === "Password"} onChanged={() => fetchMe().catch(() => undefined)} />
             <SessionList sessions={sessions} signIns={signIns} loading={sessionsLoading} onRefresh={fetchSessions} />
             <DeleteAccountCard admin={admin} />
           </div>
-        </TabsContent>
-        <TabsContent value="notifications" className="mt-4">
-          <NotificationMatrix admin={admin} initial={prefs} loading={prefsLoading} />
-        </TabsContent>
-        {admin ? (
-          <TabsContent value="activity" className="mt-4">
-            <ActivityList events={events} loading={eventsLoading} userId={profile.id} />
-          </TabsContent>
-        ) : null}
-      </Tabs>
+        )
+      case "notifications":
+        return <NotificationMatrix admin={admin} initial={prefs} loading={prefsLoading} />
+      case "settings":
+        return (
+          <SettingsTab
+            prefs={prefs}
+            onPrefsChange={handlePrefsChange}
+          />
+        )
+      case "data":
+        return (
+          <DataPrivacyTab
+            profile={p}
+            stats={stats}
+            prefs={prefs}
+            onPrefsChange={handlePrefsChange}
+          />
+        )
+      case "activity":
+        return admin ? <ActivityList events={events} loading={eventsLoading} userId={p.id} /> : null
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 pb-24">
+      <ProfileHeader profile={profile} strengthPct={strength.pct} onAvatarChange={onAvatarChange} />
+
+      <div className="mt-4">
+        <StatsStrip admin={admin} stats={stats} />
+      </div>
+
+      <div className="mt-3">
+        <QuickActions admin={admin} counts={counts} />
+      </div>
+
+      <div className="mt-4">
+        <ProfileMobileTabs items={sidebarItems} active={activeTab} onSelect={(k) => setTab(k as TabKey)} />
+      </div>
+
+      <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
+        <ProfileSidebar items={sidebarItems} active={activeTab} onSelect={(k) => setTab(k as TabKey)} />
+        <div className="min-w-0">{renderContent()}</div>
+      </div>
+
       <UnsavedChangesBar visible={dirty} saving={saving} canSave={canSave} onDiscard={onDiscard} onSave={handleSubmit(onSave)} />
     </div>
   )
@@ -466,7 +504,7 @@ function ProfilePageInner() {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<div className="mx-auto w-full max-w-5xl px-4 py-6"><Skeleton className="h-36 rounded-xl" /></div>}>
+    <Suspense fallback={<div className="mx-auto w-full max-w-6xl px-4 py-6"><Skeleton className="h-36 rounded-xl" /></div>}>
       <ProfilePageInner />
     </Suspense>
   )

@@ -240,7 +240,7 @@ export function SearchClient() {
                 onFocus={() => setFocused(true)}
                 onBlur={() => setTimeout(() => setFocused(false), 150)}
                 onKeyDown={(e) => { if (e.key === "Escape") { setInput(""); update({ q: null }); inputRef.current?.blur() } }}
-                placeholder="Search jobs, results, admit cards — or paste any website link"
+                placeholder="Search jobs, results, admit cards - or paste any website link"
                 aria-label="Search ChayanJobs or open a website"
                 autoComplete="off"
                 spellCheck={false}

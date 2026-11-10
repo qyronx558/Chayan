@@ -28,6 +28,8 @@ interface AvatarUploadProps {
   name: string
   onChange: (url: string | null) => void
   className?: string
+  /** When provided, hides the built-in trigger button and exposes the file input for external triggering */
+  externalInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 const VIEWPORT = 288
@@ -69,8 +71,9 @@ function Slider({ label, icon: Icon, min, max, step, value, display, onChange, d
   )
 }
 
-export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUploadProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export function AvatarUpload({ src, name, onChange, className = "", externalInputRef }: AvatarUploadProps) {
+  const internalRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = externalInputRef ?? internalRef
   const [modalOpen, setModalOpen] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
@@ -280,18 +283,20 @@ export function AvatarUpload({ src, name, onChange, className = "" }: AvatarUplo
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className={cn(
-          "absolute -bottom-1 -right-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-paper-3 text-paper  ring-4 ring-white transition-all hover:scale-110 hover:bg-paper-3 dark:ring-rule950",
-          className
-        )}
-        title="Change profile photo"
-        aria-label="Change profile photo"
-      >
-        <Upload className="h-4 w-4" />
-      </button>
+      {!externalInputRef && (
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className={cn(
+            "absolute -bottom-1 -right-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-paper-3 text-paper ring-4 ring-white transition-all hover:scale-110 hover:bg-paper-3 dark:ring-rule950",
+            className
+          )}
+          title="Change profile photo"
+          aria-label="Change profile photo"
+        >
+          <Upload className="h-4 w-4" />
+        </button>
+      )}
       <input
         ref={fileInputRef}
         type="file"
