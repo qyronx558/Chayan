@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 import { Check, Copy, Download, Loader2, ShieldCheck, ShieldOff } from "lucide-react"
 import { DataCard } from "@/components/admin/dashboard/DataCard"
 import { Button } from "@/components/ui/button"
@@ -27,27 +27,23 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
   const [disableCode, setDisableCode] = useState("")
   const [backupCodes, setBackupCodes] = useState<string[]>([])
   const [secretCopied, setSecretCopied] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
-  const renderQR = useCallback(async (url: string) => {
-    if (!canvasRef.current || !url) return
+  const generateQrImage = useCallback(async (url: string) => {
     try {
-      const QRCode = (await import("qrcode")).default
-      await QRCode.toCanvas(canvasRef.current, url, {
+      const QRCode = await import("qrcode")
+      const toDataURL = QRCode.toDataURL ?? QRCode.default?.toDataURL
+      if (!toDataURL) throw new Error("QR library not available")
+      const dataUrl = await toDataURL(url, {
         width: 200,
         margin: 2,
         color: { dark: "#000000", light: "#ffffff" },
       })
+      setQrDataUrl(dataUrl)
     } catch {
-      toast("Could not render QR code", "destructive")
+      toast("Could not generate QR code", "destructive")
     }
   }, [])
-
-  useEffect(() => {
-    if (step === "qr" && otpauthUrl) {
-      renderQR(otpauthUrl)
-    }
-  }, [step, otpauthUrl, renderQR])
 
   async function startSetup() {
     setBusy(true)
@@ -66,7 +62,9 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
       setOtpauthUrl(data.otpauthUrl)
       setSecret(data.secret)
       setVerifyCode("")
+      setQrDataUrl(null)
       setStep("qr")
+      generateQrImage(data.otpauthUrl)
     } catch {
       toast("Could not start 2FA setup", "destructive")
     } finally {
@@ -171,6 +169,7 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
     setSecret("")
     setVerifyCode("")
     setBackupCodes([])
+    setQrDataUrl(null)
   }
 
   return (
@@ -234,8 +233,14 @@ export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps)
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-4 py-2">
-            <div className="rounded-xl border border-rule bg-white p-3">
-              <canvas ref={canvasRef} />
+            <div className="flex items-center justify-center rounded-xl border border-rule bg-white p-3">
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt="Scan this QR code with your authenticator app" width={200} height={200} />
+              ) : (
+                <div className="flex h-[200px] w-[200px] items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
             </div>
 
             <div className="w-full space-y-2">
