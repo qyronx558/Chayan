@@ -9,6 +9,8 @@ interface ApplicationFallbackProps {
  sourceLabel: string
  headline?: string
  isPdf?: boolean
+ /** The address does not exist any more (typo or retired domain). */
+ notFound?: boolean
  /** Same-origin proxied URL (/api/proxy or /api/doc). Shown as "Preview inside" action. */
  previewUrl?: string | null
  /** Same-origin download URL (/api/doc?download=1). Shown for PDFs. */
@@ -33,6 +35,7 @@ export function ApplicationFallback({
  sourceLabel,
  headline = "Official application website",
  isPdf,
+ notFound,
  previewUrl,
  downloadUrl,
  downloadFilename,
@@ -54,8 +57,11 @@ export function ApplicationFallback({
      {headline}
     </h2>
     <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground dark:text-muted-foreground">
-     You&apos;re still on ChayanJobs. This website doesn&apos;t allow embedded viewing.
-     {isPdf ? " Try the in-app preview or download below." : " Try the in-app preview below."}
+     {notFound
+      ? `${hostname} could not be found. The official address may have changed; you can still try it in a new tab or report the link to us.`
+      : previewUrl && onTryPreview
+      ? `You're still on ChayanJobs. This website doesn't allow embedded viewing.${isPdf ? " Try the in-app preview or download below." : " Try the in-app preview below."}`
+      : `You're still on ChayanJobs. ${hostname} can't be shown inside this page, so it opens in its own tab.`}
     </p>
 
     {/* Primary: stay-inside actions */}
@@ -88,12 +94,17 @@ export function ApplicationFallback({
      target="_blank"
      rel="noopener noreferrer"
      onClick={onOpenOfficial}
-     className="mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-rule text-sm font-medium text-muted-foreground transition hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:border-ink dark:text-muted-foreground dark:hover:bg-ink"
+     className={
+      previewUrl && onTryPreview
+       ? "mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-rule text-sm font-medium text-muted-foreground transition hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:border-ink dark:text-muted-foreground dark:hover:bg-ink"
+       : "mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-foreground text-[15px] font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule focus-visible:ring-offset-2"
+     }
     >
      Continue on official site
      <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
     </a>
 
+    {notFound ? null : (
     <div className="mt-4 space-y-1.5 border-t border-dashed border-rule pt-4 text-xs text-muted-foreground dark:border-ink dark:text-muted-foreground">
      <p className="flex items-center justify-center gap-1.5 font-medium text-foreground dark:text-foreground">
       <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
@@ -106,6 +117,7 @@ export function ApplicationFallback({
      </p>
      <p className="text-muted-foreground">{sourceLabel}</p>
     </div>
+    )}
 
     <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs">
      <button

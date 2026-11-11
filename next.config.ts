@@ -5,6 +5,23 @@ const nextConfig: NextConfig = {
   output: process.env.DOCKER === "true" ? "standalone" : undefined,
   poweredByHeader: false,
   async headers() {
+    // Pages that host the in-app browser. Official application forms framed
+    // there need the camera (live photo), location (exam centre) and payment
+    // sheets, and a frame can only be granted what its host page is allowed.
+    const browserShellPolicy = {
+      key: "Permissions-Policy",
+      value: "camera=*, microphone=(), geolocation=*, payment=*, usb=()",
+    }
+    const browserShellRoutes = [
+      "/browse",
+      "/apply/:slug/start",
+      "/private-jobs/:slug/apply",
+      "/result/:slug/view",
+      "/admit-card/:slug/view",
+      "/answer-key/:slug/view",
+      "/syllabus/:slug/view",
+      "/admission/:slug/view",
+    ]
     return [
       {
         source: "/:path*",
@@ -19,6 +36,8 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         ],
       },
+      // Listed after the site-wide rule so this value wins on these routes.
+      ...browserShellRoutes.map((source) => ({ source, headers: [browserShellPolicy] })),
     ]
   },
   images: {

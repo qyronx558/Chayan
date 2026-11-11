@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Download, ExternalLink, Expand, Lock, Maximize2, Minimize2, RefreshCw, Search, X } from "lucide-react"
+import { ArrowLeft, ArrowRight, Download, ExternalLink, Expand, Lock, Maximize2, Minimize2, RefreshCw, Search, X } from "lucide-react"
 import { looksLikeUrl, normalizeExternalUrl, isSafeExternalUrl } from "@/lib/apply-room"
 import { trackApplyEvent } from "@/lib/apply-analytics"
 import type { ApplyAnalyticsPayload } from "@/components/apply/application-types"
@@ -27,6 +27,11 @@ interface BrowserAddressBarProps {
  downloadFilename?: string
  onDownload?: () => void
  openUrl?: string
+ /** Back / Forward through the pages visited in this tab. */
+ canGoBack?: boolean
+ canGoForward?: boolean
+ onBack?: () => void
+ onForward?: () => void
 }
 
 /**
@@ -52,6 +57,10 @@ export function BrowserAddressBar({
  downloadFilename,
  onDownload,
  openUrl,
+ canGoBack,
+ canGoForward,
+ onBack,
+ onForward,
 }: BrowserAddressBarProps) {
  const router = useRouter()
  const [value, setValue] = useState("")
@@ -98,14 +107,29 @@ export function BrowserAddressBar({
   router.push(`/search?q=${encodeURIComponent(input)}`)
  }
 
+ const navBtn =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule disabled:pointer-events-none disabled:opacity-35"
+
  return (
   <div className="w-full shrink-0 border-b border-rule bg-background px-2 py-1.5 sm:px-3 dark:border-ink dark:bg-paper">
    <div className="flex items-center gap-1.5">
-    {focus && backHref ? (
-     <Link href={backHref} aria-label={`Back to ${backLabel ?? "previous page"}`} title={backLabel ?? "Back"} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground">
+    {/* Chrome order: Back, Forward, Reload, then the address field. */}
+    {canGoBack || !backHref ? (
+     <button type="button" onClick={onBack} disabled={!canGoBack} aria-label="Back" title="Back (Alt+Left)" className={navBtn}>
+      <ArrowLeft className="h-4 w-4" />
+     </button>
+    ) : (
+     // Nothing earlier in this tab: Back returns to the ChayanJobs page the visitor came from.
+     <Link href={backHref} aria-label={`Back to ${backLabel ?? "previous page"}`} title={`Back to ${backLabel ?? "previous page"}`} className={navBtn}>
       <ArrowLeft className="h-4 w-4" />
      </Link>
-    ) : null}
+    )}
+    <button type="button" onClick={onForward} disabled={!canGoForward} aria-label="Forward" title="Forward (Alt+Right)" className={navBtn}>
+     <ArrowRight className="h-4 w-4" />
+    </button>
+    <button type="button" onClick={onReload} aria-label="Reload page" title="Reload" className={navBtn}>
+     <RefreshCw className="h-4 w-4" />
+    </button>
     {focus && title ? (
      <span className="hidden max-w-[22%] shrink-0 truncate text-[13px] font-semibold text-foreground xl:inline" title={title}>{title}</span>
     ) : null}
@@ -147,16 +171,6 @@ export function BrowserAddressBar({
       <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-rule border-t-emerald-600" aria-hidden="true" />
      ) : null}
     </form>
-
-    <button
-     type="button"
-     onClick={onReload}
-     aria-label="Reload page"
-     title="Reload"
-     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-paper-3 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:text-muted-foreground dark:hover:bg-ink dark:hover:text-paper"
-    >
-     <RefreshCw className="h-4 w-4" />
-    </button>
 
     {downloadUrl ? (
      <a href={downloadUrl} download={downloadFilename || "document.pdf"} onClick={onDownload} title="Download PDF" aria-label="Download PDF" className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-foreground px-2.5 text-xs font-semibold text-background transition-colors hover:bg-brick hover:text-brick-ink">

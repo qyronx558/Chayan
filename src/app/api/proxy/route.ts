@@ -3,7 +3,17 @@ import {
   validateProxyTarget,
   fetchOfficialHtml,
   rewriteHtmlForPreview,
+  frameErrorHtml,
+  FRAME_ERROR_HEADERS,
+  NotHtmlError,
 } from "@/lib/proxy"
+import { buildDocProxyUrl } from "@/lib/apply-room"
+
+export const runtime = "nodejs"
+export const maxDuration = 30
+// Most official portals are hosted in India and many refuse or throttle
+// foreign addresses, so fetch them from Mumbai. This route never touches the DB.
+export const preferredRegion = "bom1"
 
 /**
  * GET /api/proxy?url=<official-url>
@@ -12,13 +22,16 @@ import {
  * and sends cross-site links and all forms to the official site in a new tab.
  * Passwords, OTP, eKYC and payments always happen on the official site,
  * never through ChayanJobs.
+ *
+ * Failures answer with a small HTML page (never raw JSON, since this is shown
+ * in a frame) that reports cj-frame-error to the shell.
  */
 export async function GET(req: NextRequest) {
   let target: URL
   try {
     target = validateProxyTarget(req.nextUrl.searchParams.get("url"))
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid URL" }, { status: 400 })
+    return new NextResponse(frameErrorHtml("Invalid URL", null), { status: 400, headers: FRAME_ERROR_HEADERS })
   }
 
   try {
@@ -30,17 +43,23 @@ export async function GET(req: NextRequest) {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Referrer-Policy": "no-referrer",
-        "Cache-Control": "private, max-age=120",
+        // Public official pages fetched without any user credentials: let the
+        // CDN answer repeat opens instantly and refresh in the background.
+        "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
         // The page is third-party HTML served from our domain. The sandbox
         // (without allow-same-origin) gives it an opaque origin, so its scripts
         // can never read our cookies or call our APIs as the signed-in user,
         // whether it is framed or opened directly.
         "Content-Security-Policy":
-          "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation-by-user-activation; frame-ancestors 'self'",
+          "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads allow-top-navigation-by-user-activation; frame-ancestors 'self'",
         "X-Content-Type-Options": "nosniff",
       },
     })
   } catch (err) {
+    // A "page" that is really a PDF (download.php?id=..): hand it to the viewer.
+    if (err instanceof NotHtmlError && err.isPdf) {
+      return NextResponse.redirect(new URL(buildDocProxyUrl(err.finalUrl), req.nextUrl.origin), 307)
+    }
     const message = err instanceof Error ? err.message : "Preview failed"
     const status =
       message === "Blocked address" || message === "Invalid URL"
@@ -50,6 +69,6 @@ export async function GET(req: NextRequest) {
           : message === "Preview supports web pages only"
             ? 415
             : 502
-    return NextResponse.json({ ok: false, error: message }, { status })
+    return new NextResponse(frameErrorHtml(message, target.toString()), { status, headers: FRAME_ERROR_HEADERS })
   }
 }

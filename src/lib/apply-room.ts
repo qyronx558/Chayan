@@ -64,19 +64,27 @@ export function headersBlockFraming(headers: Headers): boolean {
   const xfo = headers.get("x-frame-options")?.toLowerCase() || ""
   if (xfo.includes("deny") || xfo.includes("sameorigin")) return true
 
-  const csp =
-    headers.get("content-security-policy")?.toLowerCase() ||
-    headers.get("content-security-policy-report-only")?.toLowerCase() ||
-    ""
+  // Report-only policies are not enforced, so only the real header counts.
+  const csp = headers.get("content-security-policy")?.toLowerCase() || ""
   if (!csp) return false
-  // Look for frame-ancestors directive
   const match = csp.match(/frame-ancestors([^;]*)/)
   if (!match) return false
-  const value = match[1].trim()
-  // 'none' always blocks; 'self' blocks third-party embedding on ChayanJobs
-  if (value.includes("'none'")) return true
-  if (value === "'self'" || value.startsWith("'self' ")) return true
-  return false
+  // frame-ancestors is an allow-list: unless it admits every site (a bare
+  // "*" or a bare scheme), ChayanJobs is not on it and the frame stays blank.
+  const sources = match[1].trim().split(/\s+/).filter(Boolean)
+  return !sources.some((s) => s === "*" || s === "https:" || s === "http:")
+}
+
+/**
+ * Can a visitor stay signed in to this site while it sits in our frame?
+ * Browsers only send a site's cookies inside another site's frame when the
+ * cookie is marked SameSite=None. Returns false when the site sets session
+ * cookies without it (login, captcha and OTP steps will then fail in a
+ * frame), true when every cookie is frame-safe, null when it sets none.
+ */
+export function cookiesWorkInFrame(setCookies: string[]): boolean | null {
+  if (setCookies.length === 0) return null
+  return setCookies.every((c) => /;\s*samesite\s*=\s*none/i.test(c))
 }
 
 /** True when response headers look like a PDF document. */
