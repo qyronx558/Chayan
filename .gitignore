@@ -73,3 +73,11 @@ lighthouse-perf.json
 .claude/
 skills-lock.json
 session-ses_*.md
+
+# python (uv)
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml

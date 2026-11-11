@@ -60,11 +60,11 @@ export async function POST(request: NextRequest) {
             create: { userId: session.user.id, phoneVerified: true },
             update: { phoneVerified: true },
           })
-        } catch { undefined }
+        } catch { /* ignore */ }
         try {
           const { writeAuditEvent } = await import("@/lib/audit")
           await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: "Phone number verified", source: "API" })
-        } catch { undefined }
+        } catch { /* ignore */ }
         const u = await db.user.findUnique({ where: { id: session.user.id } }).catch(() => null)
         const phone = u?.["phone"] as string | undefined
         if (phone) sendWelcomeSMS(phone).catch(() => undefined)
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         await db.phoneVerificationCode.updateMany({ where: { userId: session.user.id }, data: { attempts: { increment: 1 } } }).catch(() => undefined)
         return NextResponse.json({ success: false, error: "Invalid OTP. Please try again." }, { status: 400 })
       }
-    } catch { undefined }
+    } catch { /* ignore */ }
     const user = await db.user.findUnique({ where: { id: session.user.id } })
     if (!user || !user["resetToken"] || !user["resetTokenExpiry"]) {
       return NextResponse.json({ success: false, error: "No OTP request found. Please request a new OTP." }, { status: 400 })
@@ -93,9 +93,9 @@ export async function POST(request: NextRequest) {
         create: { userId: session.user.id, phoneVerified: true },
         update: { phoneVerified: true },
       })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, message: "Phone number verified successfully!" })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to verify OTP" }, { status: 500 })
   }
 }

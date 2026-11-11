@@ -17,7 +17,7 @@ export function JobFollowBell({ jobId, className = "" }: JobFollowBellProps) {
  const { data: session } = useSession()
  const router = useRouter()
  const [tracked, setTracked] = useState(false)
- const [status, setStatus] = useState<TrackerStatus | null>(null)
+ const [, setStatus] = useState<TrackerStatus | null>(null)
  const [loading, setLoading] = useState(false)
  const [checking, setChecking] = useState(true)
 

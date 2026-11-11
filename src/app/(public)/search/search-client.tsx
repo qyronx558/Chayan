@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   Award, BookOpen, Briefcase, Building2, CalendarClock, Clock, CreditCard, ExternalLink, FileDown,
-  FileText, Globe, GraduationCap, HelpCircle, History, KeyRound, Loader2, MapPin, Newspaper, Search,
+  FileText, Globe, GraduationCap, History, KeyRound, Loader2, MapPin, Newspaper, Search,
   Sparkles, TrendingUp, Wallet, X, Users, Bell, ArrowUpRight, Command,
 } from "lucide-react"
 import { cn } from "@/lib/utils"

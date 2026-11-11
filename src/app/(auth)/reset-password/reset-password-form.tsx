@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { z } from "zod"
 import { Loader2, Lock, CheckCircle2, AlertCircle, ArrowLeft, Shield, Bell, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
-import { AuthLayout, Divider, PasswordInput, StrengthMeter } from "@/components/auth/AuthComponents"
+import { AuthLayout, PasswordInput, StrengthMeter } from "@/components/auth/AuthComponents"
 
 const resetSchema = z
   .object({
@@ -25,7 +25,6 @@ const resetSchema = z
 type ResetInput = z.infer<typeof resetSchema>
 
 export function ResetPasswordForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams?.get("token") || ""
 

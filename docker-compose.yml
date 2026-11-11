@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      # Local copy: reachable from this machine only, never from the network.
+      - "127.0.0.1:3000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/govjobs?schema=public
       # No built-in default: a known secret would let anyone forge login sessions.
@@ -15,6 +16,7 @@ services:
       - AUTH_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
       - NEXT_PUBLIC_APP_NAME=ChayanJobs
+      - NEXT_PUBLIC_APP_ENV=local
     depends_on:
       db:
         condition: service_healthy

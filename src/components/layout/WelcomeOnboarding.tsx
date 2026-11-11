@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ChevronRight, ChevronLeft, Search, CalendarDays, ClipboardList, Bookmark, Bell, Sparkles, ArrowRight } from "lucide-react"
+import { X, ChevronRight, ChevronLeft, Search, CalendarDays, ClipboardList, Bookmark, Bell, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 const STORAGE_KEY = "ChayanJobs_welcomed"
 

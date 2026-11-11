@@ -13,8 +13,9 @@ Fixes #(issue_number)
 - [ ] Documentation update
 
 ## How Has This Been Tested?
+- [ ] `npm run check` passes (lint, types, tests with 35%+ coverage, Python flows)
+- [ ] New or changed logic has tests in `tests/` (same file name as the source file)
 - [ ] `npm run build` passes without errors
-- [ ] `npm run lint` passes without errors
 - [ ] Tested on mobile viewport
 - [ ] Tested on desktop viewport
 

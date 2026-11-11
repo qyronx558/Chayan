@@ -273,7 +273,7 @@ function BannerPicker({
 /* ── Main ProfileHeader ── */
 export function ProfileHeader({ profile, strengthPct, onAvatarChange }: ProfileHeaderProps) {
   const avatarInputRef = useRef<HTMLInputElement>(null)
-  const [busy, setBusy] = useState(false)
+  const [, setBusy] = useState(false)
   const [photoMenuOpen, setPhotoMenuOpen] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [bannerPickerOpen, setBannerPickerOpen] = useState(false)

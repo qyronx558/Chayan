@@ -2,7 +2,7 @@
 
 import { Area, AreaChart, ResponsiveContainer } from "recharts"
 
-export function Sparkline({ data, id }: { data: number[]; id: string }) {
+export function Sparkline({ data, id: _id }: { data: number[]; id: string }) {
   const points = data.map((v, i) => ({ i, v }))
   return (
     <div className="h-9 w-full" aria-hidden="true">

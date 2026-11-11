@@ -138,7 +138,7 @@ export async function PUT(request: NextRequest) {
             where: { userId: session.user.id },
             data: { phoneVerified: false },
           })
-        } catch { undefined }
+        } catch { /* ignore */ }
       }
     }
     const select = { id: true, name: true, email: true, image: true, role: true, phone: true, createdAt: true, updatedAt: true }
@@ -163,7 +163,7 @@ export async function PUT(request: NextRequest) {
         diff: { after: { name: data.name, language: data.language, phoneChanged } },
         source: "API",
       })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: user })
   } catch (error) {
     return NextResponse.json(

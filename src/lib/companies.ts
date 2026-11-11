@@ -32,6 +32,6 @@ export function domainOf(raw?: string | null): string {
     const v = raw.trim().startsWith("http") ? raw.trim() : `https://${raw.trim()}`
     return new URL(v).hostname.replace(/^www\./, "").toLowerCase()
   } catch {
-    return raw.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0].toLowerCase()
+    return raw.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0].toLowerCase()
   }
 }

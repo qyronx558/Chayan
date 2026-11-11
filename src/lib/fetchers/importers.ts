@@ -164,7 +164,7 @@ export async function importAdmitCards(): Promise<FetchResult> {
 
         const desc = parseDescription(text)
         const org = parseOrganization(desc) || title
-        const { category, state } = parseCategoryAndState(title, desc)
+        const { category } = parseCategoryAndState(title, desc)
         const { examDate } = parseImportantDates(extractSectionLines(text, "Important Dates"))
         const links = parseImportantLinks(text)
 
@@ -210,7 +210,7 @@ export async function importResults(): Promise<FetchResult> {
 
         const desc = parseDescription(text)
         const org = parseOrganization(desc) || title
-        const { category, state } = parseCategoryAndState(title, desc)
+        const { category } = parseCategoryAndState(title, desc)
         const { resultDate } = parseImportantDates(extractSectionLines(text, "Important Dates"))
         const links = parseImportantLinks(text)
 
@@ -256,7 +256,7 @@ export async function importAdmissions(): Promise<FetchResult> {
 
         const desc = parseDescription(text)
         const org = parseOrganization(desc) || title
-        const { category, state } = parseCategoryAndState(title, desc)
+        const { category } = parseCategoryAndState(title, desc)
         const { startDate, lastDate } = parseImportantDates(extractSectionLines(text, "Important Dates"))
         const applicationFee = parseApplicationFee(extractSectionLines(text, "Application Fee"))
         const links = parseImportantLinks(text)
@@ -305,7 +305,7 @@ export async function importSyllabus(): Promise<FetchResult> {
 
         const desc = parseDescription(text)
         const org = parseOrganization(desc) || title
-        const { category, state } = parseCategoryAndState(title, desc)
+        const { category } = parseCategoryAndState(title, desc)
         const subjects = parseSubjects(text)
         const links = parseImportantLinks(text)
 

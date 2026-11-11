@@ -146,7 +146,7 @@ function ProfilePageInner() {
       const res = await fetch("/api/user/notifications/preferences")
       const json = await res.json()
       if (res.ok && json.success) setPrefs(json.data as Record<string, boolean | string>)
-    } catch { undefined } finally {
+    } catch { /* ignore */ } finally {
       setPrefsLoading(false)
     }
   }, [])
@@ -156,7 +156,7 @@ function ProfilePageInner() {
       const res = await fetch("/api/users/me/two-factor")
       const json = await res.json()
       if (res.ok && json.success) setTwoFactor((json.data as { enabled?: boolean }).enabled === true)
-    } catch { undefined }
+    } catch { /* ignore */ }
   }, [])
 
   const fetchSessions = useCallback(async () => {
@@ -171,7 +171,7 @@ function ProfilePageInner() {
         setEvents(d?.events ?? [])
         setSignIns(d?.signIns ?? [])
       }
-    } catch { undefined } finally {
+    } catch { /* ignore */ } finally {
       setSessionsLoading(false)
       setEventsLoading(false)
     }

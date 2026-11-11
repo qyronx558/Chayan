@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest) {
         actorId: session.user.id, actorRole: session.user.role ?? "USER",
         summary: "Notification preferences updated", source: "API",
       })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: prefs })
   } catch (error) {
     return NextResponse.json(

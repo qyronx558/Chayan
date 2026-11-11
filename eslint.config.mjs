@@ -14,6 +14,16 @@ const eslintConfig = defineConfig([
       "react-hooks/immutability": "warn",
       "react-hooks/purity": "warn",
       "react-hooks/incompatible-library": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
   globalIgnores([
@@ -22,6 +32,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "coverage/**",
+    ".claude/**",
+    ".venv/**",
   ]),
 ]);
 

@@ -4,11 +4,25 @@
   "private": true,
   "scripts": {
     "predev": "npm run db:generate",
-    "dev": "next dev",
+    "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test:contact": "tsx --test tests/contact.test.ts",
+    "lint": "eslint . --max-warnings=95",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:contact": "vitest run tests/integration/api/contact",
+    "test:e2e:contact": "node tests/e2e/contact-ui.mjs",
+    "test:e2e:scroll-lock": "node tests/e2e/scroll-lock-ui.mjs",
+    "py:lint": "uv run ruff check . && uv run ruff format --check .",
+    "py:fix": "uv run ruff check . --fix && uv run ruff format .",
+    "py:test": "uv run pytest",
+    "fix": "npm run lint:fix && npm run py:fix",
+    "check": "npm run db:generate && npm run lint && npm run typecheck && npm run test:coverage && npm run py:lint && npm run py:test",
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy"
   },
@@ -99,11 +113,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sanitize-html": "^2.16.2",
+    "@vitest/coverage-v8": "^3.2.7",
     "eslint": "^9",
     "eslint-config-next": "^16.4.6",
     "playwright": "^1.62.1",
     "prisma": "^6.6.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

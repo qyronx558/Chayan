@@ -6,7 +6,6 @@ import { DataCard } from "@/components/admin/dashboard/DataCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/toast"
 
@@ -21,7 +20,7 @@ type SetupStep = "idle" | "qr" | "backup" | "disable"
 export function TwoFactorCard({ enabled, admin, onChanged }: TwoFactorCardProps) {
   const [step, setStep] = useState<SetupStep>("idle")
   const [busy, setBusy] = useState(false)
-  const [otpauthUrl, setOtpauthUrl] = useState("")
+  const [, setOtpauthUrl] = useState("")
   const [secret, setSecret] = useState("")
   const [verifyCode, setVerifyCode] = useState("")
   const [disableCode, setDisableCode] = useState("")

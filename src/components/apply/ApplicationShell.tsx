@@ -310,7 +310,6 @@ export function ApplicationShell(props: ApplicationShellProps) {
   setBlocked(true)
   trackApplyEvent("iframe_failed", analyticsBase)
   trackApplyEvent("interstitial_shown", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [analyticsBase])
 
  const runFrameCheck = useCallback(async (url: string) => {
@@ -353,14 +352,12 @@ export function ApplicationShell(props: ApplicationShellProps) {
   failedRef.current = { preview: false, direct: false }
   // A site already known to refuse framing goes straight to the served view.
   viewModeRef.current = hostRefusesFraming(currentUrl) ? "preview" : startMode(currentUrl)
-  /* eslint-disable react-hooks/set-state-in-effect -- tab switch must reset view state */
   setViewMode(viewModeRef.current)
   setIframeLoaded(false)
   setRevealed(false)
   setPreviewFailed(false)
   setBlocked(false)
   setSlowLoad(false)
-  /* eslint-enable react-hooks/set-state-in-effect */
   previewTracked.current = null
   if (currentUrl) void runFrameCheck(currentUrl)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab identity change
@@ -389,7 +386,6 @@ export function ApplicationShell(props: ApplicationShellProps) {
   } else {
    showInterstitial()
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [isPdf, applyMode, showInterstitial, analyticsBase])
 
  // Messages from the ChayanJobs-served frame (script injected by /api/proxy,
@@ -488,7 +484,6 @@ export function ApplicationShell(props: ApplicationShellProps) {
   setIframeLoaded(true)
   setSlowLoad(false)
   trackApplyEvent("iframe_loaded", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [analyticsBase])
 
  const handleIframeError = useCallback(() => {
@@ -513,7 +508,6 @@ export function ApplicationShell(props: ApplicationShellProps) {
  const tryPreview = useCallback(() => {
   retryMode("preview")
   trackApplyEvent("proxy_preview_retry", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [retryMode, analyticsBase])
 
  const toggleCollapse = useCallback(() => {
@@ -527,26 +521,22 @@ export function ApplicationShell(props: ApplicationShellProps) {
    if (next) trackApplyEvent("sidebar_collapsed", analyticsBase)
    return next
   })
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [analyticsBase])
 
  const openInfo = useCallback(() => {
   setDrawerOpen(true)
   trackApplyEvent("job_info_opened", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [analyticsBase])
 
  const reportIssue = useCallback(() => {
   trackApplyEvent("report_issue_clicked", analyticsBase)
   router.push("/contact")
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [router, analyticsBase])
 
  const handleApply = useCallback(() => {
   trackApplyEvent("apply_cta_clicked", analyticsBase)
   trackApplyEvent("official_site_opened", analyticsBase)
   trackApplyEvent("continue_clicked", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [analyticsBase])
 
  const handleDownload = useCallback((e?: { preventDefault(): void }) => {
@@ -572,19 +562,16 @@ export function ApplicationShell(props: ApplicationShellProps) {
  const handleOpenInNewTab = useCallback((url: string) => {
   const t = openTab(url, { switchTo: true })
   if (t) trackApplyEvent("browser_tab_opened", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [openTab, analyticsBase])
 
  const handleCloseTab = useCallback((id: string) => {
   closeTab(id)
   trackApplyEvent("browser_tab_closed", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [closeTab, analyticsBase])
 
  const handleNewTab = useCallback(() => {
   newTab()
   trackApplyEvent("browser_tab_opened", analyticsBase)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable payload per render
  }, [newTab, analyticsBase])
 
  const share = useCallback(async () => {

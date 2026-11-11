@@ -41,7 +41,7 @@ interface ApplicationItem {
 const ORDER: TrackerStatus[] = ["interested", "applied", "admit_card", "exam_done", "result_out"]
 
 export default function ApplicationsPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [items, setItems] = useState<ApplicationItem[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
@@ -49,7 +49,7 @@ export default function ApplicationsPage() {
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  const fetchApplications = useCallback(async (silent = false) => {
+  const fetchApplications = useCallback(async (_silent = false) => {
     try {
       const res = await fetch("/api/applications")
       if (res.ok) {

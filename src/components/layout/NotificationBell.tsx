@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Bell, BellRing, Check, X, Loader2, ExternalLink } from "lucide-react"
+import { Bell, BellRing, Check, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import {

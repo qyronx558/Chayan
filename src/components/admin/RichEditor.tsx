@@ -25,7 +25,7 @@ import {
   List, ListOrdered, ListChecks,
   Quote, Code, Code2, Minus,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Link, Image, Table as TableIcon,
+  Link, Image as ImageIcon, Table as TableIcon,
   Palette, Highlighter, Type, Subscript as SubscriptIcon, Superscript as SuperscriptIcon,
   Undo2, Redo2, Eraser, Maximize2, Minimize2,
   Pilcrow,
@@ -560,7 +560,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
           {uploading ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-rule-2 border-t-transparent" />
           ) : (
-            <Image className="h-4 w-4" />
+            <ImageIcon className="h-4 w-4" />
           )}
         </ToolBtn>
 

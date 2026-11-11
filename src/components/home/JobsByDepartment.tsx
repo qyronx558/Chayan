@@ -27,18 +27,6 @@ interface DepartmentItem {
  slug: string
 }
 
-const STATUS_STYLES: Record<string, string> = {
- ACTIVE: "bg-paper-3 text-foreground",
- EXPIRED: "bg-paper-2 text-brick",
- UPCOMING: "bg-paper-2 text-brick",
-}
-
-const STATUS_LABELS: Record<string, string> = {
- ACTIVE: "Active",
- EXPIRED: "Expired",
- UPCOMING: "Upcoming",
-}
-
 function formatCount(count: number): string {
  if (count >= 1000) return `${(count / 1000).toFixed(0)}K+`
  return count.toString()

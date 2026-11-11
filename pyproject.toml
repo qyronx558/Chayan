@@ -1,0 +1,42 @@
+# Python tooling for the Prefect cron flows in ./prefect, managed with uv.
+#   uv sync                 install dev tools (ruff, pytest)
+#   uv sync --extra flows   also install Prefect to run the flows
+#   uv run ruff check .     lint      (uv run ruff check . --fix to auto-fix)
+#   uv run ruff format .    format
+#   uv run pytest           tests + coverage
+[project]
+name = "chayanjobs-flows"
+version = "0.1.0"
+description = "Prefect schedules for the ChayanJobs worker scripts"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+flows = ["prefect>=3"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+  "ruff>=0.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+include = ["prefect/**/*.py", "tests/python/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+addopts = [
+  "--import-mode=importlib",
+  "--cov=prefect",
+  "--cov-report=term-missing",
+  "--cov-fail-under=35",
+]

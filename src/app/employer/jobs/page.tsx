@@ -38,7 +38,6 @@ export default function EmployerJobsPage() {
   const [loading, setLoading] = useState(true)
 
   const form = useForm<PrivateJobInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(privateJobSchema) as any,
     defaultValues: { title: "", slug: "", companyId: "", companyName: "", type: "FULL_TIME", location: "", salary: "", description: "", applicationUrl: "", status: "ACTIVE" as never },
   })
