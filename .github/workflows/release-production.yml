@@ -13,8 +13,8 @@ name: Release to production
 #   secret   DATABASE_URL   the production database
 # Needs (Settings > Secrets and variables > Actions):
 #   secret   VERCEL_TOKEN
-#   variable VERCEL_ORG_ID, VERCEL_PROJECT_ID
-#   variable PRODUCTION_URL  e.g. https://chayanjobs.in (used for the smoke test)
+#   VERCEL_ORG_ID, VERCEL_PROJECT_ID (as variables or secrets)
+#   PRODUCTION_URL (variable or secret)  e.g. https://chayanjobs.in (used for the smoke test)
 on:
   release:
     types: [published]
@@ -84,11 +84,12 @@ jobs:
       name: Production
       url: ${{ vars.PRODUCTION_URL }}
     env:
-      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID || secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID || secrets.VERCEL_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NEXT_PUBLIC_APP_ENV: production
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL || secrets.PRODUCTION_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -130,10 +131,10 @@ jobs:
           echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Smoke test the live site
-        if: vars.PRODUCTION_URL != ''
+        if: env.PRODUCTION_URL != ''
         run: |
           for i in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${{ vars.PRODUCTION_URL }}")
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$PRODUCTION_URL")
             [ "$code" = "200" ] && { echo "Live site answered 200"; exit 0; }
             echo "Attempt $i: HTTP $code, retrying..."
             sleep 10
