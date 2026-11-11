@@ -1,9 +1,34 @@
 import { lookup } from "node:dns/promises"
 import { isIP } from "node:net"
 import { normalizeExternalUrl } from "@/lib/apply-room"
+import { fetchWithRepairedChain, isIncompleteChainError } from "@/lib/tls-chain"
 
-const MAX_BYTES = 2 * 1024 * 1024
-const FETCH_TIMEOUT_MS = 10000
+const MAX_BYTES = 5 * 1024 * 1024
+const FETCH_TIMEOUT_MS = 12000
+
+/**
+ * Official portals (Akamai / Cloudflare / NIC firewalls) answer 403 to
+ * anything that does not look like a normal browser, so every server-side
+ * fetch of an official page sends ordinary browser headers.
+ */
+export const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
+export function browserHeaders(accept: string): Record<string, string> {
+  return {
+    "User-Agent": BROWSER_USER_AGENT,
+    Accept: accept,
+    "Accept-Language": "en-IN,en;q=0.9,hi;q=0.8",
+    "Upgrade-Insecure-Requests": "1",
+  }
+}
+
+/** Thrown when /api/proxy is asked for a URL that is not a web page. */
+export class NotHtmlError extends Error {
+  constructor(public readonly isPdf: boolean, public readonly finalUrl: string) {
+    super("Preview supports web pages only")
+  }
+}
 
 function isPrivateIpv4(ip: string): boolean {
   const parts = ip.split(".").map((n) => Number(n))
@@ -80,6 +105,20 @@ export async function assertPublicTarget(url: URL): Promise<void> {
 }
 
 const MAX_REDIRECTS = 5
+const TRANSIENT_RETRIES = 2
+
+/** Connection dropped or handshake garbled: worth one more try. */
+function isTransientNetworkError(err: unknown): boolean {
+  const e = err as { code?: unknown; cause?: { code?: unknown } } | null
+  const code = String(e?.cause?.code ?? e?.code ?? "")
+  return (
+    code === "ECONNRESET" ||
+    code === "EPROTO" ||
+    code === "EPIPE" ||
+    code === "UND_ERR_SOCKET" ||
+    code.startsWith("ERR_SSL_")
+  )
+}
 
 /**
  * fetch() that validates every hop. Redirects are followed by hand so a public
@@ -93,7 +132,30 @@ export async function safeFetch(
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     if (current.username || current.password) throw new Error("Blocked address")
     await assertPublicTarget(current)
-    const res = await fetch(current.toString(), { ...init, redirect: "manual" })
+    const hopUrl = current
+    let viaRepair = false
+    const attempt = async (): Promise<Response> => {
+      if (viaRepair) return fetchWithRepairedChain(hopUrl, init, assertPublicTarget)
+      try {
+        return await fetch(hopUrl.toString(), { ...init, redirect: "manual" })
+      } catch (err) {
+        // Site forgot to send its intermediate certificate: fetch the missing
+        // piece like a browser does (the chain is still fully verified).
+        if (hopUrl.protocol !== "https:" || !isIncompleteChainError(err)) throw err
+        viaRepair = true
+        return fetchWithRepairedChain(hopUrl, init, assertPublicTarget)
+      }
+    }
+    // Some portals drop a share of connections mid-handshake; a browser just
+    // reconnects, so do the same (reads only, nothing is sent twice).
+    let res: Response | null = null
+    for (let tries = 0; !res; tries++) {
+      try {
+        res = await attempt()
+      } catch (err) {
+        if (tries >= TRANSIENT_RETRIES || init.signal?.aborted || !isTransientNetworkError(err)) throw err
+      }
+    }
     if (res.status >= 300 && res.status < 400 && res.status !== 304) {
       const location = res.headers.get("location")
       if (!location) return { res, finalUrl: current.toString() }
@@ -154,6 +216,22 @@ function isPdfLink(url: URL): boolean {
  */
 const CJ_FRAME_SCRIPT =
   `<script data-cj-frame="1">(function(){` +
+  // The preview runs in an opaque origin, where touching storage or cookies
+  // throws and takes the whole official page down with it. Give page scripts
+  // harmless in-memory stand-ins instead.
+  `function S(){var d={};return{getItem:function(k){return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null},` +
+  `setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},` +
+  `key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}` +
+  `['localStorage','sessionStorage'].forEach(function(n){try{window[n].length}catch(e){` +
+  `try{Object.defineProperty(window,n,{value:S(),configurable:true})}catch(_){}}});` +
+  `try{document.cookie}catch(e){try{var c='';Object.defineProperty(document,'cookie',{configurable:true,` +
+  `get:function(){return c},set:function(v){c=String(v).split(';')[0]}})}catch(_){}}` +
+  // Tell the shell as soon as there is something to read. Waiting for
+  // DOMContentLoaded (let alone load) can take many seconds on pages that
+  // pull in slow ad or tracking scripts.
+  `var sent=0,n=0;function R(){if(sent)return;sent=1;try{window.parent.postMessage({type:'cj-frame-ready'},'*')}catch(_){}}` +
+  `(function w(){if((document.body&&document.body.childElementCount>2)||n++>100)R();else setTimeout(w,50)})();` +
+  `document.addEventListener('DOMContentLoaded',R);` +
   `function u(a){var r=a.getAttribute('href')||'';if(!r||r.charCodeAt(0)===35)return null;` +
   // Links already rewritten to our own routes carry the official URL in ?url=.
   // Unwrap it, otherwise <base> would resolve "/api/proxy" against the official host.
@@ -236,6 +314,48 @@ export function rewriteHtmlForPreview(html: string, officialUrl: string): string
   return out
 }
 
+/** Read a response body, refusing to buffer more than `max` bytes. */
+async function readCapped(res: Response, max: number, tooLarge: string): Promise<Uint8Array> {
+  const reader = res.body?.getReader()
+  if (!reader) return new Uint8Array(await res.arrayBuffer())
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > max) {
+      await reader.cancel().catch(() => {})
+      throw new Error(tooLarge)
+    }
+    chunks.push(value)
+  }
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const c of chunks) {
+    out.set(c, offset)
+    offset += c.byteLength
+  }
+  return out
+}
+
+/** Decode with the charset the site declares (header first, then <meta>). */
+function decodeHtml(bytes: Uint8Array, contentType: string): string {
+  let label = /charset\s*=\s*["']?([\w-]+)/i.exec(contentType)?.[1]
+  if (!label) {
+    const head = new TextDecoder("latin1").decode(bytes.subarray(0, 2048))
+    label = /<meta[^>]+charset\s*=\s*["']?([\w-]+)/i.exec(head)?.[1]
+  }
+  if (label) {
+    try {
+      return new TextDecoder(label, { fatal: false }).decode(bytes)
+    } catch {
+      // Unknown label: fall back to UTF-8.
+    }
+  }
+  return new TextDecoder("utf-8", { fatal: false }).decode(bytes)
+}
+
 export async function fetchOfficialHtml(url: URL): Promise<{ html: string; finalUrl: string }> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
@@ -243,26 +363,67 @@ export async function fetchOfficialHtml(url: URL): Promise<{ html: string; final
     const { res, finalUrl } = await safeFetch(url, {
       method: "GET",
       signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ChayanJobsPreview/1.0; +https://ChayanJobs.in)",
-        Accept: "text/html,application/xhtml+xml",
-        "Accept-Language": "en-IN,en;q=0.9,hi;q=0.8",
-        Range: "bytes=0-2097151",
-      },
+      headers: browserHeaders("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
     })
 
-    if (!res.ok) throw new Error(`Official site responded ${res.status}`)
-
-    const contentType = res.headers.get("content-type") || ""
-    if (!/text\/html|application\/xhtml/i.test(contentType)) {
-      throw new Error("Preview supports web pages only")
+    if (!res.ok) {
+      await res.body?.cancel().catch(() => {})
+      throw new Error(`Official site responded ${res.status}`)
     }
 
-    const buf = await res.arrayBuffer()
-    if (buf.byteLength > MAX_BYTES) throw new Error("Page too large to preview")
-    const html = new TextDecoder("utf-8", { fatal: false }).decode(buf)
-    return { html, finalUrl }
+    const contentType = res.headers.get("content-type") || ""
+    // Some servers send no Content-Type at all for HTML; only refuse when the
+    // header clearly names something else.
+    if (contentType && !/text\/html|application\/xhtml|text\/plain/i.test(contentType)) {
+      await res.body?.cancel().catch(() => {})
+      const isPdf = /application\/pdf/i.test(contentType) || /\.pdf$/i.test(new URL(finalUrl).pathname)
+      throw new NotHtmlError(isPdf, finalUrl)
+    }
+
+    const bytes = await readCapped(res, MAX_BYTES, "Page too large to preview")
+    return { html: decodeHtml(bytes, contentType), finalUrl }
+  } catch (err) {
+    if (controller.signal.aborted) throw new Error("Official site took too long to respond")
+    throw err
   } finally {
     clearTimeout(timeout)
   }
 }
+
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+}
+
+/** Headers for the small error page below (sandboxed, never cached). */
+export const FRAME_ERROR_HEADERS: Record<string, string> = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "no-store",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy":
+    "sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; frame-ancestors 'self'",
+  "X-Content-Type-Options": "nosniff",
+}
+
+/**
+ * Error page for /api/proxy and /api/doc. Inside the in-app browser it tells
+ * the shell (cj-frame-error) so the shell can switch to another way of opening
+ * the link; opened on its own it is still a readable page, never raw JSON.
+ */
+export function frameErrorHtml(message: string, officialUrl: string | null): string {
+  const payload = JSON.stringify({ type: "cj-frame-error", message }).replace(/</g, "\\u003c")
+  const link = officialUrl
+    ? `<a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">Open the official site</a>`
+    : ""
+  return (
+    `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width,initial-scale=1"><title>Could not open this page</title>` +
+    `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;` +
+    `font:15px/1.5 system-ui,sans-serif;color:#222;background:#fafafa}main{max-width:26rem;padding:2rem;text-align:center}` +
+    `a{display:inline-block;margin-top:1rem;padding:.6rem 1.1rem;border-radius:.6rem;background:#111;color:#fff;text-decoration:none}` +
+    `small{display:block;margin-top:.5rem;color:#777}</style></head><body><main>` +
+    `<strong>This page could not be opened inside ChayanJobs.</strong>` +
+    `<small>${escapeHtml(message)}</small>${link}</main>` +
+    `<script>try{window.parent.postMessage(${payload},'*')}catch(e){}</script></body></html>`
+  )
+}
+
