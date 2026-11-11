@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { DOCS_UPDATED, allDocs } from "@/components/docs/registry"
 
 export default async function sitemap() {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "")
@@ -48,6 +49,13 @@ export default async function sitemap() {
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.5 },
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.5 },
     { url: `${baseUrl}/careers`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.7 },
+    { url: `${baseUrl}/docs`, lastModified: new Date(DOCS_UPDATED), changeFrequency: "monthly" as const, priority: 0.6 },
+    ...allDocs().map((d) => ({
+      url: `${baseUrl}/docs/${d.meta.slug}`,
+      lastModified: new Date(DOCS_UPDATED),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
   ]
 
   const jobPages = jobs.map((job) => ({

@@ -20,6 +20,7 @@ import {
  Newspaper,
  CalendarDays,
  Wrench,
+ LifeBuoy,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -127,7 +128,7 @@ export function Header() {
 
  const jobsActive = pathname.startsWith("/jobs") || pathname.startsWith("/private-jobs")
  const toolsActive = pathname.startsWith("/tools")
- const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar") || pathname.startsWith("/careers")
+ const moreActive = pathname.startsWith("/syllabus") || pathname.startsWith("/admissions") || pathname.startsWith("/notifications") || pathname.startsWith("/blog") || pathname.startsWith("/exam-calendar") || pathname.startsWith("/careers") || pathname.startsWith("/docs")
 
  return (
   <>
@@ -172,6 +173,7 @@ export function Header() {
         <DropdownItem href="/blog" icon={Newspaper} label="Blog" />
         <DropdownItem href="/notifications" icon={Bell} label="Notifications" />
         <DropdownItem href="/careers" icon={Briefcase} label="Careers" />
+        <DropdownItem href="/docs" icon={LifeBuoy} label="Help Centre" />
        </NavDropdown>
       </nav>
 

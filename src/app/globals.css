@@ -1190,3 +1190,91 @@ main section div[class*="grid"] {
     break-inside: avoid;
   }
 }
+
+/* ── Help Centre (/docs) article typography. In the components layer so utility classes still win. ── */
+@layer components {
+  .docs-section + .docs-section {
+    margin-top: 3.25rem;
+  }
+  .docs-body > * + * {
+    margin-top: 1rem;
+  }
+  .docs-body p,
+  .docs-body li {
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: var(--color-ink-2);
+  }
+  .docs-body strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .docs-body ul:not([class]),
+  .docs-body ol:not([class]) {
+    padding-left: 1.4rem;
+  }
+  .docs-body ul:not([class]) {
+    list-style: square;
+  }
+  .docs-body ol:not([class]) {
+    list-style: decimal;
+  }
+  .docs-body li + li {
+    margin-top: 0.4rem;
+  }
+  .docs-body li::marker {
+    color: var(--color-muted-ink);
+  }
+  .docs-body a:not([class]),
+  .docs-callout a:not([class]) {
+    color: var(--color-brick);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+  .docs-body a:not([class]):hover,
+  .docs-callout a:not([class]):hover {
+    color: var(--color-ink);
+  }
+  .docs-callout > * + * {
+    margin-top: 0.5rem;
+  }
+  .docs-steps {
+    counter-reset: docs-step;
+    list-style: none;
+    padding: 0;
+  }
+  .docs-step {
+    counter-increment: docs-step;
+  }
+  .docs-step::before {
+    content: counter(docs-step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-rule-2);
+    background: var(--color-paper-2);
+    font-family: var(--font-outlier);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+  }
+  .docs-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: calc(1rem - 0.5px);
+    top: 2.25rem;
+    bottom: -1rem;
+    border-left: 1px dashed var(--color-rule);
+  }
+}
+@media print {
+  .docs-chrome {
+    display: none !important;
+  }
+}

@@ -25,6 +25,7 @@ import {
  Menu,
  X,
  Wrench,
+ LifeBuoy,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -48,6 +49,7 @@ const navIconMap: Record<string, React.ElementType> = {
  "Exam Calendar": CalendarDays,
  Notifications: Bell,
  Careers: Briefcase,
+ "Help Centre": LifeBuoy,
 }
 
 // "Gov Jobs" uses Jobs' href (/jobs) - not a separate mainNav entry

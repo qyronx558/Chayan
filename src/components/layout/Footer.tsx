@@ -15,6 +15,7 @@ const importantLinks = [
  { label: "Copyright Policy", href: "/copyright" },
  { label: "DMCA", href: "/dmca" },
  { label: "Blog", href: "/blog" },
+ { label: "Help Centre", href: "/docs" },
  { label: "Contact Us", href: "/contact" },
  { label: "About Us", href: "/about" },
  { label: "Sitemap", href: "/sitemap" },
