@@ -114,15 +114,55 @@ jobs:
       - name: Pytest (min 35% coverage)
         run: uv run pytest
 
+  migrations:
+    name: Database migrations build the schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply every migration to an empty database
+        run: npx prisma migrate deploy
+
+      - name: Migrations must match prisma/schema.prisma
+        run: |
+          if ! npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code > /dev/null; then
+            echo "::error::schema.prisma has changes with no migration. Run 'npx prisma migrate dev --name <change>' and commit the new folder in prisma/migrations."
+            npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script
+            exit 1
+          fi
+
   ci-passed:
     name: CI passed
     if: always()
-    needs: [lint, test, python]
+    needs: [lint, test, python, migrations]
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to succeed
         run: |
-          echo "lint=${{ needs.lint.result }} test=${{ needs.test.result }} python=${{ needs.python.result }}"
+          echo "lint=${{ needs.lint.result }} test=${{ needs.test.result }} python=${{ needs.python.result }} migrations=${{ needs.migrations.result }}"
           test "${{ needs.lint.result }}" = success
           test "${{ needs.test.result }}" = success
           test "${{ needs.python.result }}" = success
+          test "${{ needs.migrations.result }}" = success
