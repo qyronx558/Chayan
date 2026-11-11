@@ -11,7 +11,7 @@ async function audit(actorId: string, role: string | undefined, summary: string)
   try {
     const { writeAuditEvent } = await import("@/lib/audit")
     await writeAuditEvent({ action: "UPDATE", entityType: "Resume", entityId: actorId, actorId, actorRole: role ?? "USER", summary, source: "API" })
-  } catch { undefined }
+  } catch { /* ignore */ }
 }
 
 export async function POST(request: NextRequest) {

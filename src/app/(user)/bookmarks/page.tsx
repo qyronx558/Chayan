@@ -5,10 +5,10 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Bookmark, X, Calendar, MapPin, Loader2, ExternalLink } from "lucide-react"
+import { Bookmark, X, Calendar, MapPin, Loader2 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -71,7 +71,7 @@ interface BookmarkItem {
 }
 
 export default function BookmarksPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([])
   const [isLoading, setIsLoading] = useState(true)

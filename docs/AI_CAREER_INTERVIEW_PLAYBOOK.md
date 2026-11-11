@@ -154,7 +154,7 @@ The script uses Node built-ins and imports the actual matching functions. It wri
 | API route files | 146 | Complete file list in evidence JSON; one file can contain multiple HTTP handlers |
 | Explicit `@@index` declarations | 193 | Schema inventory; not proof that indexes exist in production or improve a particular query |
 | Committed migration SQL files | 9 | Migration file list; not proof they were deployed |
-| Contact test declarations | 14 | [Test file](../tests/contact.test.ts); these tests were counted, not run in this checkout |
+| Contact test declarations | 14 | [Test file](../tests/integration/api/contact/route.test.ts); these tests were counted, not run in this checkout |
 | Resume input formats | 2 | PDF and DOCX in [upload route](../src/app/api/user/resume/route.ts) |
 | Resume upload size limit | 5 MiB | `5 * 1024 * 1024` bytes in upload route; MIME checking alone is not comprehensive file validation |
 | Recommendation candidate window | Up to 300 | Latest ACTIVE private jobs in [recommendation route](../src/app/api/private-jobs/recommendations/route.ts); not 300 requests/sec |

@@ -7,7 +7,6 @@ import { prisma } from "./prisma"
 import { verifyTOTP } from "./totp"
 import { clientIp, loginRules, rateLimit } from "./rate-limit"
 import { loadAuthState } from "./auth-state"
-import type { DefaultSession } from "next-auth"
 
 type Role = "USER" | "ADMIN" | "SUPER_ADMIN"
 

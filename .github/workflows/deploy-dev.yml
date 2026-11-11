@@ -1,0 +1,99 @@
+name: Deploy to dev
+
+# Every merge to main lands here first - never on the public site.
+# Runs only after the CI workflow passed for that exact commit.
+#
+# Needs (Settings > Environments > "dev"):
+#   secret   DATABASE_URL   the DEV database (never the production one)
+# Needs (Settings > Secrets and variables > Actions):
+#   secret   VERCEL_TOKEN
+#   variable VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   variable DEV_DOMAIN     optional, e.g. dev.chayanjobs.in
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One dev deploy at a time; a newer merge waits for the running one.
+concurrency:
+  group: dev-database-migration
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main to dev
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: dev
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXT_PUBLIC_APP_ENV: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The commit CI just tested (or the tip of main for a manual run).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Check settings
+        run: |
+          missing=""
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID DATABASE_URL; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing for the dev environment:$missing. See docs/environments.md."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Apply database migrations (dev database)
+        run: npx prisma migrate deploy
+
+      - name: Build for dev
+        run: |
+          vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          vercel build --token="$VERCEL_TOKEN"
+
+      - name: Deploy to dev
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")
+          if [ -n "${{ vars.DEV_DOMAIN }}" ]; then
+            vercel alias set "$url" "${{ vars.DEV_DOMAIN }}" --token="$VERCEL_TOKEN"
+            url="https://${{ vars.DEV_DOMAIN }}"
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "### Deployed to dev: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Make sure the public cannot open dev
+        run: |
+          # Vercel Deployment Protection answers 401/403 (or a login redirect)
+          # to anyone who is not signed in to the team. A 200 means dev is public.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${{ steps.deploy.outputs.url }}")
+          echo "Unauthenticated request returned HTTP $code"
+          if [ "$code" = "200" ]; then
+            echo "::error::The dev site is open to the public. Turn on Vercel Deployment Protection (Project > Settings > Deployment Protection > Vercel Authentication: Standard Protection)."
+            exit 1
+          fi

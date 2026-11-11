@@ -3,21 +3,28 @@ name: database-migrate
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: "Which database to migrate"
+        required: true
+        default: dev
+        type: choice
+        options: [dev, production]
       baseline_existing_schema:
         description: "Mark the current baseline as applied (only for an existing populated database)"
         required: true
         default: false
         type: boolean
 
-# A database migration must have exactly one writer. Builds never run it.
+# A database migration must have exactly one writer.
+# Shared with deploy-dev / release-production so only one job writes at a time.
 concurrency:
-  group: production-database-migration
+  group: ${{ inputs.target }}-database-migration
   cancel-in-progress: false
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
-    environment: Production
+    environment: ${{ inputs.target == 'production' && 'Production' || 'dev' }}
     steps:
       - uses: actions/checkout@v4
 

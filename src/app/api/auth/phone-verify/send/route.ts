@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       if (recent >= 3) {
         return NextResponse.json({ success: false, error: "Too many codes requested. Try again in 10 minutes." }, { status: 429 })
       }
-    } catch { undefined }
+    } catch { /* ignore */ }
     // Works even when the code table is missing, so SMS cost cannot be run up.
     if (!(await rateLimit([{ key: `phone-send:user:${session.user.id}`, max: 5, windowSec: 600 }])).ok) {
       return NextResponse.json({ success: false, error: "Too many codes requested. Try again in 10 minutes." }, { status: 429 })
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: `OTP sent to ${formattedPhone}`, devCode: otp })
     }
     return NextResponse.json({ success: true, message: `OTP sent to ${formattedPhone}` })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to send OTP" }, { status: 500 })
   }
 }

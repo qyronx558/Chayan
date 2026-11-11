@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Sparkles, Briefcase, TrendingUp, Target, RefreshCw, FileUp } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Sparkles, TrendingUp, Target, RefreshCw, FileUp } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -22,7 +22,7 @@ export function JobRecommendations() {
  const [recs, setRecs] = useState<{ topMatches: RecommendedJob[]; otherJobs: RecommendedJob[]; matchCount: number } | null>(null)
  const [loading, setLoading] = useState(true)
  const [hasResume, setHasResume] = useState(false)
- const [message, setMessage] = useState("")
+ const [, setMessage] = useState("")
  const [showChangeResume, setShowChangeResume] = useState(false)
 
  const fetchRecs = async () => {
@@ -178,7 +178,7 @@ export function JobRecommendations() {
       Show other {recs.otherJobs.length} available jobs
      </summary>
      <div className="mt-4 grid gap-4 md:grid-cols-2">
-      {recs.otherJobs.slice(0, 4).map((job, i) => (
+      {recs.otherJobs.slice(0, 4).map((job) => (
        <Link key={job.id} href={`/private-jobs/${job.slug}`}>
         <Card className="group h-full cursor-pointer border-rule">
          <CardContent className="p-4">

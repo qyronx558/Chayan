@@ -1,6 +1,5 @@
 import { PrismaClient, Role, JobType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import slugify from 'slugify';
 
 const prisma = new PrismaClient();
 
@@ -99,7 +98,6 @@ async function main() {
   if ((await prisma.job.count()) === 0) {
     const cat = Object.fromEntries((await prisma.category.findMany()).map(c => [c.name, c.id]));
     const st = Object.fromEntries((await prisma.state.findMany()).map(s => [s.name, s.id]));
-    const dep = Object.fromEntries((await prisma.department.findMany()).map(d => [d.name.replace(/^(Staff Selection Commission|Union Public|Railway Recruitment|Institute of Banking|Reserve Bank of India|Securities and Exchange Board of India|NABARD|Food Corporation of India|Defence Research|Indian Space Research|All India Institute of Medical Sciences|Bharat Sanchar|Oil and Natural Gas|National Thermal Power|Steel Authority of India|Hindustan Aeronautics|Bharat Heavy|Central Board of Secondary Education).*$/, '$1'), d.id]));
 
     const deptMap: Record<string, string> = {};
     const allDepts = await prisma.department.findMany();
@@ -293,7 +291,6 @@ async function main() {
     console.log('  companies seeded');
 
     const comp = Object.fromEntries((await prisma.company.findMany()).map(c => [c.name, c.id]));
-    const now = new Date();
 
     await prisma.privateJob.createMany({
       data: [

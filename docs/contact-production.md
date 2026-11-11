@@ -144,6 +144,6 @@ inbox and the sender, then remove the test ticket under that policy.
 Run `npm run test:contact`, `npx tsc --noEmit`, and `npm run build` before release.
 
 For browser checks, start the built app with `npx next start -H 127.0.0.1 -p 3107`
-and run `node tests/contact-ui.mjs` (requires Playwright Chromium). The script
+and run `node tests/e2e/contact-ui.mjs` (requires Playwright Chromium). The script
 intercepts submissions and blocks external requests, so it sends no real mail.
 Set `CONTACT_TEST_ORIGIN` to override the default local address.

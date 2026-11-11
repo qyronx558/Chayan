@@ -27,7 +27,7 @@ export async function importByType(type: string): Promise<FetchResult> {
 
 export async function importAllTypes(): Promise<FetchResult[]> {
   const results: FetchResult[] = []
-  for (const [type, importer] of Object.entries(importers)) {
+  for (const importer of Object.values(importers)) {
     results.push(await importer())
   }
   return results

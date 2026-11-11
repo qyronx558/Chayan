@@ -186,7 +186,7 @@ function act(
   return href ? [{ kind, label, href, primary }] : []
 }
 
-type Row = Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+type Row = Record<string, any>  
 
 function tokenOr(q: ParsedQuery, fields: Row[]) {
   // Candidate retrieval: any alternative of any token in any field.

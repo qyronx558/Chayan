@@ -59,7 +59,7 @@ export async function PUT(request: NextRequest) {
       }
       await client.session.deleteMany({ where: { userId: user.id } }).catch(() => undefined)
       await client.userSession.deleteMany({ where: { userId: user.id } }).catch(() => undefined)
-    } catch { undefined }
+    } catch { /* ignore */ }
     try {
       const { writeAuditEvent } = await import("@/lib/audit")
       await writeAuditEvent({
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
         actorId: user.id, actorRole: session.user.role ?? "USER",
         summary: "Password changed, other sessions signed out", source: "API",
       })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

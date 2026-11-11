@@ -15,6 +15,8 @@ import { CookieConsent } from "@/components/layout/CookieConsent"
 import { GoogleAnalytics } from "@/components/layout/GoogleAnalytics"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
 import { siteConfig } from "@/lib/constants"
+import { EnvironmentBanner } from "@/components/layout/EnvironmentBanner"
+import { isProduction } from "@/lib/app-env"
 
 const zilla = Zilla_Slab({
   subsets: ["latin"],
@@ -46,6 +48,8 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   keywords: ["government jobs", "sarkari jobs", "govt jobs", "jobs in india", "sarkari result", "upcoming jobs", "sarkari naukri", "govt job alert"],
   authors: [{ name: siteConfig.name }],
+  // Local and dev copies must never show up in search results.
+  ...(isProduction() ? {} : { robots: { index: false, follow: false } }),
   metadataBase: new URL(siteConfig.url),
   openGraph: {
     type: "website",
@@ -135,6 +139,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
+        <EnvironmentBanner />
         <Providers>
           <ConditionalChrome header={<Header />} footer={<Footer />}>
             {children}
@@ -150,10 +155,13 @@ export default function RootLayout({
           <HideOnAdmin>
             <CookieConsent />
           </HideOnAdmin>
-          <Suspense fallback={null}>
-            <GoogleAnalytics />
-            <AdSenseScript />
-          </Suspense>
+          {/* Analytics and ads only on the live site, so test traffic never mixes in. */}
+          {isProduction() && (
+            <Suspense fallback={null}>
+              <GoogleAnalytics />
+              <AdSenseScript />
+            </Suspense>
+          )}
         </Providers>
       </body>
     </html>

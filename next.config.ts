@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { isProduction } from "./src/lib/app-env";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
@@ -38,6 +39,8 @@ const nextConfig: NextConfig = {
       },
       // Listed after the site-wide rule so this value wins on these routes.
       ...browserShellRoutes.map((source) => ({ source, headers: [browserShellPolicy] })),
+      // Local and dev copies: tell search engines not to index anything.
+      ...(isProduction() ? [] : [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }]),
     ]
   },
   images: {

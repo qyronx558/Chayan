@@ -38,7 +38,7 @@ export async function POST() {
           html: `<p>Verify your email by opening this link within 1 hour:</p><p><a href="${base}/profile?emailVerify=${token}">Verify email</a></p>`,
         }).catch(() => undefined)
       }
-    } catch { undefined }
+    } catch { /* ignore */ }
     // The token proves inbox ownership, so it only ever travels by email.
     return NextResponse.json({ success: true, data: { sent: true } })
   } catch (error) {
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
     try {
       const { writeAuditEvent } = await import("@/lib/audit")
       await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: "Email verified", source: "API" })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: { verified: true } })
   } catch (error) {
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to verify email" }, { status: 500 })

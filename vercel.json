@@ -2,5 +2,10 @@
   "buildCommand": "npm run db:generate && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  }
 }

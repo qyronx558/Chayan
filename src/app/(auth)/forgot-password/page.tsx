@@ -6,13 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { z } from "zod"
-import { Loader2, Mail, ArrowLeft, CheckCircle2, Shield, Bell, Bookmark, Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Loader2, Mail, ArrowLeft, CheckCircle2, Shield, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
-import { AuthLayout, Divider, InputWithIcon } from "@/components/auth/AuthComponents"
+import { AuthLayout, InputWithIcon } from "@/components/auth/AuthComponents"
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

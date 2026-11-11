@@ -1,0 +1,142 @@
+name: Release to production
+
+# The ONLY way code reaches the public website.
+#
+# How a team member releases:
+#   1. Check the change on the dev site.
+#   2. GitHub > Releases > "Draft a new release" > new tag (e.g. v1.4.0) on main > Publish.
+#   3. A required reviewer approves the "Production" deployment in the Actions tab.
+#
+# Roll back: Actions > "Release to production" > Run workflow > enter an older tag.
+#
+# Needs (Settings > Environments > "Production", with "Required reviewers" on):
+#   secret   DATABASE_URL   the production database
+# Needs (Settings > Secrets and variables > Actions):
+#   secret   VERCEL_TOKEN
+#   variable VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   variable PRODUCTION_URL  e.g. https://chayanjobs.in (used for the smoke test)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy (e.g. v1.4.0). Use an older tag to roll back."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  checks: read
+
+# A production database must have exactly one writer (shared with database-migrate).
+concurrency:
+  group: production-database-migration
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify release
+    # Pre-releases never go to production.
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: resolve
+        env:
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}") || { echo "::error::Tag $TAG not found"; exit 1; }
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG ($sha)"
+
+      - name: Tag must be on main
+        run: |
+          git merge-base --is-ancestor "${{ steps.resolve.outputs.sha }}" origin/main \
+            || { echo "::error::${{ steps.resolve.outputs.tag }} is not on main. Only merged, reviewed code can be released."; exit 1; }
+
+      - name: CI must have passed for this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          result=$(gh api "repos/${{ github.repository }}/commits/${{ steps.resolve.outputs.sha }}/check-runs?check_name=CI%20passed" \
+            --jq '[.check_runs[].conclusion] | if index("success") then "success" else "missing" end')
+          if [ "$result" != "success" ]; then
+            echo "::error::The 'CI passed' check did not succeed for this commit. Fix CI on main before releasing."
+            exit 1
+          fi
+
+  deploy:
+    name: Deploy to production
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Required reviewers on this environment = the manual release approval.
+    environment:
+      name: Production
+      url: ${{ vars.PRODUCTION_URL }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXT_PUBLIC_APP_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+
+      - name: Check settings
+        run: |
+          missing=""
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID DATABASE_URL; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing for the Production environment:$missing. See docs/environments.md."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Apply database migrations (production database)
+        run: npx prisma migrate deploy
+
+      - name: Build for production
+        run: |
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to production
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "### Released ${{ needs.verify.outputs.tag }} to production" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke test the live site
+        if: vars.PRODUCTION_URL != ''
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${{ vars.PRODUCTION_URL }}")
+            [ "$code" = "200" ] && { echo "Live site answered 200"; exit 0; }
+            echo "Attempt $i: HTTP $code, retrying..."
+            sleep 10
+          done
+          echo "::error::The live site did not answer 200 after the release. Roll back by re-running this workflow with the previous tag."
+          exit 1

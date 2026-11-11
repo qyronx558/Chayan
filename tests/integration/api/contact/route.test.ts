@@ -1,10 +1,10 @@
 import assert from "node:assert/strict"
-import { afterEach, mock, test } from "node:test"
+import { afterEach, test, vi } from "vitest"
 import { NextRequest } from "next/server"
 import type { Prisma } from "@prisma/client"
-import { contactSchema } from "../src/lib/contact"
-import { isSupportOnline } from "../src/lib/channels"
-import { checkContactRateLimit, ContactRateLimitError, getClientIp } from "../src/lib/contact-server"
+import { contactSchema } from "@/lib/contact"
+import { isSupportOnline } from "@/lib/channels"
+import { checkContactRateLimit, ContactRateLimitError, getClientIp } from "@/lib/contact-server"
 
 // Only fake credentials are used; every DB and provider call is mocked below.
 process.env.RESEND_API_KEY = "re_contact_tests"
@@ -15,14 +15,14 @@ process.env.AUTH_SECRET = "contact-test-secret"
 const input = { name: "Test User", email: "sender@example.com", topic: "general", subject: "Test subject", message: "Please help with my account.", website: "" }
 const key = "12345678-1234-4234-8234-123456789abc"
 const reference = `CJ-${key.toUpperCase()}`
-let prisma: typeof import("../src/lib/prisma").prisma
-let POST: typeof import("../src/app/api/contact/route").POST
-let deliver: typeof import("../src/lib/contact-delivery").deliverContactTicket
+let prisma: typeof import("@/lib/prisma").prisma
+let POST: typeof import("@/app/api/contact/route").POST
+let deliver: typeof import("@/lib/contact-delivery").deliverContactTicket
 
 async function setup() {
-  prisma = (await import("../src/lib/prisma")).prisma
-  POST = (await import("../src/app/api/contact/route")).POST
-  deliver = (await import("../src/lib/contact-delivery")).deliverContactTicket
+  prisma = (await import("@/lib/prisma")).prisma
+  POST = (await import("@/app/api/contact/route")).POST
+  deliver = (await import("@/lib/contact-delivery")).deliverContactTicket
 }
 
 function request(body: unknown = input, headers: Record<string, string> = {}) {
@@ -36,12 +36,12 @@ const restorers: (() => void)[] = []
 function stub<T extends (...args: never[]) => unknown>(target: object, method: string, implementation: T) {
   const object = target as Record<string, unknown>
   const original = object[method]
-  const replacement = mock.fn(implementation)
+  const replacement = vi.fn(implementation)
   object[method] = replacement
   restorers.push(() => { object[method] = original })
   return replacement
 }
-afterEach(() => { restorers.reverse().forEach((restore) => restore()); restorers.length = 0; mock.restoreAll() })
+afterEach(() => { restorers.reverse().forEach((restore) => restore()); restorers.length = 0 })
 
 test("validation trims fields and rejects invalid topics, lengths, and header injection", () => {
   assert.equal(contactSchema.parse({ ...input, name: "  Test User  " }).name, "Test User")
@@ -98,14 +98,14 @@ test("API rejects malformed, oversized, cross-origin and invalid requests before
     assert.equal(response.headers.get("cache-control"), "no-store")
     assert.equal((await response.json()).success, false)
   }
-  assert.equal(find.mock.callCount(), 0)
+  assert.equal(find.mock.calls.length, 0)
 })
 
 test("honeypot acknowledges without storing or emailing", async () => {
   await setup()
   const find = stub(prisma.contactTicket, "findUnique", () => { throw new Error("Unexpected DB access") })
   assert.equal((await POST(request({ ...input, website: "https://spam.example" }))).status, 200)
-  assert.equal(find.mock.callCount(), 0)
+  assert.equal(find.mock.calls.length, 0)
 })
 
 test("idempotent replay returns the stored reference without another insert", async () => {
@@ -114,7 +114,7 @@ test("idempotent replay returns the stored reference without another insert", as
   const tx = stub(prisma, "$transaction", () => { throw new Error("Unexpected insert") })
   const response = await POST(request())
   assert.deepEqual(await response.json(), { success: true, reference })
-  assert.equal(tx.mock.callCount(), 0)
+  assert.equal(tx.mock.calls.length, 0)
   assert.equal((await POST(request({ ...input, message: "A different message now" }))).status, 409)
 })
 
@@ -134,7 +134,7 @@ test("database outages and rate limits return structured errors", async () => {
   const limited = await POST(request())
   assert.equal(limited.status, 429)
   assert.equal(limited.headers.get("retry-after"), "120")
-  tx.mock.mockImplementation(async () => { throw new Error("DB unavailable") })
+  tx.mockImplementation(async () => { throw new Error("DB unavailable") })
   const failed = await POST(request())
   assert.equal(failed.status, 503)
   assert.equal((await failed.json()).success, false)
@@ -164,7 +164,7 @@ test("delivery skips tickets leased by another worker", async () => {
   stub(prisma.contactTicket, "updateMany", async () => ({ count: 0 }))
   const fetchMock = stub(globalThis, "fetch", async () => { throw new Error("Unexpected send") })
   assert.equal(await deliver(reference), true)
-  assert.equal(fetchMock.mock.callCount(), 0)
+  assert.equal(fetchMock.mock.calls.length, 0)
 })
 
 test("delivery escapes HTML, routes to the team and uses distinct provider idempotency keys", async () => {
@@ -200,12 +200,12 @@ test("provider failure schedules retry without acknowledging an undelivered mess
   })
   const sends = stub(globalThis, "fetch", async () => Response.json({ name: "rate_limit_exceeded", message: "Try again" }, { status: 429 }))
   assert.equal(await deliver(reference), false)
-  assert.equal(sends.mock.callCount(), 1)
-  const args = update.mock.calls[0].arguments[0] as { data: { nextAttemptAt: Date } }
+  assert.equal(sends.mock.calls.length, 1)
+  const args = update.mock.calls[0][0] as { data: { nextAttemptAt: Date } }
   assert.ok(args.data.nextAttemptAt.getTime() > Date.now() + 14 * 60000)
 })
 
 test("cron rejects unauthenticated requests", async () => {
-  const { GET } = await import("../src/app/api/cron/contact/route")
+  const { GET } = await import("@/app/api/cron/contact/route")
   assert.equal((await GET(request())).status, 401)
 })

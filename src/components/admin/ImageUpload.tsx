@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react"
 import { Upload, X, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "@/components/ui/toast"
 

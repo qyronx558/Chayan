@@ -48,7 +48,7 @@ export function monthLabel(month: string): string {
 
 export function parseMonthParts(month: string): { year: number; month: number } {
   const [y, m] = month.split("-").map((v) => parseInt(v, 10))
-  return { year: Number.isNaN(y) ? new Date().getFullYear() : y, month: Number.isNaN(m) ? 1 : Math.min(12, Math.max(1, m)) }
+  return { year: Number.isFinite(y) ? y : new Date().getFullYear(), month: Number.isFinite(m) ? Math.min(12, Math.max(1, m)) : 1 }
 }
 
 /** Local-calendar day key `yyyy-mm-dd` for grouping ISO dates by viewer day. */

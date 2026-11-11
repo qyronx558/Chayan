@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     try {
       const { writeAuditEvent } = await import("@/lib/audit")
       await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: `Email change requested to ${newEmail}`, source: "API" })
-    } catch { undefined }
+    } catch { /* ignore */ }
     try {
       const { Resend } = await import("resend")
       const key = process.env.RESEND_API_KEY
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           html: `<p>Confirm your new email by opening this link within 1 hour:</p><p><a href="${base}/profile?emailConfirm=${token}">Confirm ${newEmail}</a></p>`,
         }).catch(() => undefined)
       }
-    } catch { undefined }
+    } catch { /* ignore */ }
     // The token proves inbox ownership, so it only ever travels by email.
     return NextResponse.json({ success: true, data: { pendingEmail: newEmail } })
   } catch (error) {
@@ -85,7 +85,7 @@ export async function PUT(request: NextRequest) {
     try {
       const { writeAuditEvent } = await import("@/lib/audit")
       await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: `Email changed to ${pending} after confirmation`, source: "API" })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: { email: pending } })
   } catch (error) {
     if (isSchemaMismatchError(error)) {

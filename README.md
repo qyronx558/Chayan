@@ -113,7 +113,7 @@ Open [http://localhost:3000](http://localhost:3000).
 docker compose up -d
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000).
+The app will be available at [http://127.0.0.1:3000](http://127.0.0.1:3000) (this machine only).
 
 ---
 
@@ -124,25 +124,64 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 | `npm run dev` | Start the app locally |
 | `npm run build` | Build for production |
 | `npm run start` | Run the production build |
-| `npm run lint` | Check code quality |
 | `npm run db:generate` | Prepare the database client |
 | `npm run db:migrate:deploy` | Apply database updates |
 | `npx prisma studio` | Open the database viewer |
-| `npm run test:contact` | Run contact form tests |
+
+---
+
+## Tests and code quality
+
+Every pull request to `main` runs the **CI** workflow. A PR can merge only when all of these pass:
+
+1. **Lint & type check** - ESLint (no errors, warnings may not grow) and TypeScript.
+2. **Tests & coverage** - all unit and integration tests pass and line coverage stays at **35% or more**.
+3. **Python flows** - Ruff lint/format and pytest for the Prefect flows (via [uv](https://docs.astral.sh/uv/)).
+
+Run the same checks on your machine before pushing:
+
+| Command | What it does |
+| --- | --- |
+| `npm run check` | Run **everything** CI runs (lint, types, tests + coverage, Python) |
+| `npm run fix` | Auto-fix lint and formatting issues (TypeScript and Python) |
+| `npm run lint` | ESLint |
+| `npm run lint:fix` | ESLint with auto-fix |
+| `npm run typecheck` | TypeScript type check |
+| `npm test` | All unit + integration tests |
+| `npm run test:unit` / `npm run test:integration` | One kind of test only |
+| `npm run test:watch` | Re-run tests as you edit |
+| `npm run test:coverage` | Tests + coverage report (fails under 35%) - open `coverage/index.html` |
+| `npm run py:lint` / `npm run py:fix` / `npm run py:test` | Python lint, auto-fix, tests (needs `uv`) |
+| `npm run test:e2e:contact` | Browser test of the contact page (needs Playwright + running app) |
+
+Test layout mirrors the source tree, using the same file names:
+
+```text
+src/lib/dates.ts                    ->  tests/unit/lib/dates.test.ts
+src/lib/trending/score.ts           ->  tests/unit/lib/trending/score.test.ts
+src/lib/trending/rank.ts            ->  tests/integration/lib/trending/rank.test.ts
+src/app/api/contact/route.ts        ->  tests/integration/api/contact/route.test.ts
+middleware.ts                       ->  tests/unit/middleware.test.ts
+prefect/newsletter_digest_flow.py   ->  tests/python/test_newsletter_digest_flow.py
+```
+
+- `tests/unit` - one module at a time, everything else mocked.
+- `tests/integration` - several real modules (or an API route) working together, with only the database and outside services faked.
+- `tests/e2e` - Playwright scripts against a running app (run by hand).
+
+Install uv once: `pip install uv` (or see the [uv install guide](https://docs.astral.sh/uv/getting-started/installation/)), then `uv sync`.
 
 ---
 
 ## Deployment
 
-The app is built for [Vercel](https://vercel.com). Add your production environment variables in the Vercel dashboard, then deploy.
+There are three environments: **local** (your machine only), **dev** (private team site) and **production** (the public site).
 
-Database updates are applied by the **database-migrate** GitHub Actions workflow. It needs one repository secret:
+- Merging to `main` deploys to **dev** only.
+- Code reaches **production** only when a team member publishes a GitHub Release and a reviewer approves it.
+- Dev and local show a coloured banner and are hidden from search engines.
 
-```text
-DATABASE_URL
-```
-
-Run the workflow manually from the **Actions** tab after adding the secret.
+Full guide, release steps and one-time setup: [docs/environments.md](docs/environments.md).
 
 ---
 
@@ -153,7 +192,7 @@ Contributions are welcome.
 1. Fork the repository.
 2. Create a branch: `git checkout -b feat/your-feature`
 3. Make your changes.
-4. Run `npm run lint` and `npm run build`.
+4. Run `npm run check` (and `npm run build`). Use `npm run fix` for small lint issues.
 5. Commit using clear messages, push, and open a pull request.
 
 Please keep pull requests focused and easy to review.

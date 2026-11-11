@@ -77,7 +77,7 @@ export async function DELETE(request: NextRequest) {
       try {
         const { writeAuditEvent } = await import("@/lib/audit")
         await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: "Signed out other sessions", source: "API" })
-      } catch { undefined }
+      } catch { /* ignore */ }
       return NextResponse.json({ success: true, data: null })
     }
     if (!id || id === "current") {
@@ -88,7 +88,7 @@ export async function DELETE(request: NextRequest) {
     try {
       const { writeAuditEvent } = await import("@/lib/audit")
       await writeAuditEvent({ action: "UPDATE", entityType: "User", entityId: session.user.id, actorId: session.user.id, actorRole: session.user.role ?? "USER", summary: `Session signed out (${id})`, source: "API" })
-    } catch { undefined }
+    } catch { /* ignore */ }
     return NextResponse.json({ success: true, data: { id } })
   } catch (error) {
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to sign out session" }, { status: 500 })
