@@ -90,6 +90,8 @@ network (office Wi-Fi, phone hotspot) cannot open your local copy.
 
 ### 2. Repository secrets and variables - Settings → Secrets and variables → Actions
 
+`VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` and `PRODUCTION_URL` work as either a variable or a secret.
+
 | Kind | Name | Value |
 | --- | --- | --- |
 | Secret | `VERCEL_TOKEN` | Vercel → Account Settings → Tokens |
