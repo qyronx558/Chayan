@@ -119,14 +119,11 @@ jobs:
       - name: Apply database migrations (production database)
         run: npx prisma migrate deploy
 
-      - name: Build for production
+      - name: Build and deploy to production
+      # Vercel builds it on its own servers. Building here with `vercel pull` does not work:
+      # values marked "Sensitive" in Vercel cannot be downloaded (they arrive as "[SENSITIVE]").
         run: |
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          vercel build --prod --token="$VERCEL_TOKEN"
-
-      - name: Deploy to production
-        run: |
-          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          url=$(vercel deploy --prod --yes --archive=tgz --build-env NEXT_PUBLIC_APP_ENV=production --token="$VERCEL_TOKEN")
           echo "### Released ${{ needs.verify.outputs.tag }} to production" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
 
