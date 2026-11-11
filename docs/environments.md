@@ -112,6 +112,21 @@ network (office Wi-Fi, phone hotspot) cannot open your local copy.
 
 Require a pull request, and require the status check **CI passed**.
 
+## Database migrations
+
+Every schema change needs a migration: run `npx prisma migrate dev --name <change>` and commit the new
+folder in `prisma/migrations`. CI builds an empty database from the migrations and fails if the result
+does not match `prisma/schema.prisma`. Don't use `prisma db push` on the dev or production database.
+
+**A migration failed (`P3018`, then `P3009` on the next run).** Fix the migration in a PR first. Then, in
+your database provider's SQL editor for **that** database, clear the failed record and re-run the workflow:
+
+```sql
+DELETE FROM "_prisma_migrations" WHERE finished_at IS NULL AND rolled_back_at IS NULL;
+```
+
+This only removes the record of the failed attempt; it does not touch any data.
+
 ## Workflows
 
 | File | Runs when | Does |
