@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDate } from "@/lib/utils";
+import { jobLocationLabel } from "@/lib/locations";
 import type { ListModuleConfig } from "@/components/admin/list/types";
 import { JobFormDialog } from "./JobFormDialog";
 
@@ -34,7 +35,9 @@ export interface JobRow {
   createdBy?: { id: string; name: string | null; email: string; role?: string | null } | null;
   department: { id: string; name: string };
   category: { id: string; name: string };
-  state: { id: string; name: string } | null;
+  jobLevel?: "CENTRAL" | "STATE" | "DISTRICT" | null;
+  state: { id: string; name: string; slug?: string } | null;
+  district?: { id: string; name: string; slug?: string } | null;
 }
 
 export const jobsConfig: ListModuleConfig<JobRow> = {
@@ -52,6 +55,16 @@ export const jobsConfig: ListModuleConfig<JobRow> = {
   filters: [
     { key: "departmentId", label: "Department", endpoint: "/api/departments" },
     { key: "categoryId", label: "Category", endpoint: "/api/categories" },
+    {
+      key: "level",
+      label: "Job level",
+      endpoint: "",
+      options: [
+        { id: "central", name: "Central (All India)" },
+        { id: "state", name: "State" },
+        { id: "district", name: "District" },
+      ],
+    },
     { key: "stateId", label: "State", endpoint: "/api/states" },
   ],
   lookups: [
@@ -61,7 +74,7 @@ export const jobsConfig: ListModuleConfig<JobRow> = {
   ],
   searchPlaceholder: "Search jobs by title, department…",
   metaLine: (row) => {
-    const parts = [row.department.name, row.category.name];
+    const parts = [row.department.name, row.category.name, jobLocationLabel(row)];
     if (row.totalVacancies) parts.push(`${row.totalVacancies} vacancies`);
     const last = formatDate(row.lastDate);
     if (last) parts.push(`Last date ${last}`);
@@ -77,7 +90,9 @@ export const jobsConfig: ListModuleConfig<JobRow> = {
     slug: row.slug,
     departmentId: row.department.id,
     categoryId: row.category.id,
+    jobLevel: row.jobLevel ?? (row.state ? "STATE" : "CENTRAL"),
     stateId: row.state?.id ?? null,
+    districtId: row.district?.id ?? null,
     advertisementNo: row.advertisementNo,
     totalVacancies: row.totalVacancies,
     salary: row.salary,

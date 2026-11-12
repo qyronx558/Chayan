@@ -7,6 +7,7 @@ import { isAdmin } from "@/lib/roles"
 import { revalidatePublicContent } from "@/lib/cache"
 import { staffAudit } from "@/lib/moderation"
 import { requireAction } from "@/lib/admin/access"
+import { validateJobLocation } from "@/lib/locations-server"
 import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(
@@ -17,7 +18,7 @@ export async function GET(
     const { id } = await params
     const job = await prisma.job.findUnique({
       where: { id },
-      include: { department: true, category: true, state: true },
+      include: { department: true, category: true, state: true, district: true },
     })
 
     if (!job) {
@@ -69,7 +70,9 @@ export async function PUT(
       slug,
       departmentId: rawDepartmentId,
       categoryId: rawCategoryId,
+      jobLevel: rawJobLevel,
       stateId: rawStateId,
+      districtId: rawDistrictId,
       advertisementNo,
       totalVacancies,
       salary,
@@ -93,7 +96,6 @@ export async function PUT(
 
     const departmentId = normalizeRequiredId(rawDepartmentId)
     const categoryId = normalizeRequiredId(rawCategoryId)
-    const stateId = normalizeOptionalId(rawStateId)
 
     if (!departmentId) {
       return NextResponse.json({ success: false, error: "Department is required" }, { status: 400 })
@@ -102,15 +104,28 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Category is required" }, { status: 400 })
     }
 
-    const missing = await findMissingRelation({ departmentId, categoryId, stateId })
+    const missing = await findMissingRelation({ departmentId, categoryId })
     if (missing) return missingRelationResponse(missing)
 
-    const data: Prisma.JobUpdateInput = {
+    const loc = await validateJobLocation({
+      jobLevel: rawJobLevel,
+      stateId: normalizeOptionalId(rawStateId),
+      districtId: normalizeOptionalId(rawDistrictId),
+    })
+    if (!loc.ok) return NextResponse.json({ success: false, error: loc.error }, { status: 400 })
+    const { jobLevel, stateId, districtId } = loc.value
+
+    // Plain FK columns (not nested connect/disconnect) so level, state and
+    // district change in ONE UPDATE - Prisma runs each nested disconnect as its
+    // own statement, which trips Job_location_level_check halfway through.
+    const data: Prisma.JobUncheckedUpdateInput = {
       title,
       slug,
-      department: { connect: { id: departmentId } },
-      category: { connect: { id: categoryId } },
-      ...(stateId ? { state: { connect: { id: stateId } } } : { state: { disconnect: true } }),
+      departmentId,
+      categoryId,
+      jobLevel,
+      stateId,
+      districtId,
       ...(advertisementNo !== undefined ? { advertisementNo } : {}),
       ...(totalVacancies !== undefined ? { totalVacancies } : {}),
       ...(salary !== undefined ? { salary } : {}),

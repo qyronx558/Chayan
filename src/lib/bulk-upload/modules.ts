@@ -50,7 +50,9 @@ export const BULK_MODULES: BulkModuleDef[] = [
     description: "Government job notifications",
     columns: [
       ...COMMON_CONTENT_COLUMNS,
-      { header: "State", key: "state", required: false, hint: "State name (must already exist - left empty if unknown)" },
+      { header: "Job Level", key: "jobLevel", required: false, hint: "Central, State or District (empty = State if a state is given, else Central)" },
+      { header: "State", key: "state", required: false, hint: "State name (must already exist - left empty if unknown). Required for State/District level" },
+      { header: "District", key: "district", required: false, hint: "District name within the state. Required for District level" },
       { header: "Advertisement No", key: "advertisementNo", required: false, hint: "e.g. SSC/CGL/2026/01" },
       { header: "Total Vacancies", key: "totalVacancies", required: false, hint: "Number only, e.g. 7500" },
       { header: "Salary", key: "salary", required: false, hint: "e.g. Rs. 35,400 - 1,12,400/-" },

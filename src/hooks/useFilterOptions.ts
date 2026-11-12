@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 export interface FilterOption {
   id: string
   name: string
+  slug?: string
 }
 
 interface FilterOptions {

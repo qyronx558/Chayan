@@ -7,6 +7,7 @@
  */
 import { prisma } from "@/lib/prisma"
 import { slugify } from "@/lib/utils"
+import { findDistrictIdByName, validateJobLocation } from "@/lib/locations-server"
 import {
   jobSchema,
   resultSchema,
@@ -357,6 +358,11 @@ async function createContentRow(
     case "jobs": {
       const stateName = cellStr(r.state)
       const stateId = stateName ? refs.stateByName.get(stateName.toLowerCase()) : undefined
+      const districtName = cellStr(r.district)
+      const districtId = districtName && stateId ? await findDistrictIdByName(stateId, districtName) : null
+      if (districtName && !districtId) return `District "${districtName}" not found in ${stateName ?? "the selected state"}`
+      const loc = await validateJobLocation({ jobLevel: cellStr(r.jobLevel) ?? cellStr(r.level), stateId: stateId ?? null, districtId })
+      if (!loc.ok) return loc.error
       const validation = jobSchema.safeParse({
         title,
         slug,
@@ -387,7 +393,9 @@ async function createContentRow(
       await prisma.job.create({
         data: {
           ...base,
-          ...(v.stateId ? { state: { connect: { id: v.stateId } } } : {}),
+          jobLevel: loc.value.jobLevel,
+          ...(loc.value.stateId ? { state: { connect: { id: loc.value.stateId } } } : {}),
+          ...(loc.value.districtId ? { district: { connect: { id: loc.value.districtId } } } : {}),
           advertisementNo: v.advertisementNo,
           totalVacancies: v.totalVacancies,
           salary: v.salary,

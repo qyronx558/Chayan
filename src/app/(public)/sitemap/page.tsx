@@ -38,6 +38,9 @@ export default async function SitemapPage() {
               <li>
                 <Link href="/jobs" className="text-sm text-muted-foreground hover:text-brick">All Jobs</Link>
               </li>
+              <li>
+                <Link href="/jobs/states" className="text-sm text-muted-foreground hover:text-brick">Jobs by State &amp; District</Link>
+              </li>
               {categories.map((cat) => (
                 <li key={cat.slug}>
                   <Link href={`/category/${cat.slug}`} className="text-sm text-muted-foreground hover:text-brick">

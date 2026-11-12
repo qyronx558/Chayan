@@ -1,0 +1,58 @@
+name: seed-locations
+
+# Seeds/refreshes all Indian states, union territories and districts from
+# prisma/data/india_districts_statewise.csv. Idempotent: upserts only, never
+# deletes. Run it after the job_location_levels migration has been deployed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which database to seed"
+        required: true
+        default: dev
+        type: choice
+        options: [dev, production]
+      dry_run:
+        description: "Only report what would change"
+        required: true
+        default: true
+        type: boolean
+
+# Shares the migration lock so a seed never races a migration.
+concurrency:
+  group: ${{ inputs.target }}-database-migration
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target == 'production' && 'Production' || 'dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate DATABASE_URL secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::The DATABASE_URL secret is not set for this repository/environment. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Check migrations are deployed
+        run: npx prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Seed locations
+        run: npm run db:seed:locations -- ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

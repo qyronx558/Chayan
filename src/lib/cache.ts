@@ -24,10 +24,20 @@ type ContentKind =
   | "blog"
   | "featured"
 
+/** State/district SEO pages (job counts + listings), also used after location edits. */
+export function revalidateLocationPages() {
+  revalidatePath("/jobs/states")
+  revalidatePath("/jobs/state/[stateSlug]", "page")
+  revalidatePath("/jobs/district/[stateSlug]/[districtSlug]", "page")
+}
+
 /** Revalidates every public route affected by a CMS write. */
 export function revalidatePublicContent(kind: ContentKind, slug?: string) {
   revalidatePath("/")
-  if (kind === "job") revalidatePath("/category/[slug]", "page")
+  if (kind === "job") {
+    revalidatePath("/category/[slug]", "page")
+    revalidateLocationPages()
+  }
 
   const routes: Record<ContentKind, string[]> = {
     job: ["/jobs", "/apply"],

@@ -20,6 +20,8 @@ interface SearchableFilterProps {
  onChange: (id: string) => void
  /** Extra classes for the popover content (e.g. raise z-index inside a Sheet). */
  popoverClassName?: string
+ /** Greys the trigger out (e.g. District until a State is picked). */
+ disabled?: boolean
 }
 
 /**
@@ -33,17 +35,19 @@ export function SearchableFilter({
  searchPlaceholder = "Search...",
  onChange,
  popoverClassName,
+ disabled = false,
 }: SearchableFilterProps) {
  const [open, setOpen] = useState(false)
  const selected = options.find((o) => o.id === value)
 
  return (
-  <Popover open={open} onOpenChange={setOpen}>
+  <Popover open={open && !disabled} onOpenChange={(o) => setOpen(disabled ? false : o)}>
    <PopoverTrigger asChild>
     <Button
      variant="outline"
      role="combobox"
      aria-expanded={open}
+     disabled={disabled}
      className="h-10 w-full min-w-0 justify-between truncate bg-background px-3 py-2 text-sm font-normal"
     >
      <span className="min-w-0 flex-1 truncate text-left">

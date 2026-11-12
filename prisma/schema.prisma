@@ -184,8 +184,8 @@ model User {
   jobReports             JobReport[]
   companyOtpChallenges   CompanyOtpChallenge[]
   referralCode           EmployerReferralCode?
-  referralsMade          EmployerReferral[] @relation("Referrer")
-  referralsReceived      EmployerReferral[] @relation("Referred")
+  referralsMade          EmployerReferral[]      @relation("Referrer")
+  referralsReceived      EmployerReferral[]      @relation("Referred")
   coinLedger             CoinLedger[]
   rewardEnrollments      RewardEnrollment[]
   payoutAccount          PayoutAccount?
@@ -219,26 +219,26 @@ model Resume {
 }
 
 model NotificationPreference {
-  id                 String  @id @default(cuid())
-  userId             String  @unique
-  jobAlerts          Boolean @default(true)
-  resultAlerts       Boolean @default(true)
-  admitCardAlerts    Boolean @default(false)
-  privateJobAlerts   Boolean @default(true)
-  admissionAlerts    Boolean @default(true)
-  blogAlerts         Boolean @default(true)
-  syllabusAlerts     Boolean @default(true)
-  answerKeyAlerts    Boolean @default(true)
-  generalAlerts      Boolean @default(true)
-  smsJobAlerts       Boolean @default(false)
-  smsResultAlerts    Boolean @default(false)
-  smsAdmitCardAlerts Boolean @default(false)
-  smsPrivateJobAlerts Boolean @default(false)
-  smsAdmissionAlerts Boolean @default(false)
-  smsBlogAlerts      Boolean @default(false)
-  smsSyllabusAlerts  Boolean @default(false)
-  smsAnswerKeyAlerts Boolean @default(false)
-  smsGeneralAlerts   Boolean @default(false)
+  id                      String  @id @default(cuid())
+  userId                  String  @unique
+  jobAlerts               Boolean @default(true)
+  resultAlerts            Boolean @default(true)
+  admitCardAlerts         Boolean @default(false)
+  privateJobAlerts        Boolean @default(true)
+  admissionAlerts         Boolean @default(true)
+  blogAlerts              Boolean @default(true)
+  syllabusAlerts          Boolean @default(true)
+  answerKeyAlerts         Boolean @default(true)
+  generalAlerts           Boolean @default(true)
+  smsJobAlerts            Boolean @default(false)
+  smsResultAlerts         Boolean @default(false)
+  smsAdmitCardAlerts      Boolean @default(false)
+  smsPrivateJobAlerts     Boolean @default(false)
+  smsAdmissionAlerts      Boolean @default(false)
+  smsBlogAlerts           Boolean @default(false)
+  smsSyllabusAlerts       Boolean @default(false)
+  smsAnswerKeyAlerts      Boolean @default(false)
+  smsGeneralAlerts        Boolean @default(false)
   telegramJobAlerts       Boolean @default(false)
   telegramResultAlerts    Boolean @default(false)
   telegramAdmitCardAlerts Boolean @default(false)
@@ -259,7 +259,7 @@ model NotificationPreference {
   digestFrequency         String  @default("INSTANT")
   quietHoursEnabled       Boolean @default(false)
   phoneVerified           Boolean @default(false)
-  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserSession {
@@ -294,15 +294,15 @@ model LoginAttempt {
 }
 
 model PhoneVerificationCode {
-  id         String   @id @default(cuid())
-  userId     String
-  phone      String
-  codeHash   String
-  expiresAt  DateTime
-  attempts   Int      @default(0)
-  maxAttempts Int     @default(5)
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  phone       String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(5)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, createdAt])
@@ -373,14 +373,47 @@ model Department {
   @@index([createdById])
 }
 
+/// Who may apply for a government job: anyone in India, one state, or one district.
+enum JobLevel {
+  CENTRAL  @map("central")
+  STATE    @map("state")
+  DISTRICT @map("district")
+}
+
+enum StateType {
+  STATE           @map("state")
+  UNION_TERRITORY @map("union_territory")
+}
+
 model State {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
-  createdAt DateTime @default(now())
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  type      StateType  @default(STATE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
   job       Job[]
+  districts District[]
 
   @@index([name])
+  @@index([slug])
+  @@index([type])
+}
+
+/// District names/slugs are unique within a state only (e.g. Bilaspur exists in CG and HP).
+model District {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  stateId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  state     State    @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  jobs      Job[]
+
+  @@unique([stateId, slug])
+  @@unique([stateId, name])
+  @@index([stateId])
   @@index([slug])
 }
 
@@ -392,12 +425,14 @@ model Tag {
 }
 
 model Job {
-  id                   String      @id @default(cuid())
+  id                   String           @id @default(cuid())
   title                String
-  slug                 String      @unique
+  slug                 String           @unique
   departmentId         String
   categoryId           String
   stateId              String?
+  jobLevel             JobLevel         @default(CENTRAL)
+  districtId           String?
   advertisementNo      String?
   totalVacancies       Int?
   salary               String?
@@ -413,21 +448,22 @@ model Job {
   officialNotification String?
   officialWebsite      String?
   applyLink            String?
-  status               JobStatus   @default(ACTIVE)
+  status               JobStatus        @default(ACTIVE)
   experience           String?
   startDate            DateTime?
   lastDate             DateTime?
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   createdById          String?
   moderation           ModerationStatus @default(APPROVED)
   reviewedById         String?
   reviewedAt           DateTime?
   reviewNote           String?
-  department           Department  @relation(fields: [departmentId], references: [id])
-  category             Category    @relation(fields: [categoryId], references: [id])
-  state                State?      @relation(fields: [stateId], references: [id])
-  createdBy            User?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  department           Department       @relation(fields: [departmentId], references: [id])
+  category             Category         @relation(fields: [categoryId], references: [id])
+  state                State?           @relation(fields: [stateId], references: [id])
+  district             District?        @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  createdBy            User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
   result               Result[]
   admitCard            AdmitCard[]
   answerKey            AnswerKey[]
@@ -441,6 +477,8 @@ model Job {
   @@index([departmentId])
   @@index([categoryId])
   @@index([stateId])
+  @@index([jobLevel])
+  @@index([districtId])
   @@index([createdById])
   @@index([moderation])
   @@index([createdById, moderation])
@@ -450,20 +488,20 @@ model Job {
 }
 
 model Company {
-  id               String               @id @default(cuid())
-  name             String               @unique
-  slug             String               @unique
+  id               String                @id @default(cuid())
+  name             String                @unique
+  slug             String                @unique
   logo             String?
   website          String?
   description      String?
   industry         String?
   size             String?
   hq               String?
-  verifiedStatus   CompanyVerification  @default(UNVERIFIED)
+  verifiedStatus   CompanyVerification   @default(UNVERIFIED)
   claimEmailDomain String?
   responseRate     Int?
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @default(now()) @updatedAt
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
   privateJob       PrivateJob[]
   members          CompanyMember[]
   otpChallenges    CompanyOtpChallenge[]
@@ -474,49 +512,49 @@ model Company {
 }
 
 model PrivateJob {
-  id               String           @id @default(cuid())
-  title            String
-  slug             String           @unique
-  companyId        String
-  type             JobType
-  category         String?
-  description      String?
-  location         String?
-  salary           String?
-  salaryMin        Int?
-  salaryMax        Int?
-  experience       String?
-  expMin           Int?
-  expMax           Int?
-  qualification    String?
-  skills           String[]         @default([])
-  remotePolicy     RemotePolicy?
-  vacancies        Int?
-  applicationUrl   String?
-  applicationEmail String?
-  lastDate         DateTime?
-  status           String           @default("ACTIVE")
-  isFresherFriendly Boolean         @default(false)
-  isWalkIn         Boolean          @default(false)
-  walkInVenue      String?
-  walkInDate       DateTime?
-  proofUrl         String?
-  trustScore       Int              @default(0)
-  views            Int              @default(0)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  createdById      String?
-  moderation       ModerationStatus @default(APPROVED)
-  reviewedById     String?
-  reviewedAt       DateTime?
-  reviewNote       String?
-  company          Company          @relation(fields: [companyId], references: [id])
-  createdBy        User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  bookmark         Bookmark[]
-  applications     PrivateApplication[]
-  viewsLog         PrivateJobView[]
-  reports          JobReport[]
-  clicks           JobClick[]
+  id                String               @id @default(cuid())
+  title             String
+  slug              String               @unique
+  companyId         String
+  type              JobType
+  category          String?
+  description       String?
+  location          String?
+  salary            String?
+  salaryMin         Int?
+  salaryMax         Int?
+  experience        String?
+  expMin            Int?
+  expMax            Int?
+  qualification     String?
+  skills            String[]             @default([])
+  remotePolicy      RemotePolicy?
+  vacancies         Int?
+  applicationUrl    String?
+  applicationEmail  String?
+  lastDate          DateTime?
+  status            String               @default("ACTIVE")
+  isFresherFriendly Boolean              @default(false)
+  isWalkIn          Boolean              @default(false)
+  walkInVenue       String?
+  walkInDate        DateTime?
+  proofUrl          String?
+  trustScore        Int                  @default(0)
+  views             Int                  @default(0)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  createdById       String?
+  moderation        ModerationStatus     @default(APPROVED)
+  reviewedById      String?
+  reviewedAt        DateTime?
+  reviewNote        String?
+  company           Company              @relation(fields: [companyId], references: [id])
+  createdBy         User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  bookmark          Bookmark[]
+  applications      PrivateApplication[]
+  viewsLog          PrivateJobView[]
+  reports           JobReport[]
+  clicks            JobClick[]
 
   @@index([title])
   @@index([slug])
@@ -539,9 +577,9 @@ model PrivateJob {
 }
 
 model Result {
-  id           String     @id @default(cuid())
+  id           String           @id @default(cuid())
   title        String
-  slug         String     @unique
+  slug         String           @unique
   description  String?
   departmentId String
   categoryId   String
@@ -549,17 +587,17 @@ model Result {
   pdfUrl       String?
   resultDate   DateTime?
   status       String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime         @default(now())
   createdById  String?
   moderation   ModerationStatus @default(APPROVED)
   reviewedById String?
   reviewedAt   DateTime?
   reviewNote   String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  category     Category   @relation(fields: [categoryId], references: [id])
-  job          Job?       @relation(fields: [jobId], references: [id])
-  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
-   bookmark     Bookmark[]
+  department   Department       @relation(fields: [departmentId], references: [id])
+  category     Category         @relation(fields: [categoryId], references: [id])
+  job          Job?             @relation(fields: [jobId], references: [id])
+  createdBy    User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  bookmark     Bookmark[]
 
   @@index([title])
   @@index([slug])
@@ -574,9 +612,9 @@ model Result {
 }
 
 model AdmitCard {
-  id           String     @id @default(cuid())
+  id           String           @id @default(cuid())
   title        String
-  slug         String     @unique
+  slug         String           @unique
   description  String?
   departmentId String
   categoryId   String
@@ -584,16 +622,16 @@ model AdmitCard {
   examDate     DateTime?
   downloadUrl  String?
   status       String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime         @default(now())
   createdById  String?
   moderation   ModerationStatus @default(APPROVED)
   reviewedById String?
   reviewedAt   DateTime?
   reviewNote   String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  category     Category   @relation(fields: [categoryId], references: [id])
-  job          Job?       @relation(fields: [jobId], references: [id])
-  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  department   Department       @relation(fields: [departmentId], references: [id])
+  category     Category         @relation(fields: [categoryId], references: [id])
+  job          Job?             @relation(fields: [jobId], references: [id])
+  createdBy    User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
   bookmark     Bookmark[]
 
   @@index([title])
@@ -609,25 +647,25 @@ model AdmitCard {
 }
 
 model AnswerKey {
-  id           String     @id @default(cuid())
+  id           String           @id @default(cuid())
   title        String
-  slug         String     @unique
+  slug         String           @unique
   description  String?
   departmentId String
   categoryId   String
   jobId        String?
   pdfUrl       String?
   status       String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime         @default(now())
   createdById  String?
   moderation   ModerationStatus @default(APPROVED)
   reviewedById String?
   reviewedAt   DateTime?
   reviewNote   String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  category     Category   @relation(fields: [categoryId], references: [id])
-  job          Job?       @relation(fields: [jobId], references: [id])
-  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  department   Department       @relation(fields: [departmentId], references: [id])
+  category     Category         @relation(fields: [categoryId], references: [id])
+  job          Job?             @relation(fields: [jobId], references: [id])
+  createdBy    User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([title])
   @@index([slug])
@@ -641,26 +679,26 @@ model AnswerKey {
 }
 
 model Admission {
-  id             String     @id @default(cuid())
+  id             String           @id @default(cuid())
   title          String
-  slug           String     @unique
+  slug           String           @unique
   description    String?
   departmentId   String
   categoryId     String
   startDate      DateTime?
   lastDate       DateTime?
   applicationFee String?
-  pdfUrl       String?
-  status       String?
-  createdAt    DateTime @default(now())
-  createdById  String?
-  moderation   ModerationStatus @default(APPROVED)
-  reviewedById String?
-  reviewedAt   DateTime?
-  reviewNote   String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  category     Category   @relation(fields: [categoryId], references: [id])
-  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  pdfUrl         String?
+  status         String?
+  createdAt      DateTime         @default(now())
+  createdById    String?
+  moderation     ModerationStatus @default(APPROVED)
+  reviewedById   String?
+  reviewedAt     DateTime?
+  reviewNote     String?
+  department     Department       @relation(fields: [departmentId], references: [id])
+  category       Category         @relation(fields: [categoryId], references: [id])
+  createdBy      User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([title])
   @@index([slug])
@@ -675,9 +713,9 @@ model Admission {
 }
 
 model Syllabus {
-  id           String     @id @default(cuid())
+  id           String           @id @default(cuid())
   title        String
-  slug         String     @unique
+  slug         String           @unique
   description  String?
   departmentId String
   categoryId   String
@@ -685,16 +723,16 @@ model Syllabus {
   pdfUrl       String?
   subjects     String?
   status       String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime         @default(now())
   createdById  String?
   moderation   ModerationStatus @default(APPROVED)
   reviewedById String?
   reviewedAt   DateTime?
   reviewNote   String?
-  department   Department @relation(fields: [departmentId], references: [id])
-  category     Category   @relation(fields: [categoryId], references: [id])
-  job          Job?       @relation(fields: [jobId], references: [id])
-  createdBy    User?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  department   Department       @relation(fields: [departmentId], references: [id])
+  category     Category         @relation(fields: [categoryId], references: [id])
+  job          Job?             @relation(fields: [jobId], references: [id])
+  createdBy    User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
   bookmark     Bookmark[]
 
   @@index([title])
@@ -913,36 +951,36 @@ model Newsletter {
 }
 
 model NewsletterSend {
-  id        String   @id @default(cuid())
-  sentDate  DateTime @unique
-  sentAt    DateTime @default(now())
-  recipients Int     @default(0)
-  itemsSent  Int     @default(0)
+  id         String   @id @default(cuid())
+  sentDate   DateTime @unique
+  sentAt     DateTime @default(now())
+  recipients Int      @default(0)
+  itemsSent  Int      @default(0)
 
   @@index([sentDate])
 }
 
 model BlogPost {
-  id          String        @id @default(cuid())
-  title       String
-  slug        String        @unique
-  excerpt     String?
-  content     String?
-  author      String        @default("ChayanJobs Team")
-  image       String?
-  tags        String?
-  categoryId  String?
-  published   Boolean       @default(false)
-  views       Int           @default(0)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  createdById String?
-  moderation  ModerationStatus @default(APPROVED)
+  id           String           @id @default(cuid())
+  title        String
+  slug         String           @unique
+  excerpt      String?
+  content      String?
+  author       String           @default("ChayanJobs Team")
+  image        String?
+  tags         String?
+  categoryId   String?
+  published    Boolean          @default(false)
+  views        Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  createdById  String?
+  moderation   ModerationStatus @default(APPROVED)
   reviewedById String?
-  reviewedAt  DateTime?
-  reviewNote  String?
-  category    BlogCategory? @relation(fields: [categoryId], references: [id])
-  createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+  reviewNote   String?
+  category     BlogCategory?    @relation(fields: [categoryId], references: [id])
+  createdBy    User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([slug])
   @@index([published])
@@ -1226,13 +1264,13 @@ enum JobClickKind {
 }
 
 model JobClick {
-  id           String      @id @default(cuid())
+  id           String       @id @default(cuid())
   privateJobId String
   kind         JobClickKind
   sessionHash  String
   day          DateTime
-  createdAt    DateTime    @default(now())
-  privateJob   PrivateJob  @relation(fields: [privateJobId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+  privateJob   PrivateJob   @relation(fields: [privateJobId], references: [id], onDelete: Cascade)
 
   @@unique([privateJobId, kind, sessionHash, day])
   @@index([privateJobId])
@@ -1277,24 +1315,24 @@ enum AlertChannel {
 }
 
 model PageViewEvent {
-  id            String         @id @default(cuid())
-  path          String
-  entityType    String?
-  entityId      String?
-  referrer      String?
-  utmSource     String?
-  utmMedium     String?
-  utmCampaign   String?
-  deviceType    String         @default("desktop")
-  state         String?
-  userAgent     String?
+  id             String         @id @default(cuid())
+  path           String
+  entityType     String?
+  entityId       String?
+  referrer       String?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  deviceType     String         @default("desktop")
+  state          String?
+  userAgent      String?
   userAgentClass UserAgentClass @default(human)
-  botVerified   Boolean        @default(false)
-  hashedIp      String?
-  sessionId     String?
-  userId        String?
-  durationMs    Int?
-  createdAt     DateTime       @default(now())
+  botVerified    Boolean        @default(false)
+  hashedIp       String?
+  sessionId      String?
+  userId         String?
+  durationMs     Int?
+  createdAt      DateTime       @default(now())
 
   @@index([createdAt])
   @@index([path])
@@ -1342,13 +1380,13 @@ model WebVitalEvent {
 }
 
 model CrawlerRun {
-  id        String    @id @default(cuid())
-  source    String    @default("internal")
-  startedAt DateTime  @default(now())
+  id         String    @id @default(cuid())
+  source     String    @default("internal")
+  startedAt  DateTime  @default(now())
   finishedAt DateTime?
-  imported  Int       @default(0)
-  errors    Int       @default(0)
-  detail    String?
+  imported   Int       @default(0)
+  errors     Int       @default(0)
+  detail     String?
 
   @@index([startedAt])
 }
@@ -1375,14 +1413,14 @@ model AlertRule {
 }
 
 model AlertEvent {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   ruleId    String
   metric    String
   value     Float
   threshold Float
   channels  AlertChannel[] @default([])
-  sentAt    DateTime @default(now())
-  rule      AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  sentAt    DateTime       @default(now())
+  rule      AlertRule      @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
   @@index([ruleId])
   @@index([sentAt])
@@ -1406,24 +1444,24 @@ model AnalyticsDay {
 }
 
 model AnalyticsModuleDay {
-  id          String   @id @default(cuid())
-  date        DateTime
-  module      String
-  items       Int      @default(0)
-  views       Int      @default(0)
-  viewsPerItem Float   @default(0)
+  id           String   @id @default(cuid())
+  date         DateTime
+  module       String
+  items        Int      @default(0)
+  views        Int      @default(0)
+  viewsPerItem Float    @default(0)
 
   @@unique([date, module])
   @@index([module, date])
 }
 
 model IntegrationSetting {
-  key         String   @id
-  connected   Boolean  @default(false)
+  key         String    @id
+  connected   Boolean   @default(false)
   config      Json?
   metrics     Json?
   connectedAt DateTime?
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime  @updatedAt
 }
 
 model AuditEvent {
@@ -1499,28 +1537,28 @@ model AuditChannel {
 }
 
 model LogArchive {
-  id         String   @id @default(cuid())
-  period     String
-  fileUrl    String
-  eventCount Int
-  checksum   String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  period      String
+  fileUrl     String
+  eventCount  Int
+  checksum    String
+  createdAt   DateTime @default(now())
   createdById String?
 }
 
 model ContactTicket {
-  id        String   @id @default(cuid())
-  topic     String
-  name      String
-  email     String
-  subject   String
-  message   String   @db.Text
-  status    String   @default("open")
-  createdAt DateTime @default(now())
-  notifiedAt DateTime?
-  autoRepliedAt DateTime?
-  deliveryAttempts Int @default(0)
-  nextAttemptAt DateTime @default(now())
+  id               String    @id @default(cuid())
+  topic            String
+  name             String
+  email            String
+  subject          String
+  message          String    @db.Text
+  status           String    @default("open")
+  createdAt        DateTime  @default(now())
+  notifiedAt       DateTime?
+  autoRepliedAt    DateTime?
+  deliveryAttempts Int       @default(0)
+  nextAttemptAt    DateTime  @default(now())
 
   @@index([status, createdAt])
   @@index([topic, createdAt])
@@ -1528,8 +1566,8 @@ model ContactTicket {
 }
 
 model ContactRateLimit {
-  key String @id
-  count Int @default(1)
+  key       String   @id
+  count     Int      @default(1)
   expiresAt DateTime
 
   @@index([expiresAt])

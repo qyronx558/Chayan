@@ -73,6 +73,7 @@ function FilterControlItem({ control }: { control: FilterControl }) {
           allLabel={control.allLabel}
           searchPlaceholder={control.searchPlaceholder}
           onChange={control.onChange}
+          disabled={control.disabled}
           popoverClassName="z-[60]"
         />
       </div>

@@ -116,6 +116,7 @@ export async function importJobs(): Promise<FetchResult> {
         await prisma.job.create({
           data: {
             title, slug, departmentId, categoryId, stateId,
+            jobLevel: stateId ? "STATE" : "CENTRAL",
             advertisementNo: advertisementNo || undefined,
             totalVacancies: totalVacancies || undefined,
             salary: undefined, location: location || undefined,

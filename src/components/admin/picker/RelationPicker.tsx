@@ -622,6 +622,46 @@ export function StatePicker({
   );
 }
 
+/** Districts of one state. Admins can't create districts - super admins add them under Locations. */
+export function DistrictPicker({
+  open,
+  onOpenChange,
+  districts,
+  value,
+  onSelect,
+  onCreate,
+  loading,
+  allowNone = false,
+  noneLabel = "None",
+  onClear,
+  stateName,
+}: EntityPickerProps & { districts: PickerItem[]; stateName?: string }) {
+  return (
+    <RelationPicker
+      open={open}
+      onOpenChange={onOpenChange}
+      items={districts}
+      value={value}
+      onSelect={onSelect}
+      onCreate={onCreate}
+      title="Select District"
+      subtitle={
+        stateName
+          ? `Districts in ${stateName}. Missing one? Ask a super admin to add it under Locations.`
+          : "Search districts"
+      }
+      singular="District"
+      plural="districts"
+      loading={loading}
+      allowCreate={false}
+      allowNone={allowNone}
+      noneLabel={noneLabel}
+      onClear={onClear}
+      searchPlaceholder="Search districts..."
+    />
+  );
+}
+
 export function CompanyPicker({
   open,
   onOpenChange,

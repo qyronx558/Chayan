@@ -1,9 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, ArrowRight, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
@@ -19,6 +20,18 @@ import { useFilterOptions } from "@/hooks/useFilterOptions"
 import { useInfiniteListing } from "@/hooks/useInfiniteListing"
 import { useListingQuerySync } from "@/hooks/useListingQuerySync"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
+import { useDistricts } from "@/hooks/useDistricts"
+import { districtPagePath, jobLocationLabel, statePagePath } from "@/lib/locations"
+
+/** Quick links in the "Find jobs in your state" banner (most-searched states). */
+const POPULAR_STATES = [
+  { slug: "uttar-pradesh", name: "Uttar Pradesh" },
+  { slug: "bihar", name: "Bihar" },
+  { slug: "rajasthan", name: "Rajasthan" },
+  { slug: "maharashtra", name: "Maharashtra" },
+  { slug: "madhya-pradesh", name: "Madhya Pradesh" },
+  { slug: "andhra-pradesh", name: "Andhra Pradesh" },
+]
 
 interface JobData {
   id: string
@@ -26,7 +39,9 @@ interface JobData {
   slug: string
   department: { id: string; name: string; slug: string }
   category: { id: string; name: string; slug: string }
+  jobLevel?: "CENTRAL" | "STATE" | "DISTRICT"
   state: { id: string; name: string; slug: string } | null
+  district?: { id: string; name: string; slug: string } | null
   location: string | null
   totalVacancies: number | null
   lastDate: string | null
@@ -56,13 +71,41 @@ const POSTED_OPTIONS = [
   { value: "30", label: "Last 30 days" },
 ]
 
-export function JobsClient() {
+const LEVEL_OPTIONS = [
+  { value: "", label: "All levels" },
+  { value: "central", label: "Central (All India)" },
+  { value: "state", label: "State" },
+  { value: "district", label: "District" },
+]
+
+const LEVEL_LABEL: Record<string, string> = { central: "Central jobs", state: "State jobs", district: "District jobs" }
+
+/**
+ * Locks the listing to "everything a resident of this state/district can apply for"
+ * (used by /jobs/state/[state] and /jobs/district/[state]/[district]).
+ */
+export interface JobsPreset {
+  eligibleState: string
+  eligibleDistrict?: string
+  heading: string
+  intro: string
+}
+
+export function JobsClient({ preset }: { preset?: JobsPreset } = {}) {
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const [search, setSearch] = useState(searchParams.get("search") ?? "")
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("categoryId") ?? "")
   const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get("departmentId") ?? "")
+  // Legacy links (/jobs?stateId=<id>) keep working; new filters use slugs for SEO.
   const [selectedState, setSelectedState] = useState(searchParams.get("stateId") ?? "")
+  const [level, setLevelRaw] = useState(() => {
+    const raw = (searchParams.get("level") ?? "").toLowerCase()
+    return ["central", "state", "district"].includes(raw) ? raw : ""
+  })
+  const [stateSlug, setStateSlugRaw] = useState(searchParams.get("state") ?? "")
+  const [districtSlug, setDistrictSlugRaw] = useState(searchParams.get("district") ?? "")
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get("status") ?? "")
   const [qualification, setQualification] = useState(searchParams.get("qualification") ?? "")
   const [minVacancies, setMinVacancies] = useState(searchParams.get("minVacancies") ?? "")
@@ -77,6 +120,29 @@ export function JobsClient() {
   const debouncedQualification = useDebouncedValue(qualification.trim(), 300)
 
   const { categories, departments, states } = useFilterOptions({ includeStates: true })
+  const { districts, loading: districtsLoading } = useDistricts(preset ? preset.eligibleState : stateSlug)
+
+  // Parent changes clear their children: level → state → district.
+  // Central jobs have no state/district, so "Central" clears them, and picking a
+  // state/district while on "Central" widens the level back to "All".
+  // A district only makes sense for district-level jobs.
+  const setLevel = (next: string) => {
+    setLevelRaw(next)
+    if (next === "central") {
+      setStateSlugRaw("")
+      setDistrictSlugRaw("")
+    }
+    if (next === "state") setDistrictSlugRaw("")
+  }
+  const setStateSlug = (next: string) => {
+    setStateSlugRaw(next)
+    setDistrictSlugRaw("")
+    if (next && level === "central") setLevelRaw("")
+  }
+  const setDistrictSlug = (next: string) => {
+    setDistrictSlugRaw(next)
+    if (next && (level === "central" || level === "state")) setLevelRaw("")
+  }
 
   const params = useMemo(
     () => ({
@@ -84,6 +150,11 @@ export function JobsClient() {
       categoryId: selectedCategory,
       departmentId: selectedDepartment,
       stateId: selectedState,
+      level: preset ? "" : level,
+      state: preset ? "" : stateSlug,
+      district: preset ? "" : districtSlug,
+      eligibleState: preset?.eligibleState ?? "",
+      eligibleDistrict: preset?.eligibleDistrict ?? "",
       status: selectedStatus,
       qualification: debouncedQualification,
       minVacancies: minVacancies ? Number(minVacancies) : "",
@@ -99,6 +170,10 @@ export function JobsClient() {
       selectedCategory,
       selectedDepartment,
       selectedState,
+      level,
+      stateSlug,
+      districtSlug,
+      preset,
       selectedStatus,
       debouncedQualification,
       minVacancies,
@@ -130,6 +205,9 @@ export function JobsClient() {
     categoryId: selectedCategory,
     departmentId: selectedDepartment,
     stateId: selectedState,
+    level: preset ? undefined : level,
+    state: preset ? undefined : stateSlug,
+    district: preset ? undefined : districtSlug,
     status: selectedStatus,
     qualification: debouncedQualification,
     minVacancies,
@@ -146,6 +224,7 @@ export function JobsClient() {
     setSelectedCategory("")
     setSelectedDepartment("")
     setSelectedState("")
+    setLevel("")
     setSelectedStatus("")
     setQualification("")
     setMinVacancies("")
@@ -162,6 +241,7 @@ export function JobsClient() {
       selectedCategory ||
       selectedDepartment ||
       selectedState ||
+      (!preset && level) ||
       selectedStatus ||
       debouncedQualification ||
       minVacancies ||
@@ -177,6 +257,9 @@ export function JobsClient() {
     selectedCategory,
     selectedDepartment,
     selectedState,
+    !preset && level,
+    !preset && stateSlug,
+    !preset && districtSlug,
     selectedStatus,
     debouncedQualification,
     minVacancies,
@@ -196,7 +279,16 @@ export function JobsClient() {
   if (debouncedSearch) activeFilters.push({ id: "search", label: `Search: ${debouncedSearch}`, onRemove: () => setSearch("") })
   if (categoryName) activeFilters.push({ id: "category", label: categoryName, onRemove: () => setSelectedCategory("") })
   if (departmentName) activeFilters.push({ id: "department", label: departmentName, onRemove: () => setSelectedDepartment("") })
-  if (stateName) activeFilters.push({ id: "state", label: stateName, onRemove: () => setSelectedState("") })
+  if (stateName) activeFilters.push({ id: "stateId", label: stateName, onRemove: () => setSelectedState("") })
+  if (!preset && level) activeFilters.push({ id: "level", label: LEVEL_LABEL[level] ?? level, onRemove: () => setLevel("") })
+  if (!preset && stateSlug) {
+    const name = states.find((s) => s.slug === stateSlug)?.name ?? stateSlug
+    activeFilters.push({ id: "state", label: name, onRemove: () => setStateSlug("") })
+  }
+  if (!preset && districtSlug) {
+    const name = districts.find((d) => d.slug === districtSlug)?.name ?? districtSlug
+    activeFilters.push({ id: "district", label: name, onRemove: () => setDistrictSlug("") })
+  }
   if (selectedStatus) activeFilters.push({ id: "status", label: statusName ?? selectedStatus, onRemove: () => setSelectedStatus("") })
   if (debouncedQualification) activeFilters.push({ id: "qualification", label: `Qualification: ${debouncedQualification}`, onRemove: () => setQualification("") })
   if (minVacancies) activeFilters.push({ id: "vacancies", label: `${minVacancies}+ vacancies`, onRemove: () => setMinVacancies("") })
@@ -220,7 +312,63 @@ export function JobsClient() {
     { id: "active", label: "Active only", active: selectedStatus === "ACTIVE", onToggle: () => setSelectedStatus((value) => (value === "ACTIVE" ? "" : "ACTIVE")) },
   ]
 
+  const stateOptions = states.filter((s) => s.slug).map((s) => ({ id: s.slug as string, name: s.name }))
+  // State / district SEO pages: the location dropdowns navigate between those
+  // pages (keeping sort & other filters) instead of filtering in place.
+  const goTo = (path: string) => router.push(`${path}${typeof window !== "undefined" ? window.location.search : ""}`)
+  const locationFilters: FilterControl[] = preset
+    ? [
+        {
+          kind: "searchable",
+          id: "state",
+          label: "State / UT",
+          allLabel: "All states",
+          searchPlaceholder: "Search states…",
+          options: stateOptions,
+          value: preset.eligibleState,
+          onChange: (slug) => goTo(slug ? statePagePath(slug) : "/jobs/states"),
+        },
+        {
+          kind: "searchable",
+          id: "district",
+          label: "District",
+          allLabel: districtsLoading ? "Loading districts…" : "All districts",
+          searchPlaceholder: "Search districts…",
+          // Only the districts of this page's state.
+          options: districts.map((d) => ({ id: d.slug, name: d.name })),
+          value: preset.eligibleDistrict ?? "",
+          onChange: (slug) =>
+            goTo(slug ? districtPagePath(preset.eligibleState, slug) : statePagePath(preset.eligibleState)),
+        },
+      ]
+    : [
+        { kind: "select", id: "level", label: "Job level", value: level, options: LEVEL_OPTIONS, onChange: setLevel },
+        {
+          kind: "searchable",
+          id: "state",
+          label: "State / UT",
+          allLabel: "All states",
+          searchPlaceholder: "Search states…",
+          options: stateOptions,
+          value: stateSlug,
+          onChange: setStateSlug,
+        },
+        {
+          kind: "searchable",
+          id: "district",
+          label: "District",
+          allLabel: !stateSlug ? "Select a state first" : districtsLoading ? "Loading districts…" : "All districts",
+          searchPlaceholder: "Search districts…",
+          // Only the districts of the selected state.
+          options: districts.map((d) => ({ id: d.slug, name: d.name })),
+          value: districtSlug,
+          onChange: setDistrictSlug,
+          disabled: !stateSlug,
+        },
+      ]
+
   const filters: FilterControl[] = [
+    ...locationFilters,
     {
       kind: "searchable",
       id: "category",
@@ -240,16 +388,6 @@ export function JobsClient() {
       options: departments,
       value: selectedDepartment,
       onChange: setSelectedDepartment,
-    },
-    {
-      kind: "searchable",
-      id: "state",
-      label: "State",
-      allLabel: "All States",
-      searchPlaceholder: "Search states…",
-      options: states,
-      value: selectedState,
-      onChange: setSelectedState,
     },
     { kind: "select", id: "status", label: "Status", value: selectedStatus, options: STATUS_OPTIONS, onChange: setSelectedStatus },
     {
@@ -271,10 +409,53 @@ export function JobsClient() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="mb-2 text-3xl font-bold text-foreground">Latest Government Jobs</h1>
-        <p className="mb-8 text-muted-foreground">
-          Browse and apply to the latest government job notifications across India.
-        </p>
+        {preset ? (
+          <>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">{preset.heading}</h1>
+            <p className="mb-8 text-muted-foreground">{preset.intro}</p>
+          </>
+        ) : (
+          <>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Latest Government Jobs</h1>
+            <p className="mb-6 text-muted-foreground">
+              Browse and apply to the latest government job notifications across India.
+            </p>
+            <section
+              aria-labelledby="browse-by-state"
+              className="mb-8 flex flex-col gap-4 rounded-2xl border border-rule border-l-4 border-l-brick bg-paper-2 p-5 dark:border-ink dark:border-l-brick sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-start gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brick text-brick-ink" aria-hidden>
+                  <MapPin className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <h2 id="browse-by-state" className="text-lg font-semibold text-foreground">
+                    Find jobs in your state &amp; district
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    28 states, 8 union territories and 780+ districts: see state jobs, local district vacancies and all-India jobs in one place.
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {POPULAR_STATES.map((s) => (
+                      <Link
+                        key={s.slug}
+                        href={statePagePath(s.slug)}
+                        className="rounded-full border border-rule bg-background px-2.5 py-0.5 text-xs text-foreground transition-colors hover:border-brick hover:text-brick dark:border-ink"
+                      >
+                        {s.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <Button asChild size="lg" className="shrink-0">
+                <Link href="/jobs/states">
+                  Browse jobs by state <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
+            </section>
+          </>
+        )}
 
         <ListingLayout
           filters={
@@ -340,6 +521,7 @@ export function JobsClient() {
                       department={job.department.name}
                       departmentSlug={job.department.slug}
                       location={job.location || job.state?.name}
+                      locationLabel={jobLocationLabel(job)}
                       totalVacancies={job.totalVacancies}
                       lastDateToApply={job.lastDate}
                       salary={job.salary}

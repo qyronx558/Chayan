@@ -25,7 +25,16 @@ describe("revalidatePublicContent", () => {
 
   it("revalidates home, listing, category and detail pages for jobs", () => {
     revalidatePublicContent("job", "ssc-cgl")
-    expect(paths()).toEqual(["/", "/category/[slug]", "/jobs", "/apply", "/apply/ssc-cgl"])
+    expect(paths()).toEqual([
+      "/",
+      "/category/[slug]",
+      "/jobs/states",
+      "/jobs/state/[stateSlug]",
+      "/jobs/district/[stateSlug]/[districtSlug]",
+      "/jobs",
+      "/apply",
+      "/apply/ssc-cgl",
+    ])
   })
 
   it("revalidates results and the detail page", () => {

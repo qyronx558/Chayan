@@ -225,7 +225,7 @@ export default function ListPage<TRow extends BaseRow>({
 
   const filterLookups: Record<string, LookupOption[]> = useMemo(() => {
     const out: Record<string, LookupOption[]> = {};
-    for (const f of config.filters) out[f.key] = lookups[f.lookupKey ?? f.key] ?? [];
+    for (const f of config.filters) out[f.key] = f.options ?? lookups[f.lookupKey ?? f.key] ?? [];
     return out;
   }, [config.filters, lookups]);
 
