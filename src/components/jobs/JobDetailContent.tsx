@@ -19,6 +19,7 @@ import { JobApplyRail } from "@/components/jobs/JobApplyRail"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { useActiveSection } from "@/components/shared/useActiveSection"
 import { containsHtml, stripHtmlToText } from "@/lib/blog-prose"
+import { districtPagePath, statePagePath } from "@/lib/locations"
 import {
  buildDateRows, feeKpi, formatRupees, getDeadline, parseFeeBars, shortFact, stepify,
 } from "@/lib/job-insights"
@@ -29,7 +30,9 @@ interface JobDetailContentProps {
  department: string
  departmentId: string
  category: { id: string; name: string }
- state: { id: string; name: string } | null
+ jobLevel?: "CENTRAL" | "STATE" | "DISTRICT"
+ state: { id: string; name: string; slug?: string } | null
+ district?: { id: string; name: string; slug?: string } | null
  status: string
  advertisementNo: string | null
  totalVacancies: number | null
@@ -90,7 +93,7 @@ function Chip({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export function JobDetailContent({
- jobId, title, department, departmentId, category, state, status,
+ jobId, title, department, departmentId, category, jobLevel, state, district = null, status,
  advertisementNo, totalVacancies, salary, location, ageLimit, ageRelaxation, education,
  selectionProcess, applicationFee, importantDates, documentsRequired, howToApply,
  officialNotification, officialWebsite, applyLink, experience, startDate, lastDate,
@@ -172,7 +175,14 @@ export function JobDetailContent({
        <span className={cn("h-1.5 w-1.5 rounded-full bg-current", urgent && "animate-pulse")} /> {pill.text}
       </span>
       <Chip href={`/jobs?categoryId=${category.id}`}>{category.name}</Chip>
-      {state ? <Chip href={`/jobs?stateId=${state.id}`}>{state.name}</Chip> : null}
+      {jobLevel === "CENTRAL" ? (
+       <Chip href="/jobs?level=central">All India</Chip>
+      ) : state ? (
+       <Chip href={state.slug ? statePagePath(state.slug) : `/jobs?stateId=${state.id}`}>{state.name}</Chip>
+      ) : null}
+      {jobLevel === "DISTRICT" && district && state?.slug && district.slug ? (
+       <Chip href={districtPagePath(state.slug, district.slug)}>{district.name} district</Chip>
+      ) : null}
      </div>
 
      <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-foreground sm:text-[2.5rem]">{title}</h1>

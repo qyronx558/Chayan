@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api, fetcher } from "@/lib/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { jobSchema, type JobInput } from "@/lib/validations";
@@ -32,7 +32,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/components/ui/toast";
-import { formatDate, getStatusColor, slugify } from "@/lib/utils";
+import { cn, formatDate, getStatusColor, slugify } from "@/lib/utils";
+import { JOB_LEVEL_OPTIONS, jobLocationLabel, resolveJobLocation, type JobLevelValue } from "@/lib/locations";
 import { WizardSteps } from "@/components/admin/WizardSteps";
 import { FormSection } from "@/components/admin/FormSection";
 import { SmartContentField } from "@/components/admin/SmartContentField";
@@ -48,7 +49,9 @@ const EMPTY_FORM: JobInput = {
   slug: "",
   departmentId: "",
   categoryId: "",
+  jobLevel: "CENTRAL",
   stateId: null,
+  districtId: null,
   advertisementNo: null,
   totalVacancies: null,
   salary: null,
@@ -76,7 +79,9 @@ function toFormValues(row: JobRow): JobInput {
     slug: row.slug,
     departmentId: row.department.id,
     categoryId: row.category.id,
+    jobLevel: row.jobLevel ?? (row.state ? "STATE" : "CENTRAL"),
     stateId: row.state?.id || null,
+    districtId: row.district?.id || null,
     advertisementNo: row.advertisementNo,
     totalVacancies: row.totalVacancies,
     salary: row.salary,
@@ -139,6 +144,30 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
     onError: (err: Error) => toast(err.message, "destructive"),
   });
 
+  const jobLevel = (form.watch("jobLevel") ?? "CENTRAL") as JobLevelValue;
+  const selectedStateId = form.watch("stateId") ?? null;
+  const selectedState = states.find((s) => s.id === selectedStateId) ?? null;
+  const needsState = jobLevel === "STATE" || jobLevel === "DISTRICT";
+  const needsDistrict = jobLevel === "DISTRICT";
+
+  const districtsQuery = useQuery({
+    queryKey: ["state-districts", selectedStateId],
+    queryFn: () =>
+      fetcher<{ success: boolean; data: { id: string; name: string; slug: string }[] }>(
+        `/api/states/${encodeURIComponent(selectedStateId as string)}/districts`
+      ),
+    enabled: open && needsDistrict && !!selectedStateId,
+    staleTime: 10 * 60 * 1000,
+  });
+  const districts = districtsQuery.data?.data ?? [];
+
+  const setJobLevel = (level: JobLevelValue) => {
+    form.setValue("jobLevel", level, { shouldDirty: true });
+    if (level === "CENTRAL") form.setValue("stateId", null, { shouldDirty: true });
+    if (level !== "DISTRICT") form.setValue("districtId", null, { shouldDirty: true });
+    form.clearErrors(["stateId", "districtId"]);
+  };
+
   const onSubmit = (data: JobInput) => {
     const stateId =
       typeof data.stateId === "string"
@@ -146,14 +175,21 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
           ? data.stateId.trim()
           : null
         : (data.stateId ?? null);
-    const clean = { ...data, stateId };
+    // Send nulls for the fields the chosen level does not use.
+    const loc = resolveJobLocation({ jobLevel: data.jobLevel ?? "CENTRAL", stateId, districtId: data.districtId ?? null });
+    if (!loc.ok) {
+      form.setError(loc.field, { message: loc.error });
+      setWizardStep(0);
+      return;
+    }
+    const clean = { ...data, ...loc.value };
     if (row) updateMutation.mutate(clean);
     else createMutation.mutate(clean);
   };
 
   const nextStep = async () => {
     const stepFields: Record<number, (keyof JobInput)[]> = {
-      0: ["title", "slug", "departmentId", "categoryId", "status"],
+      0: ["title", "slug", "departmentId", "categoryId", "status", "jobLevel", "stateId", "districtId"],
       1: ["education", "selectionProcess", "applicationFee", "documentsRequired", "howToApply"],
       2: ["officialNotification", "officialWebsite", "applyLink", "startDate", "lastDate"],
     };
@@ -189,7 +225,7 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
                     <FormItem><FormLabel>Slug</FormLabel><FormControl><Input {...field} placeholder="ssc-cgl-2026" /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField control={form.control} name="departmentId" render={({ field }) => (
                     <FormItem><FormLabel>Department</FormLabel>
                       <FormControl>
@@ -224,24 +260,79 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="stateId" render={({ field }) => (
-                    <FormItem><FormLabel>State (optional)</FormLabel>
-                      <FormControl>
-                        <SearchableRelationSelect
-                          value={field.value}
-                          onChange={field.onChange}
-                          options={states}
-                          label="State"
-                          endpoint="/api/states"
-                          placeholder="Optional"
-                          searchPlaceholder="Search states..."
-                          allowCreate={false}
-                          nullable
-                        />
-                      </FormControl>
+                </div>
+                <div className="space-y-3 rounded-xl border border-rule p-3 dark:border-ink">
+                  <FormField control={form.control} name="jobLevel" render={() => (
+                    <FormItem>
+                      <FormLabel>Who can apply?</FormLabel>
+                      <div role="radiogroup" aria-label="Job level" className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        {JOB_LEVEL_OPTIONS.map((opt) => (
+                          <Button
+                            key={opt.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={jobLevel === opt.value}
+                            variant={jobLevel === opt.value ? "default" : "outline"}
+                            onClick={() => setJobLevel(opt.value)}
+                            className="h-auto flex-col items-start gap-0.5 whitespace-normal px-3 py-2 text-left"
+                          >
+                            <span className="text-sm font-semibold">{opt.label}</span>
+                            <span className={cn("text-xs font-normal", jobLevel === opt.value ? "opacity-90" : "text-muted-foreground")}>
+                              {opt.hint}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )} />
+                  {needsState && (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField control={form.control} name="stateId" render={({ field }) => (
+                        <FormItem><FormLabel>State / UT</FormLabel>
+                          <FormControl>
+                            <SearchableRelationSelect
+                              value={field.value}
+                              onChange={(id) => {
+                                if (id !== field.value) form.setValue("districtId", null, { shouldDirty: true });
+                                field.onChange(id);
+                              }}
+                              options={states}
+                              label="State"
+                              endpoint="/api/states"
+                              placeholder="Select state or UT"
+                              searchPlaceholder="Search states..."
+                              allowCreate={false}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      {needsDistrict && (
+                        <FormField control={form.control} name="districtId" render={({ field }) => (
+                          <FormItem><FormLabel>District</FormLabel>
+                            <FormControl>
+                              <SearchableRelationSelect
+                                value={field.value}
+                                onChange={field.onChange}
+                                options={districts}
+                                label="District"
+                                endpoint=""
+                                placeholder={districtsQuery.isLoading ? "Loading districts…" : "Select district"}
+                                searchPlaceholder="Search districts..."
+                                allowCreate={false}
+                                disabled={!selectedStateId}
+                                disabledHint="Select a state first"
+                                loading={districtsQuery.isLoading}
+                                contextLabel={selectedState?.name}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <FormField control={form.control} name="status" render={({ field }) => (
@@ -332,6 +423,11 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
                   <div><dt className="text-xs text-muted-foreground">Title</dt><dd className="font-medium">{watched.title || "-"}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Slug</dt><dd className="font-mono text-xs">{watched.slug || "-"}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Status</dt><dd><Badge className={getStatusColor(watched.status || "ACTIVE")}>{watched.status}</Badge></dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Who can apply</dt><dd>{jobLocationLabel({
+                    jobLevel,
+                    state: selectedState,
+                    district: districts.find((d) => d.id === watched.districtId) ?? row?.district ?? null,
+                  })}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Vacancies</dt><dd>{watched.totalVacancies ?? "N/A"}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Last date</dt><dd>{watched.lastDate ? formatDate(watched.lastDate) : "-"}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Apply link</dt><dd className="truncate text-brick">{watched.applyLink || "-"}</dd></div>

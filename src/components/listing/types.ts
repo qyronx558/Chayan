@@ -15,6 +15,7 @@ export type FilterControl =
       options: FilterOption[]
       value: string
       onChange: (value: string) => void
+      disabled?: boolean
     }
   | {
       kind: "select"

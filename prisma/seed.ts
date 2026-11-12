@@ -1,5 +1,6 @@
 import { PrismaClient, Role, JobType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { seedLocations } from '../src/lib/location-seed';
 
 const prisma = new PrismaClient();
 
@@ -21,16 +22,10 @@ async function main() {
     console.log('  categories seeded');
   }
 
-  // ── States (28 states only - no UTs, no cities/capitals) ──
-  if ((await prisma.state.count()) === 0) {
-    const names = [
-      'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana',
-      'Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur',
-      'Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana',
-      'Tripura','Uttar Pradesh','Uttarakhand','West Bengal',
-    ];
-    await prisma.state.createMany({ data: names.map(n => ({ name: n, slug: slug(n) })) });
-    console.log('  states seeded');
+  // ── States, union territories and districts (idempotent, from prisma/data CSV) ──
+  {
+    const loc = await seedLocations(prisma);
+    console.log(`  locations seeded (${loc.states.created} states, ${loc.districts.created} districts created)`);
   }
 
   // ── Departments ──
@@ -97,7 +92,6 @@ async function main() {
   // ── Government Jobs ──
   if ((await prisma.job.count()) === 0) {
     const cat = Object.fromEntries((await prisma.category.findMany()).map(c => [c.name, c.id]));
-    const st = Object.fromEntries((await prisma.state.findMany()).map(s => [s.name, s.id]));
 
     const deptMap: Record<string, string> = {};
     const allDepts = await prisma.department.findMany();
@@ -117,18 +111,18 @@ async function main() {
 
     await prisma.job.createMany({
       data: [
-        { title: 'SSC Combined Graduate Level Exam 2026', slug: 'ssc-cgl-2026', departmentId: deptMap['SSC'], categoryId: cat['Central Govt'], stateId: st['Karnataka'], advertisementNo: 'SSC/CGL/2026/01', totalVacancies: 7500, salary: 'Rs. 35,400 - 1,12,400/-', location: 'Across India', ageLimit: '18-32 years', education: "Bachelor's Degree", applicationFee: 'Rs. 100 (General), SC/ST/PH/Ex-Servicemen: Nil', status: 'ACTIVE', startDate: daysAgo(5), lastDate: daysFromNow(45) },
-        { title: 'UPSC Civil Services Examination 2026', slug: 'upsc-civil-services-2026', departmentId: deptMap['UPSC'], categoryId: cat['Central Govt'], stateId: st['Karnataka'], advertisementNo: 'UPSC/CSE/2026/01', totalVacancies: 1100, salary: 'Rs. 56,100 - 2,50,000/-', location: 'Across India', ageLimit: '21-32 years', education: "Bachelor's Degree", applicationFee: 'Rs. 100 (General), SC/ST/PH/Female: Nil', status: 'UPCOMING', startDate: daysFromNow(20), lastDate: daysFromNow(60) },
-        { title: 'IBPS Probationary Officers 2026', slug: 'ibps-po-2026', departmentId: deptMap['IBPS'], categoryId: cat['Banking'], stateId: st['Karnataka'], advertisementNo: 'IBPS/PO/2026/01', totalVacancies: 4500, salary: 'Rs. 36,000 - 63,840/-', location: 'Across India', ageLimit: '20-30 years', education: 'Graduation in any discipline', applicationFee: 'Rs. 850 (General), SC/ST/PH: Rs. 175', status: 'UPCOMING', startDate: daysFromNow(90), lastDate: daysFromNow(120) },
-        { title: 'RRB NTPC Graduate Level Recruitment 2026', slug: 'rrb-ntpc-2026', departmentId: deptMap['RRB'], categoryId: cat['Railways'], stateId: st['Karnataka'], advertisementNo: 'RRB/NTPC/2026/01', totalVacancies: 12000, salary: 'Rs. 19,900 - 1,42,400/-', location: 'Across India', ageLimit: '18-33 years', education: "Bachelor's Degree", applicationFee: 'Rs. 500 (General/OBC), SC/ST/PH: Rs. 250', status: 'ACTIVE', startDate: daysAgo(1), lastDate: daysFromNow(30) },
-        { title: 'RBI Grade B Officers 2026', slug: 'rbi-grade-b-2026', departmentId: deptMap['RBI'], categoryId: cat['Banking'], stateId: st['Karnataka'], advertisementNo: 'RBI/GR-B/2026/01', totalVacancies: 350, salary: 'Rs. 55,200 - 1,17,500/-', location: 'Across India', ageLimit: '21-30 years', education: "Bachelor's Degree with 60% marks", applicationFee: 'Rs. 850 (General/OBC), SC/ST/PH: Rs. 100', status: 'UPCOMING', startDate: daysFromNow(10), lastDate: daysFromNow(40) },
-        { title: 'DRDO Scientist Recruitment 2026', slug: 'drdo-scientist-2026', departmentId: deptMap['DRDO'], categoryId: cat['Research'], stateId: st['Karnataka'], advertisementNo: 'DRDO/SCIENTIST/2026/01', totalVacancies: 250, salary: 'Rs. 56,100 - 1,77,500/-', location: 'Across India', ageLimit: '18-35 years', education: 'ME/M.Tech or PhD', applicationFee: 'Rs. 100 (General), SC/ST/PH: Nil', status: 'ACTIVE', startDate: daysAgo(10), lastDate: daysFromNow(20) },
-        { title: 'ISRO Scientist/Engineer Recruitment 2026', slug: 'isro-scientist-2026', departmentId: deptMap['ISRO'], categoryId: cat['Engineering'], stateId: st['Karnataka'], advertisementNo: 'ISRO/SC/2026/01', totalVacancies: 400, salary: 'Rs. 56,100 - 1,77,500/-', location: 'Bangalore, Trivandrum, Ahmedabad', ageLimit: '18-35 years', education: 'BE/B.Tech with 65% marks', applicationFee: 'Rs. 100 (General), SC/ST/PH/Female: Nil', status: 'UPCOMING', startDate: daysFromNow(30), lastDate: daysFromNow(60) },
-        { title: 'AIIMS Nursing Officer Recruitment 2026', slug: 'aiims-nursing-officer-2026', departmentId: deptMap['AIIMS'], categoryId: cat['Medical'], stateId: st['Karnataka'], advertisementNo: 'AIIMS/NO/2026/01', totalVacancies: 1800, salary: 'Rs. 44,900 - 1,42,400/-', location: 'Across AIIMS Institutions', ageLimit: '18-35 years', education: 'B.Sc Nursing or GNM', applicationFee: 'Rs. 1500 (General/OBC), SC/ST: Rs. 1000', status: 'ACTIVE', startDate: daysAgo(3), lastDate: daysFromNow(25) },
-        { title: 'ONGC Executive Trainee Recruitment 2026', slug: 'ongc-executive-trainee-2026', departmentId: deptMap['ONGC'], categoryId: cat['Public Sector'], stateId: st['Karnataka'], advertisementNo: 'ONGC/ET/2026/01', totalVacancies: 600, salary: 'Rs. 60,000 - 1,80,000/-', location: 'Across India', ageLimit: '18-30 years', education: 'BE/B.Tech with GATE score', applicationFee: 'Rs. 500 (General/OBC), SC/ST/PH: Nil', status: 'ACTIVE', startDate: daysAgo(7), lastDate: daysFromNow(18) },
-        { title: 'SEBI Grade A Assistant Manager 2026', slug: 'sebi-grade-a-2026', departmentId: deptMap['SEBI'], categoryId: cat['Banking'], stateId: st['Karnataka'], advertisementNo: 'SEBI/GR-A/2026/01', totalVacancies: 100, salary: 'Rs. 44,500 - 1,41,500/-', location: 'Mumbai, Delhi, Chennai, Kolkata', ageLimit: '21-30 years', education: "Bachelor's Degree", applicationFee: 'Rs. 1000 (General/OBC), SC/ST/PH: Rs. 100', status: 'UPCOMING', startDate: daysFromNow(15), lastDate: daysFromNow(45) },
-        { title: 'FCI Manager Recruitment 2026', slug: 'fci-manager-2026', departmentId: deptMap['FCI'], categoryId: cat['Central Govt'], stateId: st['Karnataka'], advertisementNo: 'FCI/MGR/2026/01', totalVacancies: 900, salary: 'Rs. 44,900 - 1,42,400/-', location: 'Across India', ageLimit: '18-35 years', education: "Bachelor's Degree", applicationFee: 'Rs. 800 (General/OBC), SC/ST/PH: Nil', status: 'UPCOMING', startDate: daysFromNow(60), lastDate: daysFromNow(90) },
-        { title: 'BSNL Junior Engineer Recruitment 2026', slug: 'bsnl-je-2026', departmentId: deptMap['BSNL'], categoryId: cat['Engineering'], stateId: st['Karnataka'], advertisementNo: 'BSNL/JE/2026/01', totalVacancies: 2000, salary: 'Rs. 25,000 - 55,000/-', location: 'Across India', ageLimit: '18-30 years', education: "Diploma or Bachelor's in Engineering", applicationFee: 'Rs. 1000 (General/OBC), SC/ST/PH: Rs. 500', status: 'UPCOMING', startDate: daysFromNow(45), lastDate: daysFromNow(75) },
+        { title: 'SSC Combined Graduate Level Exam 2026', slug: 'ssc-cgl-2026', departmentId: deptMap['SSC'], categoryId: cat['Central Govt'], advertisementNo: 'SSC/CGL/2026/01', totalVacancies: 7500, salary: 'Rs. 35,400 - 1,12,400/-', location: 'Across India', ageLimit: '18-32 years', education: "Bachelor's Degree", applicationFee: 'Rs. 100 (General), SC/ST/PH/Ex-Servicemen: Nil', status: 'ACTIVE', startDate: daysAgo(5), lastDate: daysFromNow(45) },
+        { title: 'UPSC Civil Services Examination 2026', slug: 'upsc-civil-services-2026', departmentId: deptMap['UPSC'], categoryId: cat['Central Govt'], advertisementNo: 'UPSC/CSE/2026/01', totalVacancies: 1100, salary: 'Rs. 56,100 - 2,50,000/-', location: 'Across India', ageLimit: '21-32 years', education: "Bachelor's Degree", applicationFee: 'Rs. 100 (General), SC/ST/PH/Female: Nil', status: 'UPCOMING', startDate: daysFromNow(20), lastDate: daysFromNow(60) },
+        { title: 'IBPS Probationary Officers 2026', slug: 'ibps-po-2026', departmentId: deptMap['IBPS'], categoryId: cat['Banking'], advertisementNo: 'IBPS/PO/2026/01', totalVacancies: 4500, salary: 'Rs. 36,000 - 63,840/-', location: 'Across India', ageLimit: '20-30 years', education: 'Graduation in any discipline', applicationFee: 'Rs. 850 (General), SC/ST/PH: Rs. 175', status: 'UPCOMING', startDate: daysFromNow(90), lastDate: daysFromNow(120) },
+        { title: 'RRB NTPC Graduate Level Recruitment 2026', slug: 'rrb-ntpc-2026', departmentId: deptMap['RRB'], categoryId: cat['Railways'], advertisementNo: 'RRB/NTPC/2026/01', totalVacancies: 12000, salary: 'Rs. 19,900 - 1,42,400/-', location: 'Across India', ageLimit: '18-33 years', education: "Bachelor's Degree", applicationFee: 'Rs. 500 (General/OBC), SC/ST/PH: Rs. 250', status: 'ACTIVE', startDate: daysAgo(1), lastDate: daysFromNow(30) },
+        { title: 'RBI Grade B Officers 2026', slug: 'rbi-grade-b-2026', departmentId: deptMap['RBI'], categoryId: cat['Banking'], advertisementNo: 'RBI/GR-B/2026/01', totalVacancies: 350, salary: 'Rs. 55,200 - 1,17,500/-', location: 'Across India', ageLimit: '21-30 years', education: "Bachelor's Degree with 60% marks", applicationFee: 'Rs. 850 (General/OBC), SC/ST/PH: Rs. 100', status: 'UPCOMING', startDate: daysFromNow(10), lastDate: daysFromNow(40) },
+        { title: 'DRDO Scientist Recruitment 2026', slug: 'drdo-scientist-2026', departmentId: deptMap['DRDO'], categoryId: cat['Research'], advertisementNo: 'DRDO/SCIENTIST/2026/01', totalVacancies: 250, salary: 'Rs. 56,100 - 1,77,500/-', location: 'Across India', ageLimit: '18-35 years', education: 'ME/M.Tech or PhD', applicationFee: 'Rs. 100 (General), SC/ST/PH: Nil', status: 'ACTIVE', startDate: daysAgo(10), lastDate: daysFromNow(20) },
+        { title: 'ISRO Scientist/Engineer Recruitment 2026', slug: 'isro-scientist-2026', departmentId: deptMap['ISRO'], categoryId: cat['Engineering'], advertisementNo: 'ISRO/SC/2026/01', totalVacancies: 400, salary: 'Rs. 56,100 - 1,77,500/-', location: 'Bangalore, Trivandrum, Ahmedabad', ageLimit: '18-35 years', education: 'BE/B.Tech with 65% marks', applicationFee: 'Rs. 100 (General), SC/ST/PH/Female: Nil', status: 'UPCOMING', startDate: daysFromNow(30), lastDate: daysFromNow(60) },
+        { title: 'AIIMS Nursing Officer Recruitment 2026', slug: 'aiims-nursing-officer-2026', departmentId: deptMap['AIIMS'], categoryId: cat['Medical'], advertisementNo: 'AIIMS/NO/2026/01', totalVacancies: 1800, salary: 'Rs. 44,900 - 1,42,400/-', location: 'Across AIIMS Institutions', ageLimit: '18-35 years', education: 'B.Sc Nursing or GNM', applicationFee: 'Rs. 1500 (General/OBC), SC/ST: Rs. 1000', status: 'ACTIVE', startDate: daysAgo(3), lastDate: daysFromNow(25) },
+        { title: 'ONGC Executive Trainee Recruitment 2026', slug: 'ongc-executive-trainee-2026', departmentId: deptMap['ONGC'], categoryId: cat['Public Sector'], advertisementNo: 'ONGC/ET/2026/01', totalVacancies: 600, salary: 'Rs. 60,000 - 1,80,000/-', location: 'Across India', ageLimit: '18-30 years', education: 'BE/B.Tech with GATE score', applicationFee: 'Rs. 500 (General/OBC), SC/ST/PH: Nil', status: 'ACTIVE', startDate: daysAgo(7), lastDate: daysFromNow(18) },
+        { title: 'SEBI Grade A Assistant Manager 2026', slug: 'sebi-grade-a-2026', departmentId: deptMap['SEBI'], categoryId: cat['Banking'], advertisementNo: 'SEBI/GR-A/2026/01', totalVacancies: 100, salary: 'Rs. 44,500 - 1,41,500/-', location: 'Mumbai, Delhi, Chennai, Kolkata', ageLimit: '21-30 years', education: "Bachelor's Degree", applicationFee: 'Rs. 1000 (General/OBC), SC/ST/PH: Rs. 100', status: 'UPCOMING', startDate: daysFromNow(15), lastDate: daysFromNow(45) },
+        { title: 'FCI Manager Recruitment 2026', slug: 'fci-manager-2026', departmentId: deptMap['FCI'], categoryId: cat['Central Govt'], advertisementNo: 'FCI/MGR/2026/01', totalVacancies: 900, salary: 'Rs. 44,900 - 1,42,400/-', location: 'Across India', ageLimit: '18-35 years', education: "Bachelor's Degree", applicationFee: 'Rs. 800 (General/OBC), SC/ST/PH: Nil', status: 'UPCOMING', startDate: daysFromNow(60), lastDate: daysFromNow(90) },
+        { title: 'BSNL Junior Engineer Recruitment 2026', slug: 'bsnl-je-2026', departmentId: deptMap['BSNL'], categoryId: cat['Engineering'], advertisementNo: 'BSNL/JE/2026/01', totalVacancies: 2000, salary: 'Rs. 25,000 - 55,000/-', location: 'Across India', ageLimit: '18-30 years', education: "Diploma or Bachelor's in Engineering", applicationFee: 'Rs. 1000 (General/OBC), SC/ST/PH: Rs. 500', status: 'UPCOMING', startDate: daysFromNow(45), lastDate: daysFromNow(75) },
       ],
     });
     console.log('  government jobs seeded');

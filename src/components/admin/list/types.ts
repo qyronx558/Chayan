@@ -30,6 +30,8 @@ export interface FilterDef {
   param?: string;
   valueKey?: "id" | "slug";
   lookupKey?: string;
+  /** Fixed choices (no lookup endpoint), e.g. job level. */
+  options?: LookupOption[];
 }
 
 export interface LookupOption {

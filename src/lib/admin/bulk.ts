@@ -47,7 +47,7 @@ export async function runBulk(
 
 /** CSV template headers per module for ImportWizard. */
 export const IMPORT_TEMPLATES: Record<string, string[]> = {
-  Job: ["title", "slug", "departmentId", "categoryId", "stateId", "advertisementNo", "totalVacancies", "lastDate", "status"],
+  Job: ["title", "slug", "departmentId", "categoryId", "jobLevel", "stateId", "district", "advertisementNo", "totalVacancies", "lastDate", "status"],
   Result: ["title", "slug", "departmentId", "categoryId", "jobId", "pdfUrl", "resultDate", "status"],
   AdmitCard: ["title", "slug", "departmentId", "categoryId", "jobId", "examDate", "downloadUrl", "status"],
   AnswerKey: ["title", "slug", "departmentId", "categoryId", "jobId", "pdfUrl", "status"],

@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { cn, slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { LookupOption } from "@/components/admin/list/types";
-import { CategoryPicker, CompanyPicker, DepartmentPicker, StatePicker } from "./picker/RelationPicker";
+import { CategoryPicker, CompanyPicker, DepartmentPicker, DistrictPicker, StatePicker } from "./picker/RelationPicker";
 
 interface SearchableRelationSelectProps {
   value: string | null | undefined;
@@ -24,6 +24,11 @@ interface SearchableRelationSelectProps {
   onCreateNew?: (name: string) => void;
   invalidateKeys?: string[][];
   disabled?: boolean;
+  /** Shown instead of the placeholder while disabled (e.g. "Select a state first"). */
+  disabledHint?: string;
+  loading?: boolean;
+  /** District picker only: the parent state's name for the picker subtitle. */
+  contextLabel?: string;
 }
 
 export function SearchableRelationSelect({
@@ -41,6 +46,9 @@ export function SearchableRelationSelect({
   onCreateNew,
   invalidateKeys = [],
   disabled = false,
+  disabledHint,
+  loading = false,
+  contextLabel,
 }: SearchableRelationSelectProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -90,12 +98,28 @@ export function SearchableRelationSelect({
         )}
       >
         <span className="min-w-0 flex-1 truncate text-left">
-          {selected ? selected.name : stale ? "Previously selected (unavailable)" : (placeholder ?? `Select ${label.toLowerCase()}`)}
+          {disabled && disabledHint
+            ? disabledHint
+            : selected
+              ? selected.name
+              : stale
+                ? loading ? "Loading…" : "Previously selected (unavailable)"
+                : (placeholder ?? `Select ${label.toLowerCase()}`)}
         </span>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
 
-      {label === "State" ? (
+      {label === "District" ? (
+        <DistrictPicker
+          {...pickerProps}
+          districts={options}
+          loading={loading}
+          stateName={contextLabel}
+          allowNone={nullable}
+          noneLabel={noneLabel}
+          onClear={() => onChange(null)}
+        />
+      ) : label === "State" ? (
         <StatePicker
           {...pickerProps}
           states={options}

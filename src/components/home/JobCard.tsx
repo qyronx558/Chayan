@@ -11,6 +11,7 @@ import { cn, formatDate } from "@/lib/utils"
 import { UniversalCard, UniversalCardSkeleton } from "@/components/ui/universal-card"
 import { CardShareButton } from "@/components/ui/card-actions"
 import { cleanTitle } from "@/lib/card-helpers"
+import { Badge } from "@/components/ui/badge"
 
 interface JobCardProps {
  id: string
@@ -23,6 +24,8 @@ interface JobCardProps {
  salary?: string | null
  status: "ACTIVE" | "EXPIRED" | "UPCOMING"
  slug: string
+ /** "All India" | state name | "District, State" - see jobLocationLabel(). */
+ locationLabel?: string | null
  className?: string
 }
 
@@ -42,6 +45,7 @@ export function JobCard({
  salary,
  status,
  slug,
+ locationLabel,
  className,
 }: JobCardProps) {
  const isLastDateUrgent = lastDateToApply
@@ -71,6 +75,12 @@ export function JobCard({
     organization={department}
     status={statusLabel[status]}
     metadata={meta}
+    badge={locationLabel ? (
+     <Badge variant="outline" className="gap-1 font-normal">
+      <MapPin className="h-3 w-3" aria-hidden />
+      {locationLabel}
+     </Badge>
+    ) : undefined}
     primaryCtaUrl={`/apply/${slug}`}
     track={<ApplicationTracker jobId={id} />}
     save={<BookmarkButton jobId={id} />}

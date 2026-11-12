@@ -14,6 +14,7 @@ import {
  PUBLIC_INFINITE_LIMIT as LIMIT,
 } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
+import { jobLocationLabel } from "@/lib/locations"
 
 interface CategoryInfo {
  id: string
@@ -28,7 +29,9 @@ interface JobData {
  slug: string
  department: { id: string; name: string; slug: string }
  category: { id: string; name: string; slug: string }
+ jobLevel?: "CENTRAL" | "STATE" | "DISTRICT"
  state: { id: string; name: string; slug: string } | null
+ district?: { id: string; name: string; slug: string } | null
  location: string | null
  totalVacancies: number | null
  lastDate: string | null
@@ -211,6 +214,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
           department={job.department.name}
           departmentSlug={job.department.slug}
           location={job.location || job.state?.name}
+          locationLabel={jobLocationLabel(job)}
           totalVacancies={job.totalVacancies}
           lastDateToApply={job.lastDate}
           salary={job.salary}

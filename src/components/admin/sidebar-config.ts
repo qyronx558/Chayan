@@ -25,6 +25,7 @@ import {
   UploadCloud,
   DatabaseZap,
   ScrollText,
+  MapPin,
 } from "lucide-react";
 import type { StaffRole } from "@/lib/admin/access";
 
@@ -68,6 +69,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Blog posts", href: "/admin/blog", icon: Newspaper, minRole: "ADMIN" },
       { label: "Categories", href: "/admin/categories", icon: FolderKanban, minRole: "SUPER_ADMIN" },
       { label: "Departments", href: "/admin/departments", icon: Landmark, minRole: "SUPER_ADMIN" },
+      { label: "Locations", href: "/admin/locations", icon: MapPin, minRole: "SUPER_ADMIN" },
     ],
   },
   {

@@ -39,12 +39,22 @@ export const registerSchema = z
     path: ["confirmPassword"],
   })
 
+const jobLevelField = z.preprocess(
+  (v: unknown) => (typeof v === "string" ? (v.trim() ? v.trim().toUpperCase() : undefined) : v ?? undefined),
+  z.enum(["CENTRAL", "STATE", "DISTRICT"], { message: "Job level must be Central, State or District" }).optional()
+)
+
 export const jobSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   departmentId: requiredId,
   categoryId: requiredId,
+  // Omitted level ⇒ derived from state/district (see resolveJobLocation).
+  jobLevel: jobLevelField,
   stateId: optionalId,
+  districtId: optionalId,
+  // Bulk import only: district typed by name, resolved server-side within the state.
+  districtName: optionalText,
   advertisementNo: z.string().nullable().optional(),
   totalVacancies: z.coerce.number().int().positive().nullable().optional(),
   salary: z.string().nullable().optional(),
@@ -64,6 +74,30 @@ export const jobSchema = z.object({
   experience: z.string().nullable().optional(),
   startDate: z.coerce.date().nullable().optional(),
   lastDate: z.coerce.date().nullable().optional(),
+}).superRefine((v, ctx) => {
+  if ((v.jobLevel === "STATE" || v.jobLevel === "DISTRICT") && !v.stateId) {
+    ctx.addIssue({ code: "custom", path: ["stateId"], message: "State is required for state and district level jobs" })
+  }
+  if (v.jobLevel === "DISTRICT" && !v.districtId && !v.districtName) {
+    ctx.addIssue({ code: "custom", path: ["districtId"], message: "District is required for district level jobs" })
+  }
+})
+
+const locationName = z.string().trim().min(2, "Name is required").max(100, "Name is too long")
+const locationSlug = z.preprocess(
+  emptyToNull,
+  z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug may only contain lowercase letters, numbers and hyphens").nullable().optional()
+)
+
+export const stateSchema = z.object({
+  name: locationName,
+  slug: locationSlug,
+  type: z.enum(["STATE", "UNION_TERRITORY"]).default("STATE"),
+})
+
+export const districtSchema = z.object({
+  name: locationName,
+  slug: locationSlug,
 })
 
 export const categorySchema = z.object({
@@ -246,6 +280,8 @@ export const searchSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type JobInput = z.infer<typeof jobSchema>
+export type StateInput = z.input<typeof stateSchema>
+export type DistrictInput = z.input<typeof districtSchema>
 export type CategoryInput = z.infer<typeof categorySchema>
 export type DepartmentInput = z.infer<typeof departmentSchema>
 export type ResultInput = z.infer<typeof resultSchema>

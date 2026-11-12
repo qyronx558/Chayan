@@ -41,7 +41,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
 
   const job = await prisma.job.findUnique({
     where: { slug },
-    include: { department: true, category: true, state: true },
+    include: { department: true, category: true, state: true, district: true },
   })
 
   if (!job) notFound()
@@ -116,7 +116,9 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         department={job.department.name}
         departmentId={job.department.id}
         category={{ id: job.category.id, name: job.category.name }}
-        state={job.state ? { id: job.state.id, name: job.state.name } : null}
+        jobLevel={job.jobLevel}
+        state={job.state ? { id: job.state.id, name: job.state.name, slug: job.state.slug } : null}
+        district={job.district ? { id: job.district.id, name: job.district.name, slug: job.district.slug } : null}
         status={job.status}
         advertisementNo={job.advertisementNo}
         totalVacancies={job.totalVacancies}

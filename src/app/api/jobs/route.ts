@@ -13,6 +13,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
+import { buildJobLocationWhere, findDistrictIdByName, validateJobLocation } from "@/lib/locations-server"
 import { buildDateRange, dateInDays, parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
 export async function GET(request: NextRequest) {
@@ -62,8 +63,12 @@ export async function GET(request: NextRequest) {
         { department: { name: { contains: search, mode: "insensitive" } } },
         { category: { name: { contains: search, mode: "insensitive" } } },
         { state: { name: { contains: search, mode: "insensitive" } } },
+        { district: { name: { contains: search, mode: "insensitive" } } },
       ]
     }
+
+    const locationWhere = buildJobLocationWhere(searchParams)
+    if (locationWhere.length) where.AND = locationWhere
 
     if (categoryId) where.categoryId = categoryId
     if (departmentId) where.departmentId = departmentId
@@ -128,7 +133,7 @@ export async function GET(request: NextRequest) {
       const [pool, total] = await Promise.all([
         prisma.job.findMany({
           where,
-          include: { department: true, category: true, state: true },
+          include: { department: true, category: true, state: true, district: { select: { id: true, name: true, slug: true } } },
           orderBy,
           take: CANDIDATE_POOL_SIZE,
         }),
@@ -147,7 +152,13 @@ export async function GET(request: NextRequest) {
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
-        include: { department: true, category: true, state: true, ...CREATED_BY_SELECT },
+        include: {
+          department: true,
+          category: true,
+          state: true,
+          district: { select: { id: true, name: true, slug: true } },
+          ...CREATED_BY_SELECT,
+        },
         orderBy,
         skip,
         take: limit,
@@ -214,7 +225,9 @@ export async function POST(request: NextRequest) {
       slug,
       departmentId: rawDepartmentId,
       categoryId: rawCategoryId,
+      jobLevel: rawJobLevel,
       stateId: rawStateId,
+      districtId: rawDistrictId,
       advertisementNo,
       totalVacancies,
       salary,
@@ -240,7 +253,15 @@ export async function POST(request: NextRequest) {
     // those (and any whitespace-only value) must become null, never connect.
     const departmentId = normalizeRequiredId(rawDepartmentId)
     const categoryId = normalizeRequiredId(rawCategoryId)
-    const stateId = normalizeOptionalId(rawStateId)
+    const rawState = normalizeOptionalId(rawStateId)
+    let rawDistrict = normalizeOptionalId(rawDistrictId)
+    // Bulk import sends the district by name (column "district").
+    if (!rawDistrict && rawState && typeof body.districtName === "string" && body.districtName.trim()) {
+      rawDistrict = await findDistrictIdByName(rawState, body.districtName)
+      if (!rawDistrict) {
+        return NextResponse.json({ success: false, error: `District "${body.districtName.trim()}" not found in the selected state` }, { status: 400 })
+      }
+    }
 
     if (!departmentId) {
       return NextResponse.json({ success: false, error: "Department is required" }, { status: 400 })
@@ -249,15 +270,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Category is required" }, { status: 400 })
     }
 
-    const missing = await findMissingRelation({ departmentId, categoryId, stateId })
+    const missing = await findMissingRelation({ departmentId, categoryId })
     if (missing) return missingRelationResponse(missing)
+
+    const loc = await validateJobLocation({ jobLevel: rawJobLevel, stateId: rawState, districtId: rawDistrict })
+    if (!loc.ok) return NextResponse.json({ success: false, error: loc.error }, { status: 400 })
+    const { jobLevel, stateId, districtId } = loc.value
 
     const data: Prisma.JobCreateInput = {
       title,
       slug,
       department: { connect: { id: departmentId } },
       category: { connect: { id: categoryId } },
+      jobLevel,
       ...(stateId ? { state: { connect: { id: stateId } } } : {}),
+      ...(districtId ? { district: { connect: { id: districtId } } } : {}),
       ...(advertisementNo !== undefined && advertisementNo !== null ? { advertisementNo } : {}),
       ...(totalVacancies !== undefined && totalVacancies !== null ? { totalVacancies } : {}),
       ...(salary !== undefined && salary !== null ? { salary } : {}),
