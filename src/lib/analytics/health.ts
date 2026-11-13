@@ -77,8 +77,8 @@ export function evaluateHealth(input: HealthInput): HealthItem[] {
       status: crawlerStatus,
       detail: !input.crawlerLastRunAt ? "No crawler run recorded yet." : `Last run ${input.crawlerLastRunAt} with ${input.crawlerErrors} errors.`,
       checkedAt: at,
-      href: "/admin/import-data",
-      actionLabel: "Runs",
+      href: "/admin/review",
+      actionLabel: "Review",
     },
     {
       key: "sitemap",

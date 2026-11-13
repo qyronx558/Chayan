@@ -84,7 +84,7 @@ These are built around Google's publisher policies ("valuable inventory", no scr
 **Before applying for AdSense:**
 - Keep auto-approve **off** until you have reviewed a few hundred bot posts.
 - Make sure the about, contact, privacy, editorial-policy and disclaimer pages are complete.
-- Turn off the legacy *Import data* fetcher (`src/lib/fetchers`). It copies listings from a third-party aggregator site, which is exactly the duplicate content these rules exist to avoid.
+- The legacy *Import data* fetcher, which copied listings from a third-party aggregator site, has been removed. Do not add sources that republish other job sites.
 
 ## Running it
 

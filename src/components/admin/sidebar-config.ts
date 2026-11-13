@@ -23,7 +23,6 @@ import {
   Clock,
   SlidersHorizontal,
   UploadCloud,
-  DatabaseZap,
   ScrollText,
   MapPin,
 } from "lucide-react";
@@ -96,7 +95,6 @@ export const NAV_GROUPS: NavGroup[] = [
     defaultOpen: false,
     items: [
       { label: "Bulk upload", href: "/admin/bulk-upload", icon: UploadCloud, minRole: "ADMIN" },
-      { label: "Import data", href: "/admin/import-data", icon: DatabaseZap, minRole: "SUPER_ADMIN" },
       { label: "Activity logs", href: "/admin/logs", icon: ScrollText, minRole: "ADMIN" },
     ],
   },
