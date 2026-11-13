@@ -6,6 +6,7 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: syllabus.title,
     description: `${syllabus.title} - ${syllabus.department.name}${syllabus.subjects ? ` | Subjects: ${syllabus.subjects}` : ""}${syllabus.description ? ` | ${syllabus.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/syllabus/${syllabus.slug}` },
+    robots: robotsFor(syllabus.moderation, false),
     twitter: { card: "summary_large_image", title: `${syllabus.title} | ChayanJobs`, description: `${syllabus.department.name} - ${syllabus.subjects ? `Subjects: ${syllabus.subjects}` : "Download syllabus"}` },
   }
 }
@@ -34,7 +36,7 @@ export default async function SyllabusDetailPage({ params }: { params: Promise<{
     include: { department: true, category: true, job: true },
   })
 
-  if (!syllabus) notFound()
+  if (!syllabus || !(await canViewContent(syllabus.moderation))) notFound()
 
   const relatedSyllabus = await prisma.syllabus.findMany({
     where: {

@@ -6,6 +6,7 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: result.title,
     description: `${result.title} - ${result.department.name}${result.resultDate ? ` | Result Date: ${formatDate(result.resultDate)}` : ""}${result.description ? ` | ${result.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/result/${result.slug}` },
+    robots: robotsFor(result.moderation, false),
     twitter: { card: "summary_large_image", title: `${result.title} | ChayanJobs`, description: `${result.department.name} - ${result.resultDate ? `Result: ${formatDate(result.resultDate)}` : ""}` },
   }
 }
@@ -34,7 +36,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ s
     include: { department: true, category: true, job: true },
   })
 
-  if (!result) notFound()
+  if (!result || !(await canViewContent(result.moderation))) notFound()
 
   const relatedResults = await prisma.result.findMany({
     where: {

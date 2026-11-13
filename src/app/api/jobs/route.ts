@@ -245,6 +245,7 @@ export async function POST(request: NextRequest) {
       applyLink,
       status,
       experience,
+      summary,
       startDate,
       lastDate,
     } = validation.data
@@ -301,6 +302,7 @@ export async function POST(request: NextRequest) {
       ...(officialWebsite !== undefined && officialWebsite !== null ? { officialWebsite } : {}),
       ...(applyLink !== undefined && applyLink !== null ? { applyLink } : {}),
       ...(experience !== undefined && experience !== null ? { experience } : {}),
+      ...(summary !== undefined && summary !== null ? { summary } : {}),
       ...(startDate !== undefined && startDate !== null ? { startDate } : {}),
       ...(lastDate !== undefined && lastDate !== null ? { lastDate } : {}),
       status: status || "ACTIVE",

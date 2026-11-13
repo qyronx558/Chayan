@@ -1,0 +1,5 @@
+{
+  "_comment": "Manual host overrides for districts whose portal name differs from the CSV spelling. Key: \"State/District\" exactly as in prisma/data/india_districts_statewise.csv.",
+  "Bihar/Purnia": "purnea.nic.in",
+  "Bihar/Aurangabad": "aurangabad.bih.nic.in"
+}

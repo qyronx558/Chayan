@@ -6,6 +6,7 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: admitCard.title,
     description: `${admitCard.title} - ${admitCard.department.name}${admitCard.examDate ? ` | Exam Date: ${formatDate(admitCard.examDate)}` : ""}${admitCard.description ? ` | ${admitCard.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/admit-card/${admitCard.slug}` },
+    robots: robotsFor(admitCard.moderation, false),
     twitter: { card: "summary_large_image", title: `${admitCard.title} | ChayanJobs`, description: `${admitCard.department.name}${admitCard.examDate ? ` - Exam: ${formatDate(admitCard.examDate)}` : ""}` },
   }
 }
@@ -34,7 +36,7 @@ export default async function AdmitCardDetailPage({ params }: { params: Promise<
     include: { department: true, category: true, job: true },
   })
 
-  if (!admitCard) notFound()
+  if (!admitCard || !(await canViewContent(admitCard.moderation))) notFound()
 
   const relatedCards = await prisma.admitCard.findMany({
     where: {

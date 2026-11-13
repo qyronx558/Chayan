@@ -1,0 +1,24 @@
+[
+  {
+    "id": "ibps",
+    "name": "Institute of Banking Personnel Selection",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.ibps.in/",
+    "include": "[.]pdf|ibpsreg[.]ibps[.]in",
+    "department": "Institute of Banking Personnel Selection",
+    "allowHosts": ["ibps.in"],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrb",
+    "name": "Railway Recruitment Boards",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://rrb.indianrailways.gov.in/chandigarh",
+    "include": "getdata|[.]pdf",
+    "department": "Railway Recruitment Board",
+    "allowHosts": ["indianrailways.gov.in", "rrbapply.gov.in"],
+    "schedule": "frequent"
+  }
+]

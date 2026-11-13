@@ -56,6 +56,8 @@ interface JobDetailContentProps {
  updatedAt?: string | null
  viewsTotal?: number | null
  journey?: JourneyStage[] | null
+ /** Original overview written for this page (never copied from the notice). */
+ summary?: string | null
 }
 
 /* ── Small layout primitives ─────────────────────────────── */
@@ -97,7 +99,7 @@ export function JobDetailContent({
  advertisementNo, totalVacancies, salary, location, ageLimit, ageRelaxation, education,
  selectionProcess, applicationFee, importantDates, documentsRequired, howToApply,
  officialNotification, officialWebsite, applyLink, experience, startDate, lastDate,
- slug, updatedAt = null, viewsTotal = null, journey = null,
+ slug, updatedAt = null, viewsTotal = null, journey = null, summary = null,
 }: JobDetailContentProps) {
  const [now, setNow] = useState(() => Date.now())
  useEffect(() => {
@@ -205,6 +207,13 @@ export function JobDetailContent({
       <BookmarkButton jobId={jobId} size="default" variant="outline" />
      </div>
     </header>
+
+    {/* ── Overview: a short original write-up, plain text (React escapes it). ── */}
+    {summary ? (
+     <section aria-label="Overview" className="border-l-2 border-brick pl-4">
+      <p className="text-[15px] leading-relaxed text-foreground/90">{summary}</p>
+     </section>
+    ) : null}
 
     {/* ── Key facts: the 10-second scan. Each value appears here once. ── */}
     {facts.length > 0 ? (

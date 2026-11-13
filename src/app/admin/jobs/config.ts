@@ -26,6 +26,7 @@ export interface JobRow {
   officialWebsite: string | null;
   applyLink: string | null;
   experience: string | null;
+  summary?: string | null;
   startDate: string | null;
   lastDate: string | null;
   createdAt: string;
@@ -110,6 +111,7 @@ export const jobsConfig: ListModuleConfig<JobRow> = {
     applyLink: row.applyLink,
     status: row.status,
     experience: row.experience,
+    summary: row.summary ?? null,
     startDate: row.startDate,
     lastDate: row.lastDate,
   }),

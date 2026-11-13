@@ -27,6 +27,8 @@ type QueueRow = {
   createdBy: { id: string; name: string | null; email: string } | null;
   module: ReviewableEntity;
   moduleLabel: string;
+  /** Official notice the ingest bot built this post from (bot posts only). */
+  ingest?: { url: string; quality: number | null; reason: string | null } | null;
 };
 
 function parseRange(v: string | null): number | null {
@@ -129,6 +131,21 @@ export async function GET(request: NextRequest) {
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * limit;
   const data = allRows.slice(start, start + limit);
+
+  // Bot posts: attach the source notice + quality notes so reviewers can verify against the original.
+  if (data.length) {
+    const items = await prisma.ingestItem
+      .findMany({
+        where: { entityId: { in: data.map((r) => r.id) } },
+        select: { entityType: true, entityId: true, url: true, quality: true, reason: true },
+      })
+      .catch(() => []);
+    const byKey = new Map(items.map((i) => [`${i.entityType}:${i.entityId}`, i]));
+    for (const r of data) {
+      const hit = byKey.get(`${r.module}:${r.id}`);
+      if (hit) r.ingest = { url: hit.url, quality: hit.quality, reason: hit.reason };
+    }
+  }
 
   const modules = targetModules.length === 1
     ? Object.entries(countsByModule).map(([key, count]) => ({ key, label: MODULE_LABELS[key as ReviewableEntity], count }))

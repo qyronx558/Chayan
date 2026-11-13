@@ -12,12 +12,12 @@ export const dynamic = "force-dynamic"
 
 export default async function SitemapPage() {
   const [jobs, results, admitCards, answerKeys, syllabus, admissions, categories] = await Promise.all([
-    prisma.job.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.result.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.admitCard.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.answerKey.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.syllabus.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.admission.findMany({ select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.job.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.result.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.admitCard.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.answerKey.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.syllabus.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
+    prisma.admission.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
     prisma.category.findMany({ select: { name: true, slug: true }, orderBy: { name: "asc" } }),
   ])
 

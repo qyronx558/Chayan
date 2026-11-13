@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { DOCS_UPDATED, allDocs } from "@/components/docs/registry"
 import { districtPagePath, statePagePath } from "@/lib/locations"
+import { isThinJob } from "@/lib/ingest/quality"
 
 export default async function sitemap() {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "")
@@ -17,12 +18,18 @@ export default async function sitemap() {
 
   try {
     const data = await Promise.all([
-      prisma.job.findMany({ select: { slug: true, updatedAt: true } }),
-      prisma.result.findMany({ select: { slug: true, createdAt: true } }),
-      prisma.admitCard.findMany({ select: { slug: true, createdAt: true } }),
-      prisma.answerKey.findMany({ select: { slug: true, createdAt: true } }),
-      prisma.admission.findMany({ select: { slug: true, createdAt: true } }),
-      prisma.syllabus.findMany({ select: { slug: true, createdAt: true } }),
+      prisma.job.findMany({
+        where: { moderation: "APPROVED" },
+        select: {
+          slug: true, updatedAt: true, summary: true, totalVacancies: true, education: true, ageLimit: true,
+          applicationFee: true, selectionProcess: true, salary: true, howToApply: true, importantDates: true, lastDate: true,
+        },
+      }),
+      prisma.result.findMany({ where: { moderation: "APPROVED" }, select: { slug: true, createdAt: true } }),
+      prisma.admitCard.findMany({ where: { moderation: "APPROVED" }, select: { slug: true, createdAt: true } }),
+      prisma.answerKey.findMany({ where: { moderation: "APPROVED" }, select: { slug: true, createdAt: true } }),
+      prisma.admission.findMany({ where: { moderation: "APPROVED" }, select: { slug: true, createdAt: true } }),
+      prisma.syllabus.findMany({ where: { moderation: "APPROVED" }, select: { slug: true, createdAt: true } }),
       prisma.blogPost.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
       prisma.category.findMany({ select: { slug: true } }),
       prisma.state.findMany({
@@ -30,7 +37,8 @@ export default async function sitemap() {
         select: { slug: true, updatedAt: true, districts: { select: { slug: true, updatedAt: true } } },
       }),
     ])
-    jobs = data[0]
+    // Thin pages stay out of the sitemap (and carry noindex) - see isThinJob.
+    jobs = data[0].filter((j) => !isThinJob(j)).map(({ slug, updatedAt }) => ({ slug, updatedAt }))
     results = data[1]
     admitCards = data[2]
     answerKeys = data[3]

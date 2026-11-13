@@ -5,6 +5,7 @@ import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: admission.title,
     description: `${admission.title} - ${admission.department.name}${admission.startDate ? ` | Apply from: ${formatDate(admission.startDate)}` : ""}${admission.lastDate ? ` to ${formatDate(admission.lastDate)}` : ""}`,
     alternates: { canonical: `${baseUrl}/admission/${admission.slug}` },
+    robots: robotsFor(admission.moderation, false),
     twitter: { card: "summary_large_image", title: `${admission.title} | ChayanJobs`, description: `${admission.department.name} - ${admission.lastDate ? `Last date: ${formatDate(admission.lastDate)}` : ""}` },
   }
 }
@@ -33,7 +35,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
     include: { department: true, category: true },
   })
 
-  if (!admission) notFound()
+  if (!admission || !(await canViewContent(admission.moderation))) notFound()
 
   const relatedAdmissions = await prisma.admission.findMany({
     where: {

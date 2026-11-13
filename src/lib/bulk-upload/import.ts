@@ -39,6 +39,22 @@ export interface BulkImportOutcome {
 
 export type ContentModule = Exclude<BulkModuleId, "categories" | "departments">
 
+/** Per-row result, reported through `ImportContentOptions.onRow`. */
+export type RowOutcome =
+  | { status: "created"; id: string; slug: string }
+  | { status: "duplicate" }
+  | { status: "error"; message: string }
+
+export interface ImportContentOptions {
+  /**
+   * Moderation state for created rows. Bulk upload (super admin) publishes
+   * straight away; the ingest bot passes a per-row decision.
+   */
+  moderation?: "APPROVED" | "PENDING" | ((row: Record<string, unknown>, index: number) => "APPROVED" | "PENDING")
+  /** Called once per input row with what happened to it. */
+  onRow?: (index: number, outcome: RowOutcome) => void
+}
+
 export const REVALIDATE_KIND: Record<
   ContentModule,
   "job" | "result" | "admit-card" | "admission" | "answer-key" | "syllabus"
@@ -91,6 +107,18 @@ function contentStatus(v: unknown): string | undefined {
   const s = cellStr(v)
   if (!s) return undefined
   return s.toLowerCase() === "approved" ? "PUBLISHED" : s
+}
+
+/** Important-dates map ({ "Exam Date": "2026-12-01" }) - only plain string values survive. */
+function cellDates(v: unknown): Record<string, string> | null {
+  if (!v || typeof v !== "object" || Array.isArray(v) || v instanceof Date) return null
+  const out: Record<string, string> = {}
+  for (const [k, raw] of Object.entries(v as Record<string, unknown>)) {
+    const label = k.trim().slice(0, 80)
+    const value = cellStr(raw)
+    if (label && value) out[label] = value.slice(0, 120)
+  }
+  return Object.keys(out).length ? out : null
 }
 
 function jobStatus(v: unknown): "ACTIVE" | "EXPIRED" | "UPCOMING" {
@@ -243,8 +271,12 @@ export async function importContent(
   moduleId: ContentModule,
   rows: Record<string, unknown>[],
   userId: string,
-  counters: BulkCounters
+  counters: BulkCounters,
+  opts: ImportContentOptions = {}
 ): Promise<BulkImportOutcome> {
+  const moderationFor = (row: Record<string, unknown>, index: number) =>
+    typeof opts.moderation === "function" ? opts.moderation(row, index) : (opts.moderation ?? "APPROVED")
+  const report = (index: number, outcome: RowOutcome) => opts.onRow?.(index, outcome)
   const [departments, categories, states] = await Promise.all([
     prisma.department.findMany({ select: { id: true, name: true } }),
     prisma.category.findMany({ select: { id: true, name: true } }),
@@ -288,11 +320,13 @@ export async function importContent(
       const title = cellStr(r.title)
       if (!title) {
         errors.push({ row: excelRow, message: "Title is required." })
+        report(i, { status: "error", message: "Title is required." })
         continue
       }
       const slug = uniqueSlug(cellStr(r.slug) || title)
       if (seenSlugs.has(slug) || seenTitles.has(title.toLowerCase())) {
         skipped++ // duplicate - leave existing record untouched
+        report(i, { status: "duplicate" })
         continue
       }
 
@@ -300,6 +334,7 @@ export async function importContent(
       const catName = cellStr(r.category)
       if (!deptName || !catName) {
         errors.push({ row: excelRow, message: "Department and Category are required." })
+        report(i, { status: "error", message: "Department and Category are required." })
         continue
       }
 
@@ -307,24 +342,33 @@ export async function importContent(
       const departmentId = await ensureDepartment(deptName, deptCache, userId, counters)
       const categoryId = await ensureCategory(catName, catCache, counters)
 
-      const failure = await createContentRow(moduleId, r, {
+      const created = await createContentRow(moduleId, r, {
         title,
         slug,
         departmentId,
         categoryId,
         userId,
         stateByName,
+        moderation: moderationFor(r, i),
       })
-      if (typeof failure === "string") {
-        errors.push({ row: excelRow, message: failure })
+      if (typeof created === "string") {
+        errors.push({ row: excelRow, message: created })
+        report(i, { status: "error", message: created })
         continue
       }
       seenSlugs.add(slug)
       seenTitles.add(title.toLowerCase())
       imported++
+      report(i, { status: "created", id: created.id, slug })
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") skipped++
-      else errors.push({ row: excelRow, message: e instanceof Error ? e.message : "Insert failed." })
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        skipped++
+        report(i, { status: "duplicate" })
+      } else {
+        const message = e instanceof Error ? e.message : "Insert failed."
+        errors.push({ row: excelRow, message })
+        report(i, { status: "error", message })
+      }
     }
   }
   return { imported, skipped, errors }
@@ -337,15 +381,21 @@ interface ResolvedRefs {
   categoryId: string
   userId: string
   stateByName: Map<string, string>
+  moderation: "APPROVED" | "PENDING"
 }
 
-/** Returns null on success, or an error message for the row. */
+/** Returns the created id on success, or an error message for the row. */
 async function createContentRow(
   moduleId: ContentModule,
   r: Record<string, unknown>,
   refs: ResolvedRefs
-): Promise<null | string> {
+): Promise<{ id: string } | string> {
   const { title, slug, departmentId, categoryId, userId } = refs
+  // Approved rows count as reviewed by the uploader; pending rows wait for a reviewer.
+  const review =
+    refs.moderation === "APPROVED"
+      ? { moderation: "APPROVED" as const, reviewedById: userId, reviewedAt: new Date() }
+      : { moderation: "PENDING" as const }
   const base = {
     title,
     slug,
@@ -385,12 +435,14 @@ async function createContentRow(
         applyLink: cellStr(r.applyLink) ?? null,
         status: jobStatus(r.status),
         experience: cellStr(r.experience) ?? null,
+        importantDates: cellDates(r.importantDates),
         startDate: cellDate(r.startDate) ?? null,
         lastDate: cellDate(r.lastDate) ?? null,
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.job.create({
+      const row = await prisma.job.create({
+        select: { id: true },
         data: {
           ...base,
           jobLevel: loc.value.jobLevel,
@@ -412,14 +464,14 @@ async function createContentRow(
           applyLink: v.applyLink,
           status: v.status,
           experience: v.experience,
+          ...(v.importantDates ? { importantDates: v.importantDates as Prisma.InputJsonValue } : {}),
+          ...(cellStr(r.summary) ? { summary: cellStr(r.summary) } : {}),
           startDate: v.startDate,
           lastDate: v.lastDate,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
     case "results": {
       const validation = resultSchema.safeParse({
@@ -434,19 +486,18 @@ async function createContentRow(
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.result.create({
+      const row = await prisma.result.create({
+        select: { id: true },
         data: {
           ...base,
           description: v.description,
           pdfUrl: v.pdfUrl,
           resultDate: v.resultDate,
           status: v.status,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
     case "admit-cards": {
       const validation = admitCardSchema.safeParse({
@@ -461,19 +512,18 @@ async function createContentRow(
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.admitCard.create({
+      const row = await prisma.admitCard.create({
+        select: { id: true },
         data: {
           ...base,
           description: v.description,
           downloadUrl: v.downloadUrl,
           examDate: v.examDate,
           status: v.status,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
     case "admissions": {
       const validation = admissionSchema.safeParse({
@@ -490,7 +540,8 @@ async function createContentRow(
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.admission.create({
+      const row = await prisma.admission.create({
+        select: { id: true },
         data: {
           ...base,
           description: v.description,
@@ -499,12 +550,10 @@ async function createContentRow(
           lastDate: v.lastDate,
           pdfUrl: v.pdfUrl,
           status: v.status,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
     case "syllabus": {
       const validation = syllabusSchema.safeParse({
@@ -519,19 +568,18 @@ async function createContentRow(
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.syllabus.create({
+      const row = await prisma.syllabus.create({
+        select: { id: true },
         data: {
           ...base,
           description: v.description,
           subjects: v.subjects,
           pdfUrl: v.pdfUrl,
           status: v.status,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
     case "answer-keys": {
       const validation = answerKeySchema.safeParse({
@@ -545,18 +593,17 @@ async function createContentRow(
       })
       if (!validation.success) return validation.error.issues[0].message
       const v = validation.data
-      await prisma.answerKey.create({
+      const row = await prisma.answerKey.create({
+        select: { id: true },
         data: {
           ...base,
           description: v.description,
           pdfUrl: v.pdfUrl,
           status: v.status,
-          moderation: "APPROVED",
-          reviewedById: userId,
-          reviewedAt: new Date(),
+          ...review,
         },
       })
-      return null
+      return row
     }
   }
 }

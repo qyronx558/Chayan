@@ -6,6 +6,7 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: answerKey.title,
     description: `${answerKey.title} - ${answerKey.department.name}${answerKey.description ? ` | ${answerKey.description}` : ""}`,
     alternates: { canonical: `${baseUrl}/answer-key/${answerKey.slug}` },
+    robots: robotsFor(answerKey.moderation, false),
     twitter: { card: "summary_large_image", title: `${answerKey.title} | ChayanJobs`, description: `${answerKey.department.name} - Download answer key` },
   }
 }
@@ -34,7 +36,7 @@ export default async function AnswerKeyDetailPage({ params }: { params: Promise<
     include: { department: true, category: true, job: true },
   })
 
-  if (!answerKey) notFound()
+  if (!answerKey || !(await canViewContent(answerKey.moderation))) notFound()
 
   const relatedKeys = await prisma.answerKey.findMany({
     where: {

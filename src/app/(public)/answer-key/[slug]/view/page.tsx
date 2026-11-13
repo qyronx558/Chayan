@@ -5,6 +5,7 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
+import { canViewContent } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -32,7 +33,7 @@ export default async function AnswerKeyViewPage({ params }: Props) {
     include: { department: true, category: true },
   })
 
-  if (!answerKey) notFound()
+  if (!answerKey || !(await canViewContent(answerKey.moderation))) notFound()
 
   const targetUrl = normalizeExternalUrl(answerKey.pdfUrl)
   if (!targetUrl) notFound()

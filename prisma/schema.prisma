@@ -450,6 +450,8 @@ model Job {
   applyLink            String?
   status               JobStatus        @default(ACTIVE)
   experience           String?
+  /// Short original overview (written in our own words, never copied from the source).
+  summary              String?
   startDate            DateTime?
   lastDate             DateTime?
   createdAt            DateTime         @default(now())
@@ -1377,6 +1379,39 @@ model WebVitalEvent {
 
   @@index([metric, createdAt])
   @@index([path])
+}
+
+enum IngestStatus {
+  POSTED
+  SKIPPED
+  DUPLICATE
+  FAILED
+}
+
+/// One row per official notice the ingest bot has seen (dedupe + audit trail).
+model IngestItem {
+  id           String       @id @default(cuid())
+  sourceId     String
+  url          String
+  urlHash      String       @unique
+  contentHash  String?
+  kind         String
+  status       IngestStatus
+  reason       String?
+  entityType   String?
+  entityId     String?
+  confidence   Float?
+  quality      Int?
+  autoApproved Boolean      @default(false)
+  attempts     Int          @default(1)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([sourceId, createdAt])
+  @@index([contentHash])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([autoApproved, createdAt])
 }
 
 model CrawlerRun {

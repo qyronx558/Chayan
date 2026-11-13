@@ -72,6 +72,7 @@ export const jobSchema = z.object({
   applyLink: z.string().nullable().optional(),
   status: z.enum(["ACTIVE", "EXPIRED", "UPCOMING"]).default("ACTIVE"),
   experience: z.string().nullable().optional(),
+  summary: z.string().max(2000, "Overview is too long").nullable().optional(),
   startDate: z.coerce.date().nullable().optional(),
   lastDate: z.coerce.date().nullable().optional(),
 }).superRefine((v, ctx) => {
