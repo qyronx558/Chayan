@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest"
 import { triageNotice } from "@/lib/ingest/classify"
 
 describe("triageNotice", () => {
+  it("reads file-name style titles with underscores", () => {
+    expect(triageNotice("MICRO_BIOLOGIST-2026_ADVERTISEMENT (08-09-2026)")).toMatchObject({ relevant: true, kind: "jobs" })
+  })
+  it("treats a bare advertisement as a job unless it is a tender", () => {
+    expect(triageNotice("Advertisement No. 12/2026 District Health Society").relevant).toBe(true)
+    expect(triageNotice("Advertisement for e-tender of computer supply").relevant).toBe(false)
+  })
   it.each([
     ["Recruitment of Staff Nurse on contract basis", "jobs"],
     ["Walk-in interview for Medical Officer", "jobs"],

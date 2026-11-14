@@ -1,9 +1,10 @@
+import { readFileSync } from "node:fs"
 import path from "node:path"
 import { describe, expect, it, vi } from "vitest"
-import { inShard, loadSources, parseArgs, resolveApiBase, selectSources } from "../../../scripts/ingest/run"
-import { parseRobots } from "../../../scripts/ingest/http"
+import { inShard, loadSources, parseArgs, resolveApiBase, robotsNote, selectSources } from "../../../scripts/ingest/run"
+import { fallbackAgentFor, parseRobots } from "../../../scripts/ingest/http"
 import { isReadableText } from "../../../scripts/ingest/documents"
-import { hostCandidates } from "../../../scripts/ingest/discover-districts"
+import { hostCandidates, pageNamesState } from "../../../scripts/ingest/discover-districts"
 import { INGEST_KINDS, type SourceDef } from "@/lib/ingest/types"
 
 describe("CLI args", () => {
@@ -74,6 +75,47 @@ describe("committed source registry", () => {
   it("knows every content kind", () => {
     expect(INGEST_KINDS).toContain("jobs")
   })
+
+  it("covers 40+ central boards, 28+ state boards and most districts", () => {
+    expect(all.filter((s) => s.level === "CENTRAL").length).toBeGreaterThanOrEqual(40)
+    expect(all.filter((s) => s.level === "STATE").length).toBeGreaterThanOrEqual(28)
+    expect(all.filter((s) => s.level === "DISTRICT").length).toBeGreaterThanOrEqual(550)
+  })
+
+  it("uses the exact seeded state / district names (posts must land on real location pages)", () => {
+    const csv = readFileSync(path.resolve(__dirname, "../../../prisma/data/india_districts_statewise.csv"), "utf8")
+      .split(/\r?\n/)
+      .slice(1)
+      .filter(Boolean)
+      .map((l) => l.match(/("([^"]|"")*"|[^,]*)(,|$)/g)!.map((c) => c.replace(/,$/, "").replace(/^"|"$/g, "").trim()))
+    const states = new Set(csv.map((c) => c[0]))
+    const districts = new Set(csv.map((c) => `${c[0]}/${c[2]}`))
+    for (const s of all) {
+      if (s.state) expect(states, s.id).toContain(s.state)
+      if (s.district) expect(districts, s.id).toContain(`${s.state}/${s.district}`)
+    }
+  })
+})
+
+describe("TLS compatibility fallbacks", () => {
+  it("retries legacy-renegotiation servers with the legacy agent, keeping certificate checks first", () => {
+    expect(fallbackAgentFor("ERR_SSL_UNSAFE_LEGACY_RENEGOTIATION_DISABLED", "strict")).toBe("legacy")
+    expect(fallbackAgentFor("UNABLE_TO_VERIFY_LEAF_SIGNATURE", "strict")).toBe("lenient")
+    expect(fallbackAgentFor("UNABLE_TO_VERIFY_LEAF_SIGNATURE", "legacy")).toBe("legacyLenient")
+    expect(fallbackAgentFor("ERR_SSL_UNSAFE_LEGACY_RENEGOTIATION_DISABLED", "lenient")).toBe("legacyLenient")
+  })
+  it("does not retry other errors or loop", () => {
+    expect(fallbackAgentFor("ENOTFOUND", "strict")).toBeNull()
+    expect(fallbackAgentFor("UNABLE_TO_VERIFY_LEAF_SIGNATURE", "lenient")).toBeNull()
+    expect(fallbackAgentFor("ERR_SSL_UNSAFE_LEGACY_RENEGOTIATION_DISABLED", "legacyLenient")).toBeNull()
+  })
+})
+
+describe("robots-blocked notices", () => {
+  it("explains the S3WaaS CDN's outside-India block once per host", () => {
+    expect(robotsNote("cdn.s3waas.gov.in", 76)).toMatch(/76 notice file\(s\).*outside India.*District PDFs/)
+    expect(robotsNote("example.gov.in", 2)).not.toMatch(/India/)
+  })
 })
 
 describe("robots.txt", () => {
@@ -106,6 +148,17 @@ describe("district host candidates", () => {
       expect.arrayContaining(["eastchamparan.nic.in", "east-champaran.nic.in", "east.nic.in", "eastchamparan.gov.in"]),
     )
     expect(hostCandidates("Y.S.R. (Kadapa)")).toContain("ysr.nic.in")
+  })
+  it("adds state portal domains, renamed-district aliases and state prefixes", () => {
+    expect(hostCandidates("Barpeta", "Assam")).toContain("barpeta.assam.gov.in")
+    expect(hostCandidates("Gurugram", "Haryana")).toContain("gurgaon.nic.in")
+    expect(hostCandidates("Kangra", "Himachal Pradesh")).toContain("hpkangra.nic.in")
+    expect(hostCandidates("Central Delhi", "Delhi")).toContain("dmcentral.delhi.gov.in")
+    expect(pageNamesState("जिला मुंगेली, छत्तीसगढ़ सरकार", "Chhattisgarh")).toBe(true)
+    expect(pageNamesState("district patna, government of bihar", "Bihar")).toBe(true)
+    expect(pageNamesState("district patna, government of bihar", "Assam")).toBe(false)
+    // two-letter guesses only under a state domain, never bare nic.in
+    expect(hostCandidates("Dakshina Kannada", "Karnataka")).not.toContain("dk.nic.in")
   })
 })
 

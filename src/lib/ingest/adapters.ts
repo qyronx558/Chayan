@@ -100,7 +100,7 @@ export function parseHtmlLinks(html: string, pageUrl: string, src: Pick<SourceDe
     const url = normalizeUrl($(a).attr("href") ?? "", pageUrl)
     if (!url || seen.has(url)) return
     if (include && !include.test(decodeURIComponent(url))) return
-    const title = cleanText($(a).text()) || cleanText($(a).attr("title")) || cleanText($(a).attr("aria-label"))
+    const title = (cleanText($(a).text()) || cleanText($(a).attr("title")) || cleanText($(a).attr("aria-label"))).replace(/_+/g, " ").trim()
     // Short labels ("Click here", "New", "PDF") are not notice titles.
     if (title.length < 15 || /^(click here|download|view|read more|new|pdf)$/i.test(title)) return
     seen.add(url)

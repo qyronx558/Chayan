@@ -1,59 +1,15 @@
 [
   {
     "state": "Andhra Pradesh",
-    "district": "Annamayya"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Bapatla"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Anakapalli"
-  },
-  {
-    "state": "Andhra Pradesh",
     "district": "Eluru"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Kakinada"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Dr. B.R. Ambedkar Konaseema"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Alluri Sitharama Raju"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Nandyal"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "NTR"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Palnadu"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Tirupati"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Parvathipuram Manyam"
   },
   {
     "state": "Arunachal Pradesh",
     "district": "Bichom"
   },
   {
-    "state": "Andhra Pradesh",
-    "district": "YSR Kadapa"
+    "state": "Arunachal Pradesh",
+    "district": "Dibang Valley"
   },
   {
     "state": "Arunachal Pradesh",
@@ -69,35 +25,11 @@
   },
   {
     "state": "Arunachal Pradesh",
-    "district": "Pakke-Kessang"
-  },
-  {
-    "state": "Arunachal Pradesh",
     "district": "Lower Siang"
   },
   {
-    "state": "Assam",
-    "district": "Bajali"
-  },
-  {
-    "state": "Assam",
-    "district": "Baksa"
-  },
-  {
-    "state": "Assam",
-    "district": "Barpeta"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Sri Potti Sriramulu Nellore"
-  },
-  {
     "state": "Arunachal Pradesh",
-    "district": "Dibang Valley"
-  },
-  {
-    "state": "Andhra Pradesh",
-    "district": "Sri Sathya Sai"
+    "district": "Pakke-Kessang"
   },
   {
     "state": "Arunachal Pradesh",
@@ -117,115 +49,33 @@
   },
   {
     "state": "Assam",
-    "district": "Dima Hasao"
+    "district": "Majuli",
+    "site": "https://majuli.assam.gov.in"
   },
   {
     "state": "Assam",
-    "district": "Goalpara"
+    "district": "Udalguri",
+    "site": "https://udalguri.assam.gov.in"
   },
   {
-    "state": "Assam",
-    "district": "Biswanath"
+    "state": "Bihar",
+    "district": "Samastipur"
   },
   {
-    "state": "Assam",
-    "district": "Jorhat"
+    "state": "Bihar",
+    "district": "Sitamarhi"
   },
   {
-    "state": "Assam",
-    "district": "Cachar"
+    "state": "Chhattisgarh",
+    "district": "Baloda Bazar"
   },
   {
-    "state": "Assam",
-    "district": "Bongaigaon"
+    "state": "Chhattisgarh",
+    "district": "Bijapur"
   },
   {
-    "state": "Assam",
-    "district": "Charaideo"
-  },
-  {
-    "state": "Assam",
-    "district": "Chirang"
-  },
-  {
-    "state": "Assam",
-    "district": "Dhemaji"
-  },
-  {
-    "state": "Assam",
-    "district": "Dhubri"
-  },
-  {
-    "state": "Assam",
-    "district": "Hojai"
-  },
-  {
-    "state": "Assam",
-    "district": "Dibrugarh"
-  },
-  {
-    "state": "Assam",
-    "district": "Golaghat"
-  },
-  {
-    "state": "Assam",
-    "district": "Hailakandi"
-  },
-  {
-    "state": "Assam",
-    "district": "Kamrup"
-  },
-  {
-    "state": "Assam",
-    "district": "Lakhimpur"
-  },
-  {
-    "state": "Assam",
-    "district": "Kokrajhar"
-  },
-  {
-    "state": "Assam",
-    "district": "Darrang"
-  },
-  {
-    "state": "Assam",
-    "district": "Morigaon"
-  },
-  {
-    "state": "Assam",
-    "district": "Majuli"
-  },
-  {
-    "state": "Assam",
-    "district": "Nagaon"
-  },
-  {
-    "state": "Assam",
-    "district": "Sribhumi"
-  },
-  {
-    "state": "Assam",
-    "district": "Tamulpur"
-  },
-  {
-    "state": "Assam",
-    "district": "Tinsukia"
-  },
-  {
-    "state": "Assam",
-    "district": "Kamrup Metropolitan"
-  },
-  {
-    "state": "Assam",
-    "district": "Karbi Anglong"
-  },
-  {
-    "state": "Assam",
-    "district": "South Salmara-Mankachar"
-  },
-  {
-    "state": "Assam",
-    "district": "West Karbi Anglong"
+    "state": "Chhattisgarh",
+    "district": "Bilaspur"
   },
   {
     "state": "Chhattisgarh",
@@ -237,19 +87,15 @@
   },
   {
     "state": "Chhattisgarh",
-    "district": "Kabirdham"
-  },
-  {
-    "state": "Assam",
-    "district": "Nalbari"
-  },
-  {
-    "state": "Chhattisgarh",
     "district": "Khairagarh-Chhuikhadan-Gandai"
   },
   {
-    "state": "Assam",
-    "district": "Udalguri"
+    "state": "Chhattisgarh",
+    "district": "Kondagaon"
+  },
+  {
+    "state": "Chhattisgarh",
+    "district": "Korea"
   },
   {
     "state": "Chhattisgarh",
@@ -261,15 +107,11 @@
   },
   {
     "state": "Chhattisgarh",
-    "district": "Mungeli"
+    "district": "Narayanpur"
   },
   {
-    "state": "Assam",
-    "district": "Sonitpur"
-  },
-  {
-    "state": "Bihar",
-    "district": "Samastipur"
+    "state": "Chhattisgarh",
+    "district": "Raigarh"
   },
   {
     "state": "Chhattisgarh",
@@ -277,31 +119,21 @@
   },
   {
     "state": "Chhattisgarh",
-    "district": "Sarangarh-Bilaigarh"
-  },
-  {
-    "state": "Bihar",
-    "district": "Sitamarhi"
+    "district": "Sukma"
   },
   {
     "state": "Gujarat",
     "district": "Aravalli"
   },
   {
-    "state": "Chhattisgarh",
-    "district": "Kondagaon"
+    "state": "Gujarat",
+    "district": "Banaskantha",
+    "site": "https://banaskantha.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
-    "district": "Banaskantha"
-  },
-  {
-    "state": "Gujarat",
-    "district": "Bhavnagar"
-  },
-  {
-    "state": "Assam",
-    "district": "Sivasagar"
+    "district": "Bhavnagar",
+    "site": "https://bhavnagar.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
@@ -309,171 +141,36 @@
   },
   {
     "state": "Gujarat",
-    "district": "Dang"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Narayanpur"
+    "district": "Gandhinagar",
+    "site": "https://gandhinagar.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
-    "district": "Gandhinagar"
+    "district": "Jamnagar",
+    "site": "https://jamnagar.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
-    "district": "Kutch"
+    "district": "Mehsana",
+    "site": "https://mehsana.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
-    "district": "Mehsana"
+    "district": "Panchmahal",
+    "site": "https://panchmahal.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
-    "district": "Jamnagar"
-  },
-  {
-    "state": "Gujarat",
-    "district": "Panchmahal"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Sukma"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Baloda Bazar"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Bijapur"
-  },
-  {
-    "state": "Gujarat",
-    "district": "Vadodara"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Bilaspur"
-  },
-  {
-    "state": "Haryana",
-    "district": "Gurugram"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Korea"
-  },
-  {
-    "state": "Chhattisgarh",
-    "district": "Raigarh"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Chamba"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Hamirpur"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Kangra"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Kullu"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Lahaul and Spiti"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Mandi"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Shimla"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Sirmaur"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Solan"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Una"
+    "district": "Vadodara",
+    "site": "https://vadodara.gujarat.gov.in"
   },
   {
     "state": "Gujarat",
     "district": "Vav-Tharad"
   },
   {
-    "state": "Jharkhand",
-    "district": "East Singhbhum"
-  },
-  {
-    "state": "Jharkhand",
-    "district": "Hazaribagh"
-  },
-  {
     "state": "Haryana",
     "district": "Ambala"
-  },
-  {
-    "state": "Haryana",
-    "district": "Fatehabad"
-  },
-  {
-    "state": "Haryana",
-    "district": "Palwal"
-  },
-  {
-    "state": "Jharkhand",
-    "district": "Sahebganj"
-  },
-  {
-    "state": "Jharkhand",
-    "district": "West Singhbhum"
-  },
-  {
-    "state": "Karnataka",
-    "district": "Bengaluru Rural"
-  },
-  {
-    "state": "Haryana",
-    "district": "Rohtak"
-  },
-  {
-    "state": "Karnataka",
-    "district": "Chamarajanagar"
-  },
-  {
-    "state": "Karnataka",
-    "district": "Belagavi"
-  },
-  {
-    "state": "Karnataka",
-    "district": "Dakshina Kannada"
-  },
-  {
-    "state": "Himachal Pradesh",
-    "district": "Bilaspur"
-  },
-  {
-    "state": "Karnataka",
-    "district": "Tumakuru"
-  },
-  {
-    "state": "Kerala",
-    "district": "Kasaragod"
-  },
-  {
-    "state": "Kerala",
-    "district": "Thiruvananthapuram"
   },
   {
     "state": "Haryana",
@@ -485,71 +182,71 @@
   },
   {
     "state": "Haryana",
+    "district": "Fatehabad"
+  },
+  {
+    "state": "Haryana",
+    "district": "Gurugram"
+  },
+  {
+    "state": "Haryana",
     "district": "Jind"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Barwani"
+    "state": "Haryana",
+    "district": "Palwal"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Chhindwara"
-  },
-  {
-    "state": "Madhya Pradesh",
-    "district": "Bhopal"
+    "state": "Haryana",
+    "district": "Rohtak"
   },
   {
     "state": "Haryana",
     "district": "Sonipat"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Mauganj"
+    "state": "Himachal Pradesh",
+    "district": "Bilaspur"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Morena"
+    "state": "Himachal Pradesh",
+    "district": "Lahaul and Spiti"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Pandhurna"
+    "state": "Himachal Pradesh",
+    "district": "Mandi"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Shajapur"
+    "state": "Jharkhand",
+    "district": "Hazaribagh"
+  },
+  {
+    "state": "Karnataka",
+    "district": "Belagavi"
+  },
+  {
+    "state": "Karnataka",
+    "district": "Bengaluru Rural"
+  },
+  {
+    "state": "Karnataka",
+    "district": "Chamarajanagar"
+  },
+  {
+    "state": "Karnataka",
+    "district": "Dakshina Kannada"
   },
   {
     "state": "Kerala",
     "district": "Ernakulam"
   },
   {
-    "state": "Madhya Pradesh",
-    "district": "Sagar"
-  },
-  {
     "state": "Kerala",
     "district": "Idukki"
   },
   {
-    "state": "Maharashtra",
-    "district": "Ahilyanagar"
-  },
-  {
-    "state": "Madhya Pradesh",
-    "district": "Alirajpur"
-  },
-  {
-    "state": "Maharashtra",
-    "district": "Dharashiv"
-  },
-  {
-    "state": "Maharashtra",
-    "district": "Chhatrapati Sambhajinagar"
-  },
-  {
-    "state": "Madhya Pradesh",
-    "district": "Sidhi"
+    "state": "Kerala",
+    "district": "Kasaragod"
   },
   {
     "state": "Kerala",
@@ -560,36 +257,36 @@
     "district": "Wayanad"
   },
   {
-    "state": "Maharashtra",
-    "district": "Chandrapur"
+    "state": "Madhya Pradesh",
+    "district": "Alirajpur"
   },
   {
-    "state": "Maharashtra",
-    "district": "Mumbai Suburban"
+    "state": "Madhya Pradesh",
+    "district": "Barwani"
   },
   {
-    "state": "Maharashtra",
-    "district": "Palghar"
+    "state": "Madhya Pradesh",
+    "district": "Bhopal"
   },
   {
-    "state": "Manipur",
-    "district": "Imphal East"
+    "state": "Madhya Pradesh",
+    "district": "Morena"
   },
   {
-    "state": "Meghalaya",
-    "district": "Eastern West Khasi Hills"
+    "state": "Madhya Pradesh",
+    "district": "Sagar"
   },
   {
-    "state": "Mizoram",
-    "district": "Hnahthial"
-  },
-  {
-    "state": "Mizoram",
-    "district": "Khawzawl"
+    "state": "Madhya Pradesh",
+    "district": "Sidhi"
   },
   {
     "state": "Maharashtra",
     "district": "Akola"
+  },
+  {
+    "state": "Maharashtra",
+    "district": "Chandrapur"
   },
   {
     "state": "Maharashtra",
@@ -605,6 +302,10 @@
   },
   {
     "state": "Maharashtra",
+    "district": "Mumbai Suburban"
+  },
+  {
+    "state": "Maharashtra",
     "district": "Nanded"
   },
   {
@@ -612,8 +313,16 @@
     "district": "Nashik"
   },
   {
-    "state": "Nagaland",
-    "district": "Meluri"
+    "state": "Maharashtra",
+    "district": "Palghar"
+  },
+  {
+    "state": "Maharashtra",
+    "district": "Ratnagiri"
+  },
+  {
+    "state": "Manipur",
+    "district": "Imphal East"
   },
   {
     "state": "Manipur",
@@ -624,12 +333,40 @@
     "district": "Tengnoupal"
   },
   {
-    "state": "Nagaland",
-    "district": "Peren"
+    "state": "Meghalaya",
+    "district": "West Khasi Hills"
   },
   {
-    "state": "Maharashtra",
-    "district": "Ratnagiri"
+    "state": "Mizoram",
+    "district": "Champhai"
+  },
+  {
+    "state": "Mizoram",
+    "district": "Hnahthial"
+  },
+  {
+    "state": "Mizoram",
+    "district": "Khawzawl"
+  },
+  {
+    "state": "Mizoram",
+    "district": "Lawngtlai"
+  },
+  {
+    "state": "Mizoram",
+    "district": "Saitual"
+  },
+  {
+    "state": "Mizoram",
+    "district": "Siaha"
+  },
+  {
+    "state": "Nagaland",
+    "district": "Meluri"
+  },
+  {
+    "state": "Nagaland",
+    "district": "Peren"
   },
   {
     "state": "Odisha",
@@ -661,11 +398,11 @@
   },
   {
     "state": "Odisha",
-    "district": "Dhenkanal"
+    "district": "Deogarh"
   },
   {
     "state": "Odisha",
-    "district": "Deogarh"
+    "district": "Dhenkanal"
   },
   {
     "state": "Odisha",
@@ -752,8 +489,8 @@
     "district": "Sundargarh"
   },
   {
-    "state": "Mizoram",
-    "district": "Champhai"
+    "state": "Punjab",
+    "district": "Gurdaspur"
   },
   {
     "state": "Punjab",
@@ -761,11 +498,7 @@
   },
   {
     "state": "Punjab",
-    "district": "Shaheed Bhagat Singh Nagar"
-  },
-  {
-    "state": "Mizoram",
-    "district": "Lawngtlai"
+    "district": "Sri Muktsar Sahib"
   },
   {
     "state": "Rajasthan",
@@ -777,15 +510,15 @@
   },
   {
     "state": "Rajasthan",
+    "district": "Balotra"
+  },
+  {
+    "state": "Rajasthan",
     "district": "Banswara"
   },
   {
     "state": "Rajasthan",
     "district": "Baran"
-  },
-  {
-    "state": "Rajasthan",
-    "district": "Balotra"
   },
   {
     "state": "Rajasthan",
@@ -821,11 +554,11 @@
   },
   {
     "state": "Rajasthan",
-    "district": "Deeg"
+    "district": "Dausa"
   },
   {
     "state": "Rajasthan",
-    "district": "Dausa"
+    "district": "Deeg"
   },
   {
     "state": "Rajasthan",
@@ -861,11 +594,11 @@
   },
   {
     "state": "Rajasthan",
-    "district": "Jodhpur"
+    "district": "Jhunjhunu"
   },
   {
     "state": "Rajasthan",
-    "district": "Jhunjhunu"
+    "district": "Jodhpur"
   },
   {
     "state": "Rajasthan",
@@ -897,11 +630,19 @@
   },
   {
     "state": "Rajasthan",
+    "district": "Pratapgarh"
+  },
+  {
+    "state": "Rajasthan",
     "district": "Rajsamand"
   },
   {
     "state": "Rajasthan",
     "district": "Salumbar"
+  },
+  {
+    "state": "Rajasthan",
+    "district": "Sawai Madhopur"
   },
   {
     "state": "Rajasthan",
@@ -913,6 +654,10 @@
   },
   {
     "state": "Rajasthan",
+    "district": "Sri Ganganagar"
+  },
+  {
+    "state": "Rajasthan",
     "district": "Tonk"
   },
   {
@@ -920,52 +665,24 @@
     "district": "Udaipur"
   },
   {
-    "state": "Rajasthan",
-    "district": "Sawai Madhopur"
-  },
-  {
-    "state": "Rajasthan",
-    "district": "Pratapgarh"
+    "state": "Sikkim",
+    "district": "Gangtok"
   },
   {
     "state": "Sikkim",
     "district": "Namchi"
   },
   {
-    "state": "Mizoram",
-    "district": "Saitual"
-  },
-  {
-    "state": "Mizoram",
-    "district": "Siaha"
-  },
-  {
-    "state": "Telangana",
-    "district": "Bhadradri Kothagudem"
+    "state": "Sikkim",
+    "district": "Pakyong"
   },
   {
     "state": "Telangana",
     "district": "Jayashankar Bhupalpally"
   },
   {
-    "state": "Rajasthan",
-    "district": "Sri Ganganagar"
-  },
-  {
     "state": "Telangana",
     "district": "Jogulamba Gadwal"
-  },
-  {
-    "state": "Telangana",
-    "district": "Kumuram Bheem Asifabad"
-  },
-  {
-    "state": "Telangana",
-    "district": "Medchal-Malkajgiri"
-  },
-  {
-    "state": "Meghalaya",
-    "district": "West Khasi Hills"
   },
   {
     "state": "Telangana",
@@ -977,22 +694,6 @@
   },
   {
     "state": "Uttar Pradesh",
-    "district": "Bulandshahr"
-  },
-  {
-    "state": "Uttar Pradesh",
-    "district": "Gautam Buddha Nagar"
-  },
-  {
-    "state": "Sikkim",
-    "district": "Gangtok"
-  },
-  {
-    "state": "Sikkim",
-    "district": "Pakyong"
-  },
-  {
-    "state": "Uttar Pradesh",
     "district": "Basti"
   },
   {
@@ -1001,19 +702,15 @@
   },
   {
     "state": "Uttar Pradesh",
-    "district": "Farrukhabad"
+    "district": "Bulandshahr"
   },
   {
-    "state": "Punjab",
-    "district": "Gurdaspur"
+    "state": "Uttar Pradesh",
+    "district": "Farrukhabad"
   },
   {
     "state": "Uttar Pradesh",
     "district": "Fatehpur"
-  },
-  {
-    "state": "Uttar Pradesh",
-    "district": "Sant Kabir Nagar"
   },
   {
     "state": "Uttar Pradesh",
@@ -1024,112 +721,12 @@
     "district": "Lalitpur"
   },
   {
-    "state": "Punjab",
-    "district": "Sri Muktsar Sahib"
-  },
-  {
     "state": "Uttar Pradesh",
     "district": "Muzaffarnagar"
   },
   {
-    "state": "Uttarakhand",
-    "district": "Udham Singh Nagar"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Dakshin Dinajpur"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Kolkata"
-  },
-  {
     "state": "Uttar Pradesh",
     "district": "Shahjahanpur"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Alipurduar"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Kalimpong"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Malda"
-  },
-  {
-    "state": "West Bengal",
-    "district": "South 24 Parganas"
-  },
-  {
-    "state": "Andaman and Nicobar Islands",
-    "district": "Nicobar"
-  },
-  {
-    "state": "Andaman and Nicobar Islands",
-    "district": "North and Middle Andaman"
-  },
-  {
-    "state": "West Bengal",
-    "district": "North 24 Parganas"
-  },
-  {
-    "state": "Dadra and Nagar Haveli and Daman and Diu",
-    "district": "Dadra and Nagar Haveli"
-  },
-  {
-    "state": "Delhi",
-    "district": "Central Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "East Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "New Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "North Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "North East Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "North West Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "Shahdara"
-  },
-  {
-    "state": "Delhi",
-    "district": "South Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "South East Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "South West Delhi"
-  },
-  {
-    "state": "Delhi",
-    "district": "West Delhi"
-  },
-  {
-    "state": "Jammu and Kashmir",
-    "district": "Bandipora"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Paschim Bardhaman"
   },
   {
     "state": "Uttarakhand",
@@ -1138,6 +735,10 @@
   {
     "state": "Uttarakhand",
     "district": "Rudraprayag"
+  },
+  {
+    "state": "West Bengal",
+    "district": "Alipurduar"
   },
   {
     "state": "West Bengal",
@@ -1157,23 +758,67 @@
   },
   {
     "state": "West Bengal",
+    "district": "Kalimpong"
+  },
+  {
+    "state": "West Bengal",
+    "district": "Kolkata"
+  },
+  {
+    "state": "West Bengal",
+    "district": "Malda"
+  },
+  {
+    "state": "West Bengal",
     "district": "Murshidabad"
   },
   {
-    "state": "Jammu and Kashmir",
-    "district": "Baramulla"
+    "state": "West Bengal",
+    "district": "North 24 Parganas"
+  },
+  {
+    "state": "West Bengal",
+    "district": "Paschim Bardhaman"
+  },
+  {
+    "state": "West Bengal",
+    "district": "Purulia"
+  },
+  {
+    "state": "West Bengal",
+    "district": "South 24 Parganas"
+  },
+  {
+    "state": "Andaman and Nicobar Islands",
+    "district": "Nicobar"
+  },
+  {
+    "state": "Andaman and Nicobar Islands",
+    "district": "North and Middle Andaman"
   },
   {
     "state": "Dadra and Nagar Haveli and Daman and Diu",
-    "district": "Diu"
+    "district": "Dadra and Nagar Haveli"
   },
   {
     "state": "Dadra and Nagar Haveli and Daman and Diu",
     "district": "Daman"
   },
   {
-    "state": "Puducherry",
-    "district": "Puducherry"
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "district": "Diu"
+  },
+  {
+    "state": "Delhi",
+    "district": "Shahdara"
+  },
+  {
+    "state": "Jammu and Kashmir",
+    "district": "Bandipora"
+  },
+  {
+    "state": "Jammu and Kashmir",
+    "district": "Baramulla"
   },
   {
     "state": "Jammu and Kashmir",
@@ -1181,30 +826,22 @@
   },
   {
     "state": "Jammu and Kashmir",
-    "district": "Samba"
-  },
-  {
-    "state": "West Bengal",
-    "district": "Purulia"
-  },
-  {
-    "state": "Jammu and Kashmir",
     "district": "Kathua"
-  },
-  {
-    "state": "Ladakh",
-    "district": "Kargil"
-  },
-  {
-    "state": "Jammu and Kashmir",
-    "district": "Udhampur"
   },
   {
     "state": "Jammu and Kashmir",
     "district": "Kupwara"
   },
   {
+    "state": "Jammu and Kashmir",
+    "district": "Samba"
+  },
+  {
     "state": "Lakshadweep",
     "district": "Lakshadweep"
+  },
+  {
+    "state": "Puducherry",
+    "district": "Puducherry"
   }
 ]

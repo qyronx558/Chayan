@@ -28,7 +28,7 @@ import { isStaleListing, sha256, todayIST } from "../../src/lib/ingest/normalize
 import type { IngestPost } from "../../src/lib/ingest/schema"
 import type { ListingItem, SourceDef } from "../../src/lib/ingest/types"
 import { loadNotice } from "./documents"
-import { politeGet } from "./http"
+import { politeGet, RobotsDisallowed } from "./http"
 import pLimit from "p-limit"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -134,6 +134,18 @@ async function api<T>(method: "GET" | "POST", route: string, body?: unknown): Pr
   return json
 }
 
+/**
+ * One line per host whose robots.txt blocked notices. S3WaaS district PDFs live on
+ * cdn.s3waas.gov.in, which serves "Disallow: /" to visitors outside India (GitHub's
+ * runners are in the US) and no restriction inside India.
+ */
+export function robotsNote(host: string, count: number): string {
+  const base = `robots.txt on ${host} does not allow this bot to read ${count} notice file(s) - left unread, retried next run.`
+  return /(^|\.)s3waas\.gov\.in$/.test(host)
+    ? `${base} This host only blocks visitors outside India: run the district tier from a machine in India (docs/content-ingest.md → "District PDFs").`
+    : base
+}
+
 // ─── pipeline ───────────────────────────────────────────────────────
 
 async function harvest(src: SourceDef, maxPages: number, log: (m: string) => void): Promise<ListingItem[]> {
@@ -218,7 +230,9 @@ async function main() {
     log(`  (no LLM key - dry run stops after listing + triage)`)
   }
 
-  const stats = { listed: 0, relevant: 0, unseen: 0, extracted: 0, posted: 0, duplicate: 0, skipped: 0, failed: 0, errors: 0 }
+  const stats = { listed: 0, relevant: 0, unseen: 0, extracted: 0, posted: 0, duplicate: 0, skipped: 0, failed: 0, errors: 0, blocked: 0 }
+  /** Hosts whose robots.txt forbids this bot - their notices stay unread (retried next run), never counted as errors. */
+  const blockedHosts = new Map<string, number>()
   const errors: string[] = []
   const outbox: IngestPost[] = []
   const dryOut: unknown[] = []
@@ -317,6 +331,12 @@ async function main() {
         })
         if (outbox.length >= 20) await flush()
       } catch (e) {
+        if (e instanceof RobotsDisallowed) {
+          const host = new URL(item.url).host
+          stats.blocked++
+          blockedHosts.set(host, (blockedHosts.get(host) ?? 0) + 1)
+          continue
+        }
         stats.errors++
         const msg = `${item.url}: ${e instanceof Error ? e.message : e}`
         errors.push(msg)
@@ -329,6 +349,12 @@ async function main() {
     }
   }
   await flush()
+
+  for (const [host, n] of blockedHosts) {
+    const note = robotsNote(host, n)
+    errors.push(note)
+    log(`  ${note}`)
+  }
 
   const label = args.source ?? `${args.tier ?? "all"}${args.shard ? `-${args.shard.k}of${args.shard.n}` : ""}`
   log(`Done ${label}: ${JSON.stringify(stats)}`)
