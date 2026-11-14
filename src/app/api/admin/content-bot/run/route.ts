@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { dispatchConfig, githubHeaders, requireBotAdmin, WORKFLOW_FILE } from "@/lib/ingest/admin"
+import { dispatchWorkflow } from "@/lib/ingest/dispatch"
 import { runRequestSchema, workflowInputs } from "@/lib/ingest/control"
 import { writeAuditLog } from "@/lib/moderation"
 
@@ -64,16 +65,8 @@ export async function POST(request: NextRequest) {
   const parsed = runRequestSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message ?? "Invalid request" }, { status: 400 })
 
-  const res = await fetch(`https://api.github.com/repos/${cfg.repo}/actions/workflows/${WORKFLOW_FILE}/dispatches`, {
-    method: "POST",
-    headers: { ...githubHeaders(cfg.token), "content-type": "application/json" },
-    body: JSON.stringify({ ref: cfg.ref, inputs: workflowInputs(parsed.data, cfg.target) }),
-    signal: AbortSignal.timeout(15_000),
-  }).catch(() => null)
-  if (!res || res.status !== 204) {
-    const detail = res ? `GitHub answered HTTP ${res.status}${res.status === 404 ? " (workflow not found on that branch, or the token cannot see the repo)" : res.status === 403 ? " (token lacks Actions: write)" : ""}` : "Could not reach GitHub"
-    return NextResponse.json({ success: false, error: detail }, { status: 502 })
-  }
+  const started = await dispatchWorkflow(cfg, workflowInputs(parsed.data, cfg.target))
+  if (!started.ok) return NextResponse.json({ success: false, error: started.error }, { status: 502 })
   await writeAuditLog({
     action: "RUN",
     entity: "IngestRun",

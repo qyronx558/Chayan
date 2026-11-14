@@ -1,6 +1,6 @@
 import path from "node:path"
-import { describe, expect, it } from "vitest"
-import { inShard, loadSources, parseArgs, selectSources } from "../../../scripts/ingest/run"
+import { describe, expect, it, vi } from "vitest"
+import { inShard, loadSources, parseArgs, resolveApiBase, selectSources } from "../../../scripts/ingest/run"
 import { parseRobots } from "../../../scripts/ingest/http"
 import { isReadableText } from "../../../scripts/ingest/documents"
 import { hostCandidates } from "../../../scripts/ingest/discover-districts"
@@ -106,5 +106,24 @@ describe("district host candidates", () => {
       expect.arrayContaining(["eastchamparan.nic.in", "east-champaran.nic.in", "east.nic.in", "eastchamparan.gov.in"]),
     )
     expect(hostCandidates("Y.S.R. (Kadapa)")).toContain("ysr.nic.in")
+  })
+})
+
+describe("site address", () => {
+  const redirect = (to: string) => new Response(null, { status: 308, headers: { location: to } })
+  const ok = () => new Response("{}", { status: 401 })
+
+  it("follows the apex → www redirect once, so the secret is never dropped", async () => {
+    const f = vi.fn().mockResolvedValueOnce(redirect("https://www.chayanjobs.com/api/cron/ingest/config")).mockResolvedValueOnce(ok())
+    await expect(resolveApiBase("https://chayanjobs.com/", f)).resolves.toBe("https://www.chayanjobs.com")
+    expect(f.mock.calls[0][1]).toMatchObject({ redirect: "manual" })
+    expect(f.mock.calls[0][1].headers).toBeUndefined() // no secret on the probe
+  })
+  it("keeps an address that does not redirect", async () => {
+    await expect(resolveApiBase("https://www.chayanjobs.com", vi.fn().mockResolvedValue(ok()))).resolves.toBe("https://www.chayanjobs.com")
+  })
+  it("refuses to follow a redirect to another site", async () => {
+    const f = vi.fn().mockResolvedValue(redirect("https://evil.example.com/x"))
+    await expect(resolveApiBase("https://chayanjobs.com", f)).rejects.toThrow(/another site/)
   })
 })

@@ -25,31 +25,90 @@ const ALL = "all"
 
 // ─── preview ────────────────────────────────────────────────────────
 
-function PreviewList({ data }: { data: PreviewResponse }) {
+const KIND_LABEL: Record<string, string> = {
+  jobs: "Job",
+  results: "Result",
+  "admit-cards": "Admit card",
+  "answer-keys": "Answer key",
+  admissions: "Admission",
+  syllabus: "Syllabus",
+}
+
+function Stat({ label, value, tone }: { label: string; value: number; tone?: "muted" }) {
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-foreground">
-        Found <strong>{data.found}</strong> links, <strong>{data.relevant}</strong> look like jobs / results / admit cards.
-        {data.empty && " The board says it has no notices right now."}
-      </p>
-      {data.found === 0 && !data.empty && (
-        <p className="text-sm text-brick">No notice links matched. Try a different listing URL or loosen the link pattern (e.g. [.]pdf).</p>
-      )}
-      <ul className="max-h-64 divide-y divide-rule overflow-y-auto rounded-xl border border-rule">
-        {data.items.map((it) => (
-          <li key={it.url} className="flex items-start gap-2 px-3 py-2 text-sm">
-            <Badge variant="secondary" className={cn("mt-0.5 shrink-0 border-0", it.triage.relevant ? "bg-paper-3" : "bg-paper-2 text-muted-foreground")}>
-              {it.triage.relevant ? (it.triage.kind ?? "relevant") : "skip"}
-            </Badge>
-            <a href={it.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate text-foreground hover:text-brick" title={it.title}>
-              {it.title}
-            </a>
-            {it.date && <span className="shrink-0 text-xs text-muted-foreground">{it.date}</span>}
-          </li>
-        ))}
-      </ul>
+    <div className="min-w-0 rounded-xl border border-rule px-3 py-2.5">
+      <p className={cn("text-xl font-semibold tabular-nums", tone === "muted" ? "text-muted-foreground" : "text-foreground")}>{value}</p>
+      <p className="truncate text-xs text-muted-foreground">{label}</p>
     </div>
   )
+}
+
+/**
+ * What a listing page yields. Every text node may contain long unbroken
+ * strings (PDF file names, URLs), so all containers are min-w-0 and text wraps
+ * anywhere instead of pushing the dialog wider.
+ */
+function PreviewList({ data }: { data: PreviewResponse }) {
+  const skipped = data.found - data.relevant
+  return (
+    <div className="min-w-0 space-y-3">
+      <div className="grid grid-cols-3 gap-2">
+        <Stat label="Links found" value={data.found} />
+        <Stat label="Will be read" value={data.relevant} />
+        <Stat label="Skipped" value={skipped} tone="muted" />
+      </div>
+
+      {data.empty && <p className="rounded-xl bg-paper-2 px-3 py-2 text-sm text-foreground">The board says it has no notices right now.</p>}
+      {data.found === 0 && !data.empty && (
+        <p className="rounded-xl bg-paper-2 px-3 py-2 text-sm text-brick">
+          No notice links matched. Try another listing URL or a looser link pattern (for example <code>[.]pdf</code>).
+        </p>
+      )}
+
+      {data.items.length > 0 && (
+        <ul className="max-h-[45vh] min-w-0 divide-y divide-rule overflow-y-auto overflow-x-hidden rounded-xl border border-rule">
+          {data.items.map((it) => (
+            <li key={it.url} className="grid min-w-0 grid-cols-[5.25rem_minmax(0,1fr)] sm:grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 px-3 py-2.5">
+              <span
+                className={cn(
+                  "mt-0.5 inline-flex w-fit max-w-full items-center rounded-md px-2 py-0.5 text-[11px] font-semibold",
+                  it.triage.relevant ? "bg-paper-3 text-foreground" : "bg-paper-2 text-muted-foreground",
+                )}
+                title={it.triage.reason}
+              >
+                {it.triage.relevant ? (KIND_LABEL[it.triage.kind ?? ""] ?? "Relevant") : "Skipped"}
+              </span>
+              <div className="min-w-0">
+                <p className="line-clamp-2 text-sm leading-snug text-foreground [overflow-wrap:anywhere]" title={it.title}>
+                  {it.title}
+                </p>
+                <div className="mt-1 flex min-w-0 items-center gap-3 text-xs text-muted-foreground">
+                  {it.date && <span className="shrink-0 tabular-nums">{it.date}</span>}
+                  <a href={it.url} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1 hover:text-brick">
+                    <span className="truncate">{hostAndFile(it.url)}</span>
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                  </a>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {data.found > data.items.length && (
+        <p className="text-xs text-muted-foreground">Showing the newest {data.items.length} of {data.found} links.</p>
+      )}
+    </div>
+  )
+}
+
+function hostAndFile(url: string): string {
+  try {
+    const u = new URL(url)
+    const file = decodeURIComponent(u.pathname.split("/").filter(Boolean).pop() ?? "")
+    return file ? `${u.host} · ${file}` : u.host
+  } catch {
+    return url
+  }
 }
 
 // ─── add / edit dialog ──────────────────────────────────────────────
@@ -126,7 +185,7 @@ function SourceDialog({ editing, states, onClose }: { editing: SourceRow | null;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] grid-cols-[minmax(0,1fr)] overflow-y-auto overflow-x-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{editing ? "Edit source" : "Add a source"}</DialogTitle>
           <DialogDescription>
@@ -206,7 +265,7 @@ function SourceDialog({ editing, states, onClose }: { editing: SourceRow | null;
             </Button>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Opens the page once and shows which notices the bot would pick up. No AI call, nothing is saved.</p>
-          {preview && <div className="mt-3"><PreviewList data={preview} /></div>}
+          {preview && <div className="mt-3 min-w-0"><PreviewList data={preview} /></div>}
         </div>
 
         <DialogFooter>
@@ -449,12 +508,34 @@ export function SourcesTab() {
       )}
 
       <Dialog open={!!previewOf} onOpenChange={(o) => !o && setPreviewOf(null)}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{previewOf?.row.name}</DialogTitle>
-            <DialogDescription>What the bot finds on the listing page right now (before the AI step).</DialogDescription>
+        <DialogContent className="flex max-h-[90vh] w-[calc(100vw-2rem)] flex-col gap-4 overflow-hidden sm:max-w-2xl">
+          <DialogHeader className="min-w-0 space-y-1.5 pr-8 text-left">
+            <DialogTitle className="text-lg leading-snug [overflow-wrap:anywhere]">{previewOf?.row.name}</DialogTitle>
+            {previewOf && (
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                <Badge variant="outline" className="shrink-0 text-[10px]">{LEVEL_LABEL[previewOf.row.level]}</Badge>
+                <span className="shrink-0">{[previewOf.row.district, previewOf.row.state].filter(Boolean).join(", ") || "All India"}</span>
+                <a href={previewOf.row.url} target="_blank" rel="noreferrer" className="inline-flex min-w-0 max-w-full items-center gap-1 hover:text-brick">
+                  <span className="truncate">{previewOf.row.url.replace(/^https?:\/\//, "")}</span>
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                </a>
+              </div>
+            )}
+            <DialogDescription>Notices on the listing page right now, before the AI step.</DialogDescription>
           </DialogHeader>
-          {previewOf?.data ? <PreviewList data={previewOf.data} /> : <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Opening the page…</div>}
+          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+            {previewOf?.data ? (
+              <PreviewList data={previewOf.data} />
+            ) : (
+              <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Opening the page…
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col-reverse gap-2 border-t border-rule pt-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-muted-foreground">Preview only - no AI call, nothing is saved.</p>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setPreviewOf(null)}>Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

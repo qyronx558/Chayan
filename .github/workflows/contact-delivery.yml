@@ -19,6 +19,11 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           test -n "$APP_URL" && test -n "$CRON_SECRET"
+          # Follow the site's own redirect (e.g. apex -> www) first: curl would otherwise get a 308
+          # and never reach the endpoint (and must not resend the secret to another host).
+          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
+          base=${base%/}
+          echo "Site: $base"
           curl --fail-with-body --silent --show-error --max-time 120 \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${APP_URL%/}/api/cron/contact"
+            "$base/api/cron/contact"

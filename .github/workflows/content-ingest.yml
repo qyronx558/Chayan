@@ -9,6 +9,14 @@ name: content-ingest
 #   APP_URL, INGEST_SECRET, CRON_SECRET, GEMINI_API_KEY, GROQ_API_KEY (optional)
 #   DEV_APP_URL, DEV_INGEST_SECRET  (only for manual runs with target=dev)
 
+# On-time schedule: GitHub's cron often starts these hours late. For exact times, point a free
+# external cron (cron-job.org) at the site - see docs/content-ingest.md → "On-time schedule":
+#   every 4 h      GET /api/cron/ingest/trigger?slot=frequent   (central + state)
+#   06:00 IST      GET /api/cron/ingest/trigger?slot=district   (all districts)
+#   00:15 IST      GET /api/cron/expire-jobs
+# then set the repository variable INGEST_EXTERNAL_SCHEDULER=true so the GitHub crons below
+# stop (they are only the backup).
+
 on:
   schedule:
     - cron: "15 */4 * * *"   # central + state boards, every 4h
@@ -24,7 +32,7 @@ on:
       tier:
         description: "Sources to crawl"
         type: choice
-        options: [central, state, district, all]
+        options: [central, state, frequent, district, all]
         default: central
       source:
         description: "Optional single source id (e.g. nic:bihar/patna) - overrides tier"
@@ -34,17 +42,25 @@ on:
         description: "Only list + extract, send nothing"
         type: boolean
         default: true
+      scheduled:
+        description: "Treat as a scheduled run (honours the admin pause / tier switches) - used by the external scheduler"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+# One run per site at a time; a second one waits (no two runs extract the same notice at once).
 concurrency:
-  group: content-ingest-${{ github.event.schedule || inputs.target }}
+  group: content-ingest-${{ inputs.target || 'production' }}${{ github.event.schedule == '45 18 * * *' && '-expire' || '' }}
   cancel-in-progress: false
 
 jobs:
   plan:
-    if: github.event.schedule != '45 18 * * *'
+    # GitHub's cron is the backup scheduler: skipped once INGEST_EXTERNAL_SCHEDULER=true.
+    if: >-
+      github.event.schedule != '45 18 * * *' &&
+      (github.event_name != 'schedule' || vars.INGEST_EXTERNAL_SCHEDULER != 'true')
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
@@ -61,6 +77,8 @@ jobs:
             echo 'matrix=["--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
           elif [ "$TIER" = "all" ]; then
             echo 'matrix=["--tier=central","--tier=state","--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
+          elif [ "$TIER" = "frequent" ]; then
+            echo 'matrix=["--tier=central","--tier=state"]' >> "$GITHUB_OUTPUT"
           elif [ "$TIER" = "state" ]; then
             echo 'matrix=["--tier=state"]' >> "$GITHUB_OUTPUT"
           elif [ -z "$SCHEDULE" ]; then
@@ -100,7 +118,7 @@ jobs:
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           GROQ_MODEL: ${{ vars.GROQ_MODEL }}
           # Scheduled runs obey the pause / tier switches in Admin → Content bot; manual runs always go.
-          INGEST_SCHEDULED: ${{ github.event_name == 'schedule' }}
+          INGEST_SCHEDULED: ${{ github.event_name == 'schedule' || inputs.scheduled == true }}
           DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
           ARGS: ${{ matrix.args }}
         run: |
@@ -121,7 +139,7 @@ jobs:
           retention-days: 7
 
   expire-jobs:
-    if: github.event.schedule == '45 18 * * *'
+    if: github.event.schedule == '45 18 * * *' && vars.INGEST_EXTERNAL_SCHEDULER != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -131,6 +149,11 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           test -n "$APP_URL" && test -n "$CRON_SECRET"
+          # Follow the site's own redirect (e.g. apex -> www) first: curl would otherwise get a 308
+          # and never reach the endpoint (and must not resend the secret to another host).
+          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
+          base=${base%/}
+          echo "Site: $base"
           curl --fail-with-body --silent --show-error --max-time 60 \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${APP_URL%/}/api/cron/expire-jobs"
+            "$base/api/cron/expire-jobs"

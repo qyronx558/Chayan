@@ -103,6 +103,22 @@ Pause and the tier switches apply to **scheduled** runs only. Manual runs (Run n
 
 **Run now** starts the GitHub workflow through the API. It needs `INGEST_GITHUB_TOKEN` on Vercel: a fine-grained personal access token with access to this repository only and the permission **Actions: Read and write**. Production sites send `target=production`, all others `target=dev` (override with `INGEST_DISPATCH_TARGET`).
 
+## On-time schedule (recommended)
+
+GitHub's built-in cron starts this repository's scheduled jobs hours late (observed: a 02:30 UTC job running at about 09:30 UTC, and a 15-minute job running about every 6 hours). For exact times, use a free external cron such as [cron-job.org](https://cron-job.org) to call the site. The site then starts the workflow as a **scheduled** run, so Admin → Content bot's pause and tier switches still apply.
+
+| Job | URL (GET) | When (Asia/Kolkata) |
+|---|---|---|
+| Central + state boards | `https://www.chayanjobs.com/api/cron/ingest/trigger?slot=frequent` | every 4 h, e.g. 00:00, 04:00, 08:00, 12:00, 16:00, 20:00 |
+| All districts | `https://www.chayanjobs.com/api/cron/ingest/trigger?slot=district` | 06:00 daily |
+| Expire closed jobs | `https://www.chayanjobs.com/api/cron/expire-jobs` | 00:15 daily |
+
+Each call needs the header `Authorization: Bearer <CRON_SECRET>`. The trigger also needs `INGEST_GITHUB_TOKEN` on Vercel (the same token Run now uses).
+
+Once the external jobs run, set the repository variable **`INGEST_EXTERNAL_SCHEDULER=true`** (Settings → Secrets and variables → Actions → Variables). The GitHub crons in `content-ingest.yml` are then skipped, so nothing runs twice. Delete the variable to fall back to GitHub's schedule.
+
+Use the final site address (`https://www.…`). The bot and the cron workflows follow an apex → www redirect by themselves, because `fetch` and `curl` drop the `Authorization` header when a redirect changes the host.
+
 ## Running it
 
 ```bash
