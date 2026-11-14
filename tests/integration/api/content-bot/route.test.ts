@@ -28,6 +28,7 @@ import { GET as SETTINGS_GET, PATCH as SETTINGS_PATCH } from "@/app/api/admin/co
 import { DELETE as SRC_DELETE, GET as SRC_GET, PATCH as SRC_PATCH, POST as SRC_POST } from "@/app/api/admin/content-bot/sources/route"
 import { POST as RUN_POST } from "@/app/api/admin/content-bot/run/route"
 import { GET as CONFIG } from "@/app/api/cron/ingest/config/route"
+import { GET as TRIGGER } from "@/app/api/cron/ingest/trigger/route"
 
 const req = (path: string, method = "GET", body?: unknown, headers: Record<string, string> = {}) =>
   new NextRequest(`https://chayanjobs.test${path}`, {
@@ -145,5 +146,32 @@ describe("scraper config endpoint", () => {
     const body = await (await CONFIG(req("/api/cron/ingest/config", "GET", undefined, { authorization: "Bearer s3cret" }))).json()
     expect(body.settings).toEqual({ enabled: false, centralEnabled: true, stateEnabled: true, districtEnabled: false, autoApprove: false, autoApproveDailyCap: 60, minScore: 75, minConfidence: 0.85, maxNewPerSource: 10, maxLlmCalls: 50, geminiModel: "gemini-x" })
     expect(body.sources).toEqual([{ id: "bpsc", enabled: false, custom: false, def: null }])
+  })
+})
+
+describe("on-time schedule trigger (external cron)", () => {
+  const call = (slot: string, token = "cron-s3cret") => TRIGGER(req(`/api/cron/ingest/trigger?slot=${slot}`, "GET", undefined, { authorization: `Bearer ${token}` }))
+  beforeEach(() => {
+    vi.stubEnv("CRON_SECRET", "cron-s3cret")
+    vi.stubEnv("INGEST_GITHUB_TOKEN", "ghp_test")
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", "production")
+  })
+
+  it("needs CRON_SECRET and a known slot", async () => {
+    expect((await call("frequent", "wrong")).status).toBe(401)
+    expect((await call("hourly")).status).toBe(400)
+  })
+  it("starts a *scheduled* run so the admin pause and tier switches still apply", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }))
+    expect((await call("frequent")).status).toBe(200)
+    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string).inputs).toEqual({ target: "production", tier: "frequent", source: "", dry_run: "false", scheduled: "true" })
+    await call("district")
+    expect(JSON.parse(fetchMock.mock.calls[1][1]!.body as string).inputs.tier).toBe("district")
+  })
+  it("reports GitHub errors in plain words", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 422 }))
+    const res = await call("frequent")
+    expect(res.status).toBe(502)
+    expect((await res.json()).error).toMatch(/does not accept these inputs/)
   })
 })

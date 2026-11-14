@@ -12,11 +12,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Trigger newsletter digest
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
         run: |
+          # Follow the site's own redirect (e.g. apex -> www) first: curl would otherwise get a 308
+          # and never reach the endpoint (and must not resend the secret to another host).
+          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
+          base=${base%/}
+          echo "Site: $base"
           code=$(curl -s -o /tmp/digest.json -w "%{http_code}" \
             --max-time 55 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.APP_URL }}/api/cron/newsletter")
+            "$base/api/cron/newsletter")
           cat /tmp/digest.json
           if [ "$code" -ge 400 ]; then
             echo "digest trigger failed with HTTP $code"

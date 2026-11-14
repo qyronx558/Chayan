@@ -84,17 +84,52 @@ export function selectSources(all: SourceDef[], a: Pick<Args, "tier" | "shard" |
 // ─── API client ─────────────────────────────────────────────────────
 
 const MAX_AGE_DAYS = Number(process.env.INGEST_MAX_AGE_DAYS || 45)
-const API = (process.env.INGEST_API_URL || "").replace(/\/+$/, "")
+let API = (process.env.INGEST_API_URL || "").replace(/\/+$/, "")
 const SECRET = process.env.INGEST_SECRET || ""
+
+const bareHost = (h: string) => h.toLowerCase().replace(/^www\./, "")
+
+/**
+ * Follows the site's own redirects (e.g. chayanjobs.com → www.chayanjobs.com)
+ * once, up front. fetch() drops the Authorization header when a redirect
+ * changes the host, so every later call must go straight to the final address.
+ * Only http→https and apex↔www hops are followed - the secret never leaves the site.
+ */
+export async function resolveApiBase(base: string, fetchFn: typeof fetch = fetch): Promise<string> {
+  let url = base.replace(/\/+$/, "")
+  for (let hop = 0; hop < 5; hop++) {
+    const res = await fetchFn(`${url}/api/cron/ingest/config`, { redirect: "manual", signal: AbortSignal.timeout(30_000) })
+    const location = res.headers.get("location")
+    if (res.status < 300 || res.status >= 400 || !location) return url
+    const from = new URL(url)
+    const to = new URL(location, `${url}/`)
+    if (bareHost(to.hostname) !== bareHost(from.hostname)) {
+      throw new Error(`${url} redirects to another site (${to.origin}) - set INGEST_API_URL / APP_URL to the real site address`)
+    }
+    url = `${to.origin}${from.pathname.replace(/\/+$/, "")}`
+  }
+  return url
+}
 
 async function api<T>(method: "GET" | "POST", route: string, body?: unknown): Promise<T> {
   const res = await fetch(`${API}/api/cron/ingest${route}`, {
     method,
     headers: { authorization: `Bearer ${SECRET}`, "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
+    redirect: "error", // a redirect here would silently drop the secret - resolveApiBase() handles them
     signal: AbortSignal.timeout(90_000),
   })
   const json = (await res.json().catch(() => ({}))) as T & { success?: boolean; error?: string }
+  if (res.status === 401) {
+    throw new Error(
+      `${route || "/"} → HTTP 401: the site rejected INGEST_SECRET. The GitHub secret ` +
+        `(INGEST_SECRET, or DEV_INGEST_SECRET for target=dev) must be exactly the same as INGEST_SECRET in ` +
+        `Vercel for that environment - and Vercel must be redeployed after changing it.`,
+    )
+  }
+  if (res.status === 500 && json.error?.includes("not configured")) {
+    throw new Error(`${route || "/"} → ${json.error} on the site: add INGEST_SECRET in Vercel and redeploy.`)
+  }
   if (!res.ok || json.success === false) throw new Error(`${route || "/"} → HTTP ${res.status}: ${json.error ?? "error"}`)
   return json
 }
@@ -131,6 +166,15 @@ async function main() {
       `Missing ${[!API && "INGEST_API_URL", !SECRET && "INGEST_SECRET"].filter(Boolean).join(" and ")}. ` +
         `Add them to .env (e.g. INGEST_API_URL="http://127.0.0.1:3000") or pass --dry-run.`,
     )
+  }
+  if (API) {
+    const resolved = await resolveApiBase(API).catch((e) => {
+      if (!args.dryRun) throw e
+      log(`  (site not reachable: ${e instanceof Error ? e.message : e})`)
+      return API
+    })
+    if (resolved !== API) log(`Note: ${API} redirects to ${resolved} - using that. Set APP_URL to ${resolved} to skip the redirect.`)
+    API = resolved
   }
   log(`Target: ${args.dryRun ? "(dry run - nothing is sent)" : API} | LLM: ${process.env.GEMINI_API_KEY ? "gemini" : ""}${process.env.GROQ_API_KEY ? " groq" : ""}`)
 
