@@ -96,6 +96,11 @@ jobs:
           INGEST_PUBLIC_URL: ${{ secrets.APP_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Optional repository *variables* (Settings → Variables): change the model without a code change.
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL }}
+          # Scheduled runs obey the pause / tier switches in Admin → Content bot; manual runs always go.
+          INGEST_SCHEDULED: ${{ github.event_name == 'schedule' }}
           DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
           ARGS: ${{ matrix.args }}
         run: |

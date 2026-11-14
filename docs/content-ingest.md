@@ -86,6 +86,23 @@ These are built around Google's publisher policies ("valuable inventory", no scr
 - Make sure the about, contact, privacy, editorial-policy and disclaimer pages are complete.
 - The legacy *Import data* fetcher, which copied listings from a third-party aggregator site, has been removed. Do not add sources that republish other job sites.
 
+## Admin control (Admin → Content bot)
+
+Super admins control the bot from **System → Content bot**. The bot reads these settings from `GET /api/cron/ingest/config` at the start of every run, so a change takes effect from the next run. Until the settings page is saved, the environment values (`INGEST_AUTO_APPROVE`, …) are used.
+
+| Tab | What it does |
+|---|---|
+| Overview | **Pause / Resume** (skips scheduled runs), switch the central / state / district tiers on or off, last 24 h counts, **Run now**, recent GitHub runs |
+| Sources | Every built-in and custom source with 30-day results. Switch sources on or off (one by one or in bulk), **Check** what a listing page yields, **Add / edit / delete** custom sources (official domains only, exact State/District names) |
+| Settings | Auto-approve on/off, daily cap, minimum score and confidence; new notices per source; AI calls per run; Gemini model |
+| Activity | Every bot run with its log, and every notice with its result (posted / duplicate / skipped / failed) and the reason |
+
+Precedence: **admin setting > environment variable > built-in default**. The model field left blank means `GEMINI_MODEL` (GitHub variable or `.env`), else `gemini-flash-lite-latest`.
+
+Pause and the tier switches apply to **scheduled** runs only. Manual runs (Run now, the GitHub "Run workflow" button, `npm run ingest`) always run. A switched-off source is skipped by every tier run, but `--source=<id>` still runs it.
+
+**Run now** starts the GitHub workflow through the API. It needs `INGEST_GITHUB_TOKEN` on Vercel: a fine-grained personal access token with access to this repository only and the permission **Actions: Read and write**. Production sites send `target=production`, all others `target=dev` (override with `INGEST_DISPATCH_TARGET`).
+
 ## Running it
 
 ```bash
@@ -93,6 +110,8 @@ npm run ingest:dry -- --source=nic:bihar/patna     # list + triage (+ extract if
 npm run ingest -- --tier=central                    # needs INGEST_API_URL + INGEST_SECRET
 npm run ingest -- --tier=district --shard=1/4
 ```
+
+The scripts read `.env` / `.env.local` themselves; shell or GitHub Actions variables take precedence. With `NEXT_PUBLIC_APP_ENV="local"`, `INGEST_API_URL` defaults to the local dev server (`127.0.0.1:3000`). The default model is `gemini-flash-lite-latest` (about 2–5 s per notice on the free tier); override it with `GEMINI_MODEL`.
 
 **Setup:**
 1. Run `npm run db:migrate:deploy` (adds `IngestItem` and `Job.summary`).

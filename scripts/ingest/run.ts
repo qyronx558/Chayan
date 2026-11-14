@@ -9,13 +9,19 @@
  * Env: INGEST_API_URL, INGEST_SECRET, GEMINI_API_KEY (and/or GROQ_API_KEY),
  *      INGEST_MAX_LLM_CALLS (default 120 per process), INGEST_MAX_PAGES (default 2),
  *      INGEST_MAX_AGE_DAYS (default 45), INGEST_MAX_NEW_PER_SOURCE (default 15).
- * --dry-run: no API calls; prints what would be sent (extraction still runs when a key is set).
+ * Admin → Content bot settings (read from /api/cron/ingest/config) override the env:
+ * master switch + tier switches (scheduled runs only), source on/off, custom sources,
+ * limits and the Gemini model.
+ * --dry-run: posts nothing (still reads the admin settings when the API is configured).
+ * --scheduled (or INGEST_SCHEDULED=true): honour the admin pause / tier switches.
  */
+import "./env" // must stay first: loads .env before other modules read process.env
 import { readFileSync, readdirSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseListing } from "../../src/lib/ingest/adapters"
 import { triageNotice } from "../../src/lib/ingest/classify"
+import { applySourceOverrides, tierEnabled, type BotRuntimeConfig } from "../../src/lib/ingest/control"
 import { createExtractor, llmConfig, type Extractor } from "../../src/lib/ingest/extract"
 import { groundExtraction } from "../../src/lib/ingest/grounding"
 import { isStaleListing, sha256, todayIST } from "../../src/lib/ingest/normalize"
@@ -33,8 +39,10 @@ interface Args {
   shard?: { k: number; n: number }
   source?: string
   dryRun: boolean
-  limit: number
+  /** Explicit --limit; otherwise the admin setting / env decides. */
+  limit?: number
   maxPages: number
+  scheduled: boolean
 }
 
 export function parseArgs(argv: string[]): Args {
@@ -47,8 +55,9 @@ export function parseArgs(argv: string[]): Args {
     shard: shard ? { k: Number(shard[1]), n: Number(shard[2]) } : undefined,
     source: get("source"),
     dryRun: argv.includes("--dry-run"),
-    limit: Number(get("limit") ?? process.env.INGEST_MAX_LLM_CALLS ?? 120),
+    limit: get("limit") ? Number(get("limit")) : undefined,
     maxPages: Number(get("max-pages") ?? process.env.INGEST_MAX_PAGES ?? 2),
+    scheduled: argv.includes("--scheduled") || process.env.INGEST_SCHEDULED === "true",
   }
 }
 
@@ -65,16 +74,16 @@ export function inShard(id: string, shard?: { k: number; n: number }): boolean {
   return (parseInt(sha256(id).slice(0, 8), 16) % shard.n) + 1 === shard.k
 }
 
+/** An explicit --source runs even when that source is switched off; tiers skip disabled sources. */
 export function selectSources(all: SourceDef[], a: Pick<Args, "tier" | "shard" | "source">): SourceDef[] {
   if (a.source) return all.filter((s) => s.id === a.source)
   const level = a.tier?.toUpperCase()
-  return all.filter((s) => (!level || s.level === level) && inShard(s.id, a.shard))
+  return all.filter((s) => !s.disabled && (!level || s.level === level) && inShard(s.id, a.shard))
 }
 
 // ─── API client ─────────────────────────────────────────────────────
 
 const MAX_AGE_DAYS = Number(process.env.INGEST_MAX_AGE_DAYS || 45)
-const MAX_NEW_PER_SOURCE = Number(process.env.INGEST_MAX_NEW_PER_SOURCE || 15)
 const API = (process.env.INGEST_API_URL || "").replace(/\/+$/, "")
 const SECRET = process.env.INGEST_SECRET || ""
 
@@ -117,10 +126,40 @@ async function main() {
   const startedAt = new Date().toISOString()
   const today = todayIST()
   const log = (m: string) => console.log(m)
-  if (!args.dryRun && (!API || !SECRET)) throw new Error("INGEST_API_URL and INGEST_SECRET are required (or pass --dry-run)")
+  if (!args.dryRun && (!API || !SECRET)) {
+    throw new Error(
+      `Missing ${[!API && "INGEST_API_URL", !SECRET && "INGEST_SECRET"].filter(Boolean).join(" and ")}. ` +
+        `Add them to .env (e.g. INGEST_API_URL="http://127.0.0.1:3000") or pass --dry-run.`,
+    )
+  }
+  log(`Target: ${args.dryRun ? "(dry run - nothing is sent)" : API} | LLM: ${process.env.GEMINI_API_KEY ? "gemini" : ""}${process.env.GROQ_API_KEY ? " groq" : ""}`)
 
-  const sources = selectSources(loadSources(), args)
-  log(`Ingest ${args.dryRun ? "(dry run) " : ""}- ${sources.length} source(s), LLM budget ${args.limit}`)
+  // Admin → Content bot settings. A real run must have them; a dry run uses them when reachable.
+  let config: BotRuntimeConfig | null = null
+  if (API && SECRET) {
+    try {
+      config = await api<BotRuntimeConfig>("GET", "/config")
+    } catch (e) {
+      if (!args.dryRun) throw e
+      log(`  (admin settings not reachable - using .env defaults: ${e instanceof Error ? e.message : e})`)
+    }
+  }
+  if (config && args.scheduled && !config.settings.enabled) {
+    log("Content bot is paused in Admin → Content bot - nothing to do.")
+    return
+  }
+
+  let all = applySourceOverrides(loadSources(), config?.sources ?? [])
+  if (config && args.scheduled && !args.source) {
+    const off = (["CENTRAL", "STATE", "DISTRICT"] as const).filter((lv) => !tierEnabled(config.settings, lv))
+    if (off.length) log(`  tiers switched off in admin: ${off.join(", ")}`)
+    all = all.filter((s) => tierEnabled(config.settings, s.level))
+  }
+  const sources = selectSources(all, args)
+  const llmBudget = args.limit ?? config?.settings.maxLlmCalls ?? Number(process.env.INGEST_MAX_LLM_CALLS || 120)
+  const maxNewPerSource = config?.settings.maxNewPerSource ?? Number(process.env.INGEST_MAX_NEW_PER_SOURCE || 15)
+  const model = config?.settings.geminiModel || undefined
+  log(`Ingest ${args.dryRun ? "(dry run) " : ""}- ${sources.length} source(s), LLM budget ${llmBudget}, max ${maxNewPerSource} new per source${model ? `, model ${model} (admin)` : ""}`)
   if (!sources.length) return
 
   const tax = args.dryRun || !API
@@ -129,7 +168,7 @@ async function main() {
 
   let extractor: Extractor | null = null
   try {
-    extractor = createExtractor(llmConfig())
+    extractor = createExtractor(llmConfig(model ? { ...process.env, GEMINI_MODEL: model } : process.env))
   } catch (e) {
     if (!args.dryRun) throw e
     log(`  (no LLM key - dry run stops after listing + triage)`)
@@ -139,7 +178,7 @@ async function main() {
   const errors: string[] = []
   const outbox: IngestPost[] = []
   const dryOut: unknown[] = []
-  let budget = args.limit
+  let budget = llmBudget
 
   const flush = async () => {
     if (!outbox.length) return
@@ -191,7 +230,7 @@ async function main() {
       unseen = relevant.filter((r) => set.has(r.url))
     }
     // Listings are newest-first: the cap keeps a big archive's first backfill from eating the budget.
-    unseen = unseen.slice(0, MAX_NEW_PER_SOURCE)
+    unseen = unseen.slice(0, maxNewPerSource)
     stats.unseen += unseen.length
     log(`  ${src.id}: ${items.length} listed, ${relevant.length} relevant, ${unseen.length} new`)
     if (!extractor) {
@@ -202,7 +241,9 @@ async function main() {
     for (const item of unseen) {
       if (budget <= 0) break
       try {
+        const t0 = Date.now()
         const doc = await loadNotice(item.url)
+        const t1 = Date.now()
         const links = [...item.links, ...doc.links]
         budget--
         const { extraction, provider } = await extractor.extract({
@@ -215,8 +256,9 @@ async function main() {
           today,
         })
         stats.extracted++
+        const timing = `${((t1 - t0) / 1000).toFixed(1)}s fetch, ${((Date.now() - t1) / 1000).toFixed(1)}s llm`
         const local = doc.text ? groundExtraction(extraction, doc.text, links) : null
-        log(`    + [${provider}] ${extraction.kind} "${extraction.title ?? item.title}"${local ? ` verified ${Math.round(local.verifiedRatio * 100)}%${local.dropped.length ? `, dropped ${local.dropped.join(",")}` : ""}` : " (scan - unverified)"}`)
+        log(`    + [${provider}] ${extraction.kind} "${extraction.title ?? item.title}"${local ? ` verified ${Math.round(local.verifiedRatio * 100)}%${local.dropped.length ? `, dropped ${local.dropped.join(",")}` : ""}` : " (scan - unverified)"} [${timing}]`)
         outbox.push({
           sourceId: src.id,
           sourceUrl: item.url,

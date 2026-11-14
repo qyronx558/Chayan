@@ -1,3 +1,4 @@
+import type { BotSettings } from "./control"
 import type { QualityReport } from "./quality"
 
 /**
@@ -21,6 +22,11 @@ export function autoApproveConfig(env: Record<string, string | undefined> = proc
     minScore: num(env.INGEST_AUTO_APPROVE_MIN_SCORE, 75),
     minConfidence: num(env.INGEST_AUTO_APPROVE_MIN_CONFIDENCE, 0.85),
   }
+}
+
+/** Auto-approve rules from the admin portal settings (Admin → Content bot). */
+export function autoApproveFromSettings(s: Pick<BotSettings, "autoApprove" | "autoApproveDailyCap" | "minScore" | "minConfidence">): AutoApproveConfig {
+  return { enabled: s.autoApprove, dailyCap: s.autoApproveDailyCap, minScore: s.minScore, minConfidence: s.minConfidence }
 }
 
 export function canAutoApprove(q: QualityReport, cfg: AutoApproveConfig, approvedToday: number): boolean {

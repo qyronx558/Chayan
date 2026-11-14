@@ -11,7 +11,8 @@ import type { IngestPost } from "./schema"
 import type { IngestKind } from "./types"
 import { groundExtraction } from "./grounding"
 import { assessQuality, type QualityReport } from "./quality"
-import { autoApproveConfig, canAutoApprove } from "./policy"
+import { autoApproveFromSettings, canAutoApprove } from "./policy"
+import { getBotSettings } from "./settings"
 import { contentHash, jaccard, titleTokens, todayIST, urlHash } from "./normalize"
 
 export const INGEST_BOT_EMAIL = "ingest-bot@chayanjobs.internal"
@@ -173,7 +174,7 @@ export async function ingestBatch(posts: IngestPost[], now: Date = new Date()): 
     ensureBotUser(),
     prisma.category.findMany({ select: { name: true } }).then((r) => r.map((c) => c.name)),
   ])
-  const cfg = autoApproveConfig()
+  const cfg = autoApproveFromSettings(await getBotSettings())
   const startOfDay = new Date(`${today}T00:00:00+05:30`)
   let approvedToday = cfg.enabled ? await prisma.ingestItem.count({ where: { autoApproved: true, createdAt: { gte: startOfDay } } }) : 0
 
@@ -203,6 +204,7 @@ export async function ingestBatch(posts: IngestPost[], now: Date = new Date()): 
         officialWebsite: ex.officialWebsite,
         allowHosts: p.allowHosts,
         facts: { ...ex, importantDates: ex.importantDates ?? undefined },
+        otherDates: [ex.startDate, ex.examDate, ex.resultDate],
         sourceText: p.sourceText,
         grounded,
         verifiedRatio: g.verifiedRatio,

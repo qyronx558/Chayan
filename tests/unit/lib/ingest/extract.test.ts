@@ -92,3 +92,30 @@ describe("createExtractor", () => {
     expect(() => createExtractor({ ...cfg, geminiKey: undefined, groqKey: undefined })).toThrow(/GEMINI_API_KEY/)
   })
 })
+
+describe("retired models", () => {
+  it("defaults to the always-current Flash-Lite alias", async () => {
+    const { llmConfig } = await import("@/lib/ingest/extract")
+    expect(llmConfig({}).geminiModel).toBe("gemini-flash-lite-latest")
+  })
+  it("treats 503 'high demand' as temporary: waits, retries, then falls back", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(gemini(extraction()))
+    const sleep = vi.fn().mockResolvedValue(undefined)
+    const out = await createExtractor(cfg, fetchFn, sleep).extract(input)
+    expect(out.provider).toBe("gemini")
+    expect(sleep).toHaveBeenCalledWith(30_000)
+  })
+  it("switches to the alias when a pinned model returns 404", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("model retired", { status: 404 }))
+      .mockResolvedValueOnce(gemini(extraction()))
+    const out = await createExtractor({ ...cfg, geminiModel: "gemini-2.5-flash" }, fetchFn, noSleep).extract(input)
+    expect(out.provider).toBe("gemini")
+    expect(fetchFn.mock.calls[0][0]).toContain("/models/gemini-2.5-flash:")
+    expect(fetchFn.mock.calls[1][0]).toContain("/models/gemini-flash-lite-latest:")
+  })
+})

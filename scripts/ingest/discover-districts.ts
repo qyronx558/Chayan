@@ -9,6 +9,7 @@
  * Safe to re-run: verified entries are kept, new ones merged in. Review the
  * diff before committing - only committed sources are crawled.
  */
+import "./env" // must stay first: loads .env before other modules read process.env
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"

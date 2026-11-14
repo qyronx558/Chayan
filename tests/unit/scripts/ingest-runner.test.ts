@@ -16,6 +16,16 @@ describe("CLI args", () => {
     })
     expect(parseArgs(["--source=nic:bihar/patna"]).source).toBe("nic:bihar/patna")
     expect(() => parseArgs(["--tier=planet"])).toThrow(/unknown --tier/)
+    expect(parseArgs([]).limit).toBeUndefined() // admin setting decides
+    expect(parseArgs(["--scheduled"]).scheduled).toBe(true)
+  })
+  it("skips switched-off sources unless one is asked for by id", () => {
+    const all = [
+      { id: "a", name: "A", level: "STATE", adapter: "html-links", url: "https://a.gov.in" },
+      { id: "b", name: "B", level: "STATE", adapter: "html-links", url: "https://b.gov.in", disabled: true },
+    ] as SourceDef[]
+    expect(selectSources(all, { tier: "state" }).map((s) => s.id)).toEqual(["a"])
+    expect(selectSources(all, { source: "b" }).map((s) => s.id)).toEqual(["b"])
   })
 })
 

@@ -29,12 +29,19 @@ export interface LlmConfig {
 export function llmConfig(env: Record<string, string | undefined> = process.env): LlmConfig {
   return {
     geminiKey: env.GEMINI_API_KEY || undefined,
-    geminiModel: env.GEMINI_MODEL || "gemini-2.5-flash",
+    geminiModel: env.GEMINI_MODEL || GEMINI_DEFAULT_MODEL,
     groqKey: env.GROQ_API_KEY || undefined,
     groqModel: env.GROQ_MODEL || "llama-3.3-70b-versatile",
     minIntervalMs: Number(env.LLM_MIN_INTERVAL_MS || 4500),
   }
 }
+
+/**
+ * Alias Google keeps pointed at the current Flash-Lite model (pinned versions get
+ * retired). Flash-Lite answers in ~2 s on the free tier; full Flash queues for
+ * minutes or returns 503 under load. Grounding re-checks every fact either way.
+ */
+export const GEMINI_DEFAULT_MODEL = "gemini-flash-lite-latest"
 
 const MAX_TEXT_CHARS = 28_000
 
@@ -89,6 +96,8 @@ export function buildUserPrompt(input: ExtractInput): string {
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>
 
 export class RateLimitError extends Error {}
+/** The configured model was retired / is unknown (HTTP 404). */
+export class ModelNotFoundError extends Error {}
 
 /** Pulls the first JSON object out of a model reply (tolerates ```json fences). */
 export function parseJsonReply(raw: string): unknown {
@@ -111,7 +120,9 @@ async function callGemini(cfg: LlmConfig, input: ExtractInput, extra: string, fe
       generationConfig: { temperature: 0, responseMimeType: "application/json", maxOutputTokens: 4096 },
     }),
   })
-  if (res.status === 429) throw new RateLimitError("gemini rate limited")
+  // 429 = per-minute quota, 503 = model overloaded: both are temporary.
+  if (res.status === 429 || res.status === 503) throw new RateLimitError(`gemini ${res.status === 429 ? "rate limited" : "overloaded (503)"}`)
+  if (res.status === 404) throw new ModelNotFoundError(`gemini model "${cfg.geminiModel}" not available: ${(await res.text()).slice(0, 200)}`)
   if (!res.ok) throw new Error(`gemini HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const json = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
   const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? ""
@@ -133,7 +144,7 @@ async function callGroq(cfg: LlmConfig, input: ExtractInput, extra: string, fetc
       ],
     }),
   })
-  if (res.status === 429) throw new RateLimitError("groq rate limited")
+  if (res.status === 429 || res.status === 503) throw new RateLimitError(`groq ${res.status === 429 ? "rate limited" : "overloaded (503)"}`)
   if (!res.ok) throw new Error(`groq HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] }
   const text = json.choices?.[0]?.message?.content ?? ""
@@ -149,7 +160,8 @@ export interface Extractor {
  * Builds an extractor with a provider chain, client-side pacing (free tiers
  * are per-minute limited) and one schema-repair retry per provider.
  */
-export function createExtractor(cfg: LlmConfig = llmConfig(), fetchFn: FetchLike = fetch, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))): Extractor {
+export function createExtractor(initial: LlmConfig = llmConfig(), fetchFn: FetchLike = fetch, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))): Extractor {
+  let cfg = initial
   let last = 0
   const pace = async () => {
     const wait = last + cfg.minIntervalMs - Date.now()
@@ -178,7 +190,13 @@ export function createExtractor(cfg: LlmConfig = llmConfig(), fetchFn: FetchLike
             errors.push(`${p.name}: schema ${issue.path.join(".")}`)
           } catch (e) {
             errors.push(`${p.name}: ${e instanceof Error ? e.message : String(e)}`)
+            if (e instanceof ModelNotFoundError && p.name === "gemini" && cfg.geminiModel !== GEMINI_DEFAULT_MODEL) {
+              console.warn(`[ingest] ${e.message} - switching to ${GEMINI_DEFAULT_MODEL}`)
+              cfg = { ...cfg, geminiModel: GEMINI_DEFAULT_MODEL }
+              if (attempt === 0) continue
+            }
             if (e instanceof RateLimitError) {
+              console.warn(`[ingest] ${e.message} - waiting 30 s`)
               await sleep(30_000)
               if (attempt === 0) continue
             }

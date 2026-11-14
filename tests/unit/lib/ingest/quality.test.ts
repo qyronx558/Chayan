@@ -94,3 +94,18 @@ describe("auto-approve policy", () => {
     expect(canAutoApprove({ ...good, confidence: 0.7 }, cfg, 0)).toBe(false)
   })
 })
+
+describe("old notices", () => {
+  it("rejects a notice with no open deadline whose dates are all months old", () => {
+    const q = assessQuality(input({ lastDate: null, otherDates: ["2026-05-07"] }), today)
+    expect(q.reject).toBe("old notice - all its dates have passed")
+  })
+  it("rejects an admit card whose exam is already over", () => {
+    expect(assessQuality(input({ kind: "admit-cards", lastDate: null, otherDates: ["2026-11-10"] }), today).reject).toBe("old notice - all its dates have passed")
+  })
+  it("keeps recent notices and undated ones", () => {
+    expect(assessQuality(input({ lastDate: null, otherDates: ["2026-11-02"] }), today).reject).toBeNull()
+    expect(assessQuality(input({ kind: "admit-cards", lastDate: null, otherDates: ["2026-12-01"] }), today).reject).toBeNull()
+    expect(assessQuality(input({ lastDate: null, otherDates: [] }), today).reject).toBeNull()
+  })
+})

@@ -62,6 +62,8 @@ export function copiedRatio(summary: string, source: string): number {
 }
 
 export const MAX_COPIED_RATIO = 0.35
+/** A notice whose newest date is older than this (and has no open deadline) is an archive item. */
+export const STALE_AFTER_DAYS = 45
 export const MIN_SUMMARY_CHARS = 160
 
 export interface QualityInput {
@@ -75,6 +77,8 @@ export interface QualityInput {
   officialWebsite: string | null
   allowHosts?: string[]
   facts: JobLike
+  /** Exam / result / start dates (YYYY-MM-DD) - used to spot old notices with no deadline. */
+  otherDates?: (string | null | undefined)[]
   sourceText: string
   grounded: boolean
   verifiedRatio: number
@@ -98,6 +102,15 @@ export function assessQuality(q: QualityInput, today: string = todayIST()): Qual
   if (!q.department) return { score: 0, reject: "missing department", flags, confidence: 0 }
   if (!isOfficialUrl(q.officialNotification, q.allowHosts)) return { score: 0, reject: "notification is not on an official domain", flags, confidence: 0 }
   if (q.kind === "jobs" && q.lastDate && q.lastDate < today) return { score: 0, reject: "deadline already passed", flags, confidence: 0 }
+  // No open deadline and every printed date is old ⇒ archive item (e.g. a corrigendum from months ago).
+  if (!q.lastDate || q.lastDate < today) {
+    const dates = [q.lastDate, ...(q.otherDates ?? [])].filter((d): d is string => Boolean(d)).sort()
+    const newest = dates.at(-1)
+    const cutoff = new Date(Date.parse(`${today}T00:00:00Z`) - STALE_AFTER_DAYS * 86400_000).toISOString().slice(0, 10)
+    if (newest && (newest < cutoff || (q.kind === "admit-cards" && newest < today))) {
+      return { score: 0, reject: "old notice - all its dates have passed", flags, confidence: 0 }
+    }
+  }
 
   let score = 0
   const facts = q.kind === "jobs" ? substantiveCount(q.facts) : 0

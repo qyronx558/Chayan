@@ -9,6 +9,7 @@ const { prismaMock, importContent, revalidatePublicContent, writeAuditLog } = vi
     category: { findMany: vi.fn() },
     department: { findMany: vi.fn() },
     ingestItem: { findMany: vi.fn(), count: vi.fn(), upsert: vi.fn() },
+    ingestSettings: { findUnique: vi.fn() },
     crawlerRun: { create: vi.fn() },
     job: { findMany: vi.fn(), updateMany: vi.fn() },
     result: { findMany: vi.fn() },
@@ -170,6 +171,17 @@ describe("POST /api/cron/ingest", () => {
     expect(results.map((r: { moderation: string }) => r.moderation)).toEqual(["APPROVED", "PENDING"])
     expect(revalidatePublicContent).toHaveBeenCalledWith("job")
     expect(prismaMock.ingestItem.upsert.mock.calls[0][0].create.autoApproved).toBe(true)
+  })
+
+  it("uses the admin portal's auto-approve setting over the environment", async () => {
+    vi.stubEnv("INGEST_AUTO_APPROVE", "true")
+    prismaMock.ingestSettings.findUnique.mockResolvedValue({
+      enabled: true, centralEnabled: true, stateEnabled: true, districtEnabled: true,
+      autoApprove: false, autoApproveDailyCap: 60, minScore: 75, minConfidence: 0.85,
+      maxNewPerSource: 15, maxLlmCalls: 120, geminiModel: null, updatedAt: new Date(), updatedById: "u1",
+    })
+    const { results } = await (await INGEST(req("/api/cron/ingest", { items: [post()] }))).json()
+    expect(results[0].moderation).toBe("PENDING")
   })
 
   it("never invents categories - unknown ones fall back by level", async () => {
