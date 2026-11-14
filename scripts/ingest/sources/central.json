@@ -7,7 +7,9 @@
     "url": "https://www.ibps.in/",
     "include": "[.]pdf|ibpsreg[.]ibps[.]in",
     "department": "Institute of Banking Personnel Selection",
-    "allowHosts": ["ibps.in"],
+    "allowHosts": [
+      "ibps.in"
+    ],
     "schedule": "frequent"
   },
   {
@@ -18,7 +20,462 @@
     "url": "https://rrb.indianrailways.gov.in/chandigarh",
     "include": "getdata|[.]pdf",
     "department": "Railway Recruitment Board",
-    "allowHosts": ["indianrailways.gov.in", "rrbapply.gov.in"],
+    "allowHosts": [
+      "indianrailways.gov.in",
+      "rrbapply.gov.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrc-wr",
+    "name": "Railway Recruitment Cell, Western Railway",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.rrc-wr.com/",
+    "include": "[.]pdf",
+    "department": "Railway Recruitment Cell",
+    "allowHosts": [
+      "rrc-wr.com"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrc-er",
+    "name": "Railway Recruitment Cell, Eastern Railway",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.rrcer.org/notice_board.html",
+    "include": "[.]pdf",
+    "department": "Railway Recruitment Cell",
+    "allowHosts": [
+      "rrcer.org"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "nta-ugcnet",
+    "name": "NTA UGC NET",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://ugcnet.nta.ac.in/",
+    "include": "[.]pdf",
+    "department": "National Testing Agency",
+    "allowHosts": [
+      "ugcnet.nta.ac.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "nta-cuet",
+    "name": "NTA CUET UG",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://cuet.nta.nic.in/",
+    "include": "[.]pdf",
+    "department": "National Testing Agency",
+    "schedule": "frequent"
+  },
+  {
+    "id": "sbi",
+    "name": "State Bank of India Careers",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://sbi.co.in/web/careers/current-openings",
+    "include": "[.]pdf|careers/",
+    "department": "State Bank of India",
+    "allowHosts": [
+      "sbi.co.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "nabard",
+    "name": "NABARD",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.nabard.org/careers-notices1.aspx?cid=693&id=26",
+    "include": "[.]pdf|career",
+    "department": "NABARD",
+    "allowHosts": [
+      "nabard.org"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "lic",
+    "name": "Life Insurance Corporation of India",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://licindia.in/careers",
+    "include": "[.]pdf|career|recruitment",
+    "department": "Life Insurance Corporation of India",
+    "allowHosts": [
+      "licindia.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "indian-navy",
+    "name": "Indian Navy",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.joinindiannavy.gov.in/en/page/notifications.html",
+    "include": "[.]pdf|notification|event",
+    "department": "Indian Navy",
+    "schedule": "frequent"
+  },
+  {
+    "id": "drdo",
+    "name": "Defence Research & Development Organisation",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.drdo.gov.in/drdo/en/offerings/vacancies",
+    "include": "[.]pdf|vacancies/",
+    "department": "Defence Research & Development Organisation",
+    "schedule": "frequent"
+  },
+  {
+    "id": "esic",
+    "name": "Employees' State Insurance Corporation",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.esic.gov.in/recruitments",
+    "include": "[.]pdf|recruitments/",
+    "department": "Employees' State Insurance Corporation",
+    "schedule": "frequent"
+  },
+  {
+    "id": "bsf",
+    "name": "Border Security Force",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://rectt.bsf.gov.in/",
+    "include": "[.]pdf|notice|Notice",
+    "department": "Border Security Force",
+    "schedule": "frequent"
+  },
+  {
+    "id": "kvs",
+    "name": "Kendriya Vidyalaya Sangathan",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://kvsangathan.nic.in/en/recruitment/",
+    "include": "[.]pdf|recruitment",
+    "department": "Kendriya Vidyalaya Sangathan",
+    "schedule": "frequent"
+  },
+  {
+    "id": "ctet",
+    "name": "Central Teacher Eligibility Test",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://ctet.nic.in/",
+    "include": "[.]pdf",
+    "department": "Central Teacher Eligibility Test",
+    "schedule": "frequent"
+  },
+  {
+    "id": "coal-india",
+    "name": "Coal India Limited",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.coalindia.in/career-cil/jobs-coal-india/",
+    "include": "[.]pdf",
+    "department": "Coal India Limited",
+    "allowHosts": [
+      "coalindia.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "ntpc",
+    "name": "NTPC Limited",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://careers.ntpc.co.in/recruitment/",
+    "include": "[.]pdf|recruitment",
+    "department": "NTPC Limited",
+    "allowHosts": [
+      "careers.ntpc.co.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "powergrid",
+    "name": "Power Grid Corporation",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.powergrid.in/en/job-opportunities",
+    "include": "[.]pdf|job",
+    "department": "Power Grid Corporation",
+    "allowHosts": [
+      "powergrid.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "idbi",
+    "name": "IDBI Bank",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.idbibank.in/idbi-bank-careers-current-openings.aspx",
+    "include": "[.]pdf|career",
+    "department": "IDBI Bank",
+    "allowHosts": [
+      "idbibank.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrc-ncr",
+    "name": "Railway Recruitment Cell, North Central Railway",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://rrcpryj.org/notification/",
+    "include": "[.]pdf|notification/",
+    "department": "Railway Recruitment Cell",
+    "allowHosts": [
+      "rrcpryj.org"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrc-sr",
+    "name": "Railway Recruitment Cell, Southern Railway",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://rrcmas.in/",
+    "include": "downloads/|[.]pdf",
+    "department": "Railway Recruitment Cell",
+    "allowHosts": [
+      "rrcmas.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "rrc-nwr",
+    "name": "Railway Recruitment Cell, North Western Railway",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.rrcjaipur.in/Notice",
+    "include": "storeWebFiles|[.]pdf",
+    "department": "Railway Recruitment Cell",
+    "allowHosts": [
+      "rrcjaipur.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "csir-net",
+    "name": "CSIR UGC NET (NTA)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://csirnet.nta.ac.in/",
+    "include": "[.]pdf",
+    "department": "National Testing Agency",
+    "allowHosts": [
+      "csirnet.nta.ac.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "canara-bank",
+    "name": "Canara Bank",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.canarabank.bank.in/pages/Recruitment",
+    "include": "recruitment|rp-|[.]pdf",
+    "department": "Canara Bank",
+    "allowHosts": [
+      "canarabank.bank.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "hpcl",
+    "name": "Hindustan Petroleum Corporation",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.hindustanpetroleum.com/job-openings",
+    "include": "[.]pdf",
+    "department": "Hindustan Petroleum Corporation",
+    "allowHosts": [
+      "hindustanpetroleum.com"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "prasar-bharati",
+    "name": "Prasar Bharati",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://prasarbharati.gov.in/pbvacancies/",
+    "include": "[.]pdf|wp-content",
+    "department": "Prasar Bharati",
+    "schedule": "frequent"
+  },
+  {
+    "id": "vssc",
+    "name": "Vikram Sarabhai Space Centre (ISRO)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.vssc.gov.in/careers.html",
+    "include": "[.]pdf|career",
+    "department": "Indian Space Research Organisation",
+    "schedule": "frequent"
+  },
+  {
+    "id": "jipmer",
+    "name": "JIPMER Puducherry",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://jipmer.edu.in/announcement/jobs",
+    "include": "[.]pdf|announcement/",
+    "department": "JIPMER",
+    "allowHosts": [
+      "jipmer.edu.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "sail",
+    "name": "Steel Authority of India",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://sailcareers.com/",
+    "include": "[.]pdf|advt|career",
+    "department": "Steel Authority of India",
+    "allowHosts": [
+      "sailcareers.com"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "grse",
+    "name": "Garden Reach Shipbuilders",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://grse.in/career/",
+    "include": "[.]pdf",
+    "department": "Garden Reach Shipbuilders",
+    "allowHosts": [
+      "grse.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "ugc",
+    "name": "University Grants Commission",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.ugc.gov.in/",
+    "include": "[.]pdf",
+    "department": "University Grants Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "ssc-nr",
+    "name": "Staff Selection Commission (Northern Region)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://sscnr.nic.in/",
+    "include": "[.]pdf",
+    "department": "Staff Selection Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "ssc-er",
+    "name": "Staff Selection Commission (Eastern Region)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.sscer.org/",
+    "include": "[.]pdf",
+    "department": "Staff Selection Commission",
+    "allowHosts": [
+      "sscer.org"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "ssc-wr",
+    "name": "Staff Selection Commission (Western Region)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://sscwr.net/",
+    "include": "[.]pdf",
+    "department": "Staff Selection Commission",
+    "allowHosts": [
+      "sscwr.net"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "ssc-kkr",
+    "name": "Staff Selection Commission (KK Region)",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://ssckkr.kar.nic.in/",
+    "include": "[.]pdf",
+    "department": "Staff Selection Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "exim",
+    "name": "Export-Import Bank of India",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.eximbankindia.in/careers",
+    "include": "[.]pdf|career",
+    "department": "Export-Import Bank of India",
+    "allowHosts": [
+      "eximbankindia.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "nhb",
+    "name": "National Housing Bank",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://nhb.org.in/en/careers/",
+    "include": "[.]pdf",
+    "department": "National Housing Bank",
+    "allowHosts": [
+      "nhb.org.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "gic-re",
+    "name": "General Insurance Corporation of India",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.gicre.in/en/careers",
+    "include": "[.]pdf|career",
+    "department": "General Insurance Corporation of India",
+    "allowHosts": [
+      "gicre.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "igcar",
+    "name": "Indira Gandhi Centre for Atomic Research",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://www.igcar.gov.in/recruitment.html",
+    "include": "[.]pdf",
+    "department": "Department of Atomic Energy",
+    "schedule": "frequent"
+  },
+  {
+    "id": "ncert",
+    "name": "NCERT",
+    "level": "CENTRAL",
+    "adapter": "html-links",
+    "url": "https://ncert.nic.in/vacancies.php",
+    "include": "[.]pdf",
+    "department": "NCERT",
     "schedule": "frequent"
   }
 ]

@@ -74,7 +74,9 @@
     "url": "https://www.hssc.gov.in/",
     "include": "publicNotice|[.]pdf",
     "department": "Haryana Staff Selection Commission",
-    "allowHosts": ["hryssc.com"],
+    "allowHosts": [
+      "hryssc.com"
+    ],
     "schedule": "frequent"
   },
   {
@@ -86,6 +88,239 @@
     "url": "https://www.tnpsc.gov.in/english/notification.aspx",
     "include": "[.]pdf",
     "department": "Tamil Nadu Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "appsc-arunachal",
+    "name": "Arunachal Pradesh Public Service Commission",
+    "level": "STATE",
+    "state": "Arunachal Pradesh",
+    "adapter": "html-links",
+    "url": "https://appsc.gov.in/Index/sub_page/doc2195/Advertisements",
+    "extraUrls": [
+      "https://appsc.gov.in/Index/sub_page/doc12233/Notifications"
+    ],
+    "include": "[.]pdf|uploads|download",
+    "department": "Arunachal Pradesh Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "bpssc",
+    "name": "Bihar Police Subordinate Services Commission",
+    "level": "STATE",
+    "state": "Bihar",
+    "adapter": "html-links",
+    "url": "https://bpssc.bihar.gov.in/",
+    "include": "[.]pdf",
+    "department": "Bihar Police Subordinate Services Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "csbc",
+    "name": "Central Selection Board of Constable, Bihar",
+    "level": "STATE",
+    "state": "Bihar",
+    "adapter": "html-links",
+    "url": "https://csbc.bihar.gov.in/",
+    "include": "[.]pdf",
+    "department": "Central Selection Board of Constable, Bihar",
+    "schedule": "frequent"
+  },
+  {
+    "id": "cgpsc",
+    "name": "Chhattisgarh Public Service Commission",
+    "level": "STATE",
+    "state": "Chhattisgarh",
+    "adapter": "html-links",
+    "url": "https://psc.cg.gov.in/Advertisement.php",
+    "extraUrls": [
+      "https://psc.cg.gov.in/Notifications.php",
+      "https://psc.cg.gov.in/Result.php"
+    ],
+    "include": "[.]pdf",
+    "department": "Chhattisgarh Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "gpsc",
+    "name": "Gujarat Public Service Commission",
+    "level": "STATE",
+    "state": "Gujarat",
+    "adapter": "html-links",
+    "url": "https://gpsc.gujarat.gov.in/",
+    "include": "[.]pdf|Advertisement",
+    "department": "Gujarat Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "kpsc",
+    "name": "Karnataka Public Service Commission",
+    "level": "STATE",
+    "state": "Karnataka",
+    "adapter": "html-links",
+    "url": "https://kpsc.karnataka.gov.in/en",
+    "include": "[.]pdf",
+    "department": "Karnataka Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "kea",
+    "name": "Karnataka Examinations Authority",
+    "level": "STATE",
+    "state": "Karnataka",
+    "adapter": "html-links",
+    "url": "https://cetonline.karnataka.gov.in/kea/",
+    "include": "[.]pdf",
+    "department": "Karnataka Examinations Authority",
+    "schedule": "frequent"
+  },
+  {
+    "id": "mpsc-manipur",
+    "name": "Manipur Public Service Commission",
+    "level": "STATE",
+    "state": "Manipur",
+    "adapter": "html-links",
+    "url": "https://mpscmanipur.gov.in/",
+    "include": "[.]pdf",
+    "department": "Manipur Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "psssb",
+    "name": "Punjab Subordinate Services Selection Board",
+    "level": "STATE",
+    "state": "Punjab",
+    "adapter": "html-links",
+    "url": "https://sssb.punjab.gov.in/",
+    "include": "[.]pdf",
+    "department": "Punjab Subordinate Services Selection Board",
+    "schedule": "frequent"
+  },
+  {
+    "id": "rsmssb",
+    "name": "Rajasthan Staff Selection Board",
+    "level": "STATE",
+    "state": "Rajasthan",
+    "adapter": "html-links",
+    "url": "https://rssb.rajasthan.gov.in/",
+    "include": "[.]pdf",
+    "department": "Rajasthan Staff Selection Board",
+    "schedule": "frequent"
+  },
+  {
+    "id": "tnusrb",
+    "name": "Tamil Nadu Uniformed Services Recruitment Board",
+    "level": "STATE",
+    "state": "Tamil Nadu",
+    "adapter": "html-links",
+    "url": "https://www.tnusrb.tn.gov.in/",
+    "include": "[.]pdf",
+    "department": "Tamil Nadu Uniformed Services Recruitment Board",
+    "schedule": "frequent"
+  },
+  {
+    "id": "tpsc",
+    "name": "Tripura Public Service Commission",
+    "level": "STATE",
+    "state": "Tripura",
+    "adapter": "html-links",
+    "url": "https://tpsc.tripura.gov.in/",
+    "include": "[.]pdf",
+    "department": "Tripura Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "uppbpb",
+    "name": "UP Police Recruitment and Promotion Board",
+    "level": "STATE",
+    "state": "Uttar Pradesh",
+    "adapter": "html-links",
+    "url": "https://uppbpb.gov.in/",
+    "include": "[.]pdf",
+    "department": "UP Police Recruitment and Promotion Board",
+    "schedule": "frequent"
+  },
+  {
+    "id": "uksssc",
+    "name": "Uttarakhand Subordinate Service Selection Commission",
+    "level": "STATE",
+    "state": "Uttarakhand",
+    "adapter": "html-links",
+    "url": "https://sssc.uk.gov.in/",
+    "include": "[.]pdf",
+    "department": "Uttarakhand Subordinate Service Selection Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "wbpsc",
+    "name": "West Bengal Public Service Commission",
+    "level": "STATE",
+    "state": "West Bengal",
+    "adapter": "html-links",
+    "url": "https://psc.wb.gov.in/",
+    "include": "[.]pdf",
+    "department": "West Bengal Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "wbssc",
+    "name": "West Bengal Central School Service Commission",
+    "level": "STATE",
+    "state": "West Bengal",
+    "adapter": "html-links",
+    "url": "https://www.westbengalssc.com/",
+    "include": "[.]pdf",
+    "department": "West Bengal Central School Service Commission",
+    "allowHosts": [
+      "westbengalssc.com"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "jkpsc",
+    "name": "Jammu and Kashmir Public Service Commission",
+    "level": "STATE",
+    "state": "Jammu and Kashmir",
+    "adapter": "html-links",
+    "url": "https://jkpsc.nic.in/",
+    "include": "[.]pdf",
+    "department": "Jammu and Kashmir Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "jkssb",
+    "name": "J&K Services Selection Board",
+    "level": "STATE",
+    "state": "Jammu and Kashmir",
+    "adapter": "html-links",
+    "url": "https://jkssb.nic.in/",
+    "include": "[.]pdf",
+    "department": "J&K Services Selection Board",
+    "schedule": "frequent"
+  },
+  {
+    "id": "slprb-assam",
+    "name": "State Level Police Recruitment Board, Assam",
+    "level": "STATE",
+    "state": "Assam",
+    "adapter": "html-links",
+    "url": "https://slprbassam.in/",
+    "include": "[.]pdf",
+    "department": "State Level Police Recruitment Board, Assam",
+    "allowHosts": [
+      "slprbassam.in"
+    ],
+    "schedule": "frequent"
+  },
+  {
+    "id": "ddd-recruit",
+    "name": "DNH and DD Administration",
+    "level": "STATE",
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "adapter": "html-links",
+    "url": "https://ddd.gov.in/",
+    "include": "[.]pdf",
+    "department": "DNH and DD Administration",
     "schedule": "frequent"
   }
 ]

@@ -6,6 +6,7 @@ import {
   headersIndicatePdf,
   cookiesWorkInFrame,
 } from "@/lib/apply-room"
+import { documentSources, hasMirror } from "@/lib/official-mirrors"
 import { assertPublicTarget, safeFetch, browserHeaders } from "@/lib/proxy"
 
 export const runtime = "nodejs"
@@ -100,8 +101,12 @@ export async function GET(req: NextRequest) {
     secureUrl = upgraded.toString()
   }
 
+  // A host with a faster official mirror (slow NIC CDN) is judged by the mirror the
+  // viewer will actually read from; the original address is the fallback.
+  const probePlain = async () =>
+    (hasMirror(target) ? await probe(documentSources(target)[0].toString()) : null) ?? probe(normalized)
   // For http:// links, try the https:// address at the same time.
-  const [plain, secure] = await Promise.all([probe(normalized), secureUrl ? probe(secureUrl) : null])
+  const [plain, secure] = await Promise.all([probePlain(), secureUrl ? probe(secureUrl) : null])
   const secureWorks = !!secure && secure.res.ok && secure.finalUrl.startsWith("https:")
   const chosen = secureWorks ? secure : plain
   if (!chosen) return unknown("unreachable")

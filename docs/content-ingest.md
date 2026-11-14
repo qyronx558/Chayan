@@ -20,18 +20,38 @@ Admin → Review queue: "Source notice" link + quality score → Approve → liv
 
 ## Sources
 
-| Tier | File | How it is read |
-|---|---|---|
-| Central | `scripts/ingest/sources/central.json` | `html-links`: document links on the board's page |
-| State | `scripts/ingest/sources/state.json` | `html-links` |
-| District | `scripts/ingest/sources/districts.json` | `nic-s3waas`: the shared NIC district portal template |
+| Tier | File | Count | How it is read |
+|---|---|---|---|
+| Central | `scripts/ingest/sources/central.json` | 40 | `html-links`: document links on the board's page |
+| State | `scripts/ingest/sources/state.json` | 28 (18 states / UTs) | `html-links` |
+| District | `scripts/ingest/sources/districts.json` | 572 of 781 | `nic-s3waas` (the shared NIC district template); Assam's own portal via `html-links` |
 
-`npm run ingest:discover` finds every district's official portal and recruitment board, using `prisma/data/india_districts_statewise.csv` as the district list. It keeps a portal only if the site is S3WaaS, the title matches the district and the page matches the state. It writes `districts.json`, plus `districts-unresolved.json` for the districts it could not resolve automatically.
-- First run: **479 of 781 districts** were found automatically.
-- Two cases need a manual `district-hosts.json` entry:
-  - districts whose portal spelling differs from the CSV (for example Purnia → `purnea.nic.in`)
-  - states that use another platform: Rajasthan, Odisha, Assam, Delhi
+**Central** covers the big recruiters: SSC (through its regional offices, since ssc.gov.in renders only with JavaScript), IBPS, SBI, RRBs and five Railway Recruitment Cells, NTA (UGC NET, CSIR NET, CUET), CTET, KVS, NCERT, UGC, ESIC, LIC, NABARD, NHB, EXIM Bank, Canara Bank, IDBI, GIC Re, Indian Navy, BSF, DRDO, ISRO (VSSC), IGCAR, NTPC, Power Grid, Coal India, SAIL, HPCL, GRSE, Prasar Bharati and JIPMER.
+
+`npm run ingest:check -- --tier=state` (or `--source=<id>`, `--file=<candidates.json>`) fetches each listing page with the bot's own polite client and prints how many notices it finds and how many pass triage. No LLM call, nothing is posted. Run it before adding sources, and now and then to spot boards that changed their site.
+
+`npm run ingest:discover` finds every district's official portal and recruitment board, using `prisma/data/india_districts_statewise.csv` as the district list. It tries `<name>.nic.in`, `<name>.gov.in`, state portal domains (`barpeta.assam.gov.in`, `dmcentral.delhi.gov.in`), state prefixes (`hpkangra.nic.in`) and old names of renamed districts (Gurugram → `gurgaon`). A portal is kept only if its title matches the district and the page matches the state. It writes `districts.json`, plus `districts-unresolved.json` with **every** district still missing; `site` marks the ones that have an official site on another platform.
+- **572 of 781 districts** are covered.
+- Still missing:
+  - Rajasthan (41): the state portal renders only with JavaScript.
+  - Odisha (30): the district servers do not answer.
+  - About 138 scattered elsewhere, mostly very new districts without a portal yet.
+- Use a manual `district-hosts.json` entry when a portal's spelling differs from the CSV (for example Purnia → `purnea.nic.in`).
 - Review the diff before committing. The bot only crawls committed sources.
+
+### District PDFs (cdn.s3waas.gov.in)
+
+S3WaaS district sites keep their notice PDFs on `cdn.s3waas.gov.in`. That CDN answers visitors outside India with `robots.txt: Disallow: /`; inside India it publishes no restriction. GitHub's hosted runners are in the US, so on GitHub every district PDF is "blocked by robots.txt". The bot respects that, and does not use a mirror or disguise itself to get around it:
+- Blocked notices are counted as `blocked`, not as errors, with one log line per host.
+- They are **not** marked as seen, so a later run that is allowed to read them picks them up.
+
+To read district PDFs, run the **district tier from a machine in India**, either way:
+- **Self-hosted runner (recommended):** on a PC or VM in India, add a runner in GitHub (Settings → Actions → Runners → New self-hosted runner) with the label `india`, and keep it running. Then set the repository variable **`INGEST_DISTRICT_RUNNER=india`**. District shards then run there; central and state runs stay on GitHub's runners. On Windows the runner needs Git Bash, which comes with Git for Windows. Keep the repository private: GitHub advises against self-hosted runners on public repositories.
+- **Or by hand:** `npm run ingest -- --tier=district --shard=1/4` (and 2/4, 3/4, 4/4) on that machine, with `.env` holding `INGEST_API_URL`, `INGEST_SECRET` and `GEMINI_API_KEY`.
+
+Assam districts and the central / state boards keep their files on their own hosts, so they work from GitHub as before.
+
+Visitors opening these PDFs on ChayanJobs are not affected: `/api/doc` reads them through NIC's official mirror `cdnbbsr.s3waas.gov.in` (fast, same files), falling back to the CDN. See `src/lib/official-mirrors.ts`.
 
 To add a board, append an object to `central.json` or `state.json`. Fields:
 
@@ -47,8 +67,9 @@ To add a board, append an object to `central.json` or `state.json`. Fields:
 Then run `npm run ingest:dry -- --source=<id>` to check the result.
 
 Sources left out on purpose:
-- **UPSC** returns 403 to an identified bot.
-- **MPPSC** blocks all crawlers in robots.txt.
+- **UPSC, CBSE, NEET / JEE Main (NTA), Supreme Court, MHA, Ministry of Defence** answer 403 to an identified bot.
+- **MPPSC, AAI, IRDAI, ECIL, IRCTC careers, SSC NWR** block the bot (or all crawlers) in robots.txt.
+- **APPSC, MPSC (Maharashtra), RBI, India Post GDS, Rajasthan district portals** render their notice lists only with JavaScript.
 
 We do not disguise the bot to get around either.
 

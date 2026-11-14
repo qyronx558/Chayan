@@ -1,11 +1,16 @@
 import { normalizeExternalUrl } from "@/lib/apply-room"
+import { documentSources } from "@/lib/official-mirrors"
 import { validateProxyTarget, safeFetch, browserHeaders } from "@/lib/proxy"
 
 export const DOC_MAX_BYTES = 40 * 1024 * 1024
-/** Time allowed for the official server to start answering. */
-const DOC_HEADER_TIMEOUT_MS = 15000
-/** Time allowed for the whole file to pass through. */
+/** Time allowed for the official server to start answering (government servers can be slow). */
+const DOC_HEADER_TIMEOUT_MS = 25000
+/** Time a faster official mirror gets before the original address is tried. */
+const MIRROR_HEADER_TIMEOUT_MS = 8000
+/** Time allowed for the whole request, from the first byte asked for (route maxDuration is 60 s). */
 const DOC_TOTAL_TIMEOUT_MS = 55000
+/** Never cut a transfer that has just started shorter than this. */
+const MIN_TRANSFER_MS = 10000
 /** How much of the file is inspected before the first byte is sent on. */
 const SNIFF_BYTES = 1024
 
@@ -21,10 +26,30 @@ export interface OfficialPdf {
  * stream. Only the first kilobyte is held to confirm it really is a PDF; the
  * rest flows straight to the reader, so the first page shows while a large
  * file is still arriving and nothing big is buffered in memory.
+ *
+ * Hosts with an official mirror (see official-mirrors.ts) are read from the
+ * mirror first; any failure there falls back to the original address.
  */
 export async function openOfficialPdf(url: URL): Promise<OfficialPdf> {
+  const startedAt = Date.now()
+  const sources = documentSources(url)
+  let lastError: unknown = null
+  for (const [i, source] of sources.entries()) {
+    const isLast = i === sources.length - 1
+    try {
+      return await openOne(source, isLast ? DOC_HEADER_TIMEOUT_MS : MIRROR_HEADER_TIMEOUT_MS, startedAt)
+    } catch (err) {
+      lastError = err
+      // Problems that a different copy cannot fix are reported straight away.
+      if (err instanceof Error && (err.message === "Blocked address" || err.message === "Document too large")) throw err
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Document failed")
+}
+
+async function openOne(url: URL, headerTimeoutMs: number, startedAt: number): Promise<OfficialPdf> {
   const controller = new AbortController()
-  let timer = setTimeout(() => controller.abort(), DOC_HEADER_TIMEOUT_MS)
+  let timer = setTimeout(() => controller.abort(), headerTimeoutMs)
   const fail = async (reader: ReadableStreamDefaultReader<Uint8Array> | null, message: string): Promise<never> => {
     clearTimeout(timer)
     await reader?.cancel().catch(() => {})
@@ -52,7 +77,7 @@ export async function openOfficialPdf(url: URL): Promise<OfficialPdf> {
   if (!res.body) return fail(null, "Empty document")
 
   clearTimeout(timer)
-  timer = setTimeout(() => controller.abort(), DOC_TOTAL_TIMEOUT_MS)
+  timer = setTimeout(() => controller.abort(), Math.max(MIN_TRANSFER_MS, DOC_TOTAL_TIMEOUT_MS - (Date.now() - startedAt)))
 
   // Hold back just enough to check the %PDF- signature (it may sit after a
   // little leading junk, so look through the first kilobyte).

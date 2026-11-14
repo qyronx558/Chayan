@@ -28,7 +28,8 @@
     "db:seed:locations": "tsx scripts/seed-locations.ts",
     "ingest": "tsx scripts/ingest/run.ts",
     "ingest:dry": "tsx scripts/ingest/run.ts --dry-run",
-    "ingest:discover": "tsx scripts/ingest/discover-districts.ts"
+    "ingest:discover": "tsx scripts/ingest/discover-districts.ts",
+    "ingest:check": "tsx scripts/ingest/check-sources.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

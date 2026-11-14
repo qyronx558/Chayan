@@ -8,6 +8,7 @@ name: content-ingest
 # Repo secrets (Settings → Secrets and variables → Actions):
 #   APP_URL, INGEST_SECRET, CRON_SECRET, GEMINI_API_KEY, GROQ_API_KEY (optional)
 #   DEV_APP_URL, DEV_INGEST_SECRET  (only for manual runs with target=dev)
+# Optional repo variables: INGEST_EXTERNAL_SCHEDULER, INGEST_DISTRICT_RUNNER, GEMINI_MODEL, GROQ_MODEL
 
 # On-time schedule: GitHub's cron often starts these hours late. For exact times, point a free
 # external cron (cron-job.org) at the site - see docs/content-ingest.md → "On-time schedule":
@@ -89,8 +90,15 @@ jobs:
 
   ingest:
     needs: plan
-    runs-on: ubuntu-latest
+    # District notice PDFs sit on cdn.s3waas.gov.in, whose robots.txt blocks every visitor
+    # outside India (GitHub's hosted runners are in the US). Set the repository variable
+    # INGEST_DISTRICT_RUNNER to the label of a self-hosted runner in India (e.g. "india") and
+    # district shards run there; everything else stays on GitHub's runners.
+    runs-on: ${{ contains(matrix.args, '--tier=district') && vars.INGEST_DISTRICT_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash  # also on a Windows self-hosted runner (Git Bash)
     strategy:
       fail-fast: false
       # Sequential shards share one LLM key - parallel shards would just hit its per-minute limit.
