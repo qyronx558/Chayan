@@ -5,6 +5,7 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
+import { canViewContent } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -32,7 +33,7 @@ export default async function ApplyStartPage({ params }: Props) {
     include: { department: true },
   })
 
-  if (!job) notFound()
+  if (!job || !(await canViewContent(job.moderation))) notFound()
 
   const targetUrl = normalizeExternalUrl(job.applyLink || job.officialWebsite)
   if (!targetUrl) notFound()

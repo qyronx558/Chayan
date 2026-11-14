@@ -1,0 +1,136 @@
+name: content-ingest
+
+# Free all-India content pipeline (see docs/content-ingest.md):
+#   scripts/ingest/run.ts → official notices → Gemini extraction → POST /api/cron/ingest
+# Posts land in the admin review queue (moderation PENDING) unless the
+# auto-approve policy (INGEST_AUTO_APPROVE on Vercel) allows them.
+#
+# Repo secrets (Settings → Secrets and variables → Actions):
+#   APP_URL, INGEST_SECRET, CRON_SECRET, GEMINI_API_KEY, GROQ_API_KEY (optional)
+#   DEV_APP_URL, DEV_INGEST_SECRET  (only for manual runs with target=dev)
+
+on:
+  schedule:
+    - cron: "15 */4 * * *"   # central + state boards, every 4h
+    - cron: "30 0 * * *"     # 06:00 IST - all district portals, 4 shards
+    - cron: "45 18 * * *"    # 00:15 IST - expire jobs whose last date passed
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which site receives the posts"
+        type: choice
+        options: [dev, production]
+        default: dev
+      tier:
+        description: "Sources to crawl"
+        type: choice
+        options: [central, state, district, all]
+        default: central
+      source:
+        description: "Optional single source id (e.g. nic:bihar/patna) - overrides tier"
+        type: string
+        required: false
+      dry_run:
+        description: "Only list + extract, send nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: content-ingest-${{ github.event.schedule || inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.event.schedule != '45 18 * * *'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          TIER: ${{ inputs.tier }}
+          SOURCE: ${{ inputs.source }}
+        run: |
+          if [ -n "$SOURCE" ]; then
+            echo "matrix=[\"--source=$SOURCE\"]" >> "$GITHUB_OUTPUT"
+          elif [ "$SCHEDULE" = "30 0 * * *" ] || [ "$TIER" = "district" ]; then
+            echo 'matrix=["--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
+          elif [ "$TIER" = "all" ]; then
+            echo 'matrix=["--tier=central","--tier=state","--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
+          elif [ "$TIER" = "state" ]; then
+            echo 'matrix=["--tier=state"]' >> "$GITHUB_OUTPUT"
+          elif [ -z "$SCHEDULE" ]; then
+            echo 'matrix=["--tier=central"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix=["--tier=central","--tier=state"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  ingest:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      # Sequential shards share one LLM key - parallel shards would just hit its per-minute limit.
+      max-parallel: 1
+      matrix:
+        args: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run ingest
+        env:
+          INGEST_API_URL: ${{ inputs.target == 'dev' && secrets.DEV_APP_URL || secrets.APP_URL }}
+          INGEST_SECRET: ${{ inputs.target == 'dev' && secrets.DEV_INGEST_SECRET || secrets.INGEST_SECRET }}
+          INGEST_PUBLIC_URL: ${{ secrets.APP_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Optional repository *variables* (Settings → Variables): change the model without a code change.
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL }}
+          # Scheduled runs obey the pause / tier switches in Admin → Content bot; manual runs always go.
+          INGEST_SCHEDULED: ${{ github.event_name == 'schedule' }}
+          DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
+          ARGS: ${{ matrix.args }}
+        run: |
+          if [ -z "$DRY_RUN" ] && { [ -z "$INGEST_API_URL" ] || [ -z "$INGEST_SECRET" ]; }; then
+            echo "::error::APP_URL / INGEST_SECRET secrets are not set (DEV_APP_URL / DEV_INGEST_SECRET for target=dev)."
+            exit 1
+          fi
+          # shellcheck disable=SC2086
+          npx tsx scripts/ingest/run.ts $ARGS $DRY_RUN
+
+      - name: Keep dry-run output
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingest-dry-run-${{ strategy.job-index }}
+          path: ingest-dry-run.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  expire-jobs:
+    if: github.event.schedule == '45 18 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Expire closed jobs
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$APP_URL" && test -n "$CRON_SECRET"
+          curl --fail-with-body --silent --show-error --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "${APP_URL%/}/api/cron/expire-jobs"

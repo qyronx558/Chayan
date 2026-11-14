@@ -57,6 +57,7 @@ interface QueueRow {
   createdBy: { id: string; name: string | null; email: string } | null;
   module: string;
   moduleLabel: string;
+  ingest?: { url: string; quality: number | null; reason: string | null } | null;
 }
 
 interface QueueResponse {
@@ -540,6 +541,15 @@ export default function AdminReview() {
                             {r.moduleLabel}
                             {r.reviewNote ? `  •  ${r.reviewNote}` : ""}
                           </p>
+                          {r.ingest ? (
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground" title={r.ingest.reason ?? undefined}>
+                              <a href={r.ingest.url} target="_blank" rel="noopener noreferrer" className="font-medium text-brick underline-offset-2 hover:underline">
+                                Source notice
+                              </a>
+                              {r.ingest.quality !== null ? `  •  Quality ${r.ingest.quality}/100` : ""}
+                              {r.ingest.reason ? `  •  ${r.ingest.reason}` : ""}
+                            </p>
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell className={cn(density === "compact" && "py-2")}>

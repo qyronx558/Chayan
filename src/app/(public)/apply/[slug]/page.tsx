@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { stripHtmlToText } from "@/lib/blog-prose"
 import { getJourney } from "@/lib/doc-journey"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isThinJob } from "@/lib/ingest/quality"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -26,8 +28,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: job.title,
-    description: `${job.title} - ${job.department.name} | ${job.totalVacancies ? `${job.totalVacancies} vacancies` : ""} | Apply before ${job.lastDate ? formatDate(job.lastDate) : "N/A"}`,
+    // A unique, human-readable description per page beats a templated one (and avoids duplicate meta).
+    description: job.summary
+      ? job.summary.length > 160 ? `${job.summary.slice(0, 157).replace(/\s+\S*$/, "")}...` : job.summary
+      : `${job.title} - ${job.department.name} | ${job.totalVacancies ? `${job.totalVacancies} vacancies` : ""} | Apply before ${job.lastDate ? formatDate(job.lastDate) : "N/A"}`,
     alternates: { canonical: `${baseUrl}/apply/${job.slug}` },
+    robots: robotsFor(job.moderation, isThinJob(job)),
     twitter: { card: "summary_large_image", title: `${job.title} | ChayanJobs`, description: `${job.department.name} - ${job.location || "All India"} | ${job.salary || "As per norms"}` },
     openGraph: {
       title: job.title,
@@ -44,7 +50,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     include: { department: true, category: true, state: true, district: true },
   })
 
-  if (!job) notFound()
+  if (!job || !(await canViewContent(job.moderation))) notFound()
 
   const relatedJobs = await prisma.job.findMany({
     where: {
@@ -142,6 +148,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         updatedAt={job.updatedAt?.toISOString() || null}
         viewsTotal={viewsTotal}
         journey={journey}
+        summary={job.summary}
       />
 <JobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="JOB" entityId={job.id} />

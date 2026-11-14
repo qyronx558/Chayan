@@ -1,0 +1,6726 @@
+[
+  {
+    "id": "nic:andaman-and-nicobar-islands/south-andaman",
+    "name": "District South Andaman, Andaman and Nicobar Islands",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southandaman.nic.in/notice_category/recruitment/",
+    "state": "Andaman and Nicobar Islands",
+    "district": "South Andaman",
+    "department": "District Administration South Andaman",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/ananthapuramu",
+    "name": "District Ananthapuramu, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ananthapuramu.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Ananthapuramu",
+    "department": "District Administration Ananthapuramu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/chittoor",
+    "name": "District Chittoor, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chittoor.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Chittoor",
+    "department": "District Administration Chittoor",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/east-godavari",
+    "name": "District East Godavari, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastgodavari.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "East Godavari",
+    "department": "District Administration East Godavari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/guntur",
+    "name": "District Guntur, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://guntur.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Guntur",
+    "department": "District Administration Guntur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/krishna",
+    "name": "District Krishna, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://krishna.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Krishna",
+    "department": "District Administration Krishna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/kurnool",
+    "name": "District Kurnool, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kurnool.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Kurnool",
+    "department": "District Administration Kurnool",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/prakasam",
+    "name": "District Prakasam, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://prakasam.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Prakasam",
+    "department": "District Administration Prakasam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/srikakulam",
+    "name": "District Srikakulam, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://srikakulam.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Srikakulam",
+    "department": "District Administration Srikakulam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/visakhapatnam",
+    "name": "District Visakhapatnam, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://visakhapatnam.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Visakhapatnam",
+    "department": "District Administration Visakhapatnam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/vizianagaram",
+    "name": "District Vizianagaram, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vizianagaram.ap.gov.in/notice_category/recruitment/",
+    "state": "Andhra Pradesh",
+    "district": "Vizianagaram",
+    "department": "District Administration Vizianagaram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:andhra-pradesh/west-godavari",
+    "name": "District West Godavari, Andhra Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://westgodavari.ap.gov.in/notice_category/recruitment-en/",
+    "state": "Andhra Pradesh",
+    "district": "West Godavari",
+    "department": "District Administration West Godavari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/anjaw",
+    "name": "District Anjaw, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://anjaw.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Anjaw",
+    "department": "District Administration Anjaw",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/changlang",
+    "name": "District Changlang, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://changlang.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Changlang",
+    "department": "District Administration Changlang",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/east-kameng",
+    "name": "District East Kameng, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastkameng.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "East Kameng",
+    "department": "District Administration East Kameng",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/east-siang",
+    "name": "District East Siang, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastsiang.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "East Siang",
+    "department": "District Administration East Siang",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/itanagar-capital-complex",
+    "name": "District Itanagar Capital Complex, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://itanagar.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Itanagar Capital Complex",
+    "department": "District Administration Itanagar Capital Complex",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/kamle",
+    "name": "District Kamle, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kamle.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Kamle",
+    "department": "District Administration Kamle",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/kra-daadi",
+    "name": "District Kra Daadi, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kradaadi.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Kra Daadi",
+    "department": "District Administration Kra Daadi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/kurung-kumey",
+    "name": "District Kurung Kumey, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kurungkumey.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Kurung Kumey",
+    "department": "District Administration Kurung Kumey",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/lohit",
+    "name": "District Lohit, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lohit.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Lohit",
+    "department": "District Administration Lohit",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/longding",
+    "name": "District Longding, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://longding.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Longding",
+    "department": "District Administration Longding",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/lower-subansiri",
+    "name": "District Lower Subansiri, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lowersubansiri.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Lower Subansiri",
+    "department": "District Administration Lower Subansiri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/namsai",
+    "name": "District Namsai, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://namsai.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Namsai",
+    "department": "District Administration Namsai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/papum-pare",
+    "name": "District Papum Pare, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://papumpare.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Papum Pare",
+    "department": "District Administration Papum Pare",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/shi-yomi",
+    "name": "District Shi Yomi, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shiyomi.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Shi Yomi",
+    "department": "District Administration Shi Yomi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/tawang",
+    "name": "District Tawang, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tawang.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Tawang",
+    "department": "District Administration Tawang",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/tirap",
+    "name": "District Tirap, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tirap.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Tirap",
+    "department": "District Administration Tirap",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:arunachal-pradesh/upper-siang",
+    "name": "District Upper Siang, Arunachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://uppersiang.nic.in/notice_category/recruitment/",
+    "state": "Arunachal Pradesh",
+    "district": "Upper Siang",
+    "department": "District Administration Upper Siang",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/araria",
+    "name": "District Araria, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://araria.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Araria",
+    "department": "District Administration Araria",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/arwal",
+    "name": "District Arwal, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://arwal.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Arwal",
+    "department": "District Administration Arwal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/aurangabad",
+    "name": "District Aurangabad, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://aurangabad.bih.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Aurangabad",
+    "department": "District Administration Aurangabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/banka",
+    "name": "District Banka, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://banka.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Banka",
+    "department": "District Administration Banka",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/begusarai",
+    "name": "District Begusarai, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://begusarai.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Begusarai",
+    "department": "District Administration Begusarai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/bhagalpur",
+    "name": "District Bhagalpur, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bhagalpur.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Bhagalpur",
+    "department": "District Administration Bhagalpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/bhojpur",
+    "name": "District Bhojpur, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bhojpur.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Bhojpur",
+    "department": "District Administration Bhojpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/buxar",
+    "name": "District Buxar, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://buxar.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Buxar",
+    "department": "District Administration Buxar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/darbhanga",
+    "name": "District Darbhanga, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://darbhanga.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Darbhanga",
+    "department": "District Administration Darbhanga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/east-champaran",
+    "name": "District East Champaran, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastchamparan.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "East Champaran",
+    "department": "District Administration East Champaran",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/gaya",
+    "name": "District Gaya, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gaya.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Gaya",
+    "department": "District Administration Gaya",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/gopalganj",
+    "name": "District Gopalganj, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gopalganj.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Gopalganj",
+    "department": "District Administration Gopalganj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/jamui",
+    "name": "District Jamui, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jamui.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Jamui",
+    "department": "District Administration Jamui",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/jehanabad",
+    "name": "District Jehanabad, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jehanabad.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Jehanabad",
+    "department": "District Administration Jehanabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/kaimur",
+    "name": "District Kaimur, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kaimur.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Kaimur",
+    "department": "District Administration Kaimur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/katihar",
+    "name": "District Katihar, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://katihar.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Katihar",
+    "department": "District Administration Katihar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/khagaria",
+    "name": "District Khagaria, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khagaria.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Khagaria",
+    "department": "District Administration Khagaria",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/kishanganj",
+    "name": "District Kishanganj, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kishanganj.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Kishanganj",
+    "department": "District Administration Kishanganj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/lakhisarai",
+    "name": "District Lakhisarai, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lakhisarai.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Lakhisarai",
+    "department": "District Administration Lakhisarai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/madhepura",
+    "name": "District Madhepura, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://madhepura.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Madhepura",
+    "department": "District Administration Madhepura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/madhubani",
+    "name": "District Madhubani, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://madhubani.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Madhubani",
+    "department": "District Administration Madhubani",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/munger",
+    "name": "District Munger, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://munger.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Munger",
+    "department": "District Administration Munger",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/muzaffarpur",
+    "name": "District Muzaffarpur, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://muzaffarpur.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Muzaffarpur",
+    "department": "District Administration Muzaffarpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/nalanda",
+    "name": "District Nalanda, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nalanda.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Nalanda",
+    "department": "District Administration Nalanda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/nawada",
+    "name": "District Nawada, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nawada.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Nawada",
+    "department": "District Administration Nawada",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/patna",
+    "name": "District Patna, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://patna.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Patna",
+    "department": "District Administration Patna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/purnia",
+    "name": "District Purnia, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://purnea.nic.in/notice_category/recruitments/",
+    "state": "Bihar",
+    "district": "Purnia",
+    "department": "District Administration Purnia",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/rohtas",
+    "name": "District Rohtas, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rohtas.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Rohtas",
+    "department": "District Administration Rohtas",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/saharsa",
+    "name": "District Saharsa, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://saharsa.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Saharsa",
+    "department": "District Administration Saharsa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/saran",
+    "name": "District Saran, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://saran.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Saran",
+    "department": "District Administration Saran",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/sheikhpura",
+    "name": "District Sheikhpura, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sheikhpura.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Sheikhpura",
+    "department": "District Administration Sheikhpura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/sheohar",
+    "name": "District Sheohar, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sheohar.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Sheohar",
+    "department": "District Administration Sheohar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/siwan",
+    "name": "District Siwan, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://siwan.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Siwan",
+    "department": "District Administration Siwan",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/supaul",
+    "name": "District Supaul, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://supaul.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Supaul",
+    "department": "District Administration Supaul",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/vaishali",
+    "name": "District Vaishali, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vaishali.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "Vaishali",
+    "department": "District Administration Vaishali",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:bihar/west-champaran",
+    "name": "District West Champaran, Bihar",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://westchamparan.nic.in/notice_category/recruitment/",
+    "state": "Bihar",
+    "district": "West Champaran",
+    "department": "District Administration West Champaran",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chandigarh/chandigarh",
+    "name": "District Chandigarh, Chandigarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chandigarhdistrict.nic.in/notice_category/recruitment/",
+    "state": "Chandigarh",
+    "district": "Chandigarh",
+    "department": "District Administration Chandigarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/balod",
+    "name": "District Balod, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://balod.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Balod",
+    "department": "District Administration Balod",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/balrampur",
+    "name": "District Balrampur, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://balrampur.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Balrampur",
+    "department": "District Administration Balrampur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/bastar",
+    "name": "District Bastar, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bastar.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "department": "District Administration Bastar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/bemetara",
+    "name": "District Bemetara, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bemetara.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Bemetara",
+    "department": "District Administration Bemetara",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/dantewada",
+    "name": "District Dantewada, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dantewada.nic.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Dantewada",
+    "department": "District Administration Dantewada",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/dhamtari",
+    "name": "District Dhamtari, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dhamtari.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Dhamtari",
+    "department": "District Administration Dhamtari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/durg",
+    "name": "District Durg, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://durg.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Durg",
+    "department": "District Administration Durg",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/gariaband",
+    "name": "District Gariaband, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gariaband.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Gariaband",
+    "department": "District Administration Gariaband",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/jashpur",
+    "name": "District Jashpur, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jashpur.nic.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Jashpur",
+    "department": "District Administration Jashpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/kanker",
+    "name": "District Kanker, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kanker.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Kanker",
+    "department": "District Administration Kanker",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/korba",
+    "name": "District Korba, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://korba.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Korba",
+    "department": "District Administration Korba",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/mahasamund",
+    "name": "District Mahasamund, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahasamund.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Mahasamund",
+    "department": "District Administration Mahasamund",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/raipur",
+    "name": "District Raipur, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://raipur.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Raipur",
+    "department": "District Administration Raipur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/rajnandgaon",
+    "name": "District Rajnandgaon, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rajnandgaon.nic.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Rajnandgaon",
+    "department": "District Administration Rajnandgaon",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/surajpur",
+    "name": "District Surajpur, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://surajpur.nic.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Surajpur",
+    "department": "District Administration Surajpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:chhattisgarh/surguja",
+    "name": "District Surguja, Chhattisgarh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://surguja.gov.in/notice_category/recruitment/",
+    "state": "Chhattisgarh",
+    "district": "Surguja",
+    "department": "District Administration Surguja",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:goa/north-goa",
+    "name": "District North Goa, Goa",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://northgoa.gov.in/notice_category/recruitment/",
+    "state": "Goa",
+    "district": "North Goa",
+    "department": "District Administration North Goa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:goa/south-goa",
+    "name": "District South Goa, Goa",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southgoa.nic.in/notice_category/recruitment/",
+    "state": "Goa",
+    "district": "South Goa",
+    "department": "District Administration South Goa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/ahmedabad",
+    "name": "District Ahmedabad, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ahmedabad.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Ahmedabad",
+    "department": "District Administration Ahmedabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/amreli",
+    "name": "District Amreli, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://amreli.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Amreli",
+    "department": "District Administration Amreli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/anand",
+    "name": "District Anand, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://anand.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Anand",
+    "department": "District Administration Anand",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/bharuch",
+    "name": "District Bharuch, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bharuch.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Bharuch",
+    "department": "District Administration Bharuch",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/botad",
+    "name": "District Botad, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://botad.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Botad",
+    "department": "District Administration Botad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/dahod",
+    "name": "District Dahod, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dahod.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Dahod",
+    "department": "District Administration Dahod",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/devbhumi-dwarka",
+    "name": "District Devbhumi Dwarka, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://devbhumidwarka.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Devbhumi Dwarka",
+    "department": "District Administration Devbhumi Dwarka",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/gir-somnath",
+    "name": "District Gir Somnath, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://girsomnath.nic.in/notice_category/recruitments/",
+    "state": "Gujarat",
+    "district": "Gir Somnath",
+    "department": "District Administration Gir Somnath",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/junagadh",
+    "name": "District Junagadh, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://junagadh.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Junagadh",
+    "department": "District Administration Junagadh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/kheda",
+    "name": "District Kheda, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kheda.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Kheda",
+    "department": "District Administration Kheda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/mahisagar",
+    "name": "District Mahisagar, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahisagar.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Mahisagar",
+    "department": "District Administration Mahisagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/morbi",
+    "name": "District Morbi, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://morbi.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Morbi",
+    "department": "District Administration Morbi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/narmada",
+    "name": "District Narmada, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://narmada.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Narmada",
+    "department": "District Administration Narmada",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/navsari",
+    "name": "District Navsari, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://navsari.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Navsari",
+    "department": "District Administration Navsari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/patan",
+    "name": "District Patan, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://patan.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Patan",
+    "department": "District Administration Patan",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/porbandar",
+    "name": "District Porbandar, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://porbandar.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Porbandar",
+    "department": "District Administration Porbandar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/rajkot",
+    "name": "District Rajkot, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rajkot.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Rajkot",
+    "department": "District Administration Rajkot",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/sabarkantha",
+    "name": "District Sabarkantha, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sabarkantha.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Sabarkantha",
+    "department": "District Administration Sabarkantha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/surat",
+    "name": "District Surat, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://surat.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Surat",
+    "department": "District Administration Surat",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/surendranagar",
+    "name": "District Surendranagar, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://surendranagar.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Surendranagar",
+    "department": "District Administration Surendranagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/tapi",
+    "name": "District Tapi, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tapi.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Tapi",
+    "department": "District Administration Tapi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:gujarat/valsad",
+    "name": "District Valsad, Gujarat",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://valsad.nic.in/notice_category/recruitment/",
+    "state": "Gujarat",
+    "district": "Valsad",
+    "department": "District Administration Valsad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/faridabad",
+    "name": "District Faridabad, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://faridabad.nic.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Faridabad",
+    "department": "District Administration Faridabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/hisar",
+    "name": "District Hisar, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hisar.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Hisar",
+    "department": "District Administration Hisar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/jhajjar",
+    "name": "District Jhajjar, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jhajjar.nic.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Jhajjar",
+    "department": "District Administration Jhajjar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/kaithal",
+    "name": "District Kaithal, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kaithal.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Kaithal",
+    "department": "District Administration Kaithal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/karnal",
+    "name": "District Karnal, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://karnal.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Karnal",
+    "department": "District Administration Karnal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/kurukshetra",
+    "name": "District Kurukshetra, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kurukshetra.gov.in/notice_category/recruitments/",
+    "state": "Haryana",
+    "district": "Kurukshetra",
+    "department": "District Administration Kurukshetra",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/mahendragarh",
+    "name": "District Mahendragarh, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahendragarh.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Mahendragarh",
+    "department": "District Administration Mahendragarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/nuh",
+    "name": "District Nuh, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nuh.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Nuh",
+    "department": "District Administration Nuh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/panchkula",
+    "name": "District Panchkula, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://panchkula.nic.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Panchkula",
+    "department": "District Administration Panchkula",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/panipat",
+    "name": "District Panipat, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://panipat.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Panipat",
+    "department": "District Administration Panipat",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/rewari",
+    "name": "District Rewari, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rewari.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Rewari",
+    "department": "District Administration Rewari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/sirsa",
+    "name": "District Sirsa, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sirsa.gov.in/notice_category/recruitment/",
+    "state": "Haryana",
+    "district": "Sirsa",
+    "department": "District Administration Sirsa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:haryana/yamunanagar",
+    "name": "District Yamunanagar, Haryana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://yamunanagar.nic.in/notice_category/recruitments/",
+    "state": "Haryana",
+    "district": "Yamunanagar",
+    "department": "District Administration Yamunanagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:himachal-pradesh/kinnaur",
+    "name": "District Kinnaur, Himachal Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hpkinnaur.nic.in/notice_category/recruitment/",
+    "state": "Himachal Pradesh",
+    "district": "Kinnaur",
+    "department": "District Administration Kinnaur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/anantnag",
+    "name": "District Anantnag, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://anantnag.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Anantnag",
+    "department": "District Administration Anantnag",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/budgam",
+    "name": "District Budgam, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://budgam.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Budgam",
+    "department": "District Administration Budgam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/doda",
+    "name": "District Doda, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://doda.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Doda",
+    "department": "District Administration Doda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/jammu",
+    "name": "District Jammu, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jammu.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Jammu",
+    "department": "District Administration Jammu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/kishtwar",
+    "name": "District Kishtwar, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kishtwar.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Kishtwar",
+    "department": "District Administration Kishtwar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/kulgam",
+    "name": "District Kulgam, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kulgam.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Kulgam",
+    "department": "District Administration Kulgam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/poonch",
+    "name": "District Poonch, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://poonch.nic.in/notice_category/recruitment-en/",
+    "state": "Jammu and Kashmir",
+    "district": "Poonch",
+    "department": "District Administration Poonch",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/pulwama",
+    "name": "District Pulwama, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pulwama.gov.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Pulwama",
+    "department": "District Administration Pulwama",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/rajouri",
+    "name": "District Rajouri, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rajouri.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Rajouri",
+    "department": "District Administration Rajouri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/ramban",
+    "name": "District Ramban, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ramban.gov.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Ramban",
+    "department": "District Administration Ramban",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/reasi",
+    "name": "District Reasi, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://reasi.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Reasi",
+    "department": "District Administration Reasi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/shopian",
+    "name": "District Shopian, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shopian.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Shopian",
+    "department": "District Administration Shopian",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jammu-and-kashmir/srinagar",
+    "name": "District Srinagar, Jammu and Kashmir",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://srinagar.nic.in/notice_category/recruitment/",
+    "state": "Jammu and Kashmir",
+    "district": "Srinagar",
+    "department": "District Administration Srinagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/bokaro",
+    "name": "District Bokaro, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bokaro.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Bokaro",
+    "department": "District Administration Bokaro",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/chatra",
+    "name": "District Chatra, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chatra.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Chatra",
+    "department": "District Administration Chatra",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/deoghar",
+    "name": "District Deoghar, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://deoghar.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Deoghar",
+    "department": "District Administration Deoghar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/dhanbad",
+    "name": "District Dhanbad, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dhanbad.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Dhanbad",
+    "department": "District Administration Dhanbad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/dumka",
+    "name": "District Dumka, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dumka.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Dumka",
+    "department": "District Administration Dumka",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/garhwa",
+    "name": "District Garhwa, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://garhwa.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Garhwa",
+    "department": "District Administration Garhwa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/giridih",
+    "name": "District Giridih, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://giridih.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Giridih",
+    "department": "District Administration Giridih",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/godda",
+    "name": "District Godda, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://godda.nic.in/notice_category/recruitment/",
+    "extraUrls": [
+      "https://godda.nic.in/notice_category/result/"
+    ],
+    "state": "Jharkhand",
+    "district": "Godda",
+    "department": "District Administration Godda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/gumla",
+    "name": "District Gumla, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gumla.nic.in/notice_category/recruitment/",
+    "extraUrls": [
+      "https://gumla.nic.in/notice_category/results/"
+    ],
+    "state": "Jharkhand",
+    "district": "Gumla",
+    "department": "District Administration Gumla",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/jamtara",
+    "name": "District Jamtara, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jamtara.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Jamtara",
+    "department": "District Administration Jamtara",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/khunti",
+    "name": "District Khunti, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khunti.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Khunti",
+    "department": "District Administration Khunti",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/koderma",
+    "name": "District Koderma, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://koderma.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Koderma",
+    "department": "District Administration Koderma",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/latehar",
+    "name": "District Latehar, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://latehar.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Latehar",
+    "department": "District Administration Latehar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/lohardaga",
+    "name": "District Lohardaga, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lohardaga.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Lohardaga",
+    "department": "District Administration Lohardaga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/pakur",
+    "name": "District Pakur, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pakur.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Pakur",
+    "department": "District Administration Pakur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/palamu",
+    "name": "District Palamu, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://palamu.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Palamu",
+    "department": "District Administration Palamu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/ramgarh",
+    "name": "District Ramgarh, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ramgarh.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Ramgarh",
+    "department": "District Administration Ramgarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/ranchi",
+    "name": "District Ranchi, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ranchi.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Ranchi",
+    "department": "District Administration Ranchi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/seraikela-kharsawan",
+    "name": "District Seraikela Kharsawan, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://seraikela.nic.in/notice_category/recruitment-results/",
+    "extraUrls": [
+      "https://seraikela.nic.in/notice_category/recruitment-results/"
+    ],
+    "state": "Jharkhand",
+    "district": "Seraikela Kharsawan",
+    "department": "District Administration Seraikela Kharsawan",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:jharkhand/simdega",
+    "name": "District Simdega, Jharkhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://simdega.nic.in/notice_category/recruitment/",
+    "state": "Jharkhand",
+    "district": "Simdega",
+    "department": "District Administration Simdega",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/bagalkot",
+    "name": "District Bagalkot, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bagalkot.nic.in/notice_category/recruitments/",
+    "state": "Karnataka",
+    "district": "Bagalkot",
+    "department": "District Administration Bagalkot",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/ballari",
+    "name": "District Ballari, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ballari.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Ballari",
+    "department": "District Administration Ballari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/bengaluru-south",
+    "name": "District Bengaluru South, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bengalurusouth.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Bengaluru South",
+    "department": "District Administration Bengaluru South",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/bengaluru-urban",
+    "name": "District Bengaluru Urban, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bengaluruurban.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Bengaluru Urban",
+    "department": "District Administration Bengaluru Urban",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/bidar",
+    "name": "District Bidar, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bidar.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Bidar",
+    "department": "District Administration Bidar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/chikkaballapur",
+    "name": "District Chikkaballapur, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chikkaballapur.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Chikkaballapur",
+    "department": "District Administration Chikkaballapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/chikkamagaluru",
+    "name": "District Chikkamagaluru, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chikkamagaluru.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Chikkamagaluru",
+    "department": "District Administration Chikkamagaluru",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/chitradurga",
+    "name": "District Chitradurga, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chitradurga.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Chitradurga",
+    "department": "District Administration Chitradurga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/davanagere",
+    "name": "District Davanagere, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://davanagere.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Davanagere",
+    "department": "District Administration Davanagere",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/dharwad",
+    "name": "District Dharwad, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dharwad.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Dharwad",
+    "department": "District Administration Dharwad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/gadag",
+    "name": "District Gadag, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gadag.nic.in/notice_category/recruitments/",
+    "state": "Karnataka",
+    "district": "Gadag",
+    "department": "District Administration Gadag",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/hassan",
+    "name": "District Hassan, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hassan.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Hassan",
+    "department": "District Administration Hassan",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/haveri",
+    "name": "District Haveri, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://haveri.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Haveri",
+    "department": "District Administration Haveri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/kalaburagi",
+    "name": "District Kalaburagi, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kalaburagi.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Kalaburagi",
+    "department": "District Administration Kalaburagi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/kodagu",
+    "name": "District Kodagu, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kodagu.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Kodagu",
+    "department": "District Administration Kodagu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/kolar",
+    "name": "District Kolar, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kolar.nic.in/notice_category/recruitments/",
+    "state": "Karnataka",
+    "district": "Kolar",
+    "department": "District Administration Kolar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/koppal",
+    "name": "District Koppal, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://koppal.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Koppal",
+    "department": "District Administration Koppal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/mandya",
+    "name": "District Mandya, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mandya.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Mandya",
+    "department": "District Administration Mandya",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/mysuru",
+    "name": "District Mysuru, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mysore.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Mysuru",
+    "department": "District Administration Mysuru",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/raichur",
+    "name": "District Raichur, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://raichur.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Raichur",
+    "department": "District Administration Raichur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/shivamogga",
+    "name": "District Shivamogga, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shivamogga.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Shivamogga",
+    "department": "District Administration Shivamogga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/udupi",
+    "name": "District Udupi, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://udupi.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Udupi",
+    "department": "District Administration Udupi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/uttara-kannada",
+    "name": "District Uttara Kannada, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://uttarakannada.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Uttara Kannada",
+    "department": "District Administration Uttara Kannada",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/vijayanagara",
+    "name": "District Vijayanagara, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vijayanagara.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Vijayanagara",
+    "department": "District Administration Vijayanagara",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/vijayapura",
+    "name": "District Vijayapura, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vijayapura.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Vijayapura",
+    "department": "District Administration Vijayapura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:karnataka/yadgir",
+    "name": "District Yadgir, Karnataka",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://yadgir.nic.in/notice_category/recruitment/",
+    "state": "Karnataka",
+    "district": "Yadgir",
+    "department": "District Administration Yadgir",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/alappuzha",
+    "name": "District Alappuzha, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://alappuzha.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Alappuzha",
+    "department": "District Administration Alappuzha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/kannur",
+    "name": "District Kannur, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kannur.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Kannur",
+    "department": "District Administration Kannur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/kollam",
+    "name": "District Kollam, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kollam.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Kollam",
+    "department": "District Administration Kollam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/kottayam",
+    "name": "District Kottayam, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kottayam.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Kottayam",
+    "department": "District Administration Kottayam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/kozhikode",
+    "name": "District Kozhikode, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kozhikode.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Kozhikode",
+    "department": "District Administration Kozhikode",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/malappuram",
+    "name": "District Malappuram, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://malappuram.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Malappuram",
+    "department": "District Administration Malappuram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/palakkad",
+    "name": "District Palakkad, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://palakkad.nic.in/notice_category/recruitment/",
+    "state": "Kerala",
+    "district": "Palakkad",
+    "department": "District Administration Palakkad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:kerala/pathanamthitta",
+    "name": "District Pathanamthitta, Kerala",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pathanamthitta.nic.in/notice_category/recruitments/",
+    "state": "Kerala",
+    "district": "Pathanamthitta",
+    "department": "District Administration Pathanamthitta",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:ladakh/leh",
+    "name": "District Leh, Ladakh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://leh.nic.in/notice_category/recruitment/",
+    "state": "Ladakh",
+    "district": "Leh",
+    "department": "District Administration Leh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/agar-malwa",
+    "name": "District Agar Malwa, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://agarmalwa.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Agar Malwa",
+    "department": "District Administration Agar Malwa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/anuppur",
+    "name": "District Anuppur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://anuppur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Anuppur",
+    "department": "District Administration Anuppur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/ashoknagar",
+    "name": "District Ashoknagar, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ashoknagar.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Ashoknagar",
+    "department": "District Administration Ashoknagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/balaghat",
+    "name": "District Balaghat, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://balaghat.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Balaghat",
+    "department": "District Administration Balaghat",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/betul",
+    "name": "District Betul, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://betul.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Betul",
+    "department": "District Administration Betul",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/bhind",
+    "name": "District Bhind, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bhind.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Bhind",
+    "department": "District Administration Bhind",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/burhanpur",
+    "name": "District Burhanpur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://burhanpur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Burhanpur",
+    "department": "District Administration Burhanpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/chhatarpur",
+    "name": "District Chhatarpur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chhatarpur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Chhatarpur",
+    "department": "District Administration Chhatarpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/damoh",
+    "name": "District Damoh, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://damoh.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Damoh",
+    "department": "District Administration Damoh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/datia",
+    "name": "District Datia, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://datia.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Datia",
+    "department": "District Administration Datia",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/dewas",
+    "name": "District Dewas, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dewas.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Dewas",
+    "department": "District Administration Dewas",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/dhar",
+    "name": "District Dhar, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dhar.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Dhar",
+    "department": "District Administration Dhar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/dindori",
+    "name": "District Dindori, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dindori.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Dindori",
+    "department": "District Administration Dindori",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/guna",
+    "name": "District Guna, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://guna.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Guna",
+    "department": "District Administration Guna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/gwalior",
+    "name": "District Gwalior, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gwalior.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Gwalior",
+    "department": "District Administration Gwalior",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/harda",
+    "name": "District Harda, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://harda.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Harda",
+    "department": "District Administration Harda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/indore",
+    "name": "District Indore, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://indore.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Indore",
+    "department": "District Administration Indore",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/jabalpur",
+    "name": "District Jabalpur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jabalpur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Jabalpur",
+    "department": "District Administration Jabalpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/jhabua",
+    "name": "District Jhabua, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jhabua.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Jhabua",
+    "department": "District Administration Jhabua",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/katni",
+    "name": "District Katni, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://katni.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Katni",
+    "department": "District Administration Katni",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/khandwa",
+    "name": "District Khandwa, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khandwa.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Khandwa",
+    "department": "District Administration Khandwa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/khargone",
+    "name": "District Khargone, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khargone.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Khargone",
+    "department": "District Administration Khargone",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/maihar",
+    "name": "District Maihar, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://maihar.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Maihar",
+    "department": "District Administration Maihar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/mandla",
+    "name": "District Mandla, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mandla.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Mandla",
+    "department": "District Administration Mandla",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/mandsaur",
+    "name": "District Mandsaur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mandsaur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Mandsaur",
+    "department": "District Administration Mandsaur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/narmadapuram",
+    "name": "District Narmadapuram, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://narmadapuram.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Narmadapuram",
+    "department": "District Administration Narmadapuram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/narsinghpur",
+    "name": "District Narsinghpur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://narsinghpur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Narsinghpur",
+    "department": "District Administration Narsinghpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/neemuch",
+    "name": "District Neemuch, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://neemuch.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Neemuch",
+    "department": "District Administration Neemuch",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/niwari",
+    "name": "District Niwari, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://niwari.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Niwari",
+    "department": "District Administration Niwari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/panna",
+    "name": "District Panna, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://panna.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Panna",
+    "department": "District Administration Panna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/raisen",
+    "name": "District Raisen, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://raisen.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Raisen",
+    "department": "District Administration Raisen",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/rajgarh",
+    "name": "District Rajgarh, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rajgarh.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Rajgarh",
+    "department": "District Administration Rajgarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/ratlam",
+    "name": "District Ratlam, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ratlam.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Ratlam",
+    "department": "District Administration Ratlam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/rewa",
+    "name": "District Rewa, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rewa.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Rewa",
+    "department": "District Administration Rewa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/satna",
+    "name": "District Satna, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://satna.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Satna",
+    "department": "District Administration Satna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/sehore",
+    "name": "District Sehore, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sehore.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Sehore",
+    "department": "District Administration Sehore",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/seoni",
+    "name": "District Seoni, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://seoni.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Seoni",
+    "department": "District Administration Seoni",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/shahdol",
+    "name": "District Shahdol, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shahdol.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Shahdol",
+    "department": "District Administration Shahdol",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/sheopur",
+    "name": "District Sheopur, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sheopur.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Sheopur",
+    "department": "District Administration Sheopur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/shivpuri",
+    "name": "District Shivpuri, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shivpuri.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Shivpuri",
+    "department": "District Administration Shivpuri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/singrauli",
+    "name": "District Singrauli, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://singrauli.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Singrauli",
+    "department": "District Administration Singrauli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/tikamgarh",
+    "name": "District Tikamgarh, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tikamgarh.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Tikamgarh",
+    "department": "District Administration Tikamgarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/ujjain",
+    "name": "District Ujjain, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ujjain.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Ujjain",
+    "department": "District Administration Ujjain",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/umaria",
+    "name": "District Umaria, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://umaria.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Umaria",
+    "department": "District Administration Umaria",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:madhya-pradesh/vidisha",
+    "name": "District Vidisha, Madhya Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vidisha.nic.in/notice_category/recruitment/",
+    "state": "Madhya Pradesh",
+    "district": "Vidisha",
+    "department": "District Administration Vidisha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/amravati",
+    "name": "District Amravati, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://amravati.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Amravati",
+    "department": "District Administration Amravati",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/beed",
+    "name": "District Beed, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://beed.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Beed",
+    "department": "District Administration Beed",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/bhandara",
+    "name": "District Bhandara, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bhandara.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Bhandara",
+    "department": "District Administration Bhandara",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/buldhana",
+    "name": "District Buldhana, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://buldhana.nic.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Buldhana",
+    "department": "District Administration Buldhana",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/gadchiroli",
+    "name": "District Gadchiroli, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gadchiroli.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Gadchiroli",
+    "department": "District Administration Gadchiroli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/hingoli",
+    "name": "District Hingoli, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hingoli.nic.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Hingoli",
+    "department": "District Administration Hingoli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/jalgaon",
+    "name": "District Jalgaon, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jalgaon.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Jalgaon",
+    "department": "District Administration Jalgaon",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/jalna",
+    "name": "District Jalna, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jalna.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Jalna",
+    "department": "District Administration Jalna",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/kolhapur",
+    "name": "District Kolhapur, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kolhapur.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Kolhapur",
+    "department": "District Administration Kolhapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/latur",
+    "name": "District Latur, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://latur.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Latur",
+    "department": "District Administration Latur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/nagpur",
+    "name": "District Nagpur, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nagpur.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Nagpur",
+    "department": "District Administration Nagpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/nandurbar",
+    "name": "District Nandurbar, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nandurbar.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Nandurbar",
+    "department": "District Administration Nandurbar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/parbhani",
+    "name": "District Parbhani, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://parbhani.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Parbhani",
+    "department": "District Administration Parbhani",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/pune",
+    "name": "District Pune, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pune.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "department": "District Administration Pune",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/raigad",
+    "name": "District Raigad, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://raigad.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Raigad",
+    "department": "District Administration Raigad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/sangli",
+    "name": "District Sangli, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sangli.nic.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Sangli",
+    "department": "District Administration Sangli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/satara",
+    "name": "District Satara, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://www.satara.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Satara",
+    "department": "District Administration Satara",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/sindhudurg",
+    "name": "District Sindhudurg, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sindhudurg.nic.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "department": "District Administration Sindhudurg",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/solapur",
+    "name": "District Solapur, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://solapur.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Solapur",
+    "department": "District Administration Solapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/thane",
+    "name": "District Thane, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://thane.nic.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Thane",
+    "department": "District Administration Thane",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/wardha",
+    "name": "District Wardha, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://wardha.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Wardha",
+    "department": "District Administration Wardha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/washim",
+    "name": "District Washim, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://washim.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Washim",
+    "department": "District Administration Washim",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:maharashtra/yavatmal",
+    "name": "District Yavatmal, Maharashtra",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://yavatmal.gov.in/notice_category/recruitment/",
+    "state": "Maharashtra",
+    "district": "Yavatmal",
+    "department": "District Administration Yavatmal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/bishnupur",
+    "name": "District Bishnupur, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bishnupur.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Bishnupur",
+    "department": "District Administration Bishnupur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/chandel",
+    "name": "District Chandel, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chandel.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Chandel",
+    "department": "District Administration Chandel",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/churachandpur",
+    "name": "District Churachandpur, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://churachandpur.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Churachandpur",
+    "department": "District Administration Churachandpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/imphal-west",
+    "name": "District Imphal West, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://imphalwest.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Imphal West",
+    "department": "District Administration Imphal West",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/jiribam",
+    "name": "District Jiribam, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jiribam.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Jiribam",
+    "department": "District Administration Jiribam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/kakching",
+    "name": "District Kakching, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kakching.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Kakching",
+    "department": "District Administration Kakching",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/kamjong",
+    "name": "District Kamjong, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kamjong.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Kamjong",
+    "department": "District Administration Kamjong",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/kangpokpi",
+    "name": "District Kangpokpi, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kangpokpi.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Kangpokpi",
+    "department": "District Administration Kangpokpi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/noney",
+    "name": "District Noney, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://noney.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Noney",
+    "department": "District Administration Noney",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/senapati",
+    "name": "District Senapati, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://senapati.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Senapati",
+    "department": "District Administration Senapati",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/tamenglong",
+    "name": "District Tamenglong, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tamenglong.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Tamenglong",
+    "department": "District Administration Tamenglong",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/thoubal",
+    "name": "District Thoubal, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://thoubal.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Thoubal",
+    "department": "District Administration Thoubal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:manipur/ukhrul",
+    "name": "District Ukhrul, Manipur",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ukhrul.nic.in/notice_category/recruitment/",
+    "state": "Manipur",
+    "district": "Ukhrul",
+    "department": "District Administration Ukhrul",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/east-garo-hills",
+    "name": "District East Garo Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastgarohills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "East Garo Hills",
+    "department": "District Administration East Garo Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/east-jaintia-hills",
+    "name": "District East Jaintia Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastjaintiahills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "East Jaintia Hills",
+    "department": "District Administration East Jaintia Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/east-khasi-hills",
+    "name": "District East Khasi Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://eastkhasihills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "East Khasi Hills",
+    "department": "District Administration East Khasi Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/north-garo-hills",
+    "name": "District North Garo Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://northgarohills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "North Garo Hills",
+    "department": "District Administration North Garo Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/ri-bhoi",
+    "name": "District Ri Bhoi, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ribhoi.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "Ri Bhoi",
+    "department": "District Administration Ri Bhoi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/south-garo-hills",
+    "name": "District South Garo Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southgarohills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "South Garo Hills",
+    "department": "District Administration South Garo Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/south-west-garo-hills",
+    "name": "District South West Garo Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southwestgarohills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "South West Garo Hills",
+    "department": "District Administration South West Garo Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/south-west-khasi-hills",
+    "name": "District South West Khasi Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southwestkhasihills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "South West Khasi Hills",
+    "department": "District Administration South West Khasi Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/west-garo-hills",
+    "name": "District West Garo Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://westgarohills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "West Garo Hills",
+    "department": "District Administration West Garo Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:meghalaya/west-jaintia-hills",
+    "name": "District West Jaintia Hills, Meghalaya",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://westjaintiahills.gov.in/notice_category/recruitment/",
+    "state": "Meghalaya",
+    "district": "West Jaintia Hills",
+    "department": "District Administration West Jaintia Hills",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:mizoram/aizawl",
+    "name": "District Aizawl, Mizoram",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://aizawl.nic.in/notice_category/recruitment/",
+    "state": "Mizoram",
+    "district": "Aizawl",
+    "department": "District Administration Aizawl",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:mizoram/kolasib",
+    "name": "District Kolasib, Mizoram",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kolasib.nic.in/notice_category/recruitment/",
+    "state": "Mizoram",
+    "district": "Kolasib",
+    "department": "District Administration Kolasib",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:mizoram/lunglei",
+    "name": "District Lunglei, Mizoram",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lunglei.nic.in/notice_category/recruitment/",
+    "state": "Mizoram",
+    "district": "Lunglei",
+    "department": "District Administration Lunglei",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:mizoram/mamit",
+    "name": "District Mamit, Mizoram",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mamit.nic.in/notice_category/recruitment/",
+    "state": "Mizoram",
+    "district": "Mamit",
+    "department": "District Administration Mamit",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:mizoram/serchhip",
+    "name": "District Serchhip, Mizoram",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://serchhip.nic.in/notice_category/recruitment/",
+    "state": "Mizoram",
+    "district": "Serchhip",
+    "department": "District Administration Serchhip",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/chumoukedima",
+    "name": "District Chumoukedima, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chumoukedima.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Chumoukedima",
+    "department": "District Administration Chumoukedima",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/dimapur",
+    "name": "District Dimapur, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dimapur.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Dimapur",
+    "department": "District Administration Dimapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/kiphire",
+    "name": "District Kiphire, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kiphire.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Kiphire",
+    "department": "District Administration Kiphire",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/kohima",
+    "name": "District Kohima, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kohima.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Kohima",
+    "department": "District Administration Kohima",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/longleng",
+    "name": "District Longleng, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://longleng.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Longleng",
+    "department": "District Administration Longleng",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/mokokchung",
+    "name": "District Mokokchung, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mokokchung.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Mokokchung",
+    "department": "District Administration Mokokchung",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/mon",
+    "name": "District Mon, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mon.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Mon",
+    "department": "District Administration Mon",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/niuland",
+    "name": "District Niuland, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://niuland.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Niuland",
+    "department": "District Administration Niuland",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/noklak",
+    "name": "District Noklak, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://noklak.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Noklak",
+    "department": "District Administration Noklak",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/phek",
+    "name": "District Phek, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://phek.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Phek",
+    "department": "District Administration Phek",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/shamator",
+    "name": "District Shamator, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shamator.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Shamator",
+    "department": "District Administration Shamator",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/tseminyu",
+    "name": "District Tseminyu, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tseminyu.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Tseminyu",
+    "department": "District Administration Tseminyu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/tuensang",
+    "name": "District Tuensang, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tuensang.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Tuensang",
+    "department": "District Administration Tuensang",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/wokha",
+    "name": "District Wokha, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://wokha.nic.in/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Wokha",
+    "department": "District Administration Wokha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:nagaland/zunheboto",
+    "name": "District Zunheboto, Nagaland",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://zunheboto.nic.in/en/notice_category/recruitment/",
+    "state": "Nagaland",
+    "district": "Zunheboto",
+    "department": "District Administration Zunheboto",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:puducherry/karaikal",
+    "name": "District Karaikal, Puducherry",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://karaikal.gov.in/notice_category/recruitment/",
+    "state": "Puducherry",
+    "district": "Karaikal",
+    "department": "District Administration Karaikal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:puducherry/mahe",
+    "name": "District Mahe, Puducherry",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahe.gov.in/notice_category/recruitment/",
+    "state": "Puducherry",
+    "district": "Mahe",
+    "department": "District Administration Mahe",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:puducherry/yanam",
+    "name": "District Yanam, Puducherry",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://yanam.gov.in/notice_category/recruitment/",
+    "state": "Puducherry",
+    "district": "Yanam",
+    "department": "District Administration Yanam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/amritsar",
+    "name": "District Amritsar, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://amritsar.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Amritsar",
+    "department": "District Administration Amritsar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/barnala",
+    "name": "District Barnala, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://barnala.gov.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Barnala",
+    "department": "District Administration Barnala",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/bathinda",
+    "name": "District Bathinda, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bathinda.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Bathinda",
+    "department": "District Administration Bathinda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/faridkot",
+    "name": "District Faridkot, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://faridkot.nic.in/notice_category/recruitments/",
+    "state": "Punjab",
+    "district": "Faridkot",
+    "department": "District Administration Faridkot",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/fatehgarh-sahib",
+    "name": "District Fatehgarh Sahib, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://fatehgarhsahib.nic.in/notice_category/recruitments/",
+    "state": "Punjab",
+    "district": "Fatehgarh Sahib",
+    "department": "District Administration Fatehgarh Sahib",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/fazilka",
+    "name": "District Fazilka, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://fazilka.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Fazilka",
+    "department": "District Administration Fazilka",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/ferozepur",
+    "name": "District Ferozepur, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ferozepur.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Ferozepur",
+    "department": "District Administration Ferozepur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/hoshiarpur",
+    "name": "District Hoshiarpur, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hoshiarpur.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Hoshiarpur",
+    "department": "District Administration Hoshiarpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/jalandhar",
+    "name": "District Jalandhar, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jalandhar.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Jalandhar",
+    "department": "District Administration Jalandhar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/kapurthala",
+    "name": "District Kapurthala, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kapurthala.gov.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Kapurthala",
+    "department": "District Administration Kapurthala",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/ludhiana",
+    "name": "District Ludhiana, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ludhiana.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Ludhiana",
+    "department": "District Administration Ludhiana",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/malerkotla",
+    "name": "District Malerkotla, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://malerkotla.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Malerkotla",
+    "department": "District Administration Malerkotla",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/mansa",
+    "name": "District Mansa, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mansa.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Mansa",
+    "department": "District Administration Mansa",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/moga",
+    "name": "District Moga, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://moga.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Moga",
+    "department": "District Administration Moga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/pathankot",
+    "name": "District Pathankot, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pathankot.nic.in/notice_category/recruitments/",
+    "state": "Punjab",
+    "district": "Pathankot",
+    "department": "District Administration Pathankot",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/patiala",
+    "name": "District Patiala, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://patiala.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Patiala",
+    "department": "District Administration Patiala",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/rupnagar",
+    "name": "District Rupnagar, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rupnagar.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Rupnagar",
+    "department": "District Administration Rupnagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/sangrur",
+    "name": "District Sangrur, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sangrur.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Sangrur",
+    "department": "District Administration Sangrur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:punjab/tarn-taran",
+    "name": "District Tarn Taran, Punjab",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tarntaran.nic.in/notice_category/recruitment/",
+    "state": "Punjab",
+    "district": "Tarn Taran",
+    "department": "District Administration Tarn Taran",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:sikkim/gyalshing",
+    "name": "District Gyalshing, Sikkim",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gyalshing.nic.in/notice_category/recruitment/",
+    "state": "Sikkim",
+    "district": "Gyalshing",
+    "department": "District Administration Gyalshing",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:sikkim/mangan",
+    "name": "District Mangan, Sikkim",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mangan.nic.in/notice_category/recruitment/",
+    "state": "Sikkim",
+    "district": "Mangan",
+    "department": "District Administration Mangan",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:sikkim/soreng",
+    "name": "District Soreng, Sikkim",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://soreng.nic.in/notice_category/recruitment/",
+    "state": "Sikkim",
+    "district": "Soreng",
+    "department": "District Administration Soreng",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/ariyalur",
+    "name": "District Ariyalur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ariyalur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Ariyalur",
+    "department": "District Administration Ariyalur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/chengalpattu",
+    "name": "District Chengalpattu, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chengalpattu.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Chengalpattu",
+    "department": "District Administration Chengalpattu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/chennai",
+    "name": "District Chennai, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chennai.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "department": "District Administration Chennai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/coimbatore",
+    "name": "District Coimbatore, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://coimbatore.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "department": "District Administration Coimbatore",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/cuddalore",
+    "name": "District Cuddalore, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://cuddalore.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Cuddalore",
+    "department": "District Administration Cuddalore",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/dharmapuri",
+    "name": "District Dharmapuri, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dharmapuri.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Dharmapuri",
+    "department": "District Administration Dharmapuri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/dindigul",
+    "name": "District Dindigul, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dindigul.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Dindigul",
+    "department": "District Administration Dindigul",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/erode",
+    "name": "District Erode, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://erode.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Erode",
+    "department": "District Administration Erode",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/kallakurichi",
+    "name": "District Kallakurichi, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kallakurichi.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Kallakurichi",
+    "department": "District Administration Kallakurichi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/kancheepuram",
+    "name": "District Kancheepuram, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kancheepuram.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Kancheepuram",
+    "department": "District Administration Kancheepuram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/kanniyakumari",
+    "name": "District Kanniyakumari, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kanniyakumari.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Kanniyakumari",
+    "department": "District Administration Kanniyakumari",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/karur",
+    "name": "District Karur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://karur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Karur",
+    "department": "District Administration Karur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/krishnagiri",
+    "name": "District Krishnagiri, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://krishnagiri.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Krishnagiri",
+    "department": "District Administration Krishnagiri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/madurai",
+    "name": "District Madurai, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://madurai.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "department": "District Administration Madurai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/mayiladuthurai",
+    "name": "District Mayiladuthurai, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mayiladuthurai.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Mayiladuthurai",
+    "department": "District Administration Mayiladuthurai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/nagapattinam",
+    "name": "District Nagapattinam, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nagapattinam.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Nagapattinam",
+    "department": "District Administration Nagapattinam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/namakkal",
+    "name": "District Namakkal, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://namakkal.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Namakkal",
+    "department": "District Administration Namakkal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/nilgiris",
+    "name": "District Nilgiris, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nilgiris.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Nilgiris",
+    "department": "District Administration Nilgiris",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/perambalur",
+    "name": "District Perambalur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://perambalur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Perambalur",
+    "department": "District Administration Perambalur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/pudukkottai",
+    "name": "District Pudukkottai, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pudukkottai.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Pudukkottai",
+    "department": "District Administration Pudukkottai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/ramanathapuram",
+    "name": "District Ramanathapuram, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ramanathapuram.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Ramanathapuram",
+    "department": "District Administration Ramanathapuram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/ranipet",
+    "name": "District Ranipet, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ranipet.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Ranipet",
+    "department": "District Administration Ranipet",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/salem",
+    "name": "District Salem, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://salem.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Salem",
+    "department": "District Administration Salem",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/sivaganga",
+    "name": "District Sivaganga, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sivaganga.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Sivaganga",
+    "department": "District Administration Sivaganga",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tenkasi",
+    "name": "District Tenkasi, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tenkasi.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tenkasi",
+    "department": "District Administration Tenkasi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/thanjavur",
+    "name": "District Thanjavur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://thanjavur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Thanjavur",
+    "department": "District Administration Thanjavur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/theni",
+    "name": "District Theni, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://theni.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Theni",
+    "department": "District Administration Theni",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/thoothukudi",
+    "name": "District Thoothukudi, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://thoothukudi.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Thoothukudi",
+    "department": "District Administration Thoothukudi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tiruchirappalli",
+    "name": "District Tiruchirappalli, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tiruchirappalli.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tiruchirappalli",
+    "department": "District Administration Tiruchirappalli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tirunelveli",
+    "name": "District Tirunelveli, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tirunelveli.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tirunelveli",
+    "department": "District Administration Tirunelveli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tirupathur",
+    "name": "District Tirupathur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tirupathur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tirupathur",
+    "department": "District Administration Tirupathur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tiruppur",
+    "name": "District Tiruppur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tiruppur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tiruppur",
+    "department": "District Administration Tiruppur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tiruvallur",
+    "name": "District Tiruvallur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tiruvallur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tiruvallur",
+    "department": "District Administration Tiruvallur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tiruvannamalai",
+    "name": "District Tiruvannamalai, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tiruvannamalai.nic.in/notice_category/recruitment-en/",
+    "state": "Tamil Nadu",
+    "district": "Tiruvannamalai",
+    "department": "District Administration Tiruvannamalai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/tiruvarur",
+    "name": "District Tiruvarur, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tiruvarur.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Tiruvarur",
+    "department": "District Administration Tiruvarur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/vellore",
+    "name": "District Vellore, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vellore.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Vellore",
+    "department": "District Administration Vellore",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/viluppuram",
+    "name": "District Viluppuram, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://viluppuram.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Viluppuram",
+    "department": "District Administration Viluppuram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tamil-nadu/virudhunagar",
+    "name": "District Virudhunagar, Tamil Nadu",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://virudhunagar.nic.in/notice_category/recruitment/",
+    "state": "Tamil Nadu",
+    "district": "Virudhunagar",
+    "department": "District Administration Virudhunagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/adilabad",
+    "name": "District Adilabad, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://adilabad.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Adilabad",
+    "department": "District Administration Adilabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/hanumakonda",
+    "name": "District Hanumakonda, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hanumakonda.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Hanumakonda",
+    "department": "District Administration Hanumakonda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/hyderabad",
+    "name": "District Hyderabad, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hyderabad.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Hyderabad",
+    "department": "District Administration Hyderabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/jagtial",
+    "name": "District Jagtial, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jagtial.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Jagtial",
+    "department": "District Administration Jagtial",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/jangaon",
+    "name": "District Jangaon, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jangaon.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Jangaon",
+    "department": "District Administration Jangaon",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/kamareddy",
+    "name": "District Kamareddy, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kamareddy.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Kamareddy",
+    "department": "District Administration Kamareddy",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/karimnagar",
+    "name": "District Karimnagar, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://karimnagar.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Karimnagar",
+    "department": "District Administration Karimnagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/khammam",
+    "name": "District Khammam, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khammam.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Khammam",
+    "department": "District Administration Khammam",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/mahabubabad",
+    "name": "District Mahabubabad, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahabubabad.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Mahabubabad",
+    "department": "District Administration Mahabubabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/mahabubnagar",
+    "name": "District Mahabubnagar, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahabubnagar.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Mahabubnagar",
+    "department": "District Administration Mahabubnagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/mancherial",
+    "name": "District Mancherial, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mancherial.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Mancherial",
+    "department": "District Administration Mancherial",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/medak",
+    "name": "District Medak, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://medak.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Medak",
+    "department": "District Administration Medak",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/mulugu",
+    "name": "District Mulugu, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mulugu.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Mulugu",
+    "department": "District Administration Mulugu",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/nagarkurnool",
+    "name": "District Nagarkurnool, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nagarkurnool.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Nagarkurnool",
+    "department": "District Administration Nagarkurnool",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/nalgonda",
+    "name": "District Nalgonda, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nalgonda.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Nalgonda",
+    "department": "District Administration Nalgonda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/narayanpet",
+    "name": "District Narayanpet, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://narayanpet.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Narayanpet",
+    "department": "District Administration Narayanpet",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/nirmal",
+    "name": "District Nirmal, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nirmal.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Nirmal",
+    "department": "District Administration Nirmal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/nizamabad",
+    "name": "District Nizamabad, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nizamabad.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Nizamabad",
+    "department": "District Administration Nizamabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/peddapalli",
+    "name": "District Peddapalli, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://peddapalli.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Peddapalli",
+    "department": "District Administration Peddapalli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/rajanna-sircilla",
+    "name": "District Rajanna Sircilla, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rajannasircilla.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Rajanna Sircilla",
+    "department": "District Administration Rajanna Sircilla",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/sangareddy",
+    "name": "District Sangareddy, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sangareddy.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Sangareddy",
+    "department": "District Administration Sangareddy",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/siddipet",
+    "name": "District Siddipet, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://siddipet.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Siddipet",
+    "department": "District Administration Siddipet",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/suryapet",
+    "name": "District Suryapet, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://suryapet.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Suryapet",
+    "department": "District Administration Suryapet",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/vikarabad",
+    "name": "District Vikarabad, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://vikarabad.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Vikarabad",
+    "department": "District Administration Vikarabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/wanaparthy",
+    "name": "District Wanaparthy, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://wanaparthy.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Wanaparthy",
+    "department": "District Administration Wanaparthy",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/warangal",
+    "name": "District Warangal, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://warangal.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Warangal",
+    "department": "District Administration Warangal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:telangana/yadadri-bhuvanagiri",
+    "name": "District Yadadri Bhuvanagiri, Telangana",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://yadadri.telangana.gov.in/notice_category/recruitment/",
+    "state": "Telangana",
+    "district": "Yadadri Bhuvanagiri",
+    "department": "District Administration Yadadri Bhuvanagiri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/dhalai",
+    "name": "District Dhalai, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dhalai.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "Dhalai",
+    "department": "District Administration Dhalai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/gomati",
+    "name": "District Gomati, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gomati.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "Gomati",
+    "department": "District Administration Gomati",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/khowai",
+    "name": "District Khowai, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://khowai.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "Khowai",
+    "department": "District Administration Khowai",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/north-tripura",
+    "name": "District North Tripura, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://northtripura.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "North Tripura",
+    "department": "District Administration North Tripura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/sepahijala",
+    "name": "District Sepahijala, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sepahijala.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "Sepahijala",
+    "department": "District Administration Sepahijala",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/south-tripura",
+    "name": "District South Tripura, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://southtripura.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "South Tripura",
+    "department": "District Administration South Tripura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/unakoti",
+    "name": "District Unakoti, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://unakoti.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "Unakoti",
+    "department": "District Administration Unakoti",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:tripura/west-tripura",
+    "name": "District West Tripura, Tripura",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://westtripura.nic.in/notice_category/recruitment/",
+    "state": "Tripura",
+    "district": "West Tripura",
+    "department": "District Administration West Tripura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/agra",
+    "name": "District Agra, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://agra.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Agra",
+    "department": "District Administration Agra",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/aligarh",
+    "name": "District Aligarh, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://aligarh.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Aligarh",
+    "department": "District Administration Aligarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/ambedkar-nagar",
+    "name": "District Ambedkar Nagar, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ambedkarnagar.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Ambedkar Nagar",
+    "department": "District Administration Ambedkar Nagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/amethi",
+    "name": "District Amethi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://amethi.nic.in/notice_category/recruitment/",
+    "extraUrls": [
+      "https://amethi.nic.in/notice_category/results/"
+    ],
+    "state": "Uttar Pradesh",
+    "district": "Amethi",
+    "department": "District Administration Amethi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/amroha",
+    "name": "District Amroha, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://amroha.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Amroha",
+    "department": "District Administration Amroha",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/auraiya",
+    "name": "District Auraiya, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://auraiya.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Auraiya",
+    "department": "District Administration Auraiya",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/ayodhya",
+    "name": "District Ayodhya, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ayodhya.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Ayodhya",
+    "department": "District Administration Ayodhya",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/azamgarh",
+    "name": "District Azamgarh, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://azamgarh.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Azamgarh",
+    "department": "District Administration Azamgarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/bahraich",
+    "name": "District Bahraich, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bahraich.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Bahraich",
+    "department": "District Administration Bahraich",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/ballia",
+    "name": "District Ballia, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ballia.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Ballia",
+    "department": "District Administration Ballia",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/balrampur",
+    "name": "District Balrampur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://balrampur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Balrampur",
+    "department": "District Administration Balrampur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/banda",
+    "name": "District Banda, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://banda.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Banda",
+    "department": "District Administration Banda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/barabanki",
+    "name": "District Barabanki, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://barabanki.nic.in/notice_category/recruitments/",
+    "state": "Uttar Pradesh",
+    "district": "Barabanki",
+    "department": "District Administration Barabanki",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/bareilly",
+    "name": "District Bareilly, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bareilly.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Bareilly",
+    "department": "District Administration Bareilly",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/bhadohi",
+    "name": "District Bhadohi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bhadohi.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Bhadohi",
+    "department": "District Administration Bhadohi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/budaun",
+    "name": "District Budaun, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://budaun.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Budaun",
+    "department": "District Administration Budaun",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/chandauli",
+    "name": "District Chandauli, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chandauli.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Chandauli",
+    "department": "District Administration Chandauli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/chitrakoot",
+    "name": "District Chitrakoot, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://chitrakoot.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Chitrakoot",
+    "department": "District Administration Chitrakoot",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/deoria",
+    "name": "District Deoria, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://deoria.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Deoria",
+    "department": "District Administration Deoria",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/etah",
+    "name": "District Etah, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://etah.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Etah",
+    "department": "District Administration Etah",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/etawah",
+    "name": "District Etawah, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://etawah.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Etawah",
+    "department": "District Administration Etawah",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/firozabad",
+    "name": "District Firozabad, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://firozabad.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Firozabad",
+    "department": "District Administration Firozabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/ghaziabad",
+    "name": "District Ghaziabad, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ghaziabad.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Ghaziabad",
+    "department": "District Administration Ghaziabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/ghazipur",
+    "name": "District Ghazipur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://ghazipur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Ghazipur",
+    "department": "District Administration Ghazipur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/gonda",
+    "name": "District Gonda, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gonda.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Gonda",
+    "department": "District Administration Gonda",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/gorakhpur",
+    "name": "District Gorakhpur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://gorakhpur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Gorakhpur",
+    "department": "District Administration Gorakhpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/hamirpur",
+    "name": "District Hamirpur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hamirpur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Hamirpur",
+    "department": "District Administration Hamirpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/hapur",
+    "name": "District Hapur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hapur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Hapur",
+    "department": "District Administration Hapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/hardoi",
+    "name": "District Hardoi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hardoi.nic.in/notice_category/recruitment/",
+    "extraUrls": [
+      "https://hardoi.nic.in/notice_category/result/"
+    ],
+    "state": "Uttar Pradesh",
+    "district": "Hardoi",
+    "department": "District Administration Hardoi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/hathras",
+    "name": "District Hathras, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hathras.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Hathras",
+    "department": "District Administration Hathras",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/jalaun",
+    "name": "District Jalaun, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jalaun.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Jalaun",
+    "department": "District Administration Jalaun",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/jaunpur",
+    "name": "District Jaunpur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jaunpur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Jaunpur",
+    "department": "District Administration Jaunpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/jhansi",
+    "name": "District Jhansi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jhansi.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Jhansi",
+    "department": "District Administration Jhansi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kannauj",
+    "name": "District Kannauj, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kannauj.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kannauj",
+    "department": "District Administration Kannauj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kanpur-dehat",
+    "name": "District Kanpur Dehat, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kanpurdehat.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kanpur Dehat",
+    "department": "District Administration Kanpur Dehat",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kanpur-nagar",
+    "name": "District Kanpur Nagar, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kanpurnagar.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kanpur Nagar",
+    "department": "District Administration Kanpur Nagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kasganj",
+    "name": "District Kasganj, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kasganj.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kasganj",
+    "department": "District Administration Kasganj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kaushambi",
+    "name": "District Kaushambi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kaushambi.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kaushambi",
+    "department": "District Administration Kaushambi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/kushinagar",
+    "name": "District Kushinagar, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://kushinagar.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Kushinagar",
+    "department": "District Administration Kushinagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/lucknow",
+    "name": "District Lucknow, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://lucknow.nic.in/notice_category/recruitments/",
+    "state": "Uttar Pradesh",
+    "district": "Lucknow",
+    "department": "District Administration Lucknow",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/maharajganj",
+    "name": "District Maharajganj, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://maharajganj.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Maharajganj",
+    "department": "District Administration Maharajganj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/mahoba",
+    "name": "District Mahoba, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mahoba.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Mahoba",
+    "department": "District Administration Mahoba",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/mainpuri",
+    "name": "District Mainpuri, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mainpuri.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Mainpuri",
+    "department": "District Administration Mainpuri",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/mathura",
+    "name": "District Mathura, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mathura.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Mathura",
+    "department": "District Administration Mathura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/mau",
+    "name": "District Mau, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mau.nic.in/notice_category/recruitments/",
+    "state": "Uttar Pradesh",
+    "district": "Mau",
+    "department": "District Administration Mau",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/meerut",
+    "name": "District Meerut, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://meerut.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Meerut",
+    "department": "District Administration Meerut",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/mirzapur",
+    "name": "District Mirzapur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://mirzapur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Mirzapur",
+    "department": "District Administration Mirzapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/moradabad",
+    "name": "District Moradabad, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://moradabad.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Moradabad",
+    "department": "District Administration Moradabad",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/pilibhit",
+    "name": "District Pilibhit, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pilibhit.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Pilibhit",
+    "department": "District Administration Pilibhit",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/pratapgarh",
+    "name": "District Pratapgarh, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pratapgarh.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Pratapgarh",
+    "department": "District Administration Pratapgarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/prayagraj",
+    "name": "District Prayagraj, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://prayagraj.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Prayagraj",
+    "department": "District Administration Prayagraj",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/rae-bareli",
+    "name": "District Rae Bareli, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://raebareli.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Rae Bareli",
+    "department": "District Administration Rae Bareli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/rampur",
+    "name": "District Rampur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://rampur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Rampur",
+    "department": "District Administration Rampur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/saharanpur",
+    "name": "District Saharanpur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://saharanpur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Saharanpur",
+    "department": "District Administration Saharanpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/sambhal",
+    "name": "District Sambhal, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sambhal.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Sambhal",
+    "department": "District Administration Sambhal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/shamli",
+    "name": "District Shamli, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shamli.nic.in/notice_category/recruitment/",
+    "extraUrls": [
+      "https://shamli.nic.in/notice_category/results/"
+    ],
+    "state": "Uttar Pradesh",
+    "district": "Shamli",
+    "department": "District Administration Shamli",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/shravasti",
+    "name": "District Shravasti, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://shravasti.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Shravasti",
+    "department": "District Administration Shravasti",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/siddharthnagar",
+    "name": "District Siddharthnagar, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://siddharthnagar.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Siddharthnagar",
+    "department": "District Administration Siddharthnagar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/sitapur",
+    "name": "District Sitapur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sitapur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Sitapur",
+    "department": "District Administration Sitapur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/sonbhadra",
+    "name": "District Sonbhadra, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sonbhadra.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Sonbhadra",
+    "department": "District Administration Sonbhadra",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/sultanpur",
+    "name": "District Sultanpur, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://sultanpur.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Sultanpur",
+    "department": "District Administration Sultanpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/unnao",
+    "name": "District Unnao, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://unnao.nic.in/notice_category/recruitment/",
+    "state": "Uttar Pradesh",
+    "district": "Unnao",
+    "department": "District Administration Unnao",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttar-pradesh/varanasi",
+    "name": "District Varanasi, Uttar Pradesh",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://varanasi.nic.in/notice_category/recruitments/",
+    "state": "Uttar Pradesh",
+    "district": "Varanasi",
+    "department": "District Administration Varanasi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/almora",
+    "name": "District Almora, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://almora.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Almora",
+    "department": "District Administration Almora",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/bageshwar",
+    "name": "District Bageshwar, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bageshwar.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Bageshwar",
+    "department": "District Administration Bageshwar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/champawat",
+    "name": "District Champawat, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://champawat.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Champawat",
+    "department": "District Administration Champawat",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/dehradun",
+    "name": "District Dehradun, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://dehradun.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Dehradun",
+    "department": "District Administration Dehradun",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/haridwar",
+    "name": "District Haridwar, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://haridwar.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Haridwar",
+    "department": "District Administration Haridwar",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/nainital",
+    "name": "District Nainital, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nainital.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Nainital",
+    "department": "District Administration Nainital",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/pauri-garhwal",
+    "name": "District Pauri Garhwal, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pauri.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Pauri Garhwal",
+    "department": "District Administration Pauri Garhwal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/pithoragarh",
+    "name": "District Pithoragarh, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://pithoragarh.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Pithoragarh",
+    "department": "District Administration Pithoragarh",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/tehri-garhwal",
+    "name": "District Tehri Garhwal, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://tehri.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Tehri Garhwal",
+    "department": "District Administration Tehri Garhwal",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:uttarakhand/uttarkashi",
+    "name": "District Uttarkashi, Uttarakhand",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://uttarkashi.nic.in/notice_category/recruitment/",
+    "state": "Uttarakhand",
+    "district": "Uttarkashi",
+    "department": "District Administration Uttarkashi",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/bankura",
+    "name": "District Bankura, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://bankura.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Bankura",
+    "department": "District Administration Bankura",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/hooghly",
+    "name": "District Hooghly, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://hooghly.nic.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Hooghly",
+    "department": "District Administration Hooghly",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/howrah",
+    "name": "District Howrah, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://howrah.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Howrah",
+    "department": "District Administration Howrah",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/jhargram",
+    "name": "District Jhargram, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://jhargram.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Jhargram",
+    "department": "District Administration Jhargram",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/nadia",
+    "name": "District Nadia, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://nadia.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Nadia",
+    "department": "District Administration Nadia",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/paschim-medinipur",
+    "name": "District Paschim Medinipur, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://paschimmedinipur.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Paschim Medinipur",
+    "department": "District Administration Paschim Medinipur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/purba-bardhaman",
+    "name": "District Purba Bardhaman, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://purbabardhaman.nic.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Purba Bardhaman",
+    "department": "District Administration Purba Bardhaman",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/purba-medinipur",
+    "name": "District Purba Medinipur, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://purbamedinipur.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Purba Medinipur",
+    "department": "District Administration Purba Medinipur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  },
+  {
+    "id": "nic:west-bengal/uttar-dinajpur",
+    "name": "District Uttar Dinajpur, West Bengal",
+    "level": "DISTRICT",
+    "adapter": "nic-s3waas",
+    "url": "https://uttardinajpur.gov.in/notice_category/recruitment/",
+    "state": "West Bengal",
+    "district": "Uttar Dinajpur",
+    "department": "District Administration Uttar Dinajpur",
+    "allowHosts": [
+      "s3waas.gov.in"
+    ],
+    "schedule": "daily"
+  }
+]

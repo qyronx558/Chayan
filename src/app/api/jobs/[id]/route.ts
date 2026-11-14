@@ -90,6 +90,7 @@ export async function PUT(
       applyLink,
       status,
       experience,
+      summary,
       startDate,
       lastDate,
     } = validation.data
@@ -142,6 +143,7 @@ export async function PUT(
       ...(officialWebsite !== undefined ? { officialWebsite } : {}),
       ...(applyLink !== undefined ? { applyLink } : {}),
       ...(experience !== undefined ? { experience } : {}),
+      ...(summary !== undefined ? { summary } : {}),
       ...(startDate !== undefined ? { startDate } : {}),
       ...(lastDate !== undefined ? { lastDate } : {}),
       status: status || "ACTIVE",

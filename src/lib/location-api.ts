@@ -7,7 +7,7 @@ import { isSuperAdmin } from "@/lib/roles"
  * ADMINs can read it and attach it to jobs, but never create/edit/delete it.
  * Middleware only checks isAdmin, so every write route must call this.
  */
-export async function requireSuperAdmin() {
+export async function requireSuperAdmin(forbiddenMessage = "Only super admins can manage states and districts") {
   const session = await auth()
   if (!session?.user) {
     return { ok: false as const, response: NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 }) }
@@ -16,7 +16,7 @@ export async function requireSuperAdmin() {
     return {
       ok: false as const,
       response: NextResponse.json(
-        { success: false, error: "Only super admins can manage states and districts" },
+        { success: false, error: forbiddenMessage },
         { status: 403 }
       ),
     }

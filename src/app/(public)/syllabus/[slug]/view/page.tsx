@@ -5,6 +5,7 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
+import { canViewContent } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -32,7 +33,7 @@ export default async function SyllabusViewPage({ params }: Props) {
     include: { department: true, category: true },
   })
 
-  if (!syllabus) notFound()
+  if (!syllabus || !(await canViewContent(syllabus.moderation))) notFound()
 
   const targetUrl = normalizeExternalUrl(syllabus.pdfUrl)
   if (!targetUrl) notFound()

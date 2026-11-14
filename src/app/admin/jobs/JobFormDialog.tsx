@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { jobSchema, type JobInput } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -69,6 +70,7 @@ const EMPTY_FORM: JobInput = {
   applyLink: null,
   status: "ACTIVE",
   experience: null,
+  summary: null,
   startDate: null,
   lastDate: null,
 };
@@ -99,6 +101,7 @@ function toFormValues(row: JobRow): JobInput {
     applyLink: row.applyLink,
     status: row.status as "ACTIVE" | "EXPIRED" | "UPCOMING",
     experience: row.experience,
+    summary: row.summary ?? null,
     startDate: row.startDate ? new Date(row.startDate) : null,
     lastDate: row.lastDate ? new Date(row.lastDate) : null,
   };
@@ -375,6 +378,15 @@ export function JobFormDialog({ row, open, onOpenChange, lookups, onSaved }: For
 
             {wizardStep === 1 && (
               <div className="space-y-4">
+                <FormField control={form.control} name="summary" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Overview (your own words, 3-5 sentences)</FormLabel>
+                    <FormControl>
+                      <Textarea rows={4} {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} placeholder="Who is hiring, which posts, key eligibility, last date and how to apply. Do not paste text from the notice." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
                 <FormField control={form.control} name="education" render={({ field }) => (
                   <FormItem><FormLabel>Education</FormLabel><FormControl><SmartContentField value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
                 )} />

@@ -81,3 +81,6 @@ __pycache__/
 .ruff_cache/
 .coverage
 coverage.xml
+
+# Ingest bot local output
+ingest-dry-run.json

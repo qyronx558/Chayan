@@ -1,0 +1,91 @@
+[
+  {
+    "id": "bpsc",
+    "name": "Bihar Public Service Commission",
+    "level": "STATE",
+    "state": "Bihar",
+    "adapter": "html-links",
+    "url": "https://bpsc.bihar.gov.in/",
+    "include": "[.]pdf",
+    "department": "Bihar Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "jpsc",
+    "name": "Jharkhand Public Service Commission",
+    "level": "STATE",
+    "state": "Jharkhand",
+    "adapter": "html-links",
+    "url": "https://www.jpsc.gov.in/",
+    "include": "[.]pdf",
+    "department": "Jharkhand Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "uppsc",
+    "name": "Uttar Pradesh Public Service Commission",
+    "level": "STATE",
+    "state": "Uttar Pradesh",
+    "adapter": "html-links",
+    "url": "https://uppsc.up.nic.in/",
+    "include": "Open_PDF",
+    "department": "Uttar Pradesh Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "apsc",
+    "name": "Assam Public Service Commission",
+    "level": "STATE",
+    "state": "Assam",
+    "adapter": "html-links",
+    "url": "https://apsc.nic.in/",
+    "include": "[.]pdf",
+    "department": "Assam Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "rpsc",
+    "name": "Rajasthan Public Service Commission",
+    "level": "STATE",
+    "state": "Rajasthan",
+    "adapter": "html-links",
+    "url": "https://rpsc.rajasthan.gov.in/",
+    "include": "[.]pdf",
+    "department": "Rajasthan Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "hpsc",
+    "name": "Haryana Public Service Commission",
+    "level": "STATE",
+    "state": "Haryana",
+    "adapter": "html-links",
+    "url": "https://hpsc.gov.in/en-us/",
+    "include": "[.]pdf",
+    "department": "Haryana Public Service Commission",
+    "schedule": "frequent"
+  },
+  {
+    "id": "hssc",
+    "name": "Haryana Staff Selection Commission",
+    "level": "STATE",
+    "state": "Haryana",
+    "adapter": "html-links",
+    "url": "https://www.hssc.gov.in/",
+    "include": "publicNotice|[.]pdf",
+    "department": "Haryana Staff Selection Commission",
+    "allowHosts": ["hryssc.com"],
+    "schedule": "frequent"
+  },
+  {
+    "id": "tnpsc",
+    "name": "Tamil Nadu Public Service Commission",
+    "level": "STATE",
+    "state": "Tamil Nadu",
+    "adapter": "html-links",
+    "url": "https://www.tnpsc.gov.in/english/notification.aspx",
+    "include": "[.]pdf",
+    "department": "Tamil Nadu Public Service Commission",
+    "schedule": "frequent"
+  }
+]

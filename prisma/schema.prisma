@@ -450,6 +450,8 @@ model Job {
   applyLink            String?
   status               JobStatus        @default(ACTIVE)
   experience           String?
+  /// Short original overview (written in our own words, never copied from the source).
+  summary              String?
   startDate            DateTime?
   lastDate             DateTime?
   createdAt            DateTime         @default(now())
@@ -1377,6 +1379,75 @@ model WebVitalEvent {
 
   @@index([metric, createdAt])
   @@index([path])
+}
+
+enum IngestStatus {
+  POSTED
+  SKIPPED
+  DUPLICATE
+  FAILED
+}
+
+/// One row per official notice the ingest bot has seen (dedupe + audit trail).
+model IngestItem {
+  id           String       @id @default(cuid())
+  sourceId     String
+  url          String
+  urlHash      String       @unique
+  contentHash  String?
+  kind         String
+  status       IngestStatus
+  reason       String?
+  entityType   String?
+  entityId     String?
+  confidence   Float?
+  quality      Int?
+  autoApproved Boolean      @default(false)
+  attempts     Int          @default(1)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([sourceId, createdAt])
+  @@index([contentHash])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([autoApproved, createdAt])
+}
+
+/// Content bot controls edited in Admin → Content bot (single row, id "default").
+/// The scraper reads them at the start of every run.
+model IngestSettings {
+  id                  String   @id @default("default")
+  /// Master switch: false pauses all scheduled runs.
+  enabled             Boolean  @default(true)
+  centralEnabled      Boolean  @default(true)
+  stateEnabled        Boolean  @default(true)
+  districtEnabled     Boolean  @default(true)
+  autoApprove         Boolean  @default(false)
+  autoApproveDailyCap Int      @default(60)
+  minScore            Int      @default(75)
+  minConfidence       Float    @default(0.85)
+  maxNewPerSource     Int      @default(15)
+  maxLlmCalls         Int      @default(120)
+  /// Blank = use GEMINI_MODEL from the environment, else the built-in default.
+  geminiModel         String?
+  updatedAt           DateTime @updatedAt
+  updatedById         String?
+}
+
+/// Admin overrides for crawl sources: an on/off switch for a built-in source
+/// (scripts/ingest/sources/*.json), or a full definition for a custom one.
+model IngestSource {
+  id          String   @id
+  enabled     Boolean  @default(true)
+  custom      Boolean  @default(false)
+  /// Full SourceDef JSON for custom sources.
+  def         Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+
+  @@index([custom])
 }
 
 model CrawlerRun {
