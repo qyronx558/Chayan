@@ -35,7 +35,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   <li>
    <Link
     href={href}
-    className="text-sm text-paper/70 underline decoration-paper/25 decoration-1 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper/70"
+    className="text-sm text-paper/70 underline decoration-paper/25 max-sm:inline-block max-sm:py-1 decoration-1 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper/70"
    >
     {label}
    </Link>
@@ -49,8 +49,8 @@ export function Footer({ className }: { className?: string }) {
  return (
   <footer className={cn("mt-16 w-full max-w-[100vw] overflow-x-clip border-t border-rule-2 bg-ink text-paper", className)}>
    <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-    <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-12">
-     <div className="sm:col-span-2 lg:col-span-4">
+    <div className="grid min-w-0 gap-10 max-sm:grid-cols-2 max-sm:gap-x-5 sm:grid-cols-2 lg:grid-cols-12">
+     <div className="max-sm:col-span-2 sm:col-span-2 lg:col-span-4">
       <Link href="/" className="flex items-center gap-2.5">
        <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-paper/35">
         <svg viewBox="0 0 80 80" className="h-6 w-6" aria-hidden>
@@ -95,7 +95,7 @@ export function Footer({ className }: { className?: string }) {
     </div>
 
     <div className="mt-12 min-w-0 border-t border-paper/15 pt-10">
-     <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-5">
+     <div className="grid min-w-0 gap-10 max-sm:grid-cols-2 max-sm:gap-x-5 sm:grid-cols-2 lg:grid-cols-5">
       <div>
        <FooterHeading>Trending Searches</FooterHeading>
        <ul className="space-y-2.5">
@@ -119,17 +119,17 @@ export function Footer({ className }: { className?: string }) {
     </div>
 
     <div className="flex items-center justify-center overflow-hidden border-b border-paper/15 py-12">
-     <div className="max-w-full break-words text-center font-display text-6xl font-bold leading-none text-paper sm:text-8xl md:text-9xl">
+     <div className="max-w-full break-words text-center font-display text-6xl font-bold leading-none text-paper max-sm:text-[clamp(2.75rem,16vw,3.75rem)] sm:text-8xl md:text-9xl">
       ChayanJobs
      </div>
     </div>
 
-    <div className="my-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
+    <div className="my-6 flex flex-wrap justify-center gap-x-6 gap-y-2 max-sm:gap-x-4 max-sm:gap-y-0">
      {importantLinks.map((link) => (
       <Link
        key={link.label}
        href={link.href}
-       className="text-xs text-paper/55 underline decoration-paper/20 decoration-1 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper/60"
+       className="text-xs text-paper/55 underline decoration-paper/20 max-sm:py-2.5 max-sm:text-[13px] decoration-1 underline-offset-4 transition-colors hover:text-paper hover:decoration-paper/60"
       >
        {link.label}
       </Link>

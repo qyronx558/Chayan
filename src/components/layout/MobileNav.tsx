@@ -69,7 +69,7 @@ export function MobileNav() {
    </SheetTrigger>
    <SheetContent side="left" className="w-[300px] p-0">
     <div className="flex h-full flex-col">
-     <div className="flex items-center justify-between border-b border-rule px-4 py-4">
+     <div className="flex items-center justify-between border-b border-rule py-4 pl-4 pr-14">
       <div onClick={() => setOpen(false)}>
        <LogoSmall />
       </div>

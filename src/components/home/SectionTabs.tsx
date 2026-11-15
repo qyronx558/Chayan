@@ -29,7 +29,7 @@ export function SectionTabs({
     aria-selected={tab === "latest"}
     onClick={() => onChange("latest")}
     className={cn(
-     "inline-flex items-center gap-1.5 border-r border-rule px-3 py-1.5 text-xs font-medium transition-colors",
+     "inline-flex items-center gap-1.5 border-r border-rule px-3 py-1.5 text-xs font-medium transition-colors max-sm:min-h-10 max-sm:text-[13px]",
      tab === "latest" ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"
     )}
    >
@@ -41,7 +41,7 @@ export function SectionTabs({
     aria-selected={tab === "trending"}
     onClick={() => onChange("trending")}
     className={cn(
-     "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+     "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors max-sm:min-h-10 max-sm:text-[13px]",
      tab === "trending"
       ? "bg-ink text-paper"
       : "text-muted-foreground hover:text-foreground"
