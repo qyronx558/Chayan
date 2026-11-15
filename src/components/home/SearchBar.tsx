@@ -277,7 +277,7 @@ export function SearchBar({
             type="button"
             onClick={() => handleTrendingClick(term)}
             className={cn(
-              "border bg-transparent px-3 py-1 text-xs font-medium transition-colors",
+              "border bg-transparent px-3 py-1 text-xs font-medium transition-colors max-sm:min-h-9 max-sm:text-[13px]",
               isDark
                 ? "border-paper/25 text-paper/80 hover:border-brick hover:text-paper"
                 : "border-rule text-foreground hover:border-brick hover:text-brick"

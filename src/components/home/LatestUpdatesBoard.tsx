@@ -129,7 +129,7 @@ function IndexColumn({ config }: { config: ColumnConfig }) {
         </h3>
         <Link
           href={config.href}
-          className="agate shrink-0 text-[10px] text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
+          className="agate shrink-0 text-[10px] text-brick underline decoration-1 underline-offset-4 hover:decoration-2 max-sm:py-2 max-sm:text-xs"
         >
           View all
         </Link>
@@ -211,7 +211,7 @@ export function LatestUpdatesBoard({ className }: { className?: string }) {
             <Link
               key={link.href + link.label}
               href={link.href}
-              className="agate inline-flex items-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-brick"
+              className="agate inline-flex items-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-brick max-sm:min-h-9 max-sm:text-[13px]"
             >
               <link.icon className="h-3.5 w-3.5" aria-hidden />
               {link.label}

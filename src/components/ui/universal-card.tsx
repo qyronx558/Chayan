@@ -92,7 +92,7 @@ export function UniversalCard({
 
  const hasLegacyTop = Boolean(badge || statusBadge)
  const rightActions = track || save || share ? (
-  <div className="flex shrink-0 items-center gap-1.5">
+  <div className="flex shrink-0 items-center gap-1.5 max-sm:gap-2 max-sm:[&>*]:h-10 max-sm:[&>.w-8]:w-10">
    {track}
    {save}
    {share}
@@ -166,11 +166,11 @@ export function UniversalCard({
     )}
    </div>
 
-   <div className={cn("mt-4 flex items-center justify-between gap-3 border-t border-rule pt-2.5")}>
+   <div className={cn("mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-rule pt-2.5")}>
     <Link
      href={ctaHref}
      aria-label={`${ctaText} - ${title}`}
-     className="inline-flex shrink-0 items-center text-sm font-medium text-brick underline decoration-1 underline-offset-4 transition-colors hover:decoration-2 focus-visible:outline-none"
+     className="inline-flex shrink-0 items-center text-sm font-medium text-brick underline decoration-1 underline-offset-4 transition-colors hover:decoration-2 focus-visible:outline-none max-sm:min-h-10 max-sm:text-[15px] max-sm:font-semibold"
     >
      {ctaText}
     </Link>

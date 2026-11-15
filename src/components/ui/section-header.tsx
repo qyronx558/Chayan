@@ -33,7 +33,7 @@ export function SectionHeader({
   return (
     <div className={cn("mb-6 min-w-0", className)}>
       <div className="flex min-w-0 flex-wrap items-end justify-between gap-3 border-b border-rule pb-2">
-        <div className="flex min-w-0 flex-1 items-baseline gap-2.5">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2.5 max-sm:basis-full">
           <Icon className={cn("h-4 w-4 shrink-0 self-center text-muted-foreground", iconClassName)} aria-hidden />
           {index ? (
             <span className="agate shrink-0 text-[11px] text-brick" aria-hidden>
@@ -56,7 +56,7 @@ export function SectionHeader({
           {viewAllHref && (
             <Link
               href={viewAllHref}
-              className="hidden text-sm font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2 sm:inline-flex"
+              className="inline-flex items-center text-sm font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2 max-sm:min-h-10 max-sm:order-last"
             >
               {viewAllLabel}
             </Link>

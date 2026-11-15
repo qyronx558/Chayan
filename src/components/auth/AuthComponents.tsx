@@ -19,14 +19,14 @@ export function AuthLayout({
   benefits = [],
 }: AuthLayoutProps) {
   return (
-    <div className="relative min-h-screen flex bg-paper-2 px-4 py-12   ">
+    <div className="relative min-h-screen flex bg-paper-2 px-4 py-12 max-sm:min-h-0 max-sm:pb-10 max-sm:pt-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-paper-3 blur-3xl animate-blob" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-paper-3 blur-3xl animate-blob animation-delay-2000" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-paper-3 blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-5xl items-center justify-center mx-auto">
+      <div className="relative z-10 flex w-full max-w-5xl items-center justify-center mx-auto max-sm:items-start">
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -82,7 +82,7 @@ export function AuthLayout({
           className="w-full lg:w-1/2"
         >
           <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
-            <div className="lg:hidden text-center mb-8">
+            <div className="lg:hidden text-center mb-8 max-sm:mb-4">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-paper-3 text-brick text-sm font-medium dark:bg-paper-3 dark:text-brick">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-paper-3 opacity-75" />

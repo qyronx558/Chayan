@@ -5,7 +5,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { SearchableFilter } from "@/components/jobs/SearchableFilter"
 import { cn } from "@/lib/utils"
 import type { FilterControl, ListingFiltersProps } from "@/components/listing/types"
@@ -299,6 +299,12 @@ export function ListingFilters(props: ListingFiltersProps) {
             </SheetHeader>
             <div className="mt-5">
               <FilterPanel {...props} />
+            </div>
+            {/* Filters apply instantly; this gives a clear, thumb-sized way back to the list. */}
+            <div className="sticky -bottom-6 -mx-6 -mb-6 mt-6 border-t border-rule bg-background px-6 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3">
+              <SheetClose asChild>
+                <Button className="h-12 w-full text-base font-semibold">Show results</Button>
+              </SheetClose>
             </div>
           </SheetContent>
         </Sheet>
