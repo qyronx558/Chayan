@@ -198,7 +198,10 @@ export function Header() {
 
        <NotificationBell />
 
-       <ThemeToggle />
+       {/* Phones: the theme switch lives in the side menu, so the account button has room */}
+       <div className="hidden sm:contents">
+        <ThemeToggle />
+       </div>
 
        {session?.user ? (
         <DropdownMenu>
@@ -268,6 +271,10 @@ export function Header() {
          </DropdownMenuContent>
         </DropdownMenu>
        ) : (
+        <>
+        <Button size="sm" asChild className="h-9 shrink-0 px-3 sm:hidden">
+         <Link href="/login">Log in</Link>
+        </Button>
         <div className="hidden items-center gap-2 sm:flex">
          <Button variant="outline" size="sm" asChild>
           <Link href="/login">Log in</Link>
@@ -276,6 +283,7 @@ export function Header() {
           <Link href="/register">Register</Link>
          </Button>
         </div>
+        </>
        )}
       </div>
      </div>

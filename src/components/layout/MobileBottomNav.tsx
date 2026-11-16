@@ -2,17 +2,22 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Briefcase, Award, CreditCard, Search } from "lucide-react"
+import { Home, Briefcase, Building2, Award, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { requestOpenSearch } from "@/lib/search-constants"
 
 const ITEMS = [
  { label: "Home", href: "/", icon: Home, match: (p: string) => p === "/" },
  {
-  label: "Jobs",
+  label: "Gov Jobs",
   href: "/jobs",
   icon: Briefcase,
   match: (p: string) => p.startsWith("/jobs") || p.startsWith("/apply/") || p.startsWith("/category/"),
+ },
+ {
+  label: "Private Jobs",
+  href: "/private-jobs",
+  icon: Building2,
+  match: (p: string) => p.startsWith("/private-jobs") || p.startsWith("/companies"),
  },
  {
   label: "Results",
@@ -45,8 +50,7 @@ function hasOwnBottomBar(pathname: string): boolean {
 }
 
 /**
- * Phone-only bottom tab bar: the four sections people open most, plus
- * search, each with a large icon and a plain one-word label so they can be
+ * Phone-only bottom tab bar: the five sections people open most, each with a large icon and a plain one-word label so they can be
  * reached with one thumb and recognised without reading the full menu.
  * Hidden from md (768px) up, where the header navigation has room.
  */
@@ -84,16 +88,6 @@ export function MobileBottomNav() {
        </li>
       )
      })}
-     <li className="min-w-0">
-      <button
-       type="button"
-       onClick={() => requestOpenSearch()}
-       className="flex h-full w-full flex-col items-center justify-center gap-1 border-t-2 border-transparent px-0.5 text-[11.5px] font-semibold leading-none text-muted-foreground transition-colors active:bg-paper-2 active:text-foreground"
-      >
-       <Search className="h-[22px] w-[22px]" aria-hidden />
-       <span>Search</span>
-      </button>
-     </li>
     </ul>
    </nav>
   </>

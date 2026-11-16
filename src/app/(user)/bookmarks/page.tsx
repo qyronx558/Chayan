@@ -150,7 +150,8 @@ export default function BookmarksPage() {
         </div>
 
         <Tabs defaultValue="jobs" className="w-full">
-          <TabsList className="mb-6">
+          {/* Five tabs don't fit one row on a phone: wrap them so every tab is reachable */}
+          <TabsList className="mb-6 flex h-auto w-full flex-wrap justify-start gap-1 sm:inline-flex sm:w-auto">
             <TabsTrigger value="jobs">
               Saved Jobs ({savedJobs.length})
             </TabsTrigger>
@@ -326,8 +327,8 @@ function BookmarkCard({ id, title, department, location, date, status, href, onR
       <Card className="group relative border-rule transition-colors hover:border-rule">
         <CardContent className="flex items-start justify-between p-5">
           <Link href={href} className="min-w-0 flex-1">
-            <div className="mb-2 flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">{department}</Badge>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="max-w-full truncate text-xs">{department}</Badge>
               {status && (
                 <Badge
                   variant={
@@ -343,10 +344,10 @@ function BookmarkCard({ id, title, department, location, date, status, href, onR
                 </Badge>
               )}
             </div>
-            <h3 className="mb-2 text-base font-semibold text-foreground transition-colors group-hover:text-brick">
+            <h3 className="mb-2 break-words text-base font-semibold text-foreground transition-colors group-hover:text-brick">
               {title}
             </h3>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               {location && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />
