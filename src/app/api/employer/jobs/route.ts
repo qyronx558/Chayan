@@ -1,8 +1,12 @@
+import { cleanJobDescription } from "@/lib/private-jobs/description"
+import { normalizeJobGeo } from "@/lib/private-jobs/geo"
 import { NextRequest, NextResponse } from "next/server"
+import { scheduleLogoLookup } from "@/lib/private-jobs/logo"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { privateJobSchema } from "@/lib/validations"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
+import { dedupeHash } from "@/lib/private-jobs/normalize"
 import { slugify } from "@/lib/utils"
 
 async function myVerifiedCompanyIds(userId: string) {
@@ -58,6 +62,10 @@ export async function POST(request: NextRequest) {
     if (!company || company.verifiedStatus !== "VERIFIED") {
       return NextResponse.json({ success: false, error: "Company is not verified yet. Complete inbox OTP verification first.", code: "OTP_REQUIRED" }, { status: 403 })
     }
+    // Pasted HTML source / <style> designs are stored as clean markup.
+    rest.description = cleanJobDescription(rest.description) ?? rest.description
+    // Country (ISO) + canonical city, derived from the location text when not picked.
+    normalizeJobGeo(rest)
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,
@@ -73,12 +81,16 @@ export async function POST(request: NextRequest) {
         ...(isWalkIn != null ? { isWalkIn } : {}),
         skills: skills ?? [],
         trustScore: trust.score,
+        source: "EMPLOYER",
+        dedupeHash: dedupeHash(company.name, rest.title, rest.location),
         moderation: "APPROVED",
         company: { connect: { id: company.id } },
         createdBy: { connect: { id: session.user.id } },
       },
       include: { company: true },
     })
+    // Look up the company's real logo once the response is sent (no-op when it already has one).
+    scheduleLogoLookup([job.companyId])
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (e) {
     return NextResponse.json({ success: false, error: e instanceof Error ? e.message : "Failed" }, { status: 500 })

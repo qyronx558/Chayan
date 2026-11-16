@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
@@ -9,18 +10,26 @@ import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatDate, getBaseUrl } from "@/lib/utils"
+import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { buildPrivateJobPostingLd } from "@/lib/private-jobs/seo"
+import { cleanJobDescription } from "@/lib/private-jobs/description"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
-  const job = await prisma.privateJob.findUnique({
+/** One query per request, shared by generateMetadata and the page. */
+const getJob = cache((slug: string) =>
+  prisma.privateJob.findUnique({
     where: { slug },
     include: { company: true },
   })
+)
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const job = await getJob(slug)
 
   if (!job) return { title: "Not Found" }
 
@@ -30,6 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${job.title} - ${job.company.name}`,
     description: `Apply for ${job.title} at ${job.company.name}. ${job.location ? `Location: ${job.location}.` : ""} ${job.salary ? `Salary: ${job.salary}.` : ""}`,
     alternates: { canonical: `${baseUrl}/private-jobs/${job.slug}` },
+    // Closed or unreviewed postings stay out of search indexes.
+    robots: job.status === "ACTIVE" ? robotsFor(job.moderation) : { index: false, follow: true },
     twitter: { card: "summary_large_image", title: `${job.title} at ${job.company.name} | ChayanJobs`, description: `${job.company.name} - ${job.location || "India"} | ${job.salary || "As per company"}` },
     openGraph: {
       title: `${job.title} - ${job.company.name}`,
@@ -42,18 +53,16 @@ export const dynamic = "force-dynamic"
 
 export default async function PrivateJobPage({ params }: Props) {
   const { slug } = await params
-  const job = await prisma.privateJob.findUnique({
-    where: { slug },
-    include: { company: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job) notFound()
+  if (!job || !(await canViewContent(job.moderation))) notFound()
 
   const relatedJobs = await prisma.privateJob.findMany({
     where: {
       companyId: job.companyId,
       id: { not: job.id },
       status: "ACTIVE",
+      moderation: "APPROVED",
     },
     take: 4,
     orderBy: { createdAt: "desc" },
@@ -64,7 +73,7 @@ export default async function PrivateJobPage({ params }: Props) {
     relatedJobs.length > 0
       ? []
       : await prisma.privateJob.findMany({
-          where: { id: { not: job.id }, status: "ACTIVE" },
+          where: { id: { not: job.id }, status: "ACTIVE", moderation: "APPROVED" },
           take: 4,
           orderBy: { createdAt: "desc" },
           include: { company: true },
@@ -74,8 +83,11 @@ export default async function PrivateJobPage({ params }: Props) {
   // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
   const nowMs = Date.now()
 
+  const jsonLd = job.status === "ACTIVE" && job.moderation === "APPROVED" ? buildPrivateJobPostingLd(job, getBaseUrl()) : null
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />}
       <BreadcrumbNav
         segments={[
           { label: "Private Jobs", href: "/private-jobs" },
@@ -84,7 +96,8 @@ export default async function PrivateJobPage({ params }: Props) {
         className="mb-6"
       />
 
-      <PrivateJobDetail job={JSON.parse(JSON.stringify(job))} />
+      {/* Description cleaned on the server: pasted HTML source / <style> designs never reach the browser. */}
+      <PrivateJobDetail job={JSON.parse(JSON.stringify({ ...job, description: cleanJobDescription(job.description) }))} />
       <PrivateJobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="PRIVATE_JOB" entityId={job.id} />
 

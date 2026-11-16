@@ -35,3 +35,38 @@ export function domainOf(raw?: string | null): string {
     return raw.trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0].toLowerCase()
   }
 }
+/**
+ * Batch version of findOrCreateCompany for bulk imports (hundreds of boards at
+ * once): a few queries instead of a round trip per company. Returns name → id.
+ */
+export async function findOrCreateCompanies(entries: { name: string; website?: string | null }[]): Promise<Map<string, string>> {
+  const wanted = new Map<string, string | undefined>()
+  for (const e of entries) {
+    const name = e.name.trim()
+    if (name && !wanted.has(name)) wanted.set(name, e.website?.trim() ? normalizeWebsite(e.website.trim()) : undefined)
+  }
+  const names = [...wanted.keys()]
+  const ids = new Map<string, string>()
+  if (!names.length) return ids
+  const existing = await prisma.company.findMany({ where: { name: { in: names } }, select: { id: true, name: true } })
+  for (const c of existing) ids.set(c.name, c.id)
+  const missing = names.filter((n) => !ids.has(n))
+  if (missing.length) {
+    const takenSlugs = new Set(
+      (await prisma.company.findMany({ where: { slug: { in: missing.map((n) => slugify(n)).filter(Boolean) } }, select: { slug: true } })).map((c) => c.slug)
+    )
+    const suffix = Date.now().toString(36)
+    await prisma.company.createMany({
+      data: missing.map((name, i) => {
+        const base = slugify(name) || `company-${suffix}-${i}`
+        const slug = takenSlugs.has(base) ? `${base}-${suffix}${i}` : base
+        takenSlugs.add(slug)
+        return { name, slug, website: wanted.get(name) }
+      }),
+      skipDuplicates: true,
+    })
+    const created = await prisma.company.findMany({ where: { name: { in: missing } }, select: { id: true, name: true } })
+    for (const c of created) ids.set(c.name, c.id)
+  }
+  return ids
+}

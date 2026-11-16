@@ -13,6 +13,8 @@ export interface PrivateJobRow {
   category: string | null;
   description: string | null;
   location: string | null;
+  country?: string | null;
+  city?: string | null;
   salary: string | null;
   salaryMin: number | null;
   salaryMax: number | null;

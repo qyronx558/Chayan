@@ -39,6 +39,7 @@ import { SmartContentField } from "@/components/admin/SmartContentField";
 import { SearchableRelationSelect } from "@/components/admin/SearchableRelationSelect";
 import type { FormDialogProps } from "@/components/admin/list/types";
 import type { PrivateJobRow } from "./config";
+import { CitySelect, CountrySelect } from "@/components/admin/GeoSelect";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const WIZARD_STEPS = ["Basic info", "Details & content", "Apply & dates", "Review"];
@@ -52,6 +53,8 @@ const EMPTY_FORM: PrivateJobInput = {
   category: null,
   description: null,
   location: null,
+  country: null,
+  city: null,
   salary: null,
   salaryMin: null,
   salaryMax: null,
@@ -83,6 +86,8 @@ function toFormValues(row: PrivateJobRow): PrivateJobInput {
     category: row.category,
     description: row.description,
     location: row.location,
+    country: row.country ?? null,
+    city: row.city ?? null,
     salary: row.salary,
     salaryMin: row.salaryMin,
     salaryMax: row.salaryMax,
@@ -165,7 +170,7 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
   const nextStep = async () => {
     const stepFields: Record<number, (keyof PrivateJobInput)[]> = {
       0: ["title", "slug", "companyId", "type", "status"],
-      1: ["description", "category", "location", "salary", "experience"],
+      1: ["description", "category", "country", "city", "location", "salary", "experience"],
       2: ["applicationUrl", "applicationEmail", "lastDate"],
     };
     const fields = stepFields[wizardStep];
@@ -284,9 +289,17 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
                   <FormItem><FormLabel>Description - plain text or styled HTML</FormLabel><FormControl><SmartContentField value={field.value} onChange={field.onChange} placeholder="Paste or type the job description. Switch to HTML/CSS for styled tables..." /></FormControl><FormMessage /></FormItem>
                 )} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <FormField control={form.control} name="location" render={({ field }) => (
-                    <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
+                  <FormField control={form.control} name="country" render={({ field }) => (
+                    <FormItem><FormLabel>Country</FormLabel><FormControl><CountrySelect value={field.value} onChange={(v) => { if (v !== field.value) form.setValue("city", null); field.onChange(v) }} /></FormControl><FormMessage /></FormItem>
                   )} />
+                  <FormField control={form.control} name="city" render={({ field }) => (
+                    <FormItem><FormLabel>City</FormLabel><FormControl><CitySelect country={watched.country} value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="location" render={({ field }) => (
+                    <FormItem><FormLabel>Location text (optional)</FormLabel><FormControl><Input {...field} value={field.value || ""} placeholder="e.g. Bengaluru (Hybrid)" onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField control={form.control} name="salary" render={({ field }) => (
                     <FormItem><FormLabel>Salary (text)</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
                   )} />

@@ -1,3 +1,5 @@
+import { cleanJobDescription } from "@/lib/private-jobs/description"
+import { normalizeJobGeo } from "@/lib/private-jobs/geo"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -7,6 +9,8 @@ import { isAdmin } from "@/lib/roles"
 import { Prisma } from "@prisma/client"
 import { writeAuditLog } from "@/lib/moderation"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
+import { dedupeHash } from "@/lib/private-jobs/normalize"
+import { canViewContent } from "@/lib/public-visibility"
 import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +21,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       include: { company: true },
     })
     if (!job) {
+      return NextResponse.json({ success: false, error: "Not found" }, { status: 404 })
+    }
+    // Unreviewed or rejected postings are visible only to staff.
+    if (!(await canViewContent(job.moderation))) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 })
     }
     return NextResponse.json({ success: true, data: job })
@@ -42,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: validation.error.issues[0].message }, { status: 400 })
     }
 
-    const existing = await prisma.privateJob.findUnique({ where: { id } })
+    const existing = await prisma.privateJob.findUnique({ where: { id }, include: { company: { select: { name: true } } } })
     if (!existing) {
       return NextResponse.json({ success: false, error: "Private job not found" }, { status: 404 })
     }
@@ -63,6 +71,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (missing) return missingRelationResponse(missing)
       return NextResponse.json({ success: false, error: "Selected Company no longer exists. Please refresh and select again." }, { status: 400 })
     }
+    // Pasted HTML source / <style> designs are stored as clean markup.
+    rest.description = cleanJobDescription(rest.description) ?? rest.description
+    // Country (ISO) + canonical city, derived from the location text when not picked.
+    normalizeJobGeo(rest)
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,
@@ -78,7 +90,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ...(isWalkIn !== undefined && isWalkIn !== null ? { isWalkIn } : {}),
       ...(skills !== undefined ? { skills: skills ?? [] } : {}),
       trustScore: trust.score,
+      dedupeHash: dedupeHash(company?.name ?? existing.company.name, rest.title ?? existing.title, rest.location ?? existing.location),
       ...(company ? { company: { connect: { id: company.id } } } : {}),
+    }
+    // Keep closedAt in step with a manual status change.
+    if (rest.status && rest.status !== existing.status) {
+      data.closedAt = rest.status === "ACTIVE" ? null : new Date()
+      if (rest.status === "ACTIVE") data.feedMisses = 0
     }
 
     if (session.user.role === "ADMIN") {

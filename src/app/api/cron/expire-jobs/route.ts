@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePublicContent } from "@/lib/cache"
 import { requireSecret } from "@/lib/ingest/auth"
 import { todayIST } from "@/lib/ingest/normalize"
+import { expirePrivateJobs } from "@/lib/private-jobs/lifecycle"
 
 export const dynamic = "force-dynamic"
 
@@ -19,12 +20,13 @@ export async function GET(request: NextRequest) {
     where: { status: { not: "EXPIRED" }, lastDate: { lt: cutoff } },
     data: { status: "EXPIRED" },
   })
-  if (count > 0) {
-    try {
-      revalidatePublicContent("job")
-    } catch {
-      // best-effort
-    }
+  // Private jobs: past last date, or past the hard expiry of feed postings.
+  const privateExpired = await expirePrivateJobs(cutoff)
+  try {
+    if (count > 0) revalidatePublicContent("job")
+    if (privateExpired > 0) revalidatePublicContent("private-job")
+  } catch {
+    // best-effort
   }
-  return NextResponse.json({ success: true, expired: count })
+  return NextResponse.json({ success: true, expired: count, privateExpired })
 }

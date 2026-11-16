@@ -60,6 +60,13 @@ export default async function sitemap() {
     { url: `${baseUrl}/tools/eligibility-checker`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${baseUrl}/jobs`, lastModified: new Date(), changeFrequency: "hourly" as const, priority: 0.9 },
     { url: `${baseUrl}/jobs/states`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
+    // Private-job detail pages are in the sharded /sitemaps/private-jobs/sitemap/<id>.xml files.
+    ...["/private-jobs", "/private-jobs/remote", "/private-jobs/freshers", "/private-jobs/walkins"].map((path) => ({
+      url: `${baseUrl}${path}`,
+      lastModified: new Date(),
+      changeFrequency: "hourly" as const,
+      priority: path === "/private-jobs" ? 0.9 : 0.8,
+    })),
     { url: `${baseUrl}/notifications`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
     { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.8 },
     { url: `${baseUrl}/sitemap`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.3 },

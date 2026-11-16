@@ -494,6 +494,8 @@ model Company {
   name             String                @unique
   slug             String                @unique
   logo             String?
+  /// Last automatic logo lookup (website / job board / icon service); null = never tried.
+  logoCheckedAt    DateTime?
   website          String?
   description      String?
   industry         String?
@@ -507,10 +509,12 @@ model Company {
   privateJob       PrivateJob[]
   members          CompanyMember[]
   otpChallenges    CompanyOtpChallenge[]
+  jobFeeds         PrivateJobFeed[]
 
   @@index([name])
   @@index([slug])
   @@index([verifiedStatus])
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "Company_name_trgm_idx", type: Gin)
 }
 
 model PrivateJob {
@@ -522,6 +526,10 @@ model PrivateJob {
   category          String?
   description       String?
   location          String?
+  /// ISO 3166-1 alpha-2 code ("IN", "US"), or a custom country name typed by an admin.
+  country           String?
+  /// Canonical city of the opening ("Bengaluru"); filters list cities of the chosen country.
+  city              String?
   salary            String?
   salaryMin         Int?
   salaryMax         Int?
@@ -550,14 +558,34 @@ model PrivateJob {
   reviewedById      String?
   reviewedAt        DateTime?
   reviewNote        String?
+  /// Where the posting came from; feed jobs are owned and closed by the feed sync.
+  source            PrivateJobSource     @default(MANUAL)
+  feedId            String?
+  /// The posting's id in its source system (ATS job id). Unique per feed.
+  externalId        String?
+  sourceUrl         String?
+  /// Hash of the fields the feed sync compares; unchanged postings are not rewritten.
+  contentHash       String?
+  /// Normalised company + title + city, for cross-source duplicate detection.
+  dedupeHash        String?
+  /// Hard expiry for postings without a lastDate (pushed forward while the source still lists them).
+  expiresAt         DateTime?
+  lastSeenAt        DateTime?
+  /// Consecutive feed runs the posting was missing from; closes at FEED_MISSES_TO_CLOSE.
+  feedMisses        Int                  @default(0)
+  closedAt          DateTime?
+  /// Model confidence (0-1) for postings extracted by the LLM from a careers page.
+  aiConfidence      Float?
   company           Company              @relation(fields: [companyId], references: [id])
   createdBy         User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  feed              PrivateJobFeed?      @relation(fields: [feedId], references: [id], onDelete: SetNull)
   bookmark          Bookmark[]
   applications      PrivateApplication[]
   viewsLog          PrivateJobView[]
   reports           JobReport[]
   clicks            JobClick[]
 
+  @@unique([feedId, externalId])
   @@index([title])
   @@index([slug])
   @@index([companyId])
@@ -573,9 +601,107 @@ model PrivateJob {
   @@index([createdById, moderation])
   @@index([category])
   @@index([location])
+  @@index([country, city])
   @@index([expMin])
   @@index([salaryMax])
   @@index([createdAt])
+  @@index([moderation, status, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
+  @@index([status, lastDate])
+  @@index([dedupeHash])
+  @@index([title(ops: raw("gin_trgm_ops"))], map: "PrivateJob_title_trgm_idx", type: Gin)
+  @@index([location(ops: raw("gin_trgm_ops"))], map: "PrivateJob_location_trgm_idx", type: Gin)
+  @@index([skills], map: "PrivateJob_skills_gin_idx", type: Gin)
+}
+
+enum PrivateJobSource {
+  MANUAL
+  EMPLOYER
+  ATS_FEED
+}
+
+enum PrivateJobFeedProvider {
+  GREENHOUSE
+  LEVER
+  ASHBY
+  SMARTRECRUITERS
+  WORKABLE
+  RECRUITEE
+  PERSONIO
+  BREEZY
+  /// Any careers web page: JSON-LD, an embedded ATS board, or Gemini extraction.
+  CAREER_PAGE
+}
+
+/// A company's official job board (ATS) that the private-job sync pulls from.
+model PrivateJobFeed {
+  id          String                 @id @default(cuid())
+  provider    PrivateJobFeedProvider
+  /// Board token / site name in the provider's public API (e.g. "razorpay"); a URL hash for CAREER_PAGE.
+  boardToken  String
+  /// CAREER_PAGE only: the careers page that is read.
+  pageUrl     String?
+  /// CAREER_PAGE only: hash of the page text last extracted; unchanged pages skip the LLM.
+  pageHash    String?
+  companyId   String
+  enabled     Boolean                @default(true)
+  /// Import only postings located in India or remote.
+  indiaOnly   Boolean                @default(true)
+  lastRunAt   DateTime?
+  lastStatus  String?
+  lastError   String?
+  /// Counters from the last run: fetched, created, updated, unchanged, closed, skipped.
+  lastStats   Json?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  createdById String?
+  company     Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobs        PrivateJob[]
+
+  @@unique([provider, boardToken])
+  @@index([enabled, lastRunAt])
+}
+
+/// A company queued for automatic job-board discovery (probes the public ATS APIs by name / website).
+model PrivateFeedCandidate {
+  id          String    @id @default(cuid())
+  /// Company name as entered (unique, case-sensitive as typed).
+  name        String    @unique
+  website     String?
+  /// PENDING → FOUND (a board was added) | NOT_FOUND | ERROR
+  status      String    @default("PENDING")
+  provider    String?
+  boardToken  String?
+  /// Open roles on the board when it was found.
+  jobs        Int?
+  note        String?
+  /// Import scope for the feed created from this candidate.
+  indiaOnly   Boolean   @default(false)
+  feedId      String?
+  attempts    Int       @default(0)
+  checkedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  createdById String?
+
+  @@index([status, checkedAt])
+}
+
+/// Private-job seeding controls (Admin → Job feeds → Settings, super admin only). Single row "default".
+model PrivateFeedSettings {
+  id               String   @id @default("default")
+  /// Master switch: false pauses every scheduled feed sync.
+  enabled          Boolean  @default(true)
+  /// How often each feed is re-synced.
+  intervalHours    Int      @default(6)
+  /// Publish LLM-extracted postings directly when confident; otherwise they wait in Content verification.
+  autoPublishAi    Boolean  @default(false)
+  minConfidence    Float    @default(0.8)
+  /// Careers pages read with the LLM per scheduled call (each costs one Gemini request).
+  maxAiPagesPerRun Int      @default(3)
+  /// Blank = GEMINI_MODEL from the environment, else the built-in default.
+  geminiModel      String?
+  updatedAt        DateTime @updatedAt
+  updatedById      String?
 }
 
 model Result {
