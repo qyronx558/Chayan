@@ -13,6 +13,9 @@ import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { PrivateTracker } from "@/components/private/PrivateTracker"
 import { EmployerMonitorButton } from "@/components/private/EmployerMonitorButton"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
+import { CheckCircle2 } from "lucide-react"
+import { appliedOn } from "@/components/private/AppliedBadge"
+import { unmarkApplied, useAppliedAt } from "@/lib/private-jobs/applied-store"
 import { ShareRow } from "@/components/shared/ShareRow"
 
 interface Props {
@@ -93,6 +96,7 @@ export function PrivateApplyRail(p: Props) {
       </p>
      </div>
 
+     <AppliedNote privateJobId={p.privateJobId} />
      {!closed && p.applicationUrl ? (
       <Button className="h-11 w-full text-[15px] font-semibold" asChild>
        <Link href={`/private-jobs/${p.slug}/apply`} target="_blank" rel="noopener noreferrer" onClick={() => p.onApplyClick("APPLY")}>
@@ -170,5 +174,23 @@ export function PrivateApplyRail(p: Props) {
     ) : null}
    </div>
   </aside>
+ )
+}
+
+/** "You applied on 12 Nov" with a way to undo a mistaken record. */
+function AppliedNote({ privateJobId }: { privateJobId: string }) {
+ const at = useAppliedAt(privateJobId)
+ if (!at) return null
+ return (
+  <div className="flex items-start gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
+   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+   <p className="min-w-0">
+    <span className="font-medium">You applied on {appliedOn(at)}</span>
+    <span className="block text-xs text-emerald-800/80 dark:text-emerald-300/80">
+     Saved in <Link href="/private-applications" className="underline">My applications</Link>.{" "}
+     <button type="button" className="underline" onClick={() => unmarkApplied(privateJobId)}>Didn&apos;t apply?</button>
+    </span>
+   </p>
+  </div>
  )
 }

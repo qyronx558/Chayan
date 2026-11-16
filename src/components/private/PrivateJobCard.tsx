@@ -2,7 +2,7 @@
 
 import {
  MapPin,
- IndianRupee,
+ Banknote,
  Briefcase,
  Wifi,
 } from "lucide-react"
@@ -26,6 +26,9 @@ interface PrivateJobCardProps {
  salary?: string | null
  salaryMin?: number | null
  salaryMax?: number | null
+ salaryCurrency?: string | null
+ salaryLocalMin?: number | null
+ salaryLocalMax?: number | null
  experience?: string | null
  lastDate?: string | null
  trustScore?: number | null
@@ -46,6 +49,9 @@ export function PrivateJobCard({
  salary,
  salaryMin,
  salaryMax,
+ salaryCurrency,
+ salaryLocalMin,
+ salaryLocalMax,
  experience,
  lastDate,
  trustScore,
@@ -54,7 +60,7 @@ export function PrivateJobCard({
  className,
  variant = "standard",
 }: PrivateJobCardProps & { variant?: "compact" | "standard" | "wide" }) {
- const salaryText = formatSalaryRange(salaryMin, salaryMax, salary)
+ const salaryText = formatSalaryRange(salaryMin, salaryMax, salary, { salaryCurrency, salaryLocalMin, salaryLocalMax })
  const locationText =
   location && remotePolicy === "REMOTE"
    ? `${location} · Remote`
@@ -62,7 +68,7 @@ export function PrivateJobCard({
 
  const meta = [
   ...(locationText ? [{ icon: remotePolicy === "REMOTE" && !location ? Wifi : MapPin, text: locationText }] : []),
-  ...(salaryText ? [{ icon: IndianRupee, text: salaryText }] : []),
+  ...(salaryText ? [{ icon: Banknote, text: salaryText }] : []),
   ...(experience ? [{ icon: Briefcase, text: experience }] : []),
  ].slice(0, 3)
 

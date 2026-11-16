@@ -1,4 +1,5 @@
 import { getExternalHostname, normalizeExternalUrl } from "@/lib/apply-room"
+import { formatLocal, type SalaryFields } from "@/lib/private-jobs/salary"
 import { extractSkills } from "@/lib/skills"
 
 export interface TrustInput {
@@ -131,7 +132,14 @@ export function buildEmailApplyTemplate(opts: { jobTitle: string; company: strin
   return { subject, body }
 }
 
-export function formatSalaryRange(min?: number | null, max?: number | null, fallback?: string | null): string | null {
+/**
+ * Salary for display. Pass the job (`local`) so a foreign salary is shown in its
+ * own currency ("$150K-$200K/yr") rather than its rupee equivalent.
+ */
+export function formatSalaryRange(min?: number | null, max?: number | null, fallback?: string | null, local?: SalaryFields | null): string | null {
+  if (local?.salaryCurrency && local.salaryCurrency !== "INR" && (local.salaryLocalMin != null || local.salaryLocalMax != null)) {
+    return formatLocal(local.salaryLocalMin, local.salaryLocalMax, local.salaryCurrency)
+  }
   const fmt = (n: number) => (n >= 100000 ? `₹${(n / 100000).toFixed(n % 100000 === 0 ? 0 : 1)}L` : `₹${n.toLocaleString("en-IN")}`)
   if (min && max && max > min) return `${fmt(min)} – ${fmt(max)}`
   if (min) return `${fmt(min)}+`

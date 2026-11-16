@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import {
  Briefcase, Building2, CalendarClock, CalendarPlus, Check, ChevronDown, ExternalLink, FileText,
- GraduationCap, IndianRupee, Layers, MapPin, Navigation, Route, Sparkles, UserRound, Users, Wifi,
+ GraduationCap, Banknote, Layers, MapPin, Navigation, Route, Sparkles, UserRound, Users, Wifi,
  type LucideIcon,
 } from "lucide-react"
 import { formatDate, cn } from "@/lib/utils"
@@ -17,6 +17,7 @@ import { PrepKit } from "@/components/private/PrepKit"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { cleanJobDescription } from "@/lib/private-jobs/description"
 import { countryName } from "@/lib/private-jobs/geo"
+import { salaryInrHint } from "@/lib/private-jobs/salary"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { useActiveSection } from "@/components/shared/useActiveSection"
 import { Button } from "@/components/ui/button"
@@ -33,7 +34,7 @@ interface Company {
 interface PrivateJob {
  id: string; title: string; slug: string; type: string; category?: string | null
  description?: string | null; location?: string | null; country?: string | null; city?: string | null; salary?: string | null
- salaryMin?: number | null; salaryMax?: number | null
+ salaryMin?: number | null; salaryMax?: number | null; salaryCurrency?: string | null; salaryLocalMin?: number | null; salaryLocalMax?: number | null
  experience?: string | null; expMin?: number | null; expMax?: number | null
  qualification?: string | null; skills?: string[]; remotePolicy?: string | null
  vacancies?: number | null; views?: number | null; trustScore?: number | null
@@ -125,7 +126,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
   description: job.description,
  })
  const score = job.trustScore ?? trust.score
- const salary = formatSalaryRange(job.salaryMin, job.salaryMax, job.salary)
+ const salary = formatSalaryRange(job.salaryMin, job.salaryMax, job.salary, job)
  const expRange = job.expMin !== null && job.expMin !== undefined ? `${job.expMin}–${job.expMax ?? job.expMin} yrs` : null
  const experience = job.experience || expRange
 
@@ -143,9 +144,10 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
 
  /* ── Short -> tile. Long -> requirements section. Never both. ── */
  const salaryTile = shortFact(salary, 30)
+ const salaryHint = salaryInrHint(job)
  const expTile = shortFact(experience, 24)
  const facts = [
-  salaryTile ? { icon: IndianRupee, label: "Salary", value: salaryTile } : null,
+  salaryTile ? { icon: Banknote, label: salaryHint ? `Salary (${salaryHint})` : "Salary", value: salaryTile } : null,
   expTile ? { icon: Briefcase, label: "Experience", value: expTile } : null,
   job.remotePolicy ? { icon: Wifi, label: "Work mode", value: remoteLabels[job.remotePolicy] || job.remotePolicy } : null,
   { icon: Layers, label: "Job type", value: typeLabels[job.type] || job.type },
@@ -321,7 +323,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
        ) : null}
        {!salaryTile && salary ? (
         <div className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
-         <dt className="flex items-center gap-2 text-sm font-semibold text-foreground"><IndianRupee className="h-4 w-4 text-muted-foreground" /> Salary</dt>
+         <dt className="flex items-center gap-2 text-sm font-semibold text-foreground"><Banknote className="h-4 w-4 text-muted-foreground" /> Salary</dt>
          <dd className="min-w-0 text-sm"><RichTextView html={salary} /></dd>
         </div>
        ) : null}

@@ -533,6 +533,11 @@ model PrivateJob {
   salary            String?
   salaryMin         Int?
   salaryMax         Int?
+  /// ISO 4217 currency the salary was published in (null = INR). salaryMin/Max hold the yearly INR equivalent.
+  salaryCurrency    String?
+  /// Yearly salary in salaryCurrency, as published.
+  salaryLocalMin    Int?
+  salaryLocalMax    Int?
   experience        String?
   expMin            Int?
   expMax            Int?
@@ -1203,6 +1208,10 @@ model PrivateApplication {
   status       PrivateAppStatus @default(saved)
   interviewAt  DateTime?
   notes        String?
+  /// When the candidate opened the application from ChayanJobs (first time).
+  appliedAt    DateTime?
+  /// How the record started: apply_click (Apply button), manual (tracker), import (synced from this device).
+  source       String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)

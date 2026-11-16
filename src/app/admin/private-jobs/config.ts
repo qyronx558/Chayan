@@ -14,6 +14,9 @@ export interface PrivateJobRow {
   description: string | null;
   location: string | null;
   country?: string | null;
+  salaryCurrency?: string | null;
+  salaryLocalMin?: number | null;
+  salaryLocalMax?: number | null;
   city?: string | null;
   salary: string | null;
   salaryMin: number | null;
@@ -72,7 +75,7 @@ export const privateJobsConfig: ListModuleConfig<PrivateJobRow> = {
   searchPlaceholder: "Search private jobs by title, company…",
   metaLine: (row) => {
     const parts = [row.company.name, typeLabels[row.type] ?? row.type];
-    const salary = formatSalaryRange(row.salaryMin, row.salaryMax, row.salary);
+    const salary = formatSalaryRange(row.salaryMin, row.salaryMax, row.salary, row);
     if (salary) parts.push(salary);
     const last = formatDate(row.lastDate);
     if (last) parts.push(`Last date ${last}`);

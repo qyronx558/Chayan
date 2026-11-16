@@ -158,3 +158,28 @@ export function sanitizeDownloadFilename(raw: string | null | undefined, fallbac
     .slice(0, 80)
   return safe ? `${safe}.pdf` : fallback
 }
+
+/**
+ * Application portals that are single-page apps and refuse framing: their
+ * page only renders on their own address, so the ChayanJobs-served copy
+ * (/api/proxy) shows their "Page not found" screen. These go straight to the
+ * secure-window handoff instead of a broken preview.
+ */
+const SPA_ONLY_PORTALS: { host: RegExp; path?: RegExp }[] = [
+  { host: /^jobs\.ashbyhq\.com$/ },
+  { host: /(^|\.)myworkdayjobs\.com$/ },
+  { host: /(^|\.)myworkdaysite\.com$/ },
+  { host: /^jobs\.smartrecruiters\.com$/, path: /^\/oneclick-ui\// },
+  { host: /^(www\.)?linkedin\.com$/ },
+]
+
+export function proxyCannotRender(raw: string | null | undefined): boolean {
+  if (!raw) return false
+  try {
+    const u = new URL(raw)
+    const host = u.hostname.toLowerCase()
+    return SPA_ONLY_PORTALS.some((p) => p.host.test(host) && (!p.path || p.path.test(u.pathname)))
+  } catch {
+    return false
+  }
+}

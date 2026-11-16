@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { AlertCircle, Flag, Sparkles, Wifi } from "lucide-react"
+import { AlertCircle, CheckCircle2, Flag, Sparkles, Wifi } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { UniversalCardEmpty } from "@/components/ui/universal-card"
@@ -12,7 +12,7 @@ import { filterValidItems } from "@/lib/card-helpers"
 import { PrivateJobRow, PrivateJobRowSkeleton } from "@/components/private/PrivateJobRow"
 import { PrivateJobPreview, PrivateJobPreviewEmpty } from "@/components/private/PrivateJobPreview"
 import type { ListJob } from "@/components/private/job-list-utils"
-import { PrivateJobsDiscover, type DiscoverPick } from "@/components/private/PrivateJobsDiscover"
+import { PrivateJobsPulse, PrivateJobsTrending, type DiscoverActive, type DiscoverPick } from "@/components/private/PrivateJobsDiscover"
 import { ListingFilters } from "@/components/listing/ListingFilters"
 import { ListingLayout } from "@/components/listing/ListingLayout"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
@@ -21,6 +21,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import { useInfiniteListing } from "@/hooks/useInfiniteListing"
 import { useListingQuerySync } from "@/hooks/useListingQuerySync"
 import { countryName } from "@/lib/private-jobs/geo"
+import { useAppliedJobs } from "@/lib/private-jobs/applied-store"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface Company {
@@ -393,6 +394,17 @@ export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset 
   const visibleJobs = filterValidItems(jobs)
 
   const toggle = (set: (fn: (v: string) => string) => void, value: string) => set((v) => (v === value ? "" : value))
+  const discoverActive: DiscoverActive = {
+    remote: remoteFilter === "REMOTE",
+    internship: typeFilter === "INTERNSHIP",
+    highSalary: minSalary === "1000000",
+    today: postedWithin === "1",
+    fresher: fresherOnly,
+    walkin: walkinOnly,
+    companyId: companyFilter,
+    skill: skillFilter,
+  }
+
   const onDiscoverPick = (p: DiscoverPick) => {
     if (p.kind === "remote") toggle(setRemoteFilter, "REMOTE")
     else if (p.kind === "internship") toggle(setTypeFilter, "INTERNSHIP")
@@ -452,6 +464,7 @@ export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset 
             <Link href="/private-jobs/freshers" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Sparkles className="mr-1 inline h-3 w-3" />Freshers</Link>
             <Link href="/private-jobs/walkins" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Flag className="mr-1 inline h-3 w-3" />Walk-ins</Link>
             <Link href="/private-jobs/refer" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">+ Refer a job</Link>
+            <MyApplicationsLink />
           </div>
         </div>
         <p className="mb-8 max-w-2xl text-muted-foreground">
@@ -470,25 +483,11 @@ export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset 
               onClear={clearFilters}
               hasActiveFilters={hasActiveFilters}
               activeCount={activeCount}
+              railTop={<PrivateJobsPulse onPick={onDiscoverPick} active={discoverActive} />}
+              railBottom={<PrivateJobsTrending onPick={onDiscoverPick} active={discoverActive} />}
             />
           }
         >
-          <div className="mb-5">
-            <PrivateJobsDiscover
-              onPick={onDiscoverPick}
-              active={{
-                remote: remoteFilter === "REMOTE",
-                internship: typeFilter === "INTERNSHIP",
-                highSalary: minSalary === "1000000",
-                today: postedWithin === "1",
-                fresher: fresherOnly,
-                walkin: walkinOnly,
-                companyId: companyFilter,
-                skill: skillFilter,
-              }}
-            />
-          </div>
-
           <ListingToolbar
             count={visibleJobs.length}
             total={total}
@@ -557,5 +556,15 @@ export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset 
         </ListingLayout>
       </motion.div>
     </div>
+  )
+}
+
+/** "My applications (3)": jobs this candidate already applied to. */
+function MyApplicationsLink() {
+  const applied = useAppliedJobs()
+  return (
+    <Link href="/private-applications" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">
+      <CheckCircle2 className="mr-1 inline h-3 w-3" />My applications{applied.size ? ` (${applied.size})` : ""}
+    </Link>
   )
 }

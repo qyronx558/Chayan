@@ -89,4 +89,7 @@ export interface ListingFiltersProps {
   /** Number of active facets, shown as a badge on the mobile Filters button. */
   activeCount?: number
   children?: ReactNode
+  /** Extra rail content above / below the facets (desktop rail and mobile sheet). */
+  railTop?: ReactNode
+  railBottom?: ReactNode
 }

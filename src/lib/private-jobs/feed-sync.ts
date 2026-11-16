@@ -5,6 +5,7 @@ import { computeTrustScore } from "@/lib/private-jobs-trust"
 import { revalidatePublicContent } from "@/lib/cache"
 import { enrichSmartRecruiters, fetchFeed, feedBoardUrl, FeedError, type FeedPosting, type FeedProvider, type FetchLike } from "@/lib/private-jobs/feeds"
 import { parseLocation, toCountryCode } from "@/lib/private-jobs/geo"
+import { parseForeignSalary, salaryDisplay, structuredSalary, toInr, type Salary } from "@/lib/private-jobs/salary"
 import { readCareerPage } from "@/lib/private-jobs/career-page"
 import { getFeedSettings, type FeedSettings } from "@/lib/private-jobs/settings"
 import {
@@ -19,8 +20,6 @@ import {
   normalizeLocation,
   parseExperience,
   parseSalaryINR,
-  salaryLabel,
-  structuredSalaryINR,
   type JobTypeValue,
   type RemotePolicyValue,
 } from "@/lib/private-jobs/normalize"
@@ -65,6 +64,10 @@ export interface FeedJobFields {
   salary: string | null
   salaryMin: number | null
   salaryMax: number | null
+  /** Currency the salary was published in (null = INR) and the yearly amounts in it. */
+  salaryCurrency: string | null
+  salaryLocalMin: number | null
+  salaryLocalMax: number | null
   experience: string | null
   expMin: number | null
   expMax: number | null
@@ -103,16 +106,31 @@ function passesIndiaFilter(p: FeedPosting, ctx: FeedContext): boolean {
   return isIndiaPosting(p)
 }
 
+/**
+ * Pay of a posting, in the currency it was published in: structured board data
+ * first, then a rupee amount in the text, then a foreign-currency range in the text.
+ */
+function resolveSalary(p: FeedPosting, description: string | null, country: string | null): Salary | null {
+  const structured = structuredSalary(p.salary)
+  if (structured) return structured
+  const text = description?.slice(0, 8000) ?? null
+  const inr = parseSalaryINR(text?.slice(0, 4000))
+  if (inr.min != null || inr.max != null) return { ...inr, currency: "INR" }
+  return parseForeignSalary(text, country)
+}
+
 export function buildJobFields(p: FeedPosting, ctx: FeedContext): FeedJobFields {
   const title = p.title.replace(/\s+/g, " ").slice(0, 200)
   const description = p.descriptionText ? p.descriptionText.slice(0, DESCRIPTION_MAX) : null
   const indiaLocations = [p.location, ...p.locations].filter((l): l is string => !!l && (!ctx.indiaOnly || isIndiaLocation(l)))
   const location = normalizeLocation([...new Set(indiaLocations.length ? indiaLocations : [p.location || ""])].join(", "))
   const remotePolicy = detectRemotePolicy(p.workplaceType, p.location, title)
-  const structured = structuredSalaryINR(p.salary)
-  const parsed = structured.min != null || structured.max != null ? structured : parseSalaryINR(description?.slice(0, 4000))
   const exp = parseExperience(`${title}\n${p.experienceHint || ""}\n${description?.slice(0, 6000) || ""}`)
   const geo = parseLocation(p.location || p.locations[0] || null, { country: p.country, city: p.city })
+  const pay = resolveSalary(p, description, geo.country)
+  const local = pay && pay.currency !== "INR" ? pay : null
+  const salaryMin = pay ? toInr(pay.min, pay.currency) : null
+  const salaryMax = pay ? toInr(pay.max, pay.currency) : null
   const proofUrl = ctx.boardUrl
   const trust = computeTrustScore({
     applicationUrl: p.applyUrl,
@@ -129,9 +147,12 @@ export function buildJobFields(p: FeedPosting, ctx: FeedContext): FeedJobFields 
     type: detectJobType(p.commitment, title),
     category: p.department ? p.department.slice(0, 100) : null,
     skills: extractPostingSkills(title, description || ""),
-    salary: salaryLabel(parsed.min, parsed.max),
-    salaryMin: parsed.min,
-    salaryMax: parsed.max,
+    salaryMin,
+    salaryMax,
+    salaryCurrency: local?.currency ?? null,
+    salaryLocalMin: local?.min ?? null,
+    salaryLocalMax: local?.max ?? null,
+    salary: salaryDisplay({ salaryMin, salaryMax, salaryCurrency: local?.currency, salaryLocalMin: local?.min, salaryLocalMax: local?.max }),
     experience: experienceLabel(exp.min, exp.max),
     expMin: exp.min,
     expMax: exp.max,

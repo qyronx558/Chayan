@@ -19,7 +19,7 @@ import { useBrowserTabs } from "@/components/browse/useBrowserTabs"
 import type { ApplicationShellProps } from "@/components/apply/application-types"
 import { isDocumentApplication } from "@/components/apply/application-types"
 import { trackApplyEvent } from "@/lib/apply-analytics"
-import { buildDocProxyUrl, buildHtmlProxyUrl, getExternalHostname, looksLikePdfUrl, normalizeExternalUrl } from "@/lib/apply-room"
+import { buildDocProxyUrl, buildHtmlProxyUrl, getExternalHostname, looksLikePdfUrl, normalizeExternalUrl, proxyCannotRender } from "@/lib/apply-room"
 import { downloadPdfFile } from "@/lib/download-pdf"
 
 type FrameStatus = "checking" | "allowed" | "blocked" | "unknown"
@@ -330,6 +330,11 @@ export function ApplicationShell(props: ApplicationShellProps) {
   // the real site in a frame: use the ChayanJobs-served view for them.
   const needsPreview = data.isPdf || data.frameable === false || !data.directUrl
   if (!needsPreview) return
+  // Single-page portals (Ashby, Workday…) break in the served copy: hand off cleanly.
+  if (!data.isPdf && proxyCannotRender(url)) {
+   showInterstitial()
+   return
+  }
   if (failedRef.current.preview) {
    // The served view already failed and the real site cannot be framed.
    if (data.frameable === false || !data.directUrl) showInterstitial()
@@ -351,7 +356,7 @@ export function ApplicationShell(props: ApplicationShellProps) {
   latestUrlRef.current = currentUrl
   failedRef.current = { preview: false, direct: false }
   // A site already known to refuse framing goes straight to the served view.
-  viewModeRef.current = hostRefusesFraming(currentUrl) ? "preview" : startMode(currentUrl)
+  viewModeRef.current = hostRefusesFraming(currentUrl) && !proxyCannotRender(currentUrl) ? "preview" : startMode(currentUrl)
   setViewMode(viewModeRef.current)
   setIframeLoaded(false)
   setRevealed(false)
@@ -539,6 +544,44 @@ export function ApplicationShell(props: ApplicationShellProps) {
   trackApplyEvent("continue_clicked", analyticsBase)
  }, [analyticsBase])
 
+ // Private jobs whose form refuses embedding: open it in a popup window over
+ // ChayanJobs (the candidate never loses this page) and notice when it closes.
+ const [windowState, setWindowState] = useState<"idle" | "open" | "closed">("idle")
+ const popupRef = useRef<Window | null>(null)
+ const openSecureWindow = useCallback(() => {
+  handleApply()
+  const existing = popupRef.current
+  if (existing && !existing.closed) {
+   existing.focus()
+   return
+  }
+  const w = Math.min(1100, window.screen.availWidth - 40)
+  const h = Math.min(880, window.screen.availHeight - 60)
+  const left = Math.max(0, window.screenX + (window.outerWidth - w) / 2)
+  const top = Math.max(0, window.screenY + (window.outerHeight - h) / 2)
+  const win = window.open(currentUrl, `cj-apply-${slug}`, `popup=yes,width=${w},height=${h},left=${left},top=${top}`)
+  if (!win) {
+   // Popup blocked (or a phone): a normal new tab.
+   window.open(currentUrl, "_blank", "noopener,noreferrer")
+   setWindowState("closed")
+   return
+  }
+  try {
+   win.opener = null // the official site gets no handle on ChayanJobs
+  } catch {
+   // Cross-origin already: nothing to clear.
+  }
+  popupRef.current = win
+  setWindowState("open")
+  const timer = window.setInterval(() => {
+   if (!win.closed) return
+   window.clearInterval(timer)
+   popupRef.current = null
+   setWindowState("closed")
+  }, 700)
+ }, [handleApply, currentUrl, slug])
+ useEffect(() => setWindowState("idle"), [currentUrl]) // eslint-disable-line react-hooks/set-state-in-effect
+
  const handleDownload = useCallback((e?: { preventDefault(): void }) => {
   // Stop the anchor's same-tab navigation: the helper downloads via blob
   // (stays in place) and only opens a new tab if the proxy fails.
@@ -704,6 +747,9 @@ export function ApplicationShell(props: ApplicationShellProps) {
        onReport={reportIssue}
        onOpenOfficial={handleApply}
        onDownload={handleDownload}
+       onOpenWindow={type === "private" ? openSecureWindow : undefined}
+       windowState={windowState}
+       applicationsHref={type === "private" ? "/private-applications" : undefined}
       />
      ) : (
       <>
