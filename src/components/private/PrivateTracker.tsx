@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/toast"
+import { unmarkApplied, useAppliedAt } from "@/lib/private-jobs/applied-store"
 
 export type PrivateStatus = "saved" | "applied" | "shortlisted" | "interview" | "offer" | "joined" | "rejected" | "withdrawn"
 
@@ -25,7 +26,8 @@ export function PrivateTracker({ privateJobId, variant = "full", className = "",
  void variant
  const { data: session } = useSession()
  const router = useRouter()
- const [status, setStatus] = useState<PrivateStatus | null>(null)
+ const [tracked, setStatus] = useState<PrivateStatus | null>(null)
+ const appliedAt = useAppliedAt(privateJobId)
  const [loading, setLoading] = useState(false)
  const [checking, setChecking] = useState(true)
 
@@ -42,7 +44,11 @@ export function PrivateTracker({ privateJobId, variant = "full", className = "",
  useEffect(() => {
   if (!session?.user) { setChecking(false); return }
   refresh()
- }, [session, refresh])
+  // Opening the application elsewhere (Apply room) moves this job to Applied.
+  const onApplied = (e: Event) => { if ((e as CustomEvent<{ id: string }>).detail?.id === privateJobId) window.setTimeout(refresh, 800) }
+  window.addEventListener("cj-applied-change", onApplied)
+  return () => window.removeEventListener("cj-applied-change", onApplied)
+ }, [session, refresh, privateJobId])
 
  const update = async (next: PrivateStatus) => {
   if (!session?.user) { router.push("/login"); return }
@@ -57,6 +63,7 @@ export function PrivateTracker({ privateJobId, variant = "full", className = "",
    if (json.success) {
     setStatus(next)
     onChange?.(next)
+    if (next === "saved") unmarkApplied(privateJobId, { server: false })
     toast(`Marked as ${next}`, "success")
    } else toast(json.error || "Failed", "destructive")
   } catch { toast("Failed", "destructive") } finally { setLoading(false) }
@@ -68,9 +75,12 @@ export function PrivateTracker({ privateJobId, variant = "full", className = "",
    await fetch(`/api/private-applications?privateJobId=${privateJobId}`, { method: "DELETE" })
    setStatus(null)
    onChange?.(null)
+   unmarkApplied(privateJobId, { server: false })
   } finally { setLoading(false) }
  }
 
+ // Applied from this device (guests too) before the account knows about it.
+ const status = tracked ?? (appliedAt ? "applied" : null)
  if (checking) return <div className={cn("h-8 w-24 animate-pulse rounded-lg bg-paper-3", className)} />
  const info = PRIVATE_STATUSES.find((s) => s.value === status)
 

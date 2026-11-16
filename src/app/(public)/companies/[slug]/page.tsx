@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Building2, ExternalLink, MapPin, IndianRupee } from "lucide-react"
+import { Building2, ExternalLink, MapPin, Banknote } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { TrustBadge } from "@/components/private/TrustBadge"
 import { formatSalaryRange } from "@/lib/private-jobs-trust"
@@ -69,7 +69,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                   <p className="font-bold text-foreground">{j.title}</p>
                   <p className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
                     {j.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{j.location}</span>}
-                    {(j.salaryMin || j.salaryMax || j.salary) && <span className="inline-flex items-center gap-1"><IndianRupee className="h-3 w-3" />{formatSalaryRange(j.salaryMin, j.salaryMax, j.salary)}</span>}
+                    {(j.salaryMin || j.salaryMax || j.salary) && <span className="inline-flex items-center gap-1"><Banknote className="h-3 w-3" />{formatSalaryRange(j.salaryMin, j.salaryMax, j.salary, j)}</span>}
                     {j.lastDate && <span>Last: {formatDate(j.lastDate)}</span>}
                   </p>
                 </CardContent>

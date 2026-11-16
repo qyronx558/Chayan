@@ -9,10 +9,12 @@ import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { CardShareButton } from "@/components/ui/card-actions"
 import { PrivateTracker } from "@/components/private/PrivateTracker"
 import { CompanyLogo } from "@/components/private/CompanyLogo"
+import { AppliedBadge } from "@/components/private/AppliedBadge"
 import { RichTextView } from "@/components/shared/RichTextView"
 import { containsHtml } from "@/lib/blog-prose"
 import { cleanJobDescription } from "@/lib/private-jobs/description"
 import { htmlToText } from "@/lib/private-jobs/html-text"
+import { salaryInrHint } from "@/lib/private-jobs/salary"
 import {
   JOB_TYPE_LABEL,
   jobPlace,
@@ -40,6 +42,7 @@ export function PrivateJobPreview({ job, nowMs }: { job: ListJob; nowMs: number 
   const [expanded, setExpanded] = useState(false)
   const href = `/private-jobs/${job.slug}`
   const pay = salaryText(job)
+  const payInr = salaryInrHint(job)
   const trust = trustLabel(job.trustScore)
   const verified = job.company.verifiedStatus === "VERIFIED"
   const fromSource = job.source === "ATS_FEED"
@@ -66,6 +69,7 @@ export function PrivateJobPreview({ job, nowMs }: { job: ListJob; nowMs: number 
               <span aria-hidden>·</span>
               <span className="shrink-0">{postedAgo(job.createdAt, nowMs)}</span>
             </p>
+            <AppliedBadge jobId={job.id} className="mt-1.5" />
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -82,7 +86,7 @@ export function PrivateJobPreview({ job, nowMs }: { job: ListJob; nowMs: number 
 
       <div className="flex-1 overflow-y-auto overscroll-contain p-5">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3.5 sm:grid-cols-3">
-          <Fact label="Salary" value={pay ?? "Not disclosed"} muted={!pay} />
+          <Fact label="Salary" value={pay ? (payInr ? `${pay} (${payInr})` : pay) : "Not disclosed"} muted={!pay} />
           <Fact label="Experience" value={job.experience ?? "Not specified"} muted={!job.experience} />
           <Fact label="Location" value={jobPlace(job, { full: true }) ?? (job.remotePolicy === "REMOTE" ? "Remote" : "Not specified")} />
           <Fact label="Work mode" value={job.remotePolicy ? WORK_MODE_LABEL[job.remotePolicy] : "On-site"} />

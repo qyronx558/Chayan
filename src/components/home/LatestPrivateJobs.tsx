@@ -31,6 +31,9 @@ interface PrivateJob {
  salary?: string | null
  salaryMin?: number | null
  salaryMax?: number | null
+ salaryCurrency?: string | null
+ salaryLocalMin?: number | null
+ salaryLocalMax?: number | null
  experience?: string | null
  remotePolicy?: string | null
  isFresherFriendly?: boolean
@@ -100,6 +103,9 @@ export function LatestPrivateJobs({ className }: { className?: string }) {
          salary={job.salary}
          salaryMin={job.salaryMin}
          salaryMax={job.salaryMax}
+         salaryCurrency={job.salaryCurrency}
+         salaryLocalMin={job.salaryLocalMin}
+         salaryLocalMax={job.salaryLocalMax}
          experience={job.experience}
          isFresherFriendly={job.isFresherFriendly}
          isWalkIn={job.isWalkIn}

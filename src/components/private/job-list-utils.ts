@@ -1,4 +1,5 @@
 import { countryName } from "@/lib/private-jobs/geo"
+import { formatLocal } from "@/lib/private-jobs/salary"
 
 /** Display helpers shared by the private-jobs list row and preview panel. */
 
@@ -13,6 +14,10 @@ export interface ListJob {
   /** ISO code (or custom name) and canonical city, when known. */
   country?: string | null
   city?: string | null
+  /** Published currency (null = INR) and yearly amounts in it. */
+  salaryCurrency?: string | null
+  salaryLocalMin?: number | null
+  salaryLocalMax?: number | null
   salary?: string | null
   salaryMin?: number | null
   salaryMax?: number | null
@@ -65,7 +70,10 @@ export function jobPlace(job: Pick<ListJob, "location" | "country" | "city">, op
   return extra > 0 ? `${base} +${extra}` : base || null
 }
 
-export function salaryText(job: Pick<ListJob, "salary" | "salaryMin" | "salaryMax">): string | null {
+export function salaryText(job: Pick<ListJob, "salary" | "salaryMin" | "salaryMax" | "salaryCurrency" | "salaryLocalMin" | "salaryLocalMax">): string | null {
+  if (job.salaryCurrency && job.salaryCurrency !== "INR" && (job.salaryLocalMin != null || job.salaryLocalMax != null)) {
+    return formatLocal(job.salaryLocalMin, job.salaryLocalMax, job.salaryCurrency)
+  }
   const lpa = (n: number) => `${+(n / 100_000).toFixed(1)}`
   if (job.salaryMin && job.salaryMax) return `₹${lpa(job.salaryMin)}-${lpa(job.salaryMax)} LPA`
   if (job.salaryMin) return `₹${lpa(job.salaryMin)}+ LPA`

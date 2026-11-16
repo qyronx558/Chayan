@@ -326,6 +326,8 @@ export const privateJobSchema = z
     salary: z.string().nullable().optional(),
     salaryMin: z.coerce.number().int().nonnegative().nullable().optional(),
     salaryMax: z.coerce.number().int().nonnegative().nullable().optional(),
+    /** ISO 4217 currency salaryMin/Max are typed in (yearly). Null/"INR" = rupees. */
+    salaryCurrency: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Use a 3-letter currency code").nullable().optional(),
     experience: z.string().nullable().optional(),
     expMin: z.coerce.number().int().min(0).max(30).nullable().optional(),
     expMax: z.coerce.number().int().min(0).max(30).nullable().optional(),

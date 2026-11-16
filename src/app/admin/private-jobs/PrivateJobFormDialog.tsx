@@ -40,6 +40,7 @@ import { SearchableRelationSelect } from "@/components/admin/SearchableRelationS
 import type { FormDialogProps } from "@/components/admin/list/types";
 import type { PrivateJobRow } from "./config";
 import { CitySelect, CountrySelect } from "@/components/admin/GeoSelect";
+import { FORM_CURRENCIES } from "@/lib/private-jobs/salary";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const WIZARD_STEPS = ["Basic info", "Details & content", "Apply & dates", "Review"];
@@ -58,6 +59,7 @@ const EMPTY_FORM: PrivateJobInput = {
   salary: null,
   salaryMin: null,
   salaryMax: null,
+  salaryCurrency: "INR",
   experience: null,
   expMin: null,
   expMax: null,
@@ -89,8 +91,10 @@ function toFormValues(row: PrivateJobRow): PrivateJobInput {
     country: row.country ?? null,
     city: row.city ?? null,
     salary: row.salary,
-    salaryMin: row.salaryMin,
-    salaryMax: row.salaryMax,
+    // Amounts are edited in the currency they were published in.
+    salaryMin: row.salaryCurrency ? (row.salaryLocalMin ?? null) : row.salaryMin,
+    salaryMax: row.salaryCurrency ? (row.salaryLocalMax ?? null) : row.salaryMax,
+    salaryCurrency: row.salaryCurrency || "INR",
     experience: row.experience,
     expMin: row.expMin,
     expMax: row.expMax,
@@ -307,12 +311,22 @@ export function PrivateJobFormDialog({ row, open, onOpenChange, lookups, onSaved
                     <FormItem><FormLabel>Experience (text)</FormLabel><FormControl><Input {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value || null)} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                  <FormField control={form.control} name="salaryCurrency" render={({ field }) => (
+                    <FormItem><FormLabel>Currency</FormLabel>
+                      <Select value={field.value || "INR"} onValueChange={field.onChange}>
+                        <FormControl><SelectTrigger aria-label="Salary currency"><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent className="max-h-72">
+                          {FORM_CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage /></FormItem>
+                  )} />
                   <FormField control={form.control} name="salaryMin" render={({ field }) => (
-                    <FormItem><FormLabel>Salary min (monthly ₹)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Salary min (per year)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="salaryMax" render={({ field }) => (
-                    <FormItem><FormLabel>Salary max (monthly ₹)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Salary max (per year)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="vacancies" render={({ field }) => (
                     <FormItem><FormLabel>Openings</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)} /></FormControl><FormMessage /></FormItem>

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Download, Eye, Globe, Lock, RefreshCw, ShieldCheck } from "lucide-react"
+import { AppWindow, ArrowUpRight, CheckCircle2, Download, Eye, Globe, Lock, RefreshCw, ShieldCheck } from "lucide-react"
 
 interface ApplicationFallbackProps {
  organization: string
@@ -22,6 +22,12 @@ interface ApplicationFallbackProps {
  onReport: () => void
  onOpenOfficial: () => void
  onDownload?: () => void
+ /** Open the official form in a window over ChayanJobs (the page stays open here). */
+ onOpenWindow?: () => void
+ /** State of that window: open now, or closed again by the candidate. */
+ windowState?: "idle" | "open" | "closed"
+ /** Link to the candidate's applications list (private jobs). */
+ applicationsHref?: string
 }
 
 /**
@@ -45,7 +51,11 @@ export function ApplicationFallback({
  onReport,
  onOpenOfficial,
  onDownload,
+ onOpenWindow,
+ windowState = "idle",
+ applicationsHref,
 }: ApplicationFallbackProps) {
+ const handoff = !!onOpenWindow && !notFound && !isPdf
  return (
   <div className="flex h-full w-full items-center justify-center overflow-y-auto bg-background p-4 pb-28 md:pb-24 dark:bg-paper">
    <div className="w-full max-w-md rounded-2xl border border-rule bg-background p-6 text-center sm:p-8 dark:border-ink dark:bg-ink">
@@ -57,15 +67,38 @@ export function ApplicationFallback({
      {headline}
     </h2>
     <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground dark:text-muted-foreground">
-     {notFound
+     {handoff
+      ? windowState === "open"
+       ? `The application is open in a secure window from ${hostname}. Fill it there and submit; this page stays here.`
+       : windowState === "closed"
+       ? "Welcome back. If you submitted the form, you're done - this job is saved in your applications."
+       : `${hostname} only accepts applications on its own page. It opens in a secure window on top of ChayanJobs, and this job is saved to your applications.`
+      : notFound
       ? `${hostname} could not be found. The official address may have changed; you can still try it in a new tab or report the link to us.`
       : previewUrl && onTryPreview
       ? `You're still on ChayanJobs. This website doesn't allow embedded viewing.${isPdf ? " Try the in-app preview or download below." : " Try the in-app preview below."}`
       : `You're still on ChayanJobs. ${hostname} can't be shown inside this page, so it opens in its own tab.`}
     </p>
 
+    {handoff ? (
+     <button
+      type="button"
+      onClick={onOpenWindow}
+      className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-foreground text-[15px] font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule focus-visible:ring-offset-2"
+     >
+      <AppWindow className="h-5 w-5" aria-hidden="true" />
+      {windowState === "open" ? "Show application window" : windowState === "closed" ? "Open the application again" : "Apply in secure window"}
+     </button>
+    ) : null}
+    {handoff && windowState === "closed" && applicationsHref ? (
+     <a href={applicationsHref} className="mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-rule text-sm font-medium text-foreground transition hover:bg-paper-2">
+      <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+      View my applications
+     </a>
+    ) : null}
+
     {/* Primary: stay-inside actions */}
-    {previewUrl && onTryPreview ? (
+    {previewUrl && onTryPreview && !handoff ? (
      <button
       type="button"
       onClick={onTryPreview}
@@ -95,12 +128,12 @@ export function ApplicationFallback({
      rel="noopener noreferrer"
      onClick={onOpenOfficial}
      className={
-      previewUrl && onTryPreview
+      (previewUrl && onTryPreview) || handoff
        ? "mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-rule text-sm font-medium text-muted-foreground transition hover:bg-paper-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule dark:border-ink dark:text-muted-foreground dark:hover:bg-ink"
        : "mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-foreground text-[15px] font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rule focus-visible:ring-offset-2"
      }
     >
-     Continue on official site
+     {handoff ? "Open in a new tab instead" : "Continue on official site"}
      <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
     </a>
 

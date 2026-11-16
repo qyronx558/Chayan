@@ -17,6 +17,9 @@ interface JobForLd {
   remotePolicy: string | null
   salaryMin: number | null
   salaryMax: number | null
+  salaryCurrency?: string | null
+  salaryLocalMin?: number | null
+  salaryLocalMax?: number | null
   vacancies: number | null
   skills: string[]
   qualification: string | null
@@ -80,14 +83,18 @@ export function buildPrivateJobPostingLd(job: JobForLd, baseUrl: string): Record
   if (!city && !remote) {
     ld.jobLocation = { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: country } }
   }
-  if (job.salaryMin != null || job.salaryMax != null) {
+  // Published currency when the job is abroad (Google wants the real one), else INR.
+  const foreign = !!job.salaryCurrency && job.salaryCurrency !== "INR" && (job.salaryLocalMin != null || job.salaryLocalMax != null)
+  const payMin = foreign ? job.salaryLocalMin : job.salaryMin
+  const payMax = foreign ? job.salaryLocalMax : job.salaryMax
+  if (payMin != null || payMax != null) {
     ld.baseSalary = {
       "@type": "MonetaryAmount",
-      currency: "INR",
+      currency: foreign ? job.salaryCurrency : "INR",
       value: {
         "@type": "QuantitativeValue",
-        ...(job.salaryMin != null ? { minValue: job.salaryMin } : {}),
-        ...(job.salaryMax != null ? { maxValue: job.salaryMax } : {}),
+        ...(payMin != null ? { minValue: payMin } : {}),
+        ...(payMax != null ? { maxValue: payMax } : {}),
         unitText: "YEAR",
       },
     }

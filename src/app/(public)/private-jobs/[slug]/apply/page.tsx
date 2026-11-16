@@ -5,6 +5,9 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
+import { inAppApplyUrl } from "@/lib/private-jobs/apply-url"
+import { ApplyVisitTracker } from "@/components/private/AppliedBadge"
+import { salaryDisplay } from "@/lib/private-jobs/salary"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -34,13 +37,16 @@ export default async function PrivateJobApplyPage({ params }: Props) {
   const { slug } = await params
   const job = await prisma.privateJob.findUnique({
     where: { slug },
-    include: { company: true },
+    include: { company: true, feed: { select: { provider: true, boardToken: true } } },
   })
 
   if (!job) notFound()
 
-  const targetUrl = normalizeExternalUrl(job.applicationUrl)
-  if (!targetUrl) notFound()
+  const postingUrl = normalizeExternalUrl(job.applicationUrl)
+  if (!postingUrl) notFound()
+  // The board's embeddable application form where one exists, so the candidate
+  // fills and submits it inside ChayanJobs.
+  const targetUrl = normalizeExternalUrl(inAppApplyUrl(postingUrl, { feed: job.feed, externalId: job.externalId })) ?? postingUrl
 
   const hostname = getExternalHostname(targetUrl)
   const deadlineLabel = job.lastDate ? formatDate(job.lastDate) : null
@@ -50,11 +56,14 @@ export default async function PrivateJobApplyPage({ params }: Props) {
     ...(job.location ? [{ label: "Location", value: job.location }] : []),
     ...(job.experience ? [{ label: "Experience", value: job.experience }] : []),
     ...(job.type ? [{ label: "Employment type", value: job.type }] : []),
-    ...(job.salary ? [{ label: "Salary", value: job.salary }] : []),
+    ...(salaryDisplay(job) ? [{ label: "Salary", value: salaryDisplay(job) as string }] : []),
     { label: "Official source", value: hostname },
   ]
 
   return (
+    <>
+    {/* Opening the application saves it to the candidate's applied jobs. */}
+    <ApplyVisitTracker job={{ id: job.id, title: job.title, company: job.company.name, slug: job.slug }} />
     <ApplicationShell
       type="private"
       jobId={job.id}
@@ -70,5 +79,6 @@ export default async function PrivateJobApplyPage({ params }: Props) {
       backLabel="Back"
       infoRows={infoRows}
     />
+    </>
   )
 }

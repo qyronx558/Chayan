@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { BadgeCheck, Briefcase, IndianRupee, MapPin, ShieldAlert } from "lucide-react"
+import { BadgeCheck, Briefcase, Banknote, MapPin, ShieldAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { CompanyLogo } from "@/components/private/CompanyLogo"
+import { AppliedBadge } from "@/components/private/AppliedBadge"
 import {
   isFresh,
   JOB_TYPE_LABEL,
@@ -78,8 +79,8 @@ export function PrivateJobRow({
               </li>
             )}
             <li className={cn("flex items-center gap-1 tabular-nums", !pay && "text-muted-foreground")}>
-              <IndianRupee className="h-3.5 w-3.5 text-muted-foreground" />
-              {pay ? pay.replace(/^₹/, "") : "Not disclosed"}
+              <Banknote className="h-3.5 w-3.5 text-muted-foreground" />
+              {pay ?? "Not disclosed"}
             </li>
             {job.experience && (
               <li className="flex items-center gap-1">
@@ -101,6 +102,7 @@ export function PrivateJobRow({
           )}
 
           <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <AppliedBadge jobId={job.id} />
             {fresh && <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">New</span>}
             <span>{postedAgo(job.createdAt, nowMs)}</span>
             <span aria-hidden>·</span>

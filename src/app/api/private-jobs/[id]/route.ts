@@ -1,4 +1,5 @@
 import { cleanJobDescription } from "@/lib/private-jobs/description"
+import { normalizeJobSalary } from "@/lib/private-jobs/salary"
 import { normalizeJobGeo } from "@/lib/private-jobs/geo"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
@@ -75,6 +76,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     rest.description = cleanJobDescription(rest.description) ?? rest.description
     // Country (ISO) + canonical city, derived from the location text when not picked.
     normalizeJobGeo(rest)
+    normalizeJobSalary(rest, existing.salaryCurrency)
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,

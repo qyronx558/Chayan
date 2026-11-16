@@ -298,7 +298,9 @@ export function ListingFilters(props: ListingFiltersProps) {
               <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
             <div className="mt-5">
+              {props.railTop ? <div className="mb-5 border-b border-rule pb-5">{props.railTop}</div> : null}
               <FilterPanel {...props} />
+              {props.railBottom ? <div className="mt-5 border-t border-rule pt-5">{props.railBottom}</div> : null}
             </div>
             {/* Filters apply instantly; this gives a clear, thumb-sized way back to the list. */}
             <div className="sticky -bottom-6 -mx-6 -mb-6 mt-6 border-t border-rule bg-background px-6 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3">
@@ -311,7 +313,9 @@ export function ListingFilters(props: ListingFiltersProps) {
       </div>
 
       <div className="hidden max-h-[calc(100vh-7.5rem)] overflow-y-auto overscroll-contain border border-rule bg-background p-5 lg:block">
+        {props.railTop ? <div className="mb-5 border-b border-rule pb-5">{props.railTop}</div> : null}
         <FilterPanel {...props} />
+        {props.railBottom ? <div className="mt-5 border-t border-rule pt-5">{props.railBottom}</div> : null}
       </div>
     </div>
   )
