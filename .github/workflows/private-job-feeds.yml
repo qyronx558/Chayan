@@ -1,0 +1,38 @@
+name: private-job-feeds
+
+# Syncs company job boards (Admin → Job feeds) by calling /api/cron/private-feeds.
+# Each call runs the feeds that are due (not synced in 6 h) inside a 45 s budget and
+# the next call continues, so any number of boards is covered.
+#
+# Preferred: point the external cron (cron-job.org) at the site every 30 minutes:
+#   GET /api/cron/private-feeds   (Authorization: Bearer CRON_SECRET)
+# and set INGEST_EXTERNAL_SCHEDULER=true; this hourly GitHub cron is then skipped.
+
+on:
+  schedule:
+    - cron: "20 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: private-job-feeds
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event_name == 'workflow_dispatch' || vars.INGEST_EXTERNAL_SCHEDULER != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Sync due job feeds
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$APP_URL" && test -n "$CRON_SECRET"
+          # Follow the site's own redirect (e.g. apex -> www) first so the secret is never resent elsewhere.
+          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
+          base=${base%/}
+          echo "Site: $base"
+          curl --fail-with-body --silent --show-error --max-time 90 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$base/api/cron/private-feeds"

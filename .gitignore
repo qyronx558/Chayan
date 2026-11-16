@@ -84,3 +84,6 @@ coverage.xml
 
 # Ingest bot local output
 ingest-dry-run.json
+
+# job-board discovery progress (scripts/discover-job-boards.ts)
+/.cache

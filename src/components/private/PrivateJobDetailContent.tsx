@@ -15,6 +15,8 @@ import { PrivateApplyRail } from "@/components/private/PrivateApplyRail"
 import { MatchScoreBar } from "@/components/private/MatchScoreBar"
 import { PrepKit } from "@/components/private/PrepKit"
 import { RichTextView } from "@/components/shared/RichTextView"
+import { cleanJobDescription } from "@/lib/private-jobs/description"
+import { countryName } from "@/lib/private-jobs/geo"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { useActiveSection } from "@/components/shared/useActiveSection"
 import { Button } from "@/components/ui/button"
@@ -30,7 +32,7 @@ interface Company {
 
 interface PrivateJob {
  id: string; title: string; slug: string; type: string; category?: string | null
- description?: string | null; location?: string | null; salary?: string | null
+ description?: string | null; location?: string | null; country?: string | null; city?: string | null; salary?: string | null
  salaryMin?: number | null; salaryMax?: number | null
  experience?: string | null; expMin?: number | null; expMax?: number | null
  qualification?: string | null; skills?: string[]; remotePolicy?: string | null
@@ -133,6 +135,10 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
  const canApply = Boolean(job.applicationUrl || job.applicationEmail)
  const verified = job.company.verifiedStatus === "VERIFIED"
  const posted = postedAgo(job.createdAt, now)
+ // Location text plus the country when it is abroad and the text does not already say so.
+ const abroad = job.country && job.country !== "IN" ? countryName(job.country) : ""
+ const baseLocation = job.location || [job.city, abroad].filter(Boolean).join(", ")
+ const place = abroad && baseLocation && !baseLocation.toLowerCase().includes(abroad.toLowerCase()) ? `${baseLocation}, ${abroad}` : baseLocation
  const isNew = posted === "Posted today" || posted === "Posted yesterday"
 
  /* ── Short -> tile. Long -> requirements section. Never both. ── */
@@ -225,7 +231,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
        )}
        {verified ? <span className="agate inline-flex items-center gap-0.5 text-[11px] text-foreground"><Check className="h-3 w-3" /> Verified</span> : null}
       </span>
-      {job.location ? <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{job.location}</span> : null}
+      {place ? <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{place}</span> : null}
       {posted ? <span className={cn("agate text-xs", isNew && "font-semibold text-foreground")}>{posted}{isNew && !closed ? " · early applicants get noticed" : ""}</span> : null}
      </p>
 
@@ -293,7 +299,7 @@ export function PrivateJobDetailContent({ job }: { job: PrivateJob }) {
     {/* ── Description: the main content of a private job ── */}
     {job.description ? (
      <Section id="overview" icon={FileText} title="About the role">
-      <ClampedText><RichTextView html={job.description} /></ClampedText>
+      <ClampedText><RichTextView html={cleanJobDescription(job.description)} /></ClampedText>
      </Section>
     ) : null}
 

@@ -1,4 +1,7 @@
+import { cleanJobDescription } from "@/lib/private-jobs/description"
+import { normalizeJobGeo } from "@/lib/private-jobs/geo"
 import { NextRequest, NextResponse } from "next/server"
+import { scheduleLogoLookup } from "@/lib/private-jobs/logo"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
@@ -14,6 +17,7 @@ import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
+import { dedupeHash } from "@/lib/private-jobs/normalize"
 import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
 
@@ -27,6 +31,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || ""
     const companyId = searchParams.get("companyId") || ""
     const location = searchParams.get("location") || ""
+    const country = (searchParams.get("country") || "").trim().slice(0, 60)
+    const city = (searchParams.get("city") || "").trim().slice(0, 80)
     const remote = searchParams.get("remote") || ""
     const minSalary = parseInt(searchParams.get("minSalary") || "0") || 0
     const exp = searchParams.get("exp") || ""
@@ -68,14 +74,20 @@ export async function GET(request: NextRequest) {
       ]
     }
     if (type && type !== "all") where.type = type as Prisma.PrivateJobWhereInput["type"]
-    if (status) where.status = status
+    // Public lists show live openings unless a status is asked for ("all" = every status);
+    // closed postings pile up quickly once feeds run, so they never flood the default view.
+    if (status && status !== "all") where.status = status
+    else if (!status && !isAdminScope) where.status = "ACTIVE"
     if (companyId && companyId !== "all") where.companyId = companyId
     if (location && location !== "all") where.location = { contains: location, mode: "insensitive" }
+    if (country && country !== "all") where.country = country
+    if (city && city !== "all") where.city = city
     if (remote && remote !== "all") where.remotePolicy = remote as Prisma.PrivateJobWhereInput["remotePolicy"]
     if (minSalary > 0) where.salaryMax = { gte: minSalary }
     if (exp) {
       const yrs = parseInt(exp)
-      if (!isNaN(yrs)) where.AND = [{ OR: [{ expMax: null }, { expMax: { gte: yrs } }] }]
+      // Pushed onto AND (not assigned) so it can never drop another AND condition.
+      if (!isNaN(yrs)) where.AND = [...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []), { OR: [{ expMax: null }, { expMax: { gte: yrs } }] }]
     }
     if (fresher === "1") where.isFresherFriendly = true
     if (walkin === "1") where.isWalkIn = true
@@ -191,6 +203,10 @@ export async function POST(request: NextRequest) {
       if (missing) return missingRelationResponse(missing)
       return NextResponse.json({ success: false, error: "Selected Company no longer exists. Please refresh and select again." }, { status: 400 })
     }
+    // Pasted HTML source / <style> designs are stored as clean markup.
+    rest.description = cleanJobDescription(rest.description) ?? rest.description
+    // Country (ISO) + canonical city, derived from the location text when not picked.
+    normalizeJobGeo(rest)
     const trust = computeTrustScore({
       applicationUrl: rest.applicationUrl,
       applicationEmail: rest.applicationEmail,
@@ -206,6 +222,7 @@ export async function POST(request: NextRequest) {
         ...(isWalkIn != null ? { isWalkIn } : {}),
         skills: skills ?? [],
         trustScore: trust.score,
+        dedupeHash: dedupeHash(company.name, rest.title, rest.location),
         moderation: defaultModerationForRole(session.user.role),
         ...(session.user.role === "SUPER_ADMIN"
           ? { reviewedById: session.user.id, reviewedAt: new Date() }
@@ -229,6 +246,8 @@ export async function POST(request: NextRequest) {
       sendNotificationSMS("PRIVATE_JOB", job.title, job.slug, `New private job posted: ${job.title}`).catch(console.error)
     }
 
+    // Look up the company's real logo once the response is sent (no-op when it already has one).
+    scheduleLogoLookup([job.companyId])
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)

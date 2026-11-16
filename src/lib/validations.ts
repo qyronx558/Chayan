@@ -320,6 +320,9 @@ export const privateJobSchema = z
     category: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     location: z.string().nullable().optional(),
+    /** ISO country code ("IN") or a custom country name. */
+    country: z.string().trim().max(60).nullable().optional(),
+    city: z.string().trim().max(80).nullable().optional(),
     salary: z.string().nullable().optional(),
     salaryMin: z.coerce.number().int().nonnegative().nullable().optional(),
     salaryMax: z.coerce.number().int().nonnegative().nullable().optional(),
@@ -377,6 +380,8 @@ export const jobReferralSchema = z.object({
   url: z.string().url("Enter a valid application URL (https://...)"),
   proofUrl: z.string().url().nullable().optional().or(z.literal("")),
   location: z.string().max(120).nullable().optional(),
+  country: z.string().trim().max(60).nullable().optional(),
+  city: z.string().trim().max(80).nullable().optional(),
   note: z.string().max(1000).nullable().optional(),
 })
 

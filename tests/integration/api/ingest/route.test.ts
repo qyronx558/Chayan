@@ -12,6 +12,7 @@ const { prismaMock, importContent, revalidatePublicContent, writeAuditLog } = vi
     ingestSettings: { findUnique: vi.fn() },
     crawlerRun: { create: vi.fn() },
     job: { findMany: vi.fn(), updateMany: vi.fn() },
+    privateJob: { updateMany: vi.fn() },
     result: { findMany: vi.fn() },
   },
   importContent: vi.fn(),
@@ -238,10 +239,15 @@ describe("helper routes", () => {
 
   it("/expire-jobs uses CRON_SECRET and expires by IST calendar day", async () => {
     prismaMock.job.updateMany.mockResolvedValue({ count: 4 })
+    prismaMock.privateJob.updateMany.mockResolvedValue({ count: 2 })
     expect((await EXPIRE(req("/api/cron/expire-jobs", undefined, SECRET, "GET"))).status).toBe(401)
     const json = await (await EXPIRE(req("/api/cron/expire-jobs", undefined, "cron-secret", "GET"))).json()
-    expect(json).toEqual({ success: true, expired: 4 })
+    expect(json).toEqual({ success: true, expired: 4, privateExpired: 2 })
     expect(prismaMock.job.updateMany.mock.calls[0][0].where).toEqual({ status: { not: "EXPIRED" }, lastDate: { lt: new Date("2026-11-14T00:00:00.000Z") } })
     expect(revalidatePublicContent).toHaveBeenCalledWith("job")
+    const privateWhere = prismaMock.privateJob.updateMany.mock.calls[0][0].where
+    expect(privateWhere.status).toBe("ACTIVE")
+    expect(privateWhere.OR[0]).toEqual({ lastDate: { lt: new Date("2026-11-14T00:00:00.000Z") } })
+    expect(revalidatePublicContent).toHaveBeenCalledWith("private-job")
   })
 })

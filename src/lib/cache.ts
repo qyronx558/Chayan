@@ -52,5 +52,8 @@ export function revalidatePublicContent(kind: ContentKind, slug?: string) {
   }
 
   for (const route of routes[kind]) revalidatePath(route)
+  if (kind === "private-job") {
+    for (const route of ["/private-jobs/remote", "/private-jobs/freshers", "/private-jobs/walkins"]) revalidatePath(route)
+  }
   if (slug && routes[kind][1]) revalidatePath(`${routes[kind][1]}/${slug}`)
 }
