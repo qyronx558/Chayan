@@ -193,7 +193,13 @@ describe("admin job feeds", () => {
 
 describe("GET /api/cron/private-feeds", () => {
   it("requires CRON_SECRET", async () => {
+    // Independent of the developer's .env: unconfigured → 500, wrong / missing token → 401.
+    vi.stubEnv("CRON_SECRET", "")
+    expect((await CRON(req("/api/cron/private-feeds"))).status).toBe(500)
+    vi.stubEnv("CRON_SECRET", "cron-secret")
     expect((await CRON(req("/api/cron/private-feeds"))).status).toBe(401)
+    expect((await CRON(req("/api/cron/private-feeds", "GET", undefined, { authorization: "Bearer wrong" }))).status).toBe(401)
+    expect(prismaMock.privateJobFeed.findMany).not.toHaveBeenCalled()
   })
 
   it("runs due feeds and reports totals", async () => {
