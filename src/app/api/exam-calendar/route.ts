@@ -30,30 +30,37 @@ export async function GET(request: NextRequest) {
     const requested = searchParams.get("month") || ""
     const month = /^\d{4}-\d{2}$/.test(requested) ? requested : toMonthKey(new Date())
     const typeFilter = searchParams.get("type") || ""
-    const { start, end } = monthRange(month)
+    // "Upcoming" means the next 60 days from now, not just what's left of this
+    // calendar month (which is empty near month-end).
+    const upcomingMode = searchParams.get("upcoming") === "1"
+    const { start, end } = upcomingMode
+      ? { start: new Date(), end: new Date(Date.now() + 60 * 86400000) }
+      : monthRange(month)
 
     const inMonth = { gte: start, lt: end }
 
     const events: CalendarEvent[] = []
 
+    // Public calendar: only approved content, matching every other public list —
+    // pending/rejected items have no public detail page and would 404.
     const [jobs, admitCards, results, admissions] = await Promise.all([
       prisma.job.findMany({
-        where: { status: "ACTIVE", lastDate: inMonth },
+        where: { status: "ACTIVE", lastDate: inMonth, moderation: "APPROVED" },
         select: { id: true, title: true, slug: true, lastDate: true, importantDates: true, department: { select: { name: true } } },
         take: 500,
       }),
       prisma.admitCard.findMany({
-        where: { examDate: inMonth },
+        where: { examDate: inMonth, moderation: "APPROVED" },
         select: { id: true, title: true, slug: true, examDate: true, department: { select: { name: true } } },
         take: 200,
       }),
       prisma.result.findMany({
-        where: { resultDate: inMonth },
+        where: { resultDate: inMonth, moderation: "APPROVED" },
         select: { id: true, title: true, slug: true, resultDate: true, department: { select: { name: true } } },
         take: 200,
       }),
       prisma.admission.findMany({
-        where: { OR: [{ startDate: inMonth }, { lastDate: inMonth }] },
+        where: { OR: [{ startDate: inMonth }, { lastDate: inMonth }], moderation: "APPROVED" },
         select: { id: true, title: true, slug: true, startDate: true, lastDate: true, department: { select: { name: true } } },
         take: 400,
       }),

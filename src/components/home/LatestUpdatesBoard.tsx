@@ -8,15 +8,36 @@ import {
   IdCard,
   KeyRound,
   GraduationCap,
-  Calendar,
-  MapPin,
-  Bell,
-  BookOpen,
   type LucideIcon,
 } from "lucide-react"
-import { SectionHeader } from "@/components/ui/section-header"
+import { HomeSectionHeader } from "@/components/home/ui/HomeSectionHeader"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
-import { formatDate } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+
+/*
+ * "Recently published" as the notice board outside a college office: a
+ * wooden frame, cork, and typed notices pinned up — the board people crowd
+ * around to find their roll number. Each notice hangs at its own angle and
+ * has its own pin colour, the way real boards end up looking.
+ */
+
+const PINS = ["oklch(55% 0.17 28)", "oklch(58% 0.12 240)", "oklch(72% 0.14 85)", "oklch(55% 0.12 150)"]
+const TILT = ["lg:-rotate-[1.2deg]", "lg:rotate-[0.9deg]", "lg:rotate-[1.4deg]", "lg:-rotate-[0.8deg]"]
+
+function Pin({ color }: { color: string }) {
+  return (
+    <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2" aria-hidden>
+      <span
+        className="block h-[18px] w-[18px] rounded-full"
+        style={{
+          background: `radial-gradient(circle at 35% 30%, color-mix(in oklch, ${color} 40%, white) 0%, ${color} 45%, color-mix(in oklch, ${color} 70%, black) 100%)`,
+          boxShadow: "2px 3px 3px rgb(0 0 0 / .3)",
+        }}
+      />
+    </span>
+  )
+}
 
 type Raw = Record<string, unknown>
 
@@ -96,7 +117,7 @@ const COLUMNS: ColumnConfig[] = [
   },
 ]
 
-function IndexColumn({ config }: { config: ColumnConfig }) {
+function IndexColumn({ config, index }: { config: ColumnConfig; index: number }) {
   const [items, setItems] = useState<IndexItem[] | null>(null)
 
   useEffect(() => {
@@ -121,104 +142,129 @@ function IndexColumn({ config }: { config: ColumnConfig }) {
   const Icon = config.icon
 
   return (
-    <div className="min-w-0 border-t-2 border-rule-2 pt-3">
-      <div className="flex items-baseline justify-between gap-2 border-b border-rule pb-2">
-        <h3 className="flex min-w-0 items-center gap-1.5 font-display text-base font-bold text-foreground">
-          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <span className="truncate">{config.title}</span>
+    <div
+      className={cn(
+        "relative flex min-w-0 flex-col bg-[var(--hs-paper-slip)] px-4 pb-4 pt-6 sm:px-5",
+        TILT[index % TILT.length]
+      )}
+      style={{ boxShadow: "0 1px 1px rgb(0 0 0 / .1), 3px 8px 14px -6px rgb(30 15 0 / .45)" }}
+    >
+      <Pin color={PINS[index % PINS.length]} />
+
+      {/* typed notice heading */}
+      <div className={cn(typeFont.className, "text-center")}>
+        <p className="text-[10px] text-muted-foreground">NOTICE No. {String(index + 1).padStart(2, "0")}</p>
+        <h3 className="mt-0.5 flex items-center justify-center gap-2 font-[family-name:inherit] text-[17px] font-bold text-foreground">
+          <Icon className="h-4 w-4 text-[var(--hs-trust)]" aria-hidden />
+          {config.title.toUpperCase()}
         </h3>
-        <Link
-          href={config.href}
-          className="agate shrink-0 text-[10px] text-brick underline decoration-1 underline-offset-4 hover:decoration-2 max-sm:py-2 max-sm:text-xs"
-        >
-          View all
-        </Link>
+        <span className="mx-auto mt-1.5 block h-px w-24 bg-[var(--hs-border-strong)]" aria-hidden />
       </div>
 
       {items === null ? (
-        <ul aria-hidden>
+        <ul aria-hidden className="mt-4 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <li key={i} className="border-b border-rule py-3 last:border-b-0">
-              <div className="h-3 w-2/3 animate-pulse bg-paper-3" />
-              <div className="mt-2 h-2.5 w-1/2 animate-pulse bg-paper-2" />
+            <li key={i} className="flex gap-3">
+              <span className="hs-skel h-3 w-12 shrink-0" />
+              <span className="hs-skel h-3 flex-1" />
             </li>
           ))}
         </ul>
       ) : items.length === 0 ? (
-        <p className="py-6 text-xs leading-relaxed text-muted-foreground">
-          Nothing published here yet. New entries appear as soon as they are verified.
+        <p className={cn(handFont.className, "my-auto py-8 text-center text-[1.05rem] text-foreground/55")}>
+          Nothing pinned here yet. Check back soon.
         </p>
       ) : (
-        <ul>
-          {items.map((item) => {
-            const parts = item.date ? formatDate(item.date).split(" ") : []
-            return (
-              <li key={item.id} className="border-b border-rule last:border-b-0">
-                <Link href={item.href} className="group flex items-start gap-3 py-2.5">
-                  <span className="agate w-9 shrink-0 pt-0.5 text-[10px] text-muted-foreground">
-                    <span className="block text-sm font-semibold leading-none text-foreground">
-                      {parts[0] || "-"}
-                    </span>
-                    {parts[1] || ""}
+        <ol className={cn(typeFont.className, "mt-3")}>
+          {items.slice(0, 4).map((item, i) => (
+            <li key={item.id} className={cn("border-b border-dotted border-[var(--hs-border-strong)] last:border-0", i >= 3 && "max-sm:hidden")}>
+              <Link href={item.href} className="group flex items-baseline gap-3 py-2">
+                <span className="w-[3.4rem] shrink-0 text-[11.5px] text-muted-foreground">
+                  {item.date ? formatDate(item.date, "dd.MM.yy") : "--.--.--"}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="line-clamp-2 break-words text-[13.5px] font-bold leading-snug text-foreground decoration-[var(--hs-trust)] decoration-2 underline-offset-2 group-hover:underline">
+                    {cleanTitle(item.title)}
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block line-clamp-2 break-words font-display text-[0.95rem] font-bold leading-snug text-foreground transition-colors group-hover:text-brick">
-                      {cleanTitle(item.title)}
-                    </span>
-                    {item.organization && (
-                      <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                        {item.organization}
-                      </span>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+                  {item.organization && (
+                    <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{item.organization}</span>
+                  )}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
       )}
+
+      <Link
+        href={config.href}
+        className={cn(handFont.className, "mt-auto self-end pt-3 text-[1.05rem] text-[var(--hs-trust)] hover:underline")}
+      >
+        see all {config.title.toLowerCase()} →
+      </Link>
     </div>
   )
 }
 
-const moreLinks = [
-  { label: "Syllabus", href: "/syllabus", icon: BookOpen },
-  { label: "Exam calendar", href: "/exam-calendar", icon: Calendar },
-  { label: "Notifications", href: "/notifications", icon: Bell },
-  { label: "Jobs by state", href: "/jobs", icon: MapPin },
-]
-
 export function LatestUpdatesBoard({ className }: { className?: string }) {
   return (
-    <section className={className}>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <SectionHeader
-          icon={Newspaper}
-          index="02"
-          title="Latest updates"
-          subtitle="Results, admit cards, answer keys and admissions in one scannable index"
-        />
+    <div className={className}>
+      <HomeSectionHeader
+        eyebrow="after you apply"
+        icon={Newspaper}
+        title="Recently published"
+        mark="published"
+        subtitle="Remember crowding around the college notice board, looking for your roll number? This is that board, minus the crowd."
+      />
 
-        <div className="grid min-w-0 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-          {COLUMNS.map((column) => (
-            <IndexColumn key={column.key} config={column} />
+      {/* the board: wooden frame around cork */}
+      <div
+        className="relative rounded-[6px] p-2.5 sm:p-3"
+        style={{
+          background: "linear-gradient(135deg, oklch(48% 0.07 55), oklch(38% 0.06 50) 50%, oklch(45% 0.07 55))",
+          boxShadow: "inset 0 1px 0 rgb(255 255 255 / .18), 0 22px 40px -26px rgb(40 20 0 / .6)",
+        }}
+      >
+        <div
+          className="relative grid min-w-0 gap-x-6 gap-y-8 rounded-[2px] px-4 pb-6 pt-8 sm:grid-cols-2 sm:px-6"
+          style={{
+            backgroundColor: "var(--hs-cork)",
+            backgroundImage:
+              "radial-gradient(circle at 20% 30%, rgb(90 50 10 / .22) 1px, transparent 1.6px), radial-gradient(circle at 70% 80%, rgb(255 230 190 / .25) 1px, transparent 1.6px), radial-gradient(circle at 45% 60%, rgb(70 35 5 / .18) 1.2px, transparent 2px)",
+            backgroundSize: "7px 7px, 11px 11px, 13px 13px",
+            boxShadow: "inset 0 2px 6px rgb(0 0 0 / .35)",
+          }}
+        >
+          {COLUMNS.map((column, i) => (
+            <IndexColumn key={column.key} config={column} index={i} />
           ))}
-        </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-rule pt-3">
-          <span className="agate text-[10px] text-muted-foreground">More on the desk:</span>
-          {moreLinks.map((link) => (
-            <Link
-              key={link.href + link.label}
-              href={link.href}
-              className="agate inline-flex items-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-brick max-sm:min-h-9 max-sm:text-[13px]"
-            >
-              <link.icon className="h-3.5 w-3.5" aria-hidden />
-              {link.label}
-            </Link>
-          ))}
+          {/* a stray chit someone pinned at the corner */}
+          <span
+            className={cn(
+              handFont.className,
+              "absolute -bottom-3 right-6 hidden rotate-[4deg] bg-[color-mix(in_oklch,var(--hs-marigold)_55%,white)] px-3 py-1.5 text-[0.95rem] text-[var(--hs-chit-ink)] shadow-[2px_4px_8px_-3px_rgb(0_0_0/.4)] sm:block"
+            )}
+            aria-hidden
+          >
+            all the best, everyone!
+          </span>
         </div>
       </div>
-    </section>
+
+      <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted-foreground">
+        <span className={cn(handFont.className, "text-[1.05rem]")}>also on the board:</span>
+        {[
+          { label: "Syllabus", href: "/syllabus" },
+          { label: "Exam calendar", href: "/exam-calendar" },
+          { label: "Notifications", href: "/notifications" },
+          { label: "Jobs by state", href: "/jobs/states" },
+        ].map((l) => (
+          <Link key={l.href} href={l.href} className="font-medium text-foreground underline decoration-[var(--hs-border-strong)] underline-offset-4 hover:decoration-[var(--hs-trust)] max-sm:py-1">
+            {l.label}
+          </Link>
+        ))}
+      </p>
+    </div>
   )
 }
