@@ -22,7 +22,8 @@ import {
   RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { SectionHeader } from "@/components/ui/section-header"
+import { handFont } from "@/components/home/fonts"
+import { HomeSectionHeader } from "@/components/home/ui/HomeSectionHeader"
 import {
  clearViewedItems,
  getViewedItemsSnapshot,
@@ -87,17 +88,19 @@ export function RecentlyViewed({ className }: { className?: string }) {
   if (!mounted || items.length === 0) return null
 
   return (
-  <section className={cn("py-12 sm:py-16", className)} aria-label="Recently viewed">
-   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <SectionHeader
+  <section className={cn("pb-4 pt-2", className)} aria-label="Recently viewed">
+   <div className="hs-container">
+    <div className="relative">
+    <HomeSectionHeader
+     eyebrow="welcome back"
      icon={History}
-     title="Continue Exploring"
+     className="mb-5"
+     title="Pick up where you left off"
+     mark="left off"
      subtitle={
       paused
-       ? "History is paused - resume to keep tracking what you view"
-       : items.length > 0
-        ? `Pick up where you left off, ${items.length} recent ${items.length === 1 ? "visit" : "visits"}`
-        : "Pages you open will appear here automatically"
+       ? "History is paused. Resume whenever you want us to keep your place again."
+       : `You were in the middle of ${items.length === 1 ? "this" : "these"}. We folded the corner${items.length === 1 ? "" : "s"} so you wouldn't lose your place.`
      }
     />
 
@@ -113,18 +116,14 @@ export function RecentlyViewed({ className }: { className?: string }) {
          role="tab"
          aria-selected={active}
          onClick={() => setFilter(f.value)}
-         className={cn(
-          "inline-flex items-center gap-1.5 border px-3 py-1.5 text-xs font-medium transition-colors",
-          active
-           ? "border-ink bg-ink text-paper"
-           : "border-rule bg-transparent text-muted-foreground hover:border-brick hover:text-brick"
-         )}
+         data-active={active}
+         className="hs-chip py-1.5 text-xs"
         >
          {f.label}
          <span
           className={cn(
-           "px-1.5 py-0.5 text-[10px] leading-none",
-           active ? "border border-paper/30 text-paper" : "border border-rule text-muted-foreground"
+           "hs-pill px-1.5 py-0.5 text-[10px] leading-none",
+           active ? "bg-paper/20 text-paper" : "bg-paper-2 text-muted-foreground"
           )}
          >
           {count}
@@ -138,7 +137,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
       <button
        onClick={() => setHistoryPaused(!paused)}
        title={paused ? "Resume history" : "Pause history"}
-       className="inline-flex items-center gap-1.5 border border-rule bg-transparent px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"
+       className="hs-chip py-1.5 text-xs"
       >
        {paused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
        <span className="hidden sm:inline">{paused ? "Resume" : "Pause"}</span>
@@ -150,7 +149,7 @@ export function RecentlyViewed({ className }: { className?: string }) {
          setFilter("all")
         }}
         title="Clear all history"
-        className="inline-flex items-center gap-1.5 border border-rule bg-transparent px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"
+        className="hs-chip py-1.5 text-xs"
        >
         <Trash2 className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Clear all</span>
@@ -161,14 +160,14 @@ export function RecentlyViewed({ className }: { className?: string }) {
         <button
          onClick={() => scrollBy(-1)}
          aria-label="Scroll left"
-         className="flex h-8 w-8 items-center justify-center border border-rule text-muted-foreground transition-colors hover:border-brick hover:text-brick"
+         className="hs-pill flex h-8 w-8 items-center justify-center border border-rule/60 text-muted-foreground transition-colors hover:border-[var(--hs-trust)] hover:text-[var(--hs-trust)]"
         >
          <ChevronLeft className="h-4 w-4" />
         </button>
         <button
          onClick={() => scrollBy(1)}
          aria-label="Scroll right"
-         className="flex h-8 w-8 items-center justify-center border border-rule text-muted-foreground transition-colors hover:border-brick hover:text-brick"
+         className="hs-pill flex h-8 w-8 items-center justify-center border border-rule/60 text-muted-foreground transition-colors hover:border-[var(--hs-trust)] hover:text-[var(--hs-trust)]"
         >
          <ChevronRight className="h-4 w-4" />
         </button>
@@ -178,12 +177,12 @@ export function RecentlyViewed({ className }: { className?: string }) {
     </div>
 
     {visible.length === 0 ? (
-     <div className="flex flex-col items-start gap-2 border-y border-rule bg-paper-2 px-6 py-10">
+     <div className="hs-r flex flex-col items-start gap-2 bg-paper-2 px-6 py-8">
       <RotateCcw className="h-5 w-5 text-muted-foreground" />
       <p className="text-sm font-semibold text-foreground">No visits in this category yet</p>
       <button
        onClick={() => setFilter("all")}
-       className="text-xs font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
+       className="text-xs font-medium text-[var(--hs-trust)] underline decoration-1 underline-offset-4 hover:decoration-2"
       >
        Show all activity
       </button>
@@ -191,86 +190,99 @@ export function RecentlyViewed({ className }: { className?: string }) {
     ) : (
      <div
       ref={scrollerRef}
-      className="mx-0 flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:thin]"
+      className="hs-scroll mx-0 flex min-w-0 snap-x snap-mandatory gap-5 overflow-x-auto px-1 pb-3 pt-2"
      >
-      {visible.map((item) => {
+      {visible.map((item, idx) => {
        const meta = TYPE_META[item.type] ?? TYPE_META.page
        const Icon = meta.icon
        const showProgress = item.progress > 5 && item.progress < 100
        return (
         <article
          key={item.href}
-         className="group flex w-[78vw] max-w-[300px] flex-none snap-start flex-col border-t-2 border-rule-2 bg-transparent pt-3 sm:w-[300px] sm:max-w-none"
+         className={cn(
+          "group relative flex w-[78vw] max-w-[270px] flex-none snap-start flex-col bg-[var(--hs-paper-slip)] px-4 pb-4 pt-5 sm:w-[270px] sm:max-w-none",
+          idx % 2 ? "rotate-[0.6deg]" : "-rotate-[0.5deg]"
+         )}
+         style={{
+          clipPath: "polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%)",
+          filter: "drop-shadow(0 1px 1px rgb(60 40 10 / .1)) drop-shadow(0 8px 10px rgb(60 40 10 / .12))",
+         }}
         >
-         <div className="mb-3 flex items-start justify-between gap-2">
-          <span className="flex h-9 w-9 items-center justify-center border border-rule text-foreground">
-           <Icon className="h-4 w-4" />
+         {/* the folded (dog-eared) corner */}
+         <span
+          className="absolute right-0 top-0 h-[26px] w-[26px]"
+          style={{
+           background: "linear-gradient(225deg, transparent 50%, color-mix(in oklch, var(--hs-paper-slip) 80%, var(--color-ink)) 50%)",
+           boxShadow: "-2px 2px 3px rgb(0 0 0 / .08)",
+          }}
+          aria-hidden
+         />
+         {/* ribbon bookmark on pages you're half-way through */}
+         {showProgress && (
+          <span className="absolute left-4 top-0 block" aria-hidden>
+           <svg width="14" height="40" viewBox="0 0 14 40">
+            <path d="M0 0 H14 V40 L7 33 L0 40 Z" fill="var(--color-brick)" opacity=".85" />
+           </svg>
           </span>
-          <div className="flex items-center gap-1.5">
-           <span className="agate text-[10px] text-muted-foreground">
-            {meta.label}
-           </span>
-           <button
-            onClick={() => removeViewedItem(item.href)}
-            aria-label={`Remove ${item.title} from history`}
-            title="Remove"
-            className="flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-brick"
-           >
-            <X className="h-3.5 w-3.5" />
-           </button>
-          </div>
+         )}
+
+         <div className={cn("mb-2 flex items-center justify-between gap-2", showProgress && "pl-6")}>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--hs-trust)]">
+           <Icon className="h-3.5 w-3.5" />
+           {meta.label}
+          </span>
+          <button
+           onClick={() => removeViewedItem(item.href)}
+           aria-label={`Remove ${item.title} from history`}
+           title="Remove"
+           className="mr-5 flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-[var(--color-brick)]"
+          >
+           <X className="h-3.5 w-3.5" />
+          </button>
          </div>
 
          <Link href={item.href} title={item.title}>
-          <h3 className="line-clamp-2 min-h-[2.6em] font-display text-[1rem] font-bold leading-snug text-foreground transition-colors group-hover:text-brick">
+          <h3 className="line-clamp-2 min-h-[2.6em] text-[15px] font-bold leading-snug text-foreground decoration-[var(--hs-trust)] decoration-2 underline-offset-[3px] group-hover:underline">
            {item.title}
           </h3>
          </Link>
 
-         <p className="agate mt-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span>{timeAgo(item.visitedAt)}</span>
-          {item.visits > 1 && (
-           <span className="font-medium text-foreground">
-            {item.visits} visits
-           </span>
-          )}
+         <p className="mt-1.5 text-[11.5px] text-muted-foreground">
+          {timeAgo(item.visitedAt)}
+          {item.visits > 1 && <span> · opened {item.visits} times</span>}
          </p>
 
+         {/* where you stopped, marked in pencil */}
          <div className="mt-3">
-          {showProgress ? (
-           <>
-            <div className="h-1 overflow-hidden bg-paper-3">
-             <div
-              className="h-full bg-brick"
-              style={{ width: `${item.progress}%` }}
-             />
-            </div>
-            <p className="agate mt-1 text-[10px] text-muted-foreground">
-             {item.progress}% explored
-            </p>
-           </>
-          ) : item.progress >= 100 ? (
-           <p className="agate text-[10px] text-muted-foreground">
-            Fully explored
-           </p>
-          ) : (
-           <div className="h-1 overflow-hidden bg-paper-3">
-            <div className="h-full w-[6%] bg-rule-2" />
-           </div>
-          )}
+          <div className="relative h-[3px] rounded-full bg-[color-mix(in_oklch,var(--color-ink)_8%,transparent)]">
+           <div
+            className="h-full rounded-full"
+            style={{
+             width: `${Math.max(item.progress, 4)}%`,
+             background: "color-mix(in oklch, var(--color-ink) 45%, transparent)",
+            }}
+           />
+           {showProgress && (
+            <span className="absolute -top-1.5 h-[15px] w-[2px] rotate-[8deg] bg-[var(--color-brick)]" style={{ left: `${item.progress}%` }} aria-hidden />
+           )}
+          </div>
+          <p className={cn(handFont.className, "mt-1 text-[0.95rem] text-foreground/60")}>
+           {item.progress >= 100 ? "read it all" : showProgress ? `stopped about ${item.progress}% in` : "just had a glance"}
+          </p>
          </div>
 
          <Link
           href={item.href}
-          className="mt-3 inline-flex items-center text-[11px] font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
+          className={cn(handFont.className, "mt-2 inline-flex items-center self-start text-[1.05rem] text-[var(--hs-trust)] hover:underline")}
          >
-          {showProgress ? "Resume" : "Revisit"}
+          {showProgress ? "continue reading →" : "open again →"}
          </Link>
         </article>
        )
       })}
      </div>
     )}
+    </div>
    </div>
   </section>
  )

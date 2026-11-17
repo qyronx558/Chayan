@@ -1,124 +1,84 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, ChevronUp, Briefcase } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { SectionHeader } from "@/components/ui/section-header"
-import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
+import { ArrowRight, Briefcase, Landmark } from "lucide-react"
+import { cn, formatCompact } from "@/lib/utils"
 import { SectionTabs } from "@/components/home/SectionTabs"
 import { useHomeSection } from "@/components/home/use-home-section"
-import { moduleTheme } from "@/components/ui/module-theme"
-import { UniversalCardEmpty } from "@/components/ui/universal-card"
+import { useSiteStats } from "@/components/home/use-site-stats"
+import { HomeJobRow, HomeRowSkeleton, type HomeJobRowProps } from "@/components/home/HomeJobRow"
 import { filterValidItems } from "@/lib/card-helpers"
 
-interface Job {
- id: string
- title: string
- department: string
- departmentSlug?: string
- location?: string | null
- totalVacancies?: number | null
- lastDateToApply?: Date | string | null
- salary?: string | null
- status: "ACTIVE" | "EXPIRED" | "UPCOMING"
- slug: string
-}
-
-interface LatestJobsProps {
- className?: string
-}
-
-const toJob = (job: Record<string, unknown>): Job => ({
- id: job.id as string,
- title: job.title as string,
- department: (job.department as { name: string })?.name ?? "",
- location: (job.location as string) ?? null,
- totalVacancies: (job.totalVacancies as number) ?? null,
- lastDateToApply: (job.lastDate as string) ?? null,
- salary: (job.salary as string) ?? null,
- status: job.status as "ACTIVE" | "EXPIRED" | "UPCOMING",
- slug: job.slug as string,
+const toJob = (job: Record<string, unknown>): HomeJobRowProps & { id: string } => ({
+  id: job.id as string,
+  title: job.title as string,
+  slug: job.slug as string,
+  department: (job.department as { name: string })?.name ?? "",
+  location: (job.location as string) ?? null,
+  totalVacancies: (job.totalVacancies as number) ?? null,
+  lastDateToApply: (job.lastDate as string) ?? null,
 })
 
-export function LatestJobs({ className }: LatestJobsProps) {
- const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
-  "/api/jobs?limit=8&status=ACTIVE",
-  "/api/jobs?limit=8&status=ACTIVE&sort=trending"
- )
- const [showAll, setShowAll] = useState(false)
+const LINKS = [
+  { label: "Jobs by state", href: "/jobs/states" },
+  { label: "Exam calendar", href: "/exam-calendar" },
+]
 
- const jobs = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toJob))
- const busy = tab === "trending" ? trendingLoading && trending === null : loading
- const displayedJobs = showAll ? jobs : jobs.slice(0, 4)
- const grid = moduleTheme.government.homeGrid
+/** Government jobs panel — left half of the home jobs hub. */
+export function LatestJobs({ className }: { className?: string }) {
+  const { latest, trending, trendingMeta, tab, selectTab, loading, trendingLoading } = useHomeSection(
+    "/api/jobs?limit=7&status=ACTIVE",
+    "/api/jobs?limit=7&status=ACTIVE&sort=trending"
+  )
+  const stats = useSiteStats()
 
- return (
-  <section className={cn("py-12 sm:py-16", className)}>
-   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <SectionHeader
-     icon={Briefcase}
-     index="01"
-     kicker="The live desk"
-     title="Latest Government Jobs"
-     subtitle={
-      tab === "trending" && trendingMeta && !trendingMeta.fallback
-       ? `Most viewed over the last ${trendingMeta.windowDays} days`
-       : "Recent job notifications from central and state governments"
-     }
-     viewAllHref="/jobs"
-     action={<SectionTabs tab={tab} onChange={(t) => { selectTab(t); setShowAll(false) }} />}
-    />
+  const jobs = filterValidItems(((tab === "trending" ? trending : latest) ?? []).map(toJob)).slice(0, 7)
+  const busy = tab === "trending" ? trendingLoading && trending === null : loading
 
-    {busy ? (
-     <div className={grid}>
-      {Array.from({ length: 4 }).map((_, i) => (
-       <JobCardSkeleton key={i} />
-      ))}
-     </div>
-    ) : jobs.length === 0 ? (
-     <UniversalCardEmpty title="No government jobs right now" hint="New notifications will appear here as soon as they are published." />
-    ) : (
-     <div className={grid}>
-      {displayedJobs.map((job) => (
-       <div key={job.id} className="relative">
-        <JobCard {...job} />
-       </div>
-      ))}
-     </div>
-    )}
+  return (
+    <div className={cn("flex min-w-0 flex-col", className)}>
+      <div className="flex flex-wrap items-end gap-3 border-b-2 border-[var(--color-ink)]/80 pb-2">
+        <div className="min-w-[9rem] flex-1">
+          <h3 className="font-display text-[1.35rem] font-bold leading-tight text-foreground">
+            <Landmark className="mr-1.5 inline h-[18px] w-[18px] -translate-y-0.5" aria-hidden />
+            Government notifications
+          </h3>
+          <p className="truncate text-[12px] italic text-muted-foreground">
+            {tab === "trending" && trendingMeta && !trendingMeta.fallback
+              ? `Most read over the last ${trendingMeta.windowDays} days`
+              : stats
+                ? `${formatCompact(stats.activeJobs)} notices open across India`
+                : "Central & state notifications"}
+          </p>
+        </div>
+        <SectionTabs tab={tab} onChange={selectTab} />
+      </div>
 
-    {jobs.length > 4 && (
-     <div className="mt-8 text-center">
-      <Button
-       variant="outline"
-       onClick={() => setShowAll(!showAll)}
-       className="gap-2"
-      >
-       {showAll ? (
-        <>
-         Show Less <ChevronUp className="h-4 w-4" />
-        </>
-       ) : (
-        <>
-         Load More ({jobs.length - 4} more) <ChevronDown className="h-4 w-4" />
-        </>
-       )}
-      </Button>
-     </div>
-    )}
+      <div className="flex-1">
+        {busy ? (
+          Array.from({ length: 6 }).map((_, i) => <HomeRowSkeleton key={i} />)
+        ) : jobs.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
+            <Briefcase className="h-6 w-6 text-muted-foreground" />
+            <p className="text-sm font-semibold text-foreground">No government notices in this edition</p>
+            <p className="text-xs text-muted-foreground">New notifications appear here as soon as they are published.</p>
+          </div>
+        ) : (
+          jobs.map(({ id, ...job }) => <HomeJobRow key={id} {...job} />)
+        )}
+      </div>
 
-    <div className="mt-6 text-center sm:hidden">
-     <Link
-      href="/jobs"
-      className="inline-flex items-center gap-1 text-sm font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2"
-     >
-      View All Jobs
-      <ArrowRight className="h-4 w-4" />
-     </Link>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--hs-border-strong)] pt-3 text-[12.5px]">
+        {LINKS.map((l) => (
+          <Link key={l.href} href={l.href} className="italic text-muted-foreground underline decoration-[var(--hs-border-strong)] underline-offset-4 hover:text-foreground">
+            {l.label}
+          </Link>
+        ))}
+        <Link href="/jobs" className="group ml-auto inline-flex items-center gap-1 font-semibold text-[var(--hs-trust)]">
+          Continued on /jobs
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
     </div>
-   </div>
-  </section>
- )
+  )
 }

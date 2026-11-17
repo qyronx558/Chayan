@@ -146,11 +146,18 @@ export function SearchBar({
     >
       <form
         onSubmit={handleSearch}
-        className="flex w-full min-w-0 items-start gap-2"
+        className="relative w-full min-w-0"
         data-tour="search-input"
       >
-        <div className="relative min-w-0 flex-1">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <div
+          className={cn(
+            "group relative flex h-14 w-full min-w-0 items-center rounded-full border p-1.5 pl-5 transition-all sm:h-16",
+            "shadow-[0_1px_2px_rgba(40,30,20,.05),0_10px_28px_-16px_rgba(40,30,20,.25)]",
+            "focus-within:border-[var(--hs-trust)] focus-within:shadow-[0_0_0_4px_var(--hs-trust-soft)]",
+            isDark ? "border-paper/25 bg-paper text-ink" : "border-rule/70 bg-background"
+          )}
+        >
+          <Search className="h-5 w-5 shrink-0 text-muted-foreground transition-colors group-focus-within:text-[var(--hs-trust)]" aria-hidden />
           <Input
             type="text"
             placeholder="Search jobs, results, admit cards, exams..."
@@ -162,102 +169,89 @@ export function SearchBar({
             aria-label="Search everything - jobs, results, admit cards and blogs"
             role="combobox"
             aria-expanded={showDropdown}
-            className={cn(
-              "h-12 w-full rounded-none pl-11 pr-4 text-base",
-              isDark
-                ? "border border-paper/25 bg-paper text-ink placeholder:text-muted-foreground"
-                : "border border-rule-2 bg-paper-2"
-            )}
+            className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 font-outlier text-[15px] shadow-none outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-base"
           />
-          {showDropdown && (
-            <div
-              className={cn(
-                "absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden border text-left",
-                isDark
-                  ? "border-rule-2 bg-paper text-ink"
-                  : "border-rule-2 bg-background"
-              )}
-            >
-              {liveLoading && liveItems.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-muted-foreground">Searching...</p>
-              ) : liveItems.length === 0 && !liveLoading ? (
+          <Button
+            type="submit"
+            aria-label="Search"
+            className="h-full shrink-0 rounded-full bg-brick px-4 font-outlier text-sm font-semibold text-brick-ink transition-colors hover:bg-brick/90 sm:px-6"
+          >
+            <Search className="h-4 w-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Search</span>
+          </Button>
+        </div>
+        {showDropdown && (
+          <div
+            className={cn(
+              "absolute left-0 right-0 top-full z-40 mt-3 hs-r overflow-hidden border text-left font-outlier shadow-[0_18px_44px_-18px_rgba(40,30,20,.35)]",
+              isDark ? "border-rule-2 bg-paper text-ink" : "border-rule/70 bg-background"
+            )}
+          >
+            {liveLoading && liveItems.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted-foreground">Searching...</p>
+            ) : liveItems.length === 0 && !liveLoading ? (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => goToSearchPage(searchQuery)}
+                className="flex w-full items-center justify-between px-5 py-4 text-sm hover:bg-paper-2"
+              >
+                <span>No quick matches. See full results for “{searchQuery.trim()}”</span>
+              </button>
+            ) : (
+              <>
+                {grouped.map(([type, list]) => {
+                  const meta = UNIVERSAL_TYPE_META[type]
+                  const Icon = TYPE_ICONS[type]
+                  return (
+                    <div key={type} className="py-1">
+                      <p className="flex items-center gap-1.5 px-5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        <Icon className="h-3.5 w-3.5" />
+                        {meta.label}
+                      </p>
+                      {list.map((item) => {
+                        const globalIndex = liveItems.indexOf(item)
+                        return (
+                          <button
+                            key={`${item.type}-${item.id}`}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => router.push(universalItemUrl(item))}
+                            onMouseEnter={() => setHighlight(globalIndex)}
+                            className={cn(
+                              "hs-r-sm mx-2 flex w-[calc(100%-1rem)] items-center gap-2.5 px-3 py-2 text-left text-sm",
+                              highlight === globalIndex ? "bg-paper-2" : "hover:bg-paper-2"
+                            )}
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate font-medium">{item.title}</span>
+                              {item.subtitle && (
+                                <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
+                              )}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => goToSearchPage(searchQuery)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-sm hover:bg-paper-2"
+                  className="flex w-full items-center justify-center border-t border-rule/60 bg-paper-2 px-5 py-3 text-sm font-semibold text-[var(--hs-trust)] hover:bg-paper-3"
                 >
-                  <span>
-                    No quick matches. See full results for “{searchQuery.trim()}”
-                  </span>
+                  See all results for “{searchQuery.trim()}”
                 </button>
-              ) : (
-                <>
-                  {grouped.map(([type, list]) => {
-                    const meta = UNIVERSAL_TYPE_META[type]
-                    const Icon = TYPE_ICONS[type]
-                    return (
-                      <div key={type}>
-                        <p className="agate flex items-center gap-1.5 border-t border-rule px-4 pb-1 pt-2 text-[11px] text-muted-foreground">
-                          <Icon className="h-3.5 w-3.5" />
-                          {meta.label}
-                        </p>
-                        {list.map((item) => {
-                          const globalIndex = liveItems.indexOf(item)
-                          return (
-                            <button
-                              key={`${item.type}-${item.id}`}
-                              type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => router.push(universalItemUrl(item))}
-                              onMouseEnter={() => setHighlight(globalIndex)}
-                              className={cn(
-                                "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm",
-                                highlight === globalIndex ? "bg-paper-2" : "hover:bg-paper-2"
-                              )}
-                            >
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate font-medium">{item.title}</span>
-                                {item.subtitle && (
-                                  <span className="block truncate text-xs text-muted-foreground">
-                                    {item.subtitle}
-                                  </span>
-                                )}
-                              </span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )
-                  })}
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => goToSearchPage(searchQuery)}
-                    className="flex w-full items-center justify-center border-t border-rule bg-paper-2 px-4 py-2.5 text-sm font-medium text-brick hover:bg-paper-3"
-                  >
-                    See all results for “{searchQuery.trim()}”
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-        <Button
-          type="submit"
-          className={cn(
-            "h-12 shrink-0 rounded-none px-5 text-sm font-medium",
-            isDark && "bg-paper text-ink hover:bg-paper-2"
-          )}
-        >
-          <Search className="mr-1.5 h-4 w-4" />
-          Search
-        </Button>
+              </>
+            )}
+          </div>
+        )}
       </form>
 
       <div
         className={cn(
-          "mt-3 flex flex-wrap items-center gap-1.5",
+          "mt-4 flex flex-wrap items-center gap-2 font-outlier",
           align === "center" ? "justify-center" : "justify-start"
         )}
         data-tour="trending-searches"
@@ -277,10 +271,10 @@ export function SearchBar({
             type="button"
             onClick={() => handleTrendingClick(term)}
             className={cn(
-              "border bg-transparent px-3 py-1 text-xs font-medium transition-colors max-sm:min-h-9 max-sm:text-[13px]",
+              "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors max-sm:min-h-9 max-sm:text-[13px]",
               isDark
-                ? "border-paper/25 text-paper/80 hover:border-brick hover:text-paper"
-                : "border-rule text-foreground hover:border-brick hover:text-brick"
+                ? "border-paper/25 text-paper/80 hover:border-[var(--hs-trust)] hover:text-paper"
+                : "border-rule/60 bg-transparent text-foreground hover:border-[var(--hs-trust)] hover:bg-[var(--hs-trust-soft)] hover:text-[var(--hs-trust)]"
             )}
           >
             {term}
@@ -288,15 +282,6 @@ export function SearchBar({
         ))}
       </div>
 
-      <p
-        className={cn(
-          "agate mt-2 text-xs",
-          align === "center" ? "" : "text-left",
-          isDark ? "text-paper/45" : "text-muted-foreground"
-        )}
-      >
-        Universal search. Press Enter for the full results and recommendations page.
-      </p>
     </div>
   )
 

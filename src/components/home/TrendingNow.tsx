@@ -2,8 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, Eye, Flame } from "lucide-react"
+import { ChevronLeft, ChevronRight, Flame } from "lucide-react"
 import { cn, formatCompact } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+
+/*
+ * "What others are reading" as a library card catalogue: each trending page
+ * is a typed catalogue card (red header rule, punched rod hole), the filter
+ * chips are drawer labels, and popularity is the date-stamp column that
+ * fills up as more people "borrow" it.
+ */
+const RULE = "color-mix(in oklch, oklch(62% 0.09 240) 26%, transparent)"
+const RED = "color-mix(in oklch, var(--color-brick) 60%, transparent)"
+import { HomeSectionHeader } from "@/components/home/ui/HomeSectionHeader"
 
 type ModuleKey =
  | "jobs"
@@ -71,13 +82,11 @@ const orgOf = (item: TrendItem): string =>
 
 function SkeletonCard() {
  return (
-  <div className="w-[300px] max-w-[85vw] shrink-0 snap-start sm:w-[320px]">
-   <div className="border-t-2 border-rule-2 pt-3">
-    <div className="h-3 w-16 animate-pulse bg-paper-3" />
-    <div className="mt-3 h-4 w-3/4 animate-pulse bg-paper-3" />
-    <div className="mt-2 h-3 w-1/2 animate-pulse bg-paper-2" />
-    <div className="mt-6 h-3 w-24 animate-pulse bg-paper-2" />
-   </div>
+  <div className="w-[270px] max-w-[80vw] shrink-0 snap-start rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] p-4">
+   <span className="hs-skel block h-3 w-16" />
+   <span className="hs-skel mt-4 block h-4 w-11/12" />
+   <span className="hs-skel mt-2 block h-4 w-2/3" />
+   <span className="hs-skel mt-6 block h-3 w-24" />
   </div>
  )
 }
@@ -157,109 +166,144 @@ export function TrendingNow({ className }: { className?: string }) {
 
  if (!loading && (!data || flat.length === 0)) return null
 
- return (
-  <section className={cn("py-12 sm:py-16", className)}>
-   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div className="mb-6 flex min-w-0 items-end justify-between gap-3 border-b border-rule pb-2">
-     <div className="flex min-w-0 items-baseline gap-2.5">
-      <Flame className="h-4 w-4 shrink-0 self-center text-muted-foreground" aria-hidden />
-      <div className="min-w-0">
-       <h2 className="font-display text-[1.6rem] font-bold leading-tight text-foreground sm:text-[1.9rem]">
-        Trending now
-       </h2>
-       <p className="mt-1 text-sm text-muted-foreground">
-        What aspirants are viewing most across every section
-       </p>
-      </div>
-     </div>
-    </div>
-
-    <div className="no-scrollbar mb-5 flex gap-2 overflow-x-auto pb-1">
-     {(["all", ...MODULES] as Array<ModuleKey | "all">).map((m) => {
-      const active = filter === m
-      return (
-       <button
-        key={m}
-        onClick={() => setFilter(m)}
-        className={cn(
-         "shrink-0 whitespace-nowrap border px-4 py-1.5 text-[13px] transition-colors",
-         active
-          ? "border-ink bg-ink font-medium text-paper"
-          : "border-rule bg-transparent font-medium text-muted-foreground hover:border-brick hover:text-brick"
-        )}
-       >
-        {m === "all" ? "All" : LABEL[m]}
-       </button>
-      )
-     })}
-    </div>
-
-    <div className="relative">
-     <div
-      ref={trackRef}
-      onScroll={updateEdges}
-      className="no-scrollbar flex min-w-0 snap-x snap-mandatory gap-8 overflow-x-auto scroll-smooth pb-4"
+ const arrows = (
+  <div className="hidden items-center gap-1.5 sm:flex">
+   {([-1, 1] as const).map((dir) => {
+    const enabled = dir === 1 ? canRight : canLeft
+    const Icon = dir === 1 ? ChevronRight : ChevronLeft
+    return (
+     <button
+      key={dir}
+      onClick={() => nudge(dir)}
+      disabled={!enabled || loading}
+      aria-label={dir === 1 ? "Scroll trending right" : "Scroll trending left"}
+      className="hs-pill flex h-9 w-9 items-center justify-center border border-[var(--hs-border-strong)] bg-[var(--hs-surface)] text-foreground transition-colors hover:border-[var(--hs-trust)] hover:text-[var(--hs-trust)] disabled:opacity-35"
      >
-      {loading
-       ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-       : flat.map(({ module, item, rank, views, fallback, windowDays }) => {
-         return (
-          <div
-           key={`${module}-${item.id}`}
-           className="w-[300px] max-w-[85vw] shrink-0 snap-start sm:w-[320px]"
-          >
-           <Link href={HREF[module](item.slug)} className="group block border-t-2 border-rule-2 pt-3">
-            <div className="flex items-baseline justify-between gap-2">
-             <span className="agate text-xs text-brick">{LABEL[module]}</span>
-             <span className="agate text-2xl font-bold leading-none text-rule-2">
-              {String(rank).padStart(2, "0")}
-             </span>
-            </div>
-            <h3 className="mt-2 line-clamp-2 font-display text-[1.1rem] font-bold leading-snug text-foreground transition-colors group-hover:text-brick">
-             {item.title ?? item.name ?? "Untitled"}
-            </h3>
-            {orgOf(item) && (
-             <p className="mt-1 truncate text-sm text-muted-foreground">{orgOf(item)}</p>
-            )}
-            <div className="mt-4 flex items-center justify-between gap-2 border-t border-rule pt-2.5">
-             <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-              <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="truncate">
-               {!fallback && views > 0
-                ? `${formatCompact(views)} views, ${windowDays}d`
-                : "Recently added"}
-              </span>
-             </span>
-             <span className="shrink-0 text-xs font-medium text-brick underline decoration-1 underline-offset-4 group-hover:decoration-2">
-              View
-             </span>
-            </div>
-           </Link>
-          </div>
-         )
-        })}
-     </div>
+      <Icon className="h-4 w-4" />
+     </button>
+    )
+   })}
+  </div>
+ )
 
-     {canRight && !loading && (
+ return (
+  <div className={cn("min-w-0", className)}>
+   <HomeSectionHeader
+    eyebrow="what everyone’s opening"
+    icon={Flame}
+    title="What others are reading"
+    mark="others"
+    markStyle="highlight"
+    subtitle="Like the library's most-borrowed shelf: the pages other aspirants keep coming back to this week."
+    action={arrows}
+   />
+
+   {/* drawer labels of the catalogue cabinet */}
+   <div className="hs-scroll mb-5 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filter by section">
+    {(["all", ...MODULES] as Array<ModuleKey | "all">).map((m) => {
+     const on = filter === m
+     return (
       <button
-       onClick={() => nudge(1)}
-       aria-label="Scroll trending right"
-       className="absolute right-0 top-1/2 z-10 flex h-16 w-8 -translate-y-1/2 items-center justify-center border border-rule bg-background text-foreground transition-colors hover:border-brick hover:text-brick"
+       key={m}
+       role="tab"
+       aria-selected={on}
+       onClick={() => setFilter(m)}
+       className={cn(
+        typeFont.className,
+        "relative shrink-0 whitespace-nowrap rounded-[3px] border px-3 pb-2 pt-1.5 text-[12.5px] transition-colors",
+        on
+         ? "border-[oklch(55%_0.06_75)] bg-[color-mix(in_oklch,var(--hs-marigold)_30%,var(--hs-paper-slip))] font-bold text-foreground"
+         : "border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] text-foreground/70 hover:text-foreground"
+       )}
       >
-       <ChevronRight className="h-5 w-5" />
+       {m === "all" ? "ALL" : LABEL[m].toUpperCase()}
+       {/* brass drawer pull */}
+       <span
+        className="absolute bottom-[3px] left-1/2 h-[3px] w-5 -translate-x-1/2 rounded-full"
+        style={{ background: on ? "oklch(62% 0.1 80)" : "var(--hs-border-strong)" }}
+        aria-hidden
+       />
       </button>
-     )}
-     {canLeft && !loading && (
-      <button
-       onClick={() => nudge(-1)}
-       aria-label="Scroll trending left"
-       className="absolute left-0 top-1/2 z-10 flex h-16 w-8 -translate-y-1/2 items-center justify-center border border-rule bg-background text-foreground transition-colors hover:border-brick hover:text-brick"
-      >
-       <ChevronLeft className="h-5 w-5" />
-      </button>
-     )}
-    </div>
+     )
+    })}
    </div>
-  </section>
+
+   <div
+    ref={trackRef}
+    onScroll={updateEdges}
+    className="hs-scroll -mx-1 flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-4 pt-4"
+   >
+    {loading
+     ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+     : flat.map(({ module, item, rank, views, fallback, windowDays }, idx) => {
+        const stamps = !fallback && views > 0 ? Math.max(1, Math.min(5, 6 - Math.ceil(rank / 1.3))) : 0
+        return (
+         <Link
+          key={`${module}-${item.id}`}
+          href={HREF[module](item.slug)}
+          className={cn(
+           typeFont.className,
+           "group relative flex w-[270px] max-w-[80vw] shrink-0 snap-start flex-col rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] px-4 pb-8 pt-3 transition-transform duration-200 hover:-translate-y-1",
+           idx % 2 ? "rotate-[0.5deg]" : "-rotate-[0.4deg]"
+          )}
+          style={{
+           boxShadow: "0 1px 2px rgb(60 40 10 / .08), 0 12px 20px -16px rgb(60 40 10 / .5)",
+           backgroundImage: `linear-gradient(to bottom, transparent 0, transparent 34px, ${RED} 34px, ${RED} 35px, transparent 35px), repeating-linear-gradient(to bottom, transparent 0, transparent 21px, ${RULE} 21px, ${RULE} 22px)`,
+           backgroundPosition: "0 0, 0 35px",
+          }}
+         >
+          {/* call number row */}
+          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+           <span>{LABEL[module].toUpperCase()}</span>
+           <span className="font-bold text-foreground/70">No. {String(rank).padStart(3, "0")}</span>
+          </div>
+
+          <h3 className="mt-4 line-clamp-3 font-[family-name:inherit] text-[14.5px] font-bold leading-[22px] text-foreground decoration-[var(--hs-trust)] decoration-2 underline-offset-2 group-hover:underline">
+           {item.title ?? item.name ?? "Untitled"}
+          </h3>
+          {orgOf(item) && <p className="truncate text-[12px] leading-[22px] text-muted-foreground">{orgOf(item)}</p>}
+
+          {/* borrowed: stamped marks */}
+          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+           <span className="min-w-0">
+            <span className="block text-[10px] text-muted-foreground">READ BY</span>
+            <span className="block truncate text-[12.5px] font-bold text-foreground">
+             {stamps ? `${formatCompact(views)} in ${windowDays} days` : "just added"}
+            </span>
+           </span>
+           {stamps > 0 && (
+            <span className="flex shrink-0 gap-0.5" aria-hidden>
+             {Array.from({ length: stamps }).map((_, k) => (
+              <span
+               key={k}
+               className="h-3.5 w-2.5 rounded-[1px] border"
+               style={{
+                borderColor: "color-mix(in oklch, var(--hs-stamp) 70%, transparent)",
+                background: "color-mix(in oklch, var(--hs-stamp) 18%, transparent)",
+                transform: `rotate(${((k % 3) - 1) * 4}deg)`,
+               }}
+              />
+             ))}
+            </span>
+           )}
+          </div>
+
+          {idx === 0 && stamps > 0 && (
+           <span className={cn(handFont.className, "absolute -top-3 right-3 rotate-[5deg] bg-[color-mix(in_oklch,var(--hs-marigold)_55%,white)] px-2 text-[0.9rem] text-[var(--hs-chit-ink)] shadow-[1px_2px_4px_rgb(0_0_0/.15)]")}>
+            everyone&apos;s on this one
+           </span>
+          )}
+
+          {/* rod hole at the bottom of every catalogue card */}
+          <span
+           className="absolute bottom-2.5 left-1/2 h-3.5 w-3.5 -translate-x-1/2 rounded-full"
+           style={{ background: "var(--color-paper)", boxShadow: "inset 0 1px 2px rgb(40 30 20 / .35)" }}
+           aria-hidden
+          />
+         </Link>
+        )
+       })}
+   </div>
+  </div>
  )
 }

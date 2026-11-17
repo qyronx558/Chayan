@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, type CSSProperties } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -11,173 +11,223 @@ import {
   ChevronLeft,
   ChevronRight,
   Briefcase,
-  FileText,
+  Building2,
   CreditCard,
-  BookOpen,
-  KeyRound,
   GraduationCap,
-  Clock,
-  Search,
-  ClipboardCheck,
-  CheckCircle2,
+  Sparkles,
 } from "lucide-react"
 import { SearchBar } from "@/components/home/SearchBar"
+import { useSiteStats, type SiteStats } from "@/components/home/use-site-stats"
 import type { FeaturedSlideItem } from "@/components/featured/FeaturedSlideView"
 import { FEATURED_TYPE_BADGES } from "@/lib/featured"
-import { formatCompact } from "@/lib/utils"
+import { cn, formatCompact } from "@/lib/utils"
+import { handFont } from "@/components/home/fonts"
 
 const WORDS = ["government job", "private job", "result", "admit card"]
 
-const LINKS = [
-  { label: "Govt jobs", href: "/jobs", icon: Briefcase },
-  { label: "Private jobs", href: "/private-jobs", icon: FileText },
-  { label: "Results", href: "/results", icon: GraduationCap },
-  { label: "Admit cards", href: "/admit-cards", icon: CreditCard },
-  { label: "Answer keys", href: "/answer-keys", icon: KeyRound },
-  { label: "Syllabus", href: "/syllabus", icon: BookOpen },
-]
-
-const JOURNEY_STEPS = [
-  { icon: Search, label: "Search", sub: "Find openings" },
-  { icon: ClipboardCheck, label: "Apply", sub: "Submit forms" },
-  { icon: CreditCard, label: "Admit card", sub: "Download hall ticket" },
-  { icon: BookOpen, label: "Exam", sub: "Appear for test" },
-  { icon: CheckCircle2, label: "Result", sub: "Check outcome" },
-]
-
-interface CalendarEvent {
-  date: string
-  type: string
-  label: string
-  title: string
-  department: string
-  href: string
-}
-
-interface SiteStats {
-  activeJobs: number
-  totalResults: number
-  totalAdmitCards: number
-  totalPrivateJobs: number
-  totalUsers: number
-  recentJobs: { title: string; department: { name: string } }[]
-}
+const PROMISES = ["100% free", "Official sources only", "Updated every day"]
 
 function featuredHref(item: FeaturedSlideItem) {
   const href = item.linkUrl || item.ctaUrl || "/jobs"
   return href.startsWith("/") || href.startsWith("http") ? href : `https://${href}`
 }
 
-function daysUntil(dateStr: string) {
-  const diff = new Date(dateStr).getTime() - Date.now()
-  return Math.max(0, Math.ceil(diff / 86400000))
+function badgeOf(item: FeaturedSlideItem, fallback = "Featured") {
+  return item.badge || FEATURED_TYPE_BADGES[item.type] || fallback
 }
 
-/* ── Floating rings decoration ── */
-function FloatingRings() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      <div
-        className="absolute -right-20 -top-20 h-[340px] w-[340px] rounded-full border border-ink/[0.04] sm:h-[480px] sm:w-[480px]"
-        style={{ animation: "float-slow 18s ease-in-out infinite" }}
-      />
-      <div
-        className="absolute -right-10 top-10 h-[240px] w-[240px] rounded-full border border-brick/[0.06] sm:h-[360px] sm:w-[360px]"
-        style={{ animation: "float-slow 18s ease-in-out infinite 3s" }}
-      />
-      <div
-        className="absolute -left-16 bottom-0 h-[200px] w-[200px] rounded-full border border-ink/[0.03] sm:h-[280px] sm:w-[280px]"
-        style={{ animation: "float-slow 22s ease-in-out infinite 6s" }}
-      />
-    </div>
-  )
-}
+/* ── Live "now" card with featured carousel ── */
+function LiveNowCard({ items }: { items: FeaturedSlideItem[] }) {
+  const [active, setActive] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval>>(null)
+  const count = items.length
 
-/* ── Aspirant journey stepper ── */
-function JourneyStepper() {
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    if (count > 1) timerRef.current = setInterval(() => setActive((i) => (i + 1) % count), 4500)
+  }, [count])
+
+  useEffect(() => {
+    resetTimer()
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [resetTimer])
+
+  const go = (dir: -1 | 1) => {
+    setActive((i) => (i + dir + count) % count)
+    resetTimer()
+  }
+
+  if (count === 0) return <LiveNowFallback />
+
+  const item = items[active]
+  const href = featuredHref(item)
+  const external = href.startsWith("http")
+  const others = items.map((it, i) => ({ it, i })).filter(({ i }) => i !== active).slice(0, 3)
+
   return (
-    <div className="flex items-center justify-center gap-0">
-      {JOURNEY_STEPS.map((step, i) => {
-        const Icon = step.icon
-        return (
-          <div key={step.label} className="flex items-center">
-            <div
-              className="group flex flex-col items-center gap-1.5"
-              style={{ animation: `fadeIn .5s ease ${i * 0.12}s both` }}
+    <div className="relative lg:rotate-[1.2deg]">
+    {/* two strips of tape holding the cutting up */}
+    <span className="absolute -top-3 left-8 z-20 h-6 w-20 -rotate-[8deg]" style={{ background: "color-mix(in oklch, var(--hs-marigold) 50%, transparent)", clipPath: "polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%)" }} aria-hidden />
+    <span className="absolute -top-3 right-8 z-20 h-6 w-20 rotate-[6deg]" style={{ background: "color-mix(in oklch, var(--hs-marigold) 50%, transparent)", clipPath: "polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%)" }} aria-hidden />
+    <div className="relative overflow-hidden rounded-[4px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] p-3 shadow-[0_1px_2px_rgb(60_40_10/.08),0_26px_50px_-30px_rgb(60_40_10/.55)] sm:p-4">
+      <div className="mb-3 flex items-center gap-2 px-1">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-[pulse-dot_1.5s_ease-in-out_infinite] rounded-full bg-brick opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-brick" />
+        </span>
+        <span className="text-[13px] font-semibold text-foreground">Live now</span>
+        <span className="text-xs text-muted-foreground">pinned &amp; trending</span>
+        {count > 1 && (
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              onClick={() => go(-1)}
+              className="hs-pill flex h-7 w-7 items-center justify-center border border-rule/50 text-muted-foreground transition-colors hover:border-[var(--hs-trust)] hover:text-[var(--hs-trust)]"
+              aria-label="Previous"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-ink/8 bg-paper shadow-[0_1px_3px_rgba(0,0,0,.04)] transition-all group-hover:border-brick/20 group-hover:shadow-md sm:h-12 sm:w-12">
-                <Icon className="h-4 w-4 text-ink/40 transition-colors group-hover:text-brick sm:h-5 sm:w-5" />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40 sm:text-[11px]">{step.label}</span>
-              <span className="hidden text-[10px] text-ink/25 sm:block">{step.sub}</span>
-            </div>
-            {i < JOURNEY_STEPS.length - 1 && (
-              <div className="mx-1.5 mb-5 flex items-center sm:mx-3 sm:mb-6">
-                <div className="h-[1px] w-4 bg-ink/10 sm:w-8" />
-                <div className="h-0 w-0 border-y-[3px] border-l-[5px] border-y-transparent border-l-ink/10" />
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-/* ── Upcoming deadline mini-cards ── */
-function DeadlineStrip({ events }: { events: CalendarEvent[] }) {
-  if (events.length === 0) return null
-  return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-      {events.slice(0, 3).map((ev, i) => {
-        const days = daysUntil(ev.date)
-        const urgency =
-          days <= 3 ? "border-red-200 bg-red-50/60" : days <= 7 ? "border-amber-200 bg-amber-50/50" : "border-ink/8 bg-paper"
-        const urgencyText = days <= 3 ? "text-red-600" : days <= 7 ? "text-amber-600" : "text-ink/50"
-        return (
-          <Link
-            key={`${ev.href}-${i}`}
-            href={ev.href}
-            className={`group flex items-start gap-3 rounded-xl border p-3 transition-all hover:shadow-md ${urgency}`}
-            style={{ animation: `fadeIn .4s ease ${i * 0.1}s both` }}
-          >
-            <div className="flex shrink-0 flex-col items-center">
-              <span className={`font-display text-2xl font-bold tabular-nums leading-none ${urgencyText}`}>{days}</span>
-              <span className={`text-[10px] font-medium uppercase ${urgencyText}`}>days</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${urgencyText}`}>{ev.label}</span>
-              <p className="mt-0.5 line-clamp-1 text-xs font-medium text-ink/70 group-hover:text-ink">{ev.title}</p>
-              <p className="line-clamp-1 text-[10px] text-ink/35">{ev.department}</p>
-            </div>
-            <ArrowRight className="mt-1 h-3 w-3 shrink-0 text-ink/20 transition-transform group-hover:translate-x-0.5 group-hover:text-ink/50" />
-          </Link>
-        )
-      })}
-    </div>
-  )
-}
-
-/* ── Social proof bar ── */
-function SocialProof({ stats }: { stats: SiteStats | null }) {
-  if (!stats) return null
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-      {[
-        { value: stats.activeJobs, label: "live openings", icon: Briefcase },
-        { value: stats.totalResults, label: "results declared", icon: GraduationCap },
-        { value: stats.totalPrivateJobs, label: "private roles", icon: FileText },
-      ].map((s) => {
-        const Icon = s.icon
-        return s.value > 0 ? (
-          <div key={s.label} className="flex items-center gap-1.5">
-            <Icon className="h-3 w-3 text-ink/25" />
-            <span className="text-xs text-ink/40">
-              <span className="font-bold tabular-nums text-ink/60">{formatCompact(s.value)}</span> {s.label}
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+            <span className="hs-tabular w-9 text-center text-[11px] text-muted-foreground">
+              {active + 1}/{count}
             </span>
+            <button
+              onClick={() => go(1)}
+              className="hs-pill flex h-7 w-7 items-center justify-center border border-rule/50 text-muted-foreground transition-colors hover:border-[var(--hs-trust)] hover:text-[var(--hs-trust)]"
+              aria-label="Next"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
           </div>
-        ) : null
-      })}
+        )}
+      </div>
+
+      <Link
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+        className="group block"
+      >
+        <div className="hs-r relative aspect-[16/9] overflow-hidden bg-paper-2">
+          {item.image ? (
+            <img
+              key={item.id}
+              src={item.image}
+              alt={item.title}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              loading="eager"
+            />
+          ) : (
+            <div
+              className="flex h-full items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--hs-trust-soft), color-mix(in oklch, var(--color-ink) 5%, transparent))",
+              }}
+            >
+              <Zap className="hs-trust h-12 w-12 opacity-30" />
+            </div>
+          )}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to top, rgb(0 0 0 / .55), transparent 55%)" }}
+          />
+          <span className="hs-pill hs-bg-trust hs-caps absolute left-3 top-3 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold">
+            <TrendingUp className="h-3 w-3" />
+            {badgeOf(item)}
+          </span>
+          <div className="absolute inset-x-0 bottom-0 p-4">
+            <h2
+              key={item.id}
+              className="line-clamp-2 text-lg font-bold leading-snug text-white sm:text-xl"
+              style={{ animation: "fadeIn .4s ease" }}
+            >
+              {item.title}
+            </h2>
+            {item.organization && <p className="mt-1 truncate text-xs text-white/75">{item.organization}</p>}
+          </div>
+          {count > 1 && (
+            <div className="absolute inset-x-4 bottom-1.5 h-[3px] overflow-hidden rounded-full bg-white/20">
+              <div key={active} className="h-full animate-[progress-fill_4.5s_linear] rounded-full bg-white/80" />
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-3 px-1 pb-1 pt-3">
+          <p className="line-clamp-1 min-w-0 text-[13px] text-muted-foreground">{item.info || item.dateText || "Tap to view full details"}</p>
+          <span className="hs-trust inline-flex shrink-0 items-center gap-1 text-[13px] font-semibold">
+            {item.ctaLabel || "View"}
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </div>
+      </Link>
+
+      {others.length > 0 && (
+        <ul className="mt-2 space-y-1 border-t border-rule/40 pt-2">
+          {others.map(({ it, i }) => (
+            <li key={it.id}>
+              <button
+                onClick={() => {
+                  setActive(i)
+                  resetTimer()
+                }}
+                className="hs-row flex w-full items-center gap-3 px-2 py-2 text-left"
+              >
+                <span className="hs-icon-tile h-8 w-8">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px] font-medium hs-trust">{badgeOf(it, "Update")}</span>
+                  <span className="block truncate text-[13px] font-medium text-foreground">{it.title}</span>
+                </span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+    <p className={cn(handFont.className, "mt-3 text-center text-[1rem] text-foreground/55")} aria-hidden>
+      cut out from today&apos;s updates, pinned for you
+    </p>
+    </div>
+  )
+}
+
+/* Shown when no featured items exist — still gives first-time visitors a clear map. */
+function LiveNowFallback() {
+  const rows = [
+    { icon: Briefcase, title: "Government jobs", sub: "Central & state notifications", href: "/jobs" },
+    { icon: Building2, title: "Private jobs", sub: "Verified companies hiring now", href: "/private-jobs" },
+    { icon: GraduationCap, title: "Results", sub: "Declared results & merit lists", href: "/results" },
+    { icon: CreditCard, title: "Admit cards", sub: "Download hall tickets", href: "/admit-cards" },
+  ]
+  return (
+    <div className="relative hidden rotate-[1.2deg] lg:block">
+      <span className="absolute -top-3 left-8 z-20 h-6 w-20 -rotate-[8deg]" style={{ background: "color-mix(in oklch, var(--hs-marigold) 50%, transparent)", clipPath: "polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%)" }} aria-hidden />
+      <span className="absolute -top-3 right-8 z-20 h-6 w-20 rotate-[6deg]" style={{ background: "color-mix(in oklch, var(--hs-marigold) 50%, transparent)", clipPath: "polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%)" }} aria-hidden />
+    <div
+      className="rounded-[4px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] p-5 shadow-[0_1px_2px_rgb(60_40_10/.08),0_26px_50px_-30px_rgb(60_40_10/.55)]"
+      style={{ backgroundImage: "repeating-linear-gradient(to bottom, transparent 0, transparent 31px, color-mix(in oklch, oklch(62% 0.09 240) 20%, transparent) 31px, color-mix(in oklch, oklch(62% 0.09 240) 20%, transparent) 32px)" }}
+    >
+      <p className={cn(handFont.className, "mb-2 px-1 text-[1.2rem] text-foreground")}>Not sure where to begin? Most people start here:</p>
+      <ul className="space-y-1">
+        {rows.map((r) => (
+          <li key={r.href}>
+            <Link href={r.href} className="hs-row group flex items-center gap-3 px-2 py-3">
+              <span className="hs-icon-tile h-10 w-10">
+                <r.icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-foreground">{r.title}</span>
+                <span className="block truncate text-xs text-muted-foreground">{r.sub}</span>
+              </span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--hs-trust)]" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <p className={cn(handFont.className, "mt-2 px-1 text-right text-[1rem] text-[var(--color-brick)]")}>you&apos;ve got this →</p>
+    </div>
     </div>
   )
 }
@@ -187,20 +237,24 @@ function LiveTicker({ items }: { items: FeaturedSlideItem[] }) {
   if (items.length === 0) return null
   const doubled = [...items, ...items]
   return (
-    <div className="relative overflow-hidden border-y border-ink/6 bg-ink/[0.02]">
-      <div className="flex" style={{ animation: `ticker-scroll ${items.length * 4}s linear infinite` }}>
+    <div className="relative overflow-hidden border-y border-rule/40 bg-[var(--hs-surface)]">
+      <div
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16"
+        style={{ background: "linear-gradient(to right, var(--hs-surface), transparent)" }}
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16"
+        style={{ background: "linear-gradient(to left, var(--hs-surface), transparent)" }}
+      />
+      <div className="flex w-max hover:[animation-play-state:paused]" style={{ animation: `ticker-scroll ${items.length * 5}s linear infinite` }}>
         {doubled.map((item, i) => (
-          <Link
-            key={`${item.id}-${i}`}
-            href={featuredHref(item)}
-            className="group flex shrink-0 items-center gap-3 px-6 py-3"
-          >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brick/10">
-              <TrendingUp className="h-2.5 w-2.5 text-brick" />
+          <Link key={`${item.id}-${i}`} href={featuredHref(item)} className="group flex shrink-0 items-center gap-2.5 px-5 py-3">
+            <span className="hs-trust text-[11px] font-semibold">{badgeOf(item, "New")}</span>
+            <span className="whitespace-nowrap text-[13px] text-muted-foreground transition-colors group-hover:text-foreground">
+              {item.title}
             </span>
-            <span className="whitespace-nowrap text-sm text-ink/50 transition-colors group-hover:text-ink">{item.title}</span>
-            <span className="text-xs font-bold uppercase tracking-wider text-brick/60">
-              {item.badge || FEATURED_TYPE_BADGES[item.type] || "New"}
+            <span className="text-rule" aria-hidden>
+              •
             </span>
           </Link>
         ))}
@@ -209,177 +263,53 @@ function LiveTicker({ items }: { items: FeaturedSlideItem[] }) {
   )
 }
 
-/* ── Featured carousel ── */
-function FeaturedCarousel({ items }: { items: FeaturedSlideItem[] }) {
-  const [active, setActive] = useState(0)
-  const timerRef = useRef<ReturnType<typeof setInterval>>(null)
-  const count = items.length
-
-  const resetTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => setActive((i) => (i + 1) % count), 2800)
-  }, [count])
-
-  useEffect(() => {
-    if (count < 2) return
-    resetTimer()
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [count, resetTimer])
-
-  const go = (dir: -1 | 1) => {
-    setActive((i) => (i + dir + count) % count)
-    resetTimer()
-  }
-
-  if (items.length === 0) return null
-
-  const item = items[active]
-  const badge = item.badge || FEATURED_TYPE_BADGES[item.type] || "Featured"
-  const href = featuredHref(item)
-
+/* ── Quiet numbers strip ── */
+function StatsStrip({ stats }: { stats: SiteStats | null }) {
+  const tiles = [
+    { label: "government jobs open", value: stats?.activeJobs, href: "/jobs" },
+    { label: "private openings", value: stats?.totalPrivateJobs, href: "/private-jobs" },
+    { label: "results declared", value: stats?.totalResults, href: "/results" },
+    { label: "admit cards out", value: stats?.totalAdmitCards, href: "/admit-cards" },
+  ]
   return (
-    <div className="relative">
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-[pulse-dot_1.5s_ease-in-out_infinite] rounded-full bg-brick opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-brick" />
-          </span>
-          <span className="text-xs font-bold uppercase tracking-widest text-brick">Live</span>
-        </div>
-        <span className="text-xs font-medium text-ink/40">Pinned & trending</span>
-        <div className="ml-auto flex items-center gap-1.5">
-          {count > 1 &&
-            items.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  setActive(i)
-                  resetTimer()
-                }}
-                className={`h-1.5 rounded-full transition-all ${i === active ? "w-6 bg-brick" : "w-1.5 bg-ink/15 hover:bg-ink/30"}`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          <span className="ml-2 text-xs tabular-nums text-ink/30">
-            {active + 1}/{count}
-          </span>
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-2xl border border-ink/8 bg-paper shadow-[0_1px_3px_rgba(0,0,0,.04),0_8px_32px_rgba(0,0,0,.07)]">
+    <div
+      className="relative grid grid-cols-2 overflow-hidden bg-[var(--hs-paper-slip)] lg:grid-cols-4"
+      style={{
+        clipPath: "polygon(0 0, 100% 0, 100% calc(100% - 5px), 97% 100%, 93% calc(100% - 4px), 88% 100%, 82% calc(100% - 5px), 76% 100%, 70% calc(100% - 3px), 63% 100%, 57% calc(100% - 5px), 50% 100%, 44% calc(100% - 4px), 37% 100%, 31% calc(100% - 5px), 24% 100%, 18% calc(100% - 3px), 11% 100%, 5% calc(100% - 5px), 0 100%)",
+        filter: "drop-shadow(0 6px 8px rgb(60 40 10 / .12))",
+        backgroundImage: "repeating-linear-gradient(to bottom, transparent 0, transparent 27px, color-mix(in oklch, oklch(62% 0.09 240) 22%, transparent) 27px, color-mix(in oklch, oklch(62% 0.09 240) 22%, transparent) 28px)",
+      }}
+    >
+      {tiles.map((t, i) => (
         <Link
-          href={href}
-          target={href.startsWith("http") ? "_blank" : undefined}
-          rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-          className="group grid md:grid-cols-[1.15fr_1fr]"
+          key={t.label}
+          href={t.href}
+          className={cn(
+            "group flex flex-col px-5 py-4 transition-colors hover:bg-[var(--hs-surface-2)] sm:px-6 sm:py-5",
+            i % 2 === 1 && "border-l border-[var(--hs-border)]",
+            i >= 2 && "border-t border-[var(--hs-border)] lg:border-t-0",
+            i === 2 && "lg:border-l"
+          )}
         >
-          <div className="relative aspect-[16/10] overflow-hidden bg-ink/5 md:aspect-auto md:min-h-[300px]">
-            {item.image ? (
-              <img
-                key={item.id}
-                src={item.image}
-                alt={item.title}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                loading="eager"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center bg-gradient-to-br from-brick/5 to-ink/5">
-                <Zap className="h-14 w-14 text-ink/8" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent" />
-          </div>
-
-          <div className="relative flex flex-col justify-center p-7 sm:p-9">
-            <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-brick/8 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brick">
-              <TrendingUp className="h-3 w-3" />
-              {badge}
-              {item.isPinned && <span className="ml-1 text-brick/50">· Pinned</span>}
+          {stats ? (
+            <span className={cn(handFont.className, "text-[2.3rem] leading-none text-foreground")}>
+              {formatCompact(t.value ?? 0)}
             </span>
-            <h2
-              key={item.id}
-              className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl lg:text-[1.7rem]"
-              style={{ animation: "fadeIn .4s ease" }}
-            >
-              {item.title}
-            </h2>
-            {item.organization && <p className="mt-2 text-sm font-medium text-ink/45">{item.organization}</p>}
-            {item.info && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/50">{item.info}</p>}
-            {item.dateText && <p className="mt-3 text-xs text-ink/35">{item.dateText}</p>}
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-ink transition-colors group-hover:text-brick">
-              {item.ctaLabel || "Read more"}{" "}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </span>
-          </div>
+          ) : (
+            <span className="hs-skel block h-7 w-12" />
+          )}
+          <span className="mt-1.5 text-[13px] text-muted-foreground transition-colors group-hover:text-[var(--hs-trust)]">
+            {t.label}
+          </span>
         </Link>
-
-        {count > 1 && (
-          <>
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                go(-1)
-              }}
-              className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-ink/10 bg-paper/90 text-ink/50 shadow-sm backdrop-blur-sm transition-all hover:bg-paper hover:text-ink hover:shadow-md"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                go(1)
-              }}
-              className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-ink/10 bg-paper/90 text-ink/50 shadow-sm backdrop-blur-sm transition-all hover:bg-paper hover:text-ink hover:shadow-md"
-              aria-label="Next"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {count > 1 && (
-        <div className="mt-4 grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(count, 4)}, 1fr)` }}>
-          {items.slice(0, 4).map((it, i) => (
-            <button
-              key={it.id}
-              onClick={() => {
-                setActive(i)
-                resetTimer()
-              }}
-              className={`flex flex-col rounded-xl border px-3 py-3 text-left transition-all ${
-                i === active
-                  ? "border-brick/25 bg-brick/[0.04] shadow-sm"
-                  : "border-ink/6 bg-transparent hover:border-ink/12 hover:bg-ink/[0.02]"
-              }`}
-            >
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${i === active ? "text-brick" : "text-ink/25"}`}>
-                {it.badge || FEATURED_TYPE_BADGES[it.type] || "Update"}
-              </span>
-              <span className={`mt-0.5 line-clamp-1 text-xs font-medium ${i === active ? "text-ink/80" : "text-ink/40"}`}>
-                {it.title}
-              </span>
-              {i === active && (
-                <div className="mt-2.5 h-[2px] w-full overflow-hidden rounded-full bg-brick/10">
-                  <div className="h-full animate-[progress-fill_2.8s_linear] rounded-full bg-brick" />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+      ))}
     </div>
   )
 }
 
 export function HomeHero() {
   const [featured, setFeatured] = useState<FeaturedSlideItem[]>([])
-  const [stats, setStats] = useState<SiteStats | null>(null)
-  const [deadlines, setDeadlines] = useState<CalendarEvent[]>([])
+  const stats = useSiteStats()
   const [wordIdx, setWordIdx] = useState(0)
 
   useEffect(() => {
@@ -388,122 +318,101 @@ export function HomeHero() {
       .then((r) => r.json())
       .then((d) => !cancelled && setFeatured(d.success ? d.data : []))
       .catch(() => {})
-    fetch("/api/stats")
-      .then((r) => r.json())
-      .then((d) => !cancelled && d.success && setStats(d.data))
-      .catch(() => {})
-    fetch("/api/exam-calendar?upcoming=1&limit=3")
-      .then((r) => r.json())
-      .then((d) => !cancelled && d.success && setDeadlines(d.data))
-      .catch(() => {})
     return () => {
       cancelled = true
     }
   }, [])
 
   useEffect(() => {
-    const id = setInterval(() => setWordIdx((i) => (i + 1) % WORDS.length), 2200)
+    const id = setInterval(() => setWordIdx((i) => (i + 1) % WORDS.length), 2400)
     return () => clearInterval(id)
   }, [])
 
   return (
-    <section className="relative w-full bg-paper text-ink">
-      <FloatingRings />
-
-      {/* ── hero top ── */}
-      <div className="relative mx-auto w-full max-w-5xl px-4 pb-10 pt-14 text-center sm:px-8 sm:pt-20">
-        <h1 className="font-display text-[2.5rem] font-bold leading-[1.06] tracking-tight sm:text-[3.75rem] lg:text-[4.25rem]">
-          Find your next
-          <br className="sm:hidden" />
+    <section className="relative w-full text-foreground">
+      <div className="hs-container relative z-20 grid items-start gap-10 pb-10 pt-10 sm:pt-14 lg:grid-cols-12 lg:gap-14 lg:pb-12 lg:pt-16">
+        {/* ── left: pitch + search ── */}
+        <div className="relative z-30 min-w-0 lg:col-span-7">
           <span
-            className="relative ml-2 inline-block overflow-hidden align-bottom"
-            style={{ height: "1.18em", verticalAlign: "baseline" }}
+            className={cn(handFont.className, "absolute -top-6 left-[15.5rem] hidden rotate-[-4deg] text-[1.05rem] text-[var(--color-brick)] lg:block")}
+            aria-hidden
           >
-            <span
-              key={wordIdx}
-              className="inline-block text-brick"
-              style={{ animation: "slide-up .35s cubic-bezier(.16,1,.3,1)" }}
-            >
-              {WORDS[wordIdx]}
-            </span>
+            the one you&apos;ve been waiting for
+            <svg width="30" height="34" viewBox="0 0 30 34" fill="none" className="ml-1 inline-block align-top">
+              <path d="M26 3 C 24 16, 16 24, 5 29" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              <path d="M5 21 L4 30 L13 31" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </span>
-        </h1>
-
-        <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/50 sm:text-lg">
-          Verified openings, results and admit cards - all in one place.
-        </p>
-
-        {/* social proof counts */}
-        <div className="mt-4">
-          <SocialProof stats={stats} />
-        </div>
-
-        <div className="mx-auto mt-8 max-w-2xl">
-          <SearchBar embedded tone="light" align="center" />
-        </div>
-
-        {/* category pills */}
-        <nav aria-label="Browse" className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-2">
-          {LINKS.map((l) => {
-            const Icon = l.icon
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="group inline-flex items-center gap-1.5 rounded-full border border-ink/8 px-4 py-2 text-sm text-ink/50 transition-all hover:border-ink/20 hover:bg-ink/[0.03] hover:text-ink"
+          <h1 className="text-[2.6rem] font-bold leading-[1.05] text-foreground sm:text-[3.6rem] lg:text-[4.1rem]">
+            Find your next
+            <span className="block overflow-hidden pb-1" style={{ height: "1.18em" }}>
+              <span
+                key={wordIdx}
+                className="hs-highlight"
+                style={{ animation: "slide-up .45s cubic-bezier(.16,1,.3,1)" }}
               >
-                <Icon className="h-3.5 w-3.5 text-ink/30 transition-colors group-hover:text-brick" />
-                {l.label}
-              </Link>
-            )
-          })}
-        </nav>
+                {WORDS[wordIdx]}
+              </span>
+            </span>
+          </h1>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <Link
-            href="/jobs"
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-paper shadow-[0_2px_12px_rgba(0,0,0,.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,.22)]"
-          >
-            Browse live jobs
-            <ArrowUpRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link href="#alerts" className="rounded-full px-6 py-3 text-sm font-semibold text-ink/55 transition-colors hover:text-ink">
-            Get alerts
-          </Link>
-        </div>
-      </div>
+          <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
+            Government and private jobs, results, admit cards and answer keys, checked against official sources and
+            kept in one calm place, so you can spend less time searching and{" "}
+            <span className="relative inline-block text-foreground">
+              more time preparing.
+              <svg viewBox="0 0 200 10" preserveAspectRatio="none" className="absolute -bottom-1.5 left-0 h-2.5 w-full" aria-hidden>
+                <path
+                  className="hs-draw"
+                  d="M2 6 C 40 2, 90 9, 130 5 S 185 3, 198 6"
+                  fill="none"
+                  stroke="var(--hs-marigold)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  style={{ ["--len" as string]: 220, animationDelay: "1.2s" } as CSSProperties}
+                />
+              </svg>
+            </span>
+          </p>
 
-      {/* ── aspirant journey ── */}
-      <div className="mx-auto w-full max-w-3xl px-4 pb-10 sm:px-8">
-        <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-ink/25">Your journey</p>
-        <JourneyStepper />
-      </div>
+          {/* z-index keeps the live search suggestions above everything that follows */}
+          <div className="relative z-40 mt-7 max-w-2xl">
+            <SearchBar embedded tone="light" align="left" />
+          </div>
 
-      {/* ── upcoming deadlines ── */}
-      {deadlines.length > 0 && (
-        <div className="mx-auto w-full max-w-5xl px-4 pb-8 sm:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-ink/30" />
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/40">Upcoming deadlines</span>
-            </div>
-            <Link href="/exam-calendar" className="text-xs font-medium text-brick hover:underline">
-              View calendar <ArrowRight className="ml-0.5 inline h-3 w-3" />
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <Link href="/jobs" className="hs-btn hs-btn-dark">
+              Browse government jobs
+              <ArrowUpRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link href="/private-jobs" className="hs-btn hs-btn-ghost">
+              Explore private jobs
             </Link>
           </div>
-          <DeadlineStrip events={deadlines} />
-        </div>
-      )}
 
-      {/* ── live ticker strip ── */}
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+            {PROMISES.map((p) => (
+              <li key={p} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                <svg viewBox="0 0 28 24" className="h-4 w-5 text-[var(--hs-trust)]" fill="none" aria-hidden>
+                  <path d="M3 13.5 C 5.5 15, 8 18, 10 21 C 13 13, 18 7, 25 2.5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* ── right: live card ── */}
+        <div className="relative z-10 min-w-0 lg:col-span-5 lg:pt-2">
+          <LiveNowCard items={featured.slice(0, 6)} />
+        </div>
+      </div>
+
+      <div className="hs-container relative z-0 pb-10">
+        <StatsStrip stats={stats} />
+      </div>
+
       <LiveTicker items={featured.slice(0, 8)} />
-
-      {/* ── featured carousel ── */}
-      {featured.length > 0 && (
-        <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
-          <FeaturedCarousel items={featured.slice(0, 6)} />
-        </div>
-      )}
     </section>
   )
 }
