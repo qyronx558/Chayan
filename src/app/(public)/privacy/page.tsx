@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import { Clause, LegalPaper } from "@/components/legal/LegalPaper"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -12,82 +13,74 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-bold text-foreground">Privacy Policy</h1>
-      <p className="mb-8 text-sm text-muted-foreground">Last updated: July 1, 2026</p>
+    <LegalPaper kind="privacy" title="Privacy Policy" updated="Last updated: July 1, 2026">
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">Information We Collect</h2>
-        <p className="mb-3 leading-relaxed text-foreground">
+      <Clause title="Information We Collect">
+        <p>
           When you visit ChayanJobs, we may collect certain information automatically, including your
           IP address, browser type, operating system, referring URLs, and your interactions with our site.
           If you subscribe to our newsletter or contact us via email, we collect the personal information
           you provide, such as your name and email address.
         </p>
-        <p className="leading-relaxed text-foreground">
+        <p>
           We do not collect sensitive personal data unless you voluntarily provide it. We never collect
           financial information such as bank account details, credit card numbers, or UPI identifiers.
         </p>
-      </section>
+      </Clause>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">How We Use Your Information</h2>
-        <p className="mb-3 leading-relaxed text-foreground">
+      <Clause title="How We Use Your Information">
+        <p>
           The information we collect is used to improve our services, personalize your experience, send
           job alerts and newsletters (only with your consent), and respond to your inquiries.
         </p>
-        <p className="leading-relaxed text-foreground">
+        <p>
           We do not sell, trade, or rent your personal information to third parties. We may share
           aggregated, non-personally identifiable information for analytics and reporting purposes.
         </p>
-      </section>
+      </Clause>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">Cookies</h2>
-        <p className="mb-3 leading-relaxed text-foreground">
+      <Clause title="Cookies">
+        <p>
           ChayanJobs uses cookies and similar tracking technologies to enhance your browsing experience,
           analyze site traffic, and understand where our visitors come from. Cookies are small text files
           stored on your device by your web browser.
         </p>
-        <p className="leading-relaxed text-foreground">
+        <p>
           You can control cookie preferences through your browser settings. Disabling cookies may affect
           certain features of our website. We use both session cookies (which expire when you close your
           browser) and persistent cookies (which remain until deleted).
         </p>
-      </section>
+      </Clause>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">Third-Party Links</h2>
-        <p className="mb-3 leading-relaxed text-foreground">
+      <Clause title="Third-Party Links">
+        <p>
           Our website contains links to external third-party websites, including official government
           portals, examination bodies, and news sources. We are not responsible for the privacy practices
           or content of these external sites.
         </p>
-        <p className="leading-relaxed text-foreground">
+        <p>
           We encourage you to review the privacy policies of any third-party sites you visit. The
           inclusion of a link does not imply endorsement by ChayanJobs.
         </p>
-      </section>
+      </Clause>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">Data Security</h2>
-        <p className="mb-3 leading-relaxed text-foreground">
+      <Clause title="Data Security">
+        <p>
           We implement reasonable technical and organizational measures to protect your personal
           information against unauthorized access, alteration, disclosure, or destruction.
         </p>
-        <p className="leading-relaxed text-foreground">
+        <p>
           However, no method of transmission over the Internet or electronic storage is 100% secure.
           While we strive to protect your data, we cannot guarantee absolute security.
         </p>
-      </section>
+      </Clause>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-foreground">Contact</h2>
-        <p className="leading-relaxed text-foreground">
+      <Clause title="Contact">
+        <p>
           If you have any questions about this Privacy Policy, please{" "}
-          <Link href="/contact" className="text-brick hover:underline">contact us</Link>.
+          <Link href="/contact">contact us</Link>.
         </p>
-      </section>
-    </div>
+      </Clause>
+    </LegalPaper>
   )
 }

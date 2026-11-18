@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import "@/app/home.css"
 import "./contact.css"
 import { ContactFooter } from "@/components/contact/ContactFooter"
 import { ContactHeader } from "@/components/contact/ContactHeader"
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="contact-scope min-h-screen text-[15px] antialiased">
+    <div className="home-saas contact-scope min-h-screen text-[15px] antialiased">
       <ContactHeader />
       <main className="mx-auto w-full max-w-[1120px] px-4 sm:px-6">
         <ContactMain />

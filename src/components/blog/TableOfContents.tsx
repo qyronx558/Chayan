@@ -58,33 +58,32 @@ export function TableOfContents({ className }: { className?: string }) {
   }
 
   return (
-    <nav className={cn("rounded-xl border border-rule bg-background dark:border-ink dark:bg-ink", className)}>
+    <nav className={cn("relative rounded-[3px] border border-[var(--hs-border-strong,var(--color-rule))] bg-[var(--hs-paper-slip,var(--background))]", className)}>
+      <span className="absolute -top-1 right-5 h-10 w-4 bg-[var(--color-brick)]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%)" }} aria-hidden />
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-foreground dark:text-paper"
+        className="flex w-full items-center justify-between px-4 py-3 pr-12 text-sm font-semibold text-foreground"
       >
         <span className="flex items-center gap-2">
-          <ListTree className="h-4 w-4 text-brick" /> On this page
+          <ListTree className="h-4 w-4 text-[var(--color-brick)]" /> On this page
         </span>
         {collapsed ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronUp className="h-4 w-4 text-muted-foreground" />}
       </button>
       {!collapsed && (
-        <ul className="space-y-1 border-t border-rule px-3 py-3 dark:border-ink">
+        <ul className="space-y-0.5 border-t border-dashed border-[var(--hs-border-strong,var(--color-rule))] px-3 py-3">
           {headings.map((h) => (
             <li key={h.id} style={{ paddingLeft: h.level === 3 ? "1rem" : "0" }}>
               <button
                 type="button"
                 onClick={() => scrollTo(h.id)}
                 className={cn(
-                  "flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-[13px] leading-snug transition-colors",
-                  active === h.id
-                    ? "bg-paper-3 font-semibold text-brick dark:bg-paper-3 dark:text-brick"
-                    : "text-muted-foreground hover:bg-paper-2 hover:text-foreground dark:text-muted-foreground dark:hover:bg-ink/50 dark:hover:text-muted-foreground"
+                  "relative flex w-full items-start gap-2 px-2 py-1.5 text-left text-[13px] leading-snug transition-colors",
+                  active === h.id ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", active === h.id ? "bg-brick" : "bg-paper-3 dark:bg-ink-2")} />
-                {h.text}
+                <span className={cn("mt-[3px] w-3 shrink-0 text-[var(--color-brick)]", active === h.id ? "opacity-100" : "opacity-0")} aria-hidden>→</span>
+                <span className={cn(active === h.id && "underline decoration-[var(--color-brick)] decoration-wavy decoration-1 underline-offset-4")}>{h.text}</span>
               </button>
             </li>
           ))}

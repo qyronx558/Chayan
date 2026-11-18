@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Sparkles } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
 
 interface Match {
  matchScore: number
@@ -37,27 +37,34 @@ export function MatchScoreBar({ privateJobId }: { privateJobId: string }) {
   return () => { cancelled = true }
  }, [privateJobId])
 
- if (!loaded) return <div className="h-16 animate-pulse rounded-2xl bg-paper-3 dark:bg-ink" />
+ const tag = "relative rounded-[10px] border border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] py-4 pl-12 pr-5"
+ const hole = <span aria-hidden className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-[var(--hs-border-strong)] bg-background" />
+ if (!loaded) return <div className="h-16 animate-pulse rounded-[10px] bg-[var(--hs-surface-2)]" />
  if (!hasResume) {
   return (
-   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-rule bg-paper-3 p-4">
-    <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Sparkles className="h-4 w-4 text-brick" /> Upload resume to see your match score for this role</p>
-    <Link href="/profile" className="text-sm font-bold text-brick hover:underline">Upload resume →</Link>
+   <div className={cn(tag, "flex flex-wrap items-center justify-between gap-3 border-dashed")}>
+    {hole}
+    <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Sparkles className="h-4 w-4 text-[var(--color-brick)]" /> Upload resume to see your match score for this role</p>
+    <Link href="/profile" className={cn(handFont.className, "text-[1.1rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4")}>Upload resume →</Link>
    </div>
   )
  }
  if (!match) return null
- const color = match.matchScore >= 70 ? "bg-paper-3" : match.matchScore >= 40 ? "bg-paper-2" : "bg-paper-3"
+ const ink = match.matchScore >= 70 ? "oklch(48% 0.12 155)" : match.matchScore >= 40 ? "oklch(60% 0.13 75)" : "oklch(52% 0.19 27)"
  return (
-  <div className="rounded-2xl border border-rule bg-background p-4 dark:border-ink dark:bg-ink">
-   <div className="mb-2 flex items-center justify-between">
-    <p className="flex items-center gap-1.5 text-sm font-bold"><Sparkles className="h-4 w-4 text-brick" /> Your match: {match.matchScore}%</p>
-    <div className="flex flex-wrap gap-1">{match.matchedSkills.slice(0, 4).map((s) => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}</div>
+  <div className={tag} style={{ boxShadow: "0 14px 24px -18px rgb(20 30 70 / .5)" }}>
+   {hole}
+   <div className="flex flex-wrap items-center justify-between gap-3">
+    <p className="flex items-baseline gap-2">
+     <span className={cn(typeFont.className, "text-[10px] font-bold tracking-[0.2em] text-muted-foreground")}>YOUR MATCH</span>
+     <span className="font-display text-[1.6rem] font-black leading-none tabular-nums" style={{ color: ink }}>{match.matchScore}%</span>
+    </p>
+    <div className="flex flex-wrap gap-1.5">{match.matchedSkills.slice(0, 4).map((s) => <span key={s} className={cn(typeFont.className, "rounded-full border border-[var(--hs-border-strong)] px-2 py-0.5 text-[10.5px] font-bold uppercase text-foreground/80")}>✓ {s}</span>)}</div>
    </div>
-   <div className="h-2 overflow-hidden rounded-full bg-paper-3 dark:bg-ink">
-    <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${match.matchScore}%` }} />
+   <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[var(--hs-surface-2)]">
+    <div className="h-full rounded-full transition-all" style={{ width: `${match.matchScore}%`, background: ink }} />
    </div>
-   {match.improvementTips[0] && <p className="mt-2 text-xs text-muted-foreground">{match.improvementTips[0]}</p>}
+   {match.improvementTips[0] && <p className={cn(handFont.className, "mt-2 text-[1.02rem] leading-snug text-muted-foreground")}>tip: {match.improvementTips[0]}</p>}
   </div>
  )
 }

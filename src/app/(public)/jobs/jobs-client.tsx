@@ -1,18 +1,13 @@
 "use client"
 
+import { BeforeApplyChecklist, JobClipping, VacancyMasthead } from "./vacancy-gazette"
+import { DeskItem, DeskListing } from "@/components/desk/DeskKit"
 import { useMemo, useState } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
-import { AlertCircle, ArrowRight, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { JobCard, JobCardSkeleton } from "@/components/home/JobCard"
-import { UniversalCardEmpty } from "@/components/ui/universal-card"
-import { listGridWithSidebar } from "@/components/ui/module-theme"
-import { filterValidItems } from "@/lib/card-helpers"
-import { ListingFilters } from "@/components/listing/ListingFilters"
-import { ListingLayout } from "@/components/listing/ListingLayout"
+import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
+import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
+import { BookmarkButton } from "@/components/layout/BookmarkButton"
+import { CardShareButton } from "@/components/ui/card-actions"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
 import type { ActiveFilterChip, FilterControl, QuickFilter, SortOption } from "@/components/listing/types"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
@@ -407,152 +402,65 @@ export function JobsClient({ preset }: { preset?: JobsPreset } = {}) {
   const visibleJobs = filterValidItems(jobs)
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        {preset ? (
-          <>
-            <h1 className="mb-2 text-3xl font-bold text-foreground">{preset.heading}</h1>
-            <p className="mb-8 text-muted-foreground">{preset.intro}</p>
-          </>
-        ) : (
-          <>
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Latest Government Jobs</h1>
-            <p className="mb-6 text-muted-foreground">
-              Browse and apply to the latest government job notifications across India.
-            </p>
-            <section
-              aria-labelledby="browse-by-state"
-              className="mb-8 flex flex-col gap-4 rounded-2xl border border-rule border-l-4 border-l-brick bg-paper-2 p-5 dark:border-ink dark:border-l-brick sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="flex min-w-0 items-start gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brick text-brick-ink" aria-hidden>
-                  <MapPin className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
-                  <h2 id="browse-by-state" className="text-lg font-semibold text-foreground">
-                    Find jobs in your state &amp; district
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    28 states, 8 union territories and 780+ districts: see state jobs, local district vacancies and all-India jobs in one place.
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {POPULAR_STATES.map((s) => (
-                      <Link
-                        key={s.slug}
-                        href={statePagePath(s.slug)}
-                        className="rounded-full border border-rule bg-background px-2.5 py-0.5 text-xs text-foreground transition-colors hover:border-brick hover:text-brick dark:border-ink"
-                      >
-                        {s.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <Button asChild size="lg" className="shrink-0">
-                <Link href="/jobs/states">
-                  Browse jobs by state <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden />
-                </Link>
-              </Button>
-            </section>
-          </>
-        )}
-
-        <ListingLayout
-          filters={
-            <ListingFilters
-              search={search}
-              onSearchChange={setSearch}
-              onSearchSubmit={() => setSearch((value) => value.trim())}
-              searchPlaceholder="Search jobs, departments, qualifications…"
-              filters={filters}
-              quickFilters={quickFilters}
-              onClear={clearFilters}
-              hasActiveFilters={hasActiveFilters}
-              activeCount={activeCount}
-            />
-          }
-        >
-          <ListingToolbar
-            count={visibleJobs.length}
-            total={total}
-            label="jobs"
-            refreshing={refreshing}
-            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
-            activeFilters={activeFilters}
-            onClearAll={clearFilters}
+    <DeskListing
+      hero={<VacancyMasthead total={total} heading={preset?.heading} intro={preset?.intro} popularStates={preset ? undefined : POPULAR_STATES} />}
+      filters={{
+        search,
+        onSearchChange: setSearch,
+        onSearchSubmit: () => setSearch((value) => value.trim()),
+        searchPlaceholder: "Search jobs, departments, qualifications…",
+        filters,
+        quickFilters,
+        onClear: clearFilters,
+        hasActiveFilters,
+        activeCount,
+      }}
+      aside={<BeforeApplyChecklist />}
+      toolbar={
+        <ListingToolbar
+          count={visibleJobs.length}
+          total={total}
+          label="jobs"
+          refreshing={refreshing}
+          sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
+        />
+      }
+      loading={loading && jobs.length === 0}
+      error={error && jobs.length === 0 ? error : null}
+      onRetry={retry}
+      errorTitle="The paper didn't arrive for a second."
+      empty={visibleJobs.length === 0}
+      emptyTitle="Nothing to circle in this issue."
+      emptyHint="Try fewer filters. New vacancies are added every day, so the next issue may have yours."
+      loadingMore={loadingMore}
+      footer={
+        <InfiniteListFooter
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+          onRetry={loadMore}
+          loadedCount={jobs.length}
+          total={total}
+          label="jobs"
+        />
+      }
+    >
+      {visibleJobs.map((item, index) => (
+        <DeskItem key={item.id} index={index}>
+          <JobClipping
+            item={item}
+            index={index}
+            location={jobLocationLabel(item)}
+            track={<ApplicationTracker jobId={item.id} />}
+            save={<BookmarkButton jobId={item.id} />}
+            share={<CardShareButton title={cleanTitle(item.title)} url={`/apply/${item.slug}`} text={`Apply for ${cleanTitle(item.title)} - ${item.department.name}`} />}
           />
-
-          {loading && jobs.length === 0 ? (
-            <div className={listGridWithSidebar}>
-              {Array.from({ length: 9 }).map((_, index) => (
-                <JobCardSkeleton key={index} />
-              ))}
-            </div>
-          ) : error && jobs.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-16">
-                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-                <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
-                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-                <Button onClick={retry}>Try Again</Button>
-              </CardContent>
-            </Card>
-          ) : visibleJobs.length === 0 ? (
-            <UniversalCardEmpty
-              title="No jobs found"
-              hint="Try adjusting your search or filter criteria."
-              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-            />
-          ) : (
-            <>
-              <div className={listGridWithSidebar}>
-                {visibleJobs.map((job) => (
-                  <motion.div
-                    key={job.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35 }}
-                    className="h-full"
-                  >
-                    <JobCard
-                      id={job.id}
-                      title={job.title}
-                      department={job.department.name}
-                      departmentSlug={job.department.slug}
-                      location={job.location || job.state?.name}
-                      locationLabel={jobLocationLabel(job)}
-                      totalVacancies={job.totalVacancies}
-                      lastDateToApply={job.lastDate}
-                      salary={job.salary}
-                      status={job.status}
-                      slug={job.slug}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              {loadingMore ? (
-                <div className={`mt-6 ${listGridWithSidebar}`}>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <JobCardSkeleton key={index} />
-                  ))}
-                </div>
-              ) : null}
-              <InfiniteListFooter
-                sentinelRef={sentinelRef}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                loadMoreError={loadMoreError}
-                onLoadMore={loadMore}
-                onRetry={loadMore}
-                loadedCount={jobs.length}
-                total={total}
-                label="jobs"
-              />
-            </>
-          )}
-        </ListingLayout>
-      </motion.div>
-    </div>
+        </DeskItem>
+      ))}
+    </DeskListing>
   )
 }

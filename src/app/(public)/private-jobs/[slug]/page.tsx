@@ -8,12 +8,15 @@ import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { PrivateJobViewTracker } from "@/components/private/PrivateJobViewTracker"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { cn, formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import "@/app/home.css"
 import { canViewContent, robotsFor } from "@/lib/public-visibility"
 import { buildPrivateJobPostingLd } from "@/lib/private-jobs/seo"
 import { cleanJobDescription } from "@/lib/private-jobs/description"
+
+/* airmail chevrons; kept here because airmail.tsx is a client module */
+const AIRMAIL = "repeating-linear-gradient(135deg, oklch(55% 0.19 27) 0 10px, transparent 10px 15px, oklch(45% 0.13 255) 15px 25px, transparent 25px 30px)"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -86,7 +89,7 @@ export default async function PrivateJobPage({ params }: Props) {
   const jsonLd = job.status === "ACTIVE" && job.moderation === "APPROVED" ? buildPrivateJobPostingLd(job, getBaseUrl()) : null
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
+    <div className="home-saas container mx-auto max-w-6xl px-4 py-8">
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />}
       <BreadcrumbNav
         segments={[
@@ -104,52 +107,47 @@ export default async function PrivateJobPage({ params }: Props) {
       <DiscussionSection postType="PRIVATE_JOB" postId={job.id} path={`/private-jobs/${job.slug}`} />
 
       {related.length > 0 && (
-        <section className="mt-12">
-          <div className="mb-6 flex items-end justify-between gap-3">
+        <section className="mt-14">
+          <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-foreground dark:text-paper">Related Jobs</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className={cn(typeFont.className, "text-[10.5px] font-bold tracking-[0.25em] text-muted-foreground")}>MORE LETTERS IN THE POST</p>
+              <h2 className="mt-1 font-display text-[1.6rem] font-black leading-tight text-foreground">
                 {relatedJobs.length > 0 ? `More openings at ${job.company.name}` : "More private openings"}
-              </p>
+              </h2>
             </div>
-            <Link href="/private-jobs" className="shrink-0 text-sm font-semibold text-brick hover:underline dark:text-brick">
-              View all private jobs →
+            <Link href="/private-jobs" className={cn(handFont.className, "shrink-0 text-[1.1rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4")}>
+              view all private jobs →
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {related.map((rj) => {
+          <div className="grid gap-6 sm:grid-cols-2">
+            {related.map((rj, i) => {
               const rjLast = rj.lastDate ? new Date(rj.lastDate).getTime() : null
               const rjDays = rjLast ? Math.floor((rjLast - nowMs) / 86400000) : null
               const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
               return (
-                <Link key={rj.id} href={`/private-jobs/${rj.slug}`}>
-                  <Card className="group h-full border-rule transition-all hover:-translate-y-0.5 hover:border-rule dark:border-ink">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                            <Badge variant="secondary" className="bg-paper-3 text-xs text-brick dark:bg-paper-3 dark:text-brick">{rj.company.name}</Badge>
-                            {rjDays !== null && rjDays >= 0 && rjDays <= 7 ? (
-                              <Badge className="bg-paper-2 text-[11px] text-brick dark:bg-paper-2 dark:text-brick">Only {rjDays}d left</Badge>
-                            ) : rjDays !== null && rjDays > 7 ? (
-                              <Badge variant="outline" className="text-[11px]">{rjDays}d left</Badge>
-                            ) : null}
-                            {rjUrgent ? null : rj.vacancies ? (
-                              <Badge variant="outline" className="text-[11px]">{rj.vacancies} openings</Badge>
-                            ) : null}
-                          </div>
-                          <CardTitle className="text-base leading-snug group-hover:text-brick dark:group-hover:text-brick">{rj.title}</CardTitle>
-                        </div>
+                <Link key={rj.id} href={`/private-jobs/${rj.slug}`} className={cn("group block transition-transform duration-300 hover:-translate-y-1", i % 2 ? "rotate-[0.5deg]" : "-rotate-[0.5deg]")}>
+                  <article className="h-full p-[5px]" style={{ background: AIRMAIL, boxShadow: "0 16px 26px -20px rgb(30 30 60 / .55)" }}>
+                    <div className="relative h-full bg-[var(--hs-paper-slip)] px-5 pb-4 pt-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className={cn(typeFont.className, "min-w-0 truncate text-[11px] font-bold uppercase text-muted-foreground")}>{rj.company.name}</p>
+                        {rjDays !== null && rjDays >= 0 ? (
+                          <span
+                            className={cn(typeFont.className, "shrink-0 rotate-[6deg] rounded-[3px] border-2 px-1.5 text-[10px] font-bold")}
+                            style={{ color: rjUrgent ? "oklch(52% 0.19 27)" : "oklch(45% 0.13 255)", borderColor: "currentColor" }}
+                          >
+                            {rjUrgent ? `ONLY ${rjDays}D LEFT` : `${rjDays}D LEFT`}
+                          </span>
+                        ) : null}
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-1 text-sm text-muted-foreground dark:text-muted-foreground">
-                        {rj.location && <p>📍 {rj.location}</p>}
-                        {rj.lastDate && <p>🗓 Last Date: <span className={rjUrgent ? "font-bold text-brick" : "font-medium"}>{formatDate(rj.lastDate)}</span></p>}
-                        {rj.vacancies && <p>👥 Openings: {rj.vacancies}</p>}
+                      <h3 className="mt-2 font-display text-[1.12rem] font-bold leading-snug text-foreground decoration-[var(--color-brick)] decoration-2 underline-offset-[3px] group-hover:underline">{rj.title}</h3>
+                      <div className={cn(typeFont.className, "mt-3 space-y-1 text-[11.5px] text-muted-foreground")}>
+                        {rj.location && <p>To: <span className="text-foreground">{rj.location}</span></p>}
+                        {rj.lastDate && <p>Last date: <span className={rjUrgent ? "font-bold text-[var(--color-brick)]" : "text-foreground"}>{formatDate(rj.lastDate)}</span></p>}
+                        {rj.vacancies && <p>Openings: <span className="text-foreground">{rj.vacancies}</span></p>}
                       </div>
-                    </CardContent>
-                  </Card>
+                      <p className={cn(handFont.className, "mt-3 text-[1.05rem] text-[var(--hs-trust)]")}>open the letter →</p>
+                    </div>
+                  </article>
                 </Link>
               )
             })}

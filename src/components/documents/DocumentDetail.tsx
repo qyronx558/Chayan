@@ -1,13 +1,16 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react"
 import Link from "next/link"
 import {
- BookOpen, Building2, CalendarCheck, CalendarClock, CalendarDays, CalendarPlus, Check, ExternalLink,
+ BookOpen, Building2, CalendarCheck, CalendarClock, CalendarDays, CalendarPlus, ExternalLink,
  FileCheck2, FileText, GraduationCap, KeyRound, ListChecks, Ticket, Wallet, Info, Tag,
  type LucideIcon,
 } from "lucide-react"
 import { formatDate, cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import { HandTick, paperShadow } from "@/components/desk/DeskKit"
+import { DocArt, SKINS } from "@/components/documents/doc-skins"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { EntityViewTracker, type TrackedEntityType } from "@/components/analytics/EntityViewTracker"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
@@ -128,15 +131,24 @@ const tileIcon = (label: string): LucideIcon => {
  return Tag
 }
 
-function Section({ id, icon: Icon, title, hint, children }: { id: string; icon: LucideIcon; title: string; hint?: string; children: ReactNode }) {
+function Section({ id, n, accent, notebook, icon: Icon, title, hint, children }: { id: string; n?: number; accent?: string; notebook?: boolean; icon: LucideIcon; title: string; hint?: string; children: ReactNode }) {
  return (
-  <section id={id} className="scroll-mt-32 border border-rule bg-card">
-   <header className="flex items-center gap-3 border-b border-rule px-4 py-3 sm:px-5">
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-ink text-paper"><Icon className="h-4 w-4" /></span>
-    <h2 className="font-display text-lg font-bold leading-none text-foreground">{title}</h2>
-    {hint ? <span className="agate ml-auto hidden text-[11px] text-muted-foreground sm:block">{hint}</span> : null}
+  <section
+   id={id}
+   className="relative scroll-mt-32 overflow-hidden rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)]"
+   style={{ boxShadow: paperShadow }}
+  >
+   {notebook ? <span className="pointer-events-none absolute bottom-0 left-[2.1rem] top-0 w-px bg-[oklch(62%_0.17_25/0.45)] sm:left-[2.6rem]" aria-hidden /> : null}
+   <header className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1 pb-3 pr-5 pt-5 sm:pr-7", notebook ? "pl-12 sm:pl-14" : "pl-5 sm:pl-7")}>
+    <span className={cn(typeFont.className, "text-[11px] font-bold")} style={{ color: accent }}>§ {String(n ?? 1).padStart(2, "0")}</span>
+    <h2 className="flex items-center gap-2 font-display text-[1.35rem] font-black leading-tight text-foreground">
+     {title}
+     <Icon className="h-4 w-4 text-muted-foreground/70" aria-hidden />
+    </h2>
+    {hint ? <span className={cn(handFont.className, "ml-auto hidden text-[1rem] text-muted-foreground sm:block")}>{hint}</span> : null}
    </header>
-   <div className="p-4 sm:p-5">{children}</div>
+   <div className={cn("border-t border-dashed border-[var(--hs-border-strong)]", notebook ? "ml-12 mr-5 sm:ml-14 sm:mr-7" : "mx-5 sm:mx-7")} />
+   <div className={cn("pb-6 pr-5 pt-5 sm:pr-7", notebook ? "pl-12 sm:pl-14" : "pl-5 sm:pl-7")}>{children}</div>
   </section>
  )
 }
@@ -213,65 +225,92 @@ export function DocumentDetail({
   </>
  )
 
- const pillCls =
-  state.tone === "hot" ? "border-brick bg-brick text-brick-ink"
-  : state.tone === "ok" ? "border-ink text-foreground"
-  : "border-rule-2 text-muted-foreground"
+ const skin = SKINS[kind]
+ const accent = skin.accent
+ const num = (id: string) => sections.findIndex((s) => s.id === id) + 1
+ const stampTone = state.tone === "hot" ? "var(--color-brick)" : state.tone === "ok" ? accent : "oklch(50% 0.02 60)"
 
  return (
-  <div>
+  <div className="home-saas" style={{ ["--doc-accent" as string]: accent } as CSSProperties}>
   {/* Rail + content only: the sticky rail must never share a grid with anything below it. */}
-  <div className="grid items-start gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+  <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_340px]">
    {tracking ? <EntityViewTracker entityType={tracking.entityType} entityId={tracking.entityId} /> : null}
 
-   <div className="min-w-0 space-y-6">
-    {/* ── Hero ── */}
+   <div className="min-w-0 space-y-8">
+    {/* ── Hero: the paper itself ── */}
     <header>
-     <div className="flex flex-wrap items-center gap-1.5">
-      <span className={cn("agate inline-flex items-center gap-1.5 border px-2 py-0.5 text-[11px] uppercase tracking-wider", pillCls)}>
-       <span className={cn("h-1.5 w-1.5 rounded-full bg-current", state.tone === "hot" && "animate-pulse")} /> {state.pill}
+     <div className={cn(typeFont.className, "flex flex-wrap items-center gap-x-4 gap-y-1 border-y-2 border-double border-[var(--hs-border-strong)] py-1.5 text-[11px] font-bold uppercase text-foreground/70")}>
+      <span className="inline-flex items-center gap-1.5" style={{ color: accent }}><config.icon className="h-3.5 w-3.5" /> {skin.kicker}</span>
+      {category ? <span>{category}</span> : null}
+      <span className="ml-auto inline-flex items-center gap-1.5">
+       <span className={cn("h-1.5 w-1.5 rounded-full", state.tone === "hot" && "animate-pulse")} style={{ background: stampTone }} />
+       {state.pill}
       </span>
-      <span className="agate inline-flex items-center gap-1 border border-rule px-2 py-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
-       <config.icon className="h-3 w-3" /> {config.badge}
-      </span>
-      {category ? (
-       <span className="agate border border-rule px-2 py-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">{category}</span>
-      ) : null}
      </div>
-     <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-foreground sm:text-[2.5rem]">{title}</h1>
-     <p className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
-      <span className="inline-flex items-center gap-1.5 font-semibold text-foreground"><Building2 className="h-4 w-4 text-muted-foreground" />{department}</span>
-      {linkRows.map((l) => (
-       <Link key={l.label} href={l.href} className="inline-flex min-w-0 items-center gap-1 underline-offset-4 hover:text-brick hover:underline" title={l.value}>
-        <ExternalLink className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{l.label}: {l.value}</span>
-       </Link>
-      ))}
-     </p>
-     {/* Mobile/tablet: desktop gets these in the rail */}
-     <div className="mt-4 flex flex-wrap items-center gap-2 lg:hidden print:hidden">{actionNodes}</div>
+
+     <div className="mt-6 flex items-start justify-between gap-6">
+      <div className="min-w-0 flex-1">
+       <p className={cn(typeFont.className, "inline-flex items-center gap-1.5 text-[12.5px] font-bold uppercase text-muted-foreground")}>
+        <Building2 className="h-3.5 w-3.5" />{department}
+       </p>
+       <h1 className="mt-2 font-display text-[2rem] font-black leading-[1.08] text-foreground sm:text-[2.6rem]">{title}</h1>
+       <p className={cn(handFont.className, "mt-3 text-[1.15rem] leading-snug")} style={{ color: accent }}>{skin.note}</p>
+       {linkRows.length > 0 ? (
+        <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+         {linkRows.map((l) => (
+          <Link key={l.label} href={l.href} className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-dashed border-[var(--hs-border-strong)] px-3 py-1 transition-colors hover:border-solid hover:text-foreground" style={{ ["--tw-ring-color" as string]: accent }} title={l.value}>
+           <ExternalLink className="h-3.5 w-3.5 shrink-0" /> <span className="truncate"><b className="font-semibold text-foreground">{l.label}:</b> {l.value}</span>
+          </Link>
+         ))}
+        </p>
+       ) : null}
+       {/* Mobile/tablet: desktop gets these in the rail */}
+       <div className="mt-5 flex flex-wrap items-center gap-2 lg:hidden print:hidden">{actionNodes}</div>
+      </div>
+      <DocArt kind={kind} department={department} date={primaryFormatted} pill={state.pill} accent={accent} />
+     </div>
     </header>
 
-    {/* ── Key facts ── */}
+    {/* ── Key facts: one ticket strip ── */}
     {tiles.length > 0 ? (
-     <dl className={cn("grid grid-cols-2 border-b border-r border-rule bg-card", tiles.length === 4 ? "sm:grid-cols-2" : tiles.length === 1 ? "sm:grid-cols-1" : "sm:grid-cols-3")}>
-      {tiles.map((t) => (
-       <div key={t.label} className="min-w-0 border-l border-t border-rule px-4 py-3.5">
-        <dt className="agate flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground"><t.icon className="h-3.5 w-3.5" /> {t.label}</dt>
-        <dd className={cn("mt-1.5 font-display text-xl font-bold leading-tight tabular-nums sm:text-2xl", t.hot ? "text-brick" : "text-foreground")}>{t.value}</dd>
-        {t.sub ? <p className={cn("agate mt-0.5 text-xs", t.hot ? "font-semibold text-brick" : "text-muted-foreground")}>{t.sub}</p> : null}
-       </div>
-      ))}
-     </dl>
+     <div className="rounded-[4px] border border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)]" style={{ boxShadow: paperShadow }}>
+      <p className={cn(typeFont.className, "border-b border-dashed border-[var(--hs-border-strong)] px-5 py-2 text-[10.5px] font-bold tracking-[0.25em] text-muted-foreground")}>AT A GLANCE</p>
+      <dl className={cn("grid", tiles.length === 1 ? "grid-cols-1" : "grid-cols-2", tiles.length === 2 ? "sm:grid-cols-2" : tiles.length === 4 ? "sm:grid-cols-4" : tiles.length >= 3 ? "sm:grid-cols-3" : "")}>
+       {tiles.map((t, i) => (
+        <div key={t.label} className={cn("min-w-0 border-dashed border-[var(--hs-border-strong)] px-5 py-4", i > 0 && "border-l", i >= 2 && "max-sm:border-t", i % 2 === 0 && "max-sm:border-l-0", tiles.length !== 4 && i >= 3 && "sm:border-t", tiles.length !== 4 && i === 3 && "sm:border-l-0")}>
+         <dt className={cn(typeFont.className, "flex items-center gap-1.5 text-[10.5px] font-bold uppercase text-muted-foreground")}><t.icon className="h-3.5 w-3.5" /> {t.label}</dt>
+         <dd className={cn("mt-2 font-display text-[1.3rem] font-black leading-tight tabular-nums sm:text-[1.5rem]", t.hot ? "text-[var(--color-brick)]" : "text-foreground")}>
+          {t.sub || t.hot ? (
+           <span className="relative inline-block">
+            {t.value}
+            <svg viewBox="0 0 120 8" preserveAspectRatio="none" className="absolute -bottom-1.5 left-0 h-2 w-full" aria-hidden>
+             <path d="M2 5 C 30 2, 60 7, 118 3" stroke={t.hot ? "var(--color-brick)" : accent} strokeWidth="2" fill="none" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+           </span>
+          ) : t.value}
+         </dd>
+         {t.sub ? <p className={cn(handFont.className, "mt-1.5 text-[1rem] leading-tight", t.hot ? "text-[var(--color-brick)]" : "text-muted-foreground")}>{t.sub}</p> : null}
+        </div>
+       ))}
+      </dl>
+     </div>
     ) : null}
 
     {sections.length > 2 ? (
-     <nav aria-label="Sections" className="sticky top-[65px] z-30 -mx-4 border-b border-rule bg-background/95 px-4 backdrop-blur print:hidden sm:mx-0 sm:px-0">
-      <ul className="flex gap-1 overflow-x-auto">
-       {sections.map((s) => (
+     <nav aria-label="Sections" className="sticky top-[65px] z-30 -mx-4 border-b border-[var(--hs-border-strong)] bg-background/95 px-4 pt-2 backdrop-blur print:hidden sm:mx-0 sm:px-0">
+      <ul className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+       {sections.map((s, i) => (
         <li key={s.id} className="shrink-0">
-         <button type="button" onClick={() => goTo(s.id)} className={cn("relative px-3 py-3 text-[13px] font-medium transition-colors", active === s.id ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+         <button
+          type="button"
+          onClick={() => goTo(s.id)}
+          className={cn(
+           "relative -mb-px rounded-t-[8px] border border-b-0 px-3.5 pb-2 pt-1.5 text-[13px] transition-colors",
+           active === s.id ? "border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] font-semibold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+         >
+          <span className={cn(typeFont.className, "mr-1.5 text-[10px]")} style={{ color: active === s.id ? accent : undefined }}>{String(i + 1).padStart(2, "0")}</span>
           {s.label}
-          <span className={cn("absolute inset-x-3 -bottom-px h-0.5", active === s.id ? "bg-brick" : "bg-transparent")} />
          </button>
         </li>
        ))}
@@ -282,40 +321,46 @@ export function DocumentDetail({
     {journey ? <div id="journey" className="scroll-mt-32"><DocumentJourney stages={journey} /></div> : null}
 
     {topics.length > 0 ? (
-     <Section id="topics" icon={BookOpen} title={list?.label || "Topics"} hint="Tick as you study · saved on this device">
+     <Section id="topics" n={num("topics")} accent={accent} icon={BookOpen} title={list?.label || "Topics"} hint="tick as you study · saved on this device" notebook={kind === "syllabus"}>
       <TopicChecklist storageKey={tracking?.entityId ?? title} items={topics} />
      </Section>
     ) : null}
 
     {longRows.map((r, i) => (
-     <Section key={r.label} id={`row-${i}`} icon={r.label.match(/fee/i) ? Wallet : ListChecks} title={r.label}>
+     <Section key={r.label} id={`row-${i}`} n={num(`row-${i}`)} accent={accent} icon={r.label.match(/fee/i) ? Wallet : ListChecks} title={r.label}>
       <RichTextView html={r.value} />
      </Section>
     ))}
 
     {description ? (
-     <Section id="about" icon={FileText} title={`About this ${config.badge.toLowerCase()}`}>
+     <Section id="about" n={num("about")} accent={accent} icon={FileText} title={`About this ${config.badge.toLowerCase()}`}>
       <RichTextView html={description} />
      </Section>
     ) : null}
 
     {guide ? (
-     <Section id="guide" icon={Info} title={guide.title} hint="General guidance - follow your official notice">
-      <ul className="space-y-2.5">
+     <section id="guide" className="relative mx-auto max-w-xl scroll-mt-32 -rotate-[0.6deg] px-6 pb-6 pt-7 text-[oklch(28%_0.03_60)]" style={{ background: skin.guidePaper, boxShadow: "0 1px 1px rgb(60 40 10 / .1), 0 18px 28px -20px rgb(60 40 10 / .55)" }}>
+      <span className="absolute -top-2.5 left-1/2 h-6 w-24 -translate-x-1/2 rotate-[-2deg] bg-[oklch(92%_0.04_90/0.75)] shadow-[0_1px_2px_rgb(0_0_0/.12)]" aria-hidden />
+      <h2 className={cn(handFont.className, "text-[1.5rem] leading-tight")}>{guide.title}</h2>
+      <ul className="mt-3 space-y-2.5">
        {guide.items.map((g) => (
-        <li key={g} className="flex items-start gap-3 text-sm text-foreground">
-         <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center border border-rule text-ink"><Check className="h-3 w-3" /></span>
+        <li key={g} className="flex items-start gap-3 text-[14.5px] leading-snug">
+         <HandTick className="mt-0.5 h-4 w-5 shrink-0" draw={false} />
          {g}
         </li>
        ))}
       </ul>
-     </Section>
+      <p className={cn(handFont.className, "mt-4 text-[0.98rem] opacity-70")}>general guidance. your official notice always wins.</p>
+     </section>
     ) : null}
 
     {tiles.length === 0 && sections.length === 0 && !hasFile ? (
-     <div className="flex items-start gap-3 border border-rule bg-paper-2 p-5 text-sm text-muted-foreground">
+     <div className="flex items-start gap-3 rounded-[3px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] p-5 text-sm text-muted-foreground">
       <Info className="mt-0.5 h-5 w-5 shrink-0" />
-      <p>Details for this {config.badge.toLowerCase()} are not published yet. Check back soon or follow the linked job for updates.</p>
+      <div>
+       <p className={cn(handFont.className, "text-[1.2rem] text-foreground")}>Nothing printed on this sheet yet.</p>
+       <p className="mt-1">Details for this {config.badge.toLowerCase()} are not published yet. Check back soon or follow the linked job for updates.</p>
+      </div>
      </div>
     ) : null}
    </div>
@@ -329,23 +374,33 @@ export function DocumentDetail({
     publishedAt={publishedAt}
     state={state}
     actions={actionNodes}
+    accent={accent}
    />
 
   </div>
 
    {/* ── Related (full width, below) ── */}
    {relatedItems.length > 0 ? (
-    <section className="mt-10">
-     <div className="mb-4 flex items-end justify-between gap-3 border-b-2 border-rule-2 pb-2">
-      <h2 className="font-display text-xl font-bold text-foreground">{relatedTitle}</h2>
-      <Link href={config.listHref} className="shrink-0 text-sm font-medium text-brick underline decoration-1 underline-offset-4 hover:decoration-2">{config.listLabel} →</Link>
+    <section className="mt-16">
+     <div className="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-dashed border-[var(--hs-border-strong)] pb-3">
+      <div>
+       <p className={cn(handFont.className, "text-[1.15rem]")} style={{ color: accent }}>{skin.relatedNote}</p>
+       <h2 className="font-display text-[1.6rem] font-black leading-tight text-foreground">{relatedTitle}</h2>
+      </div>
+      <Link href={config.listHref} className={cn(handFont.className, "shrink-0 text-[1.1rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4 hover:text-[var(--color-brick)]")}>{config.listLabel.toLowerCase()} →</Link>
      </div>
-     <div className="grid border-b border-r border-rule sm:grid-cols-2">
-      {relatedItems.map((item) => (
-       <Link key={item.href} href={item.href} className="group border-l border-t border-rule bg-card p-4 transition-colors hover:bg-paper-2">
-        <span className="agate text-[11px] uppercase tracking-wider text-muted-foreground">{item.department}</span>
-        <h3 className="mt-1 text-sm font-semibold leading-snug text-foreground group-hover:text-brick">{item.title}</h3>
-        {item.meta ? <p className="agate mt-1.5 line-clamp-2 text-xs text-muted-foreground">{item.meta}</p> : null}
+     <div className="grid gap-6 sm:grid-cols-2">
+      {relatedItems.map((item, i) => (
+       <Link
+        key={item.href}
+        href={item.href}
+        className={cn("group relative block rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] px-5 pb-4 pt-5 transition-transform duration-300 hover:-translate-y-1", i % 3 === 1 ? "rotate-[0.5deg]" : i % 3 === 2 ? "-rotate-[0.4deg]" : "")}
+        style={{ boxShadow: paperShadow }}
+       >
+        <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full shadow-[1px_2px_2px_rgb(0_0_0/.3)]" style={{ background: `radial-gradient(circle at 35% 30%, color-mix(in oklch, ${accent} 55%, white), ${accent})` }} aria-hidden />
+        <span className={cn(typeFont.className, "line-clamp-1 text-[10.5px] font-bold uppercase text-muted-foreground")}>{item.department}</span>
+        <h3 className="mt-1.5 line-clamp-2 font-display text-[1.08rem] font-bold leading-snug text-foreground group-hover:underline group-hover:underline-offset-2" style={{ textDecorationColor: accent }}>{item.title}</h3>
+        {item.meta ? <p className={cn(typeFont.className, "mt-2 line-clamp-2 text-[11.5px] text-muted-foreground")}>{item.meta}</p> : null}
        </Link>
       ))}
      </div>
@@ -353,19 +408,19 @@ export function DocumentDetail({
    ) : null}
 
    {/* ── Mobile bar ── */}
-   <div className="sticky bottom-0 z-40 -mx-4 border-t border-rule bg-background/95 backdrop-blur print:hidden lg:hidden">
+   <div className="sticky bottom-0 z-40 -mx-4 border-t border-[var(--hs-border-strong)] bg-background/95 backdrop-blur print:hidden lg:hidden">
     {state.progress !== null ? (
-     <div className="h-1 w-full bg-paper-3" role="progressbar" aria-valuenow={state.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
-      <div className={cn("h-full", state.tone === "hot" ? "bg-brick" : "bg-ink")} style={{ width: `${state.progress}%` }} />
+     <div className="h-1 w-full bg-[var(--hs-surface-2)]" role="progressbar" aria-valuenow={state.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+      <div className="h-full" style={{ width: `${state.progress}%`, background: state.tone === "hot" ? "var(--color-brick)" : accent }} />
      </div>
     ) : null}
     <div className="flex items-center gap-3 px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
      <div className="min-w-0 flex-1">
       <p className="truncate text-sm font-semibold text-foreground">{title}</p>
-      <p className={cn("agate text-xs", state.tone === "hot" ? "text-brick" : "text-muted-foreground")}>{state.headline}</p>
+      <p className={cn(handFont.className, "text-[1rem] leading-tight", state.tone === "hot" ? "text-[var(--color-brick)]" : "text-muted-foreground")}>{state.headline}</p>
      </div>
      {downloadUrl ? (
-      <Button className="h-10 shrink-0 px-5 font-semibold" asChild>
+      <Button className="h-11 shrink-0 rounded-full px-6 font-semibold" asChild>
        {viewerActive ? (
         <Link href={viewerHref as string} target="_blank" rel="noopener noreferrer"><FileText className="mr-1.5 h-4 w-4" /> Open</Link>
        ) : (

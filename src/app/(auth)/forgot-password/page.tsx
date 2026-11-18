@@ -9,6 +9,7 @@ import { z } from "zod"
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Shield, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
+import { handFont } from "@/components/home/fonts"
 import { AuthLayout, InputWithIcon } from "@/components/auth/AuthComponents"
 
 const forgotPasswordSchema = z.object({
@@ -64,6 +65,7 @@ export default function ForgotPasswordPage() {
         ? "We have sent a password reset link to your email address. Please check your inbox."
         : "Enter your email address and we'll send you a secure reset link."}
       benefits={benefits}
+      variant={isSuccess ? "forgot-sent" : "forgot"}
     >
       <div className="space-y-6">
         <div className="text-center">
@@ -71,18 +73,18 @@ export default function ForgotPasswordPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-paper-3 dark:bg-paper-3"
+            className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border-[2.5px] ${isSuccess ? "rotate-[6deg] border-[oklch(45%_0.1_160)] text-[oklch(45%_0.1_160)]" : "-rotate-[6deg] border-[var(--color-brick)] text-[var(--color-brick)]"}`}
           >
             {isSuccess ? (
-              <CheckCircle2 className="h-8 w-8 text-foreground dark:text-foreground" />
+              <CheckCircle2 className="h-8 w-8" />
             ) : (
-              <Mail className="h-8 w-8 text-brick dark:text-brick" />
+              <Mail className="h-8 w-8" />
             )}
           </motion.div>
-          <h1 className="text-2xl font-bold text-foreground dark:text-paper">
+          <h1 className="font-display text-[2rem] font-black leading-tight text-foreground">
             {isSuccess ? "Check Your Email" : "Reset Password"}
           </h1>
-          <p className="mt-2 text-muted-foreground dark:text-muted-foreground">
+          <p className="mt-2 text-[14.5px] text-muted-foreground">
             {isSuccess
               ? "If an account exists with that email, you will receive a password reset link shortly."
               : "Enter your email address and we'll send you a reset link."}
@@ -91,11 +93,12 @@ export default function ForgotPasswordPage() {
 
         {isSuccess ? (
           <div className="space-y-4">
-            <div className="rounded-xl bg-paper-3 p-4 text-sm text-foreground dark:bg-paper-3 dark:text-foreground border border-rule dark:border-rule">
-              <p className="font-medium">Reset email sent!</p>
-              <p className="mt-1">Please check your inbox (and spam folder) for a link to reset your password. The link expires in 1 hour.</p>
+            <div className="relative rotate-[-0.6deg] rounded-[3px] px-4 pb-4 pt-5 text-sm text-[oklch(28%_0.03_60)]" style={{ background: "oklch(93% 0.09 95)", boxShadow: "0 1px 1px rgb(60 40 10 / .1), 0 12px 18px -14px rgb(60 40 10 / .5)" }}>
+              <span className="absolute -top-2 left-1/2 h-4 w-14 -translate-x-1/2 rotate-[3deg] bg-[oklch(92%_0.03_90/0.85)] shadow-[0_1px_2px_rgb(0_0_0/.12)]" aria-hidden />
+              <p className={`${handFont.className} text-[1.25rem] leading-tight`}>Reset email sent!</p>
+              <p className="mt-1 leading-relaxed">Please check your inbox (and spam folder) for a link to reset your password. The link expires in 1 hour.</p>
             </div>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="h-12 w-full rounded-full text-[15px] font-semibold" asChild>
               <Link href="/login">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Login
@@ -115,7 +118,7 @@ export default function ForgotPasswordPage() {
               autoFocus
             />
 
-            <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+            <Button type="submit" className="h-12 w-full rounded-full text-[15px] font-semibold transition-transform hover:-translate-y-px" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -127,7 +130,7 @@ export default function ForgotPasswordPage() {
             </Button>
 
             <div className="text-center">
-              <Link href="/login" className="inline-flex items-center text-sm font-medium text-brick hover:text-brick">
+              <Link href="/login" className={`${handFont.className} inline-flex items-center text-[1.1rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4 hover:text-[var(--color-brick)]`}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 Back to login
               </Link>

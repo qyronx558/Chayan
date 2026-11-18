@@ -11,6 +11,7 @@ import { Mail, Loader2, Shield, Bell, Bookmark, Clock, Briefcase, Building2, Use
 import { loginSchema, type LoginInput } from "@/lib/validations"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
+import { handFont, typeFont } from "@/components/home/fonts"
 import { AuthLayout, GoogleButton, Divider, InputWithIcon, PasswordInput } from "@/components/auth/AuthComponents"
 
 export default function LoginPage() {
@@ -147,23 +148,26 @@ export default function LoginPage() {
       sideTitle="Your Career Gateway"
       sideDescription="Sign in to access personalized job alerts, track applications, and discover opportunities across government & private sectors."
       benefits={benefits}
+      variant="login"
+      pass={mode}
     >
       <div className="space-y-6">
         {twoFactorStep ? (
           <>
             <div className="text-center">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brick/10 dark:bg-brick/20">
-                <ShieldCheck className="h-7 w-7 text-brick" />
+              <div className="mx-auto mb-4 flex h-14 w-14 rotate-[-6deg] items-center justify-center rounded-full border-[2.5px] border-[var(--color-brick)] text-[var(--color-brick)]">
+                <ShieldCheck className="h-7 w-7" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground dark:text-paper">Two-factor authentication</h1>
+              <h1 className="font-display text-[1.9rem] font-black leading-tight text-foreground">Two-factor authentication</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 Enter the 6-digit code from your authenticator app to continue signing in.
               </p>
+              <p className={`${handFont.className} mt-1 text-[1.05rem] text-[var(--color-brick)]`}>one more lock, just for you.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="totp-login" className="mb-1.5 block text-sm font-medium text-foreground dark:text-paper">
+                <label htmlFor="totp-login" className={`${typeFont.className} mb-1.5 block text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/75`}>
                   Authenticator code
                 </label>
                 <input
@@ -177,13 +181,13 @@ export default function LoginPage() {
                   onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   onKeyDown={(e) => { if (e.key === "Enter" && totpCode.length === 6) onSubmitTotp() }}
                   placeholder="000000"
-                  className="w-full rounded-xl border border-rule bg-background px-4 py-3 text-center font-mono text-2xl tracking-[0.4em] text-foreground placeholder:text-muted-foreground/40 focus:border-brick focus:outline-none focus:ring-2 focus:ring-brick/20 dark:bg-ink dark:text-paper"
+                  className={`${typeFont.className} w-full rounded-[12px] border-[1.5px] border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-surface)] px-4 py-4 text-center text-[1.9rem] font-bold tracking-[0.5em] text-foreground placeholder:text-muted-foreground/30 focus:border-solid focus:border-foreground/70 focus:outline-none focus:ring-4 focus:ring-[color-mix(in_oklch,var(--color-brick)_14%,transparent)]`}
                 />
               </div>
 
               <Button
                 type="button"
-                className="w-full py-3.5"
+                className="h-12 w-full rounded-full text-[15px] font-semibold"
                 disabled={isLoading || totpCode.length !== 6}
                 onClick={onSubmitTotp}
               >
@@ -204,7 +208,7 @@ export default function LoginPage() {
                   setSavedCredentials(null)
                   setTotpCode("")
                 }}
-                className="flex w-full items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-brick"
+                className={`${handFont.className} flex w-full items-center justify-center gap-1.5 text-[1.08rem] text-muted-foreground transition-colors hover:text-[var(--color-brick)]`}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Back to sign in
@@ -218,31 +222,34 @@ export default function LoginPage() {
         ) : (
           <>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground dark:text-paper">Sign In</h1>
-              <p className="mt-2 text-muted-foreground dark:text-muted-foreground">Continue to your dashboard</p>
+              <h1 className="font-display text-[2.1rem] font-black leading-none text-foreground">Sign In</h1>
+              <p className="mt-2 text-[14.5px] text-muted-foreground">Continue to your dashboard</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 rounded-xl bg-paper-3 p-1 dark:bg-ink">
+            <div className="grid grid-cols-2 gap-1 rounded-full border-[1.5px] border-[var(--hs-border-strong)] bg-[var(--hs-surface)] p-1" role="group" aria-label="Account type">
               <button
                 type="button"
                 onClick={() => setMode("seeker")}
-                className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "seeker" ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={mode === "seeker"}
+                className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-sm font-semibold transition-all duration-300 ${mode === "seeker" ? "bg-[var(--color-brick)] text-[oklch(98%_0.01_90)] shadow-[0_4px_10px_-4px_rgb(0_0_0/.4)]" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <User className="h-4 w-4" /> Jobseeker
               </button>
               <button
                 type="button"
                 onClick={() => setMode("employer")}
-                className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${mode === "employer" ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={mode === "employer"}
+                className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-sm font-semibold transition-all duration-300 ${mode === "employer" ? "bg-[oklch(45%_0.13_255)] text-[oklch(98%_0.01_90)] shadow-[0_4px_10px_-4px_rgb(0_0_0/.4)]" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Building2 className="h-4 w-4" /> Employer
               </button>
             </div>
 
             {mode === "employer" && (
-              <div className="rounded-xl border border-rule bg-paper-3 p-4 text-sm text-brick dark:border-rule dark:bg-paper-3 dark:text-brick">
-                <p className="flex items-center gap-1.5 font-bold"><Briefcase className="h-4 w-4" /> Company login - 2 steps</p>
-                <ol className="mt-1.5 list-decimal space-y-0.5 pl-5 text-[13px]">
+              <div className="relative rotate-[-0.6deg] rounded-[3px] px-4 pb-4 pt-5 text-sm text-[oklch(28%_0.03_60)]" style={{ background: "oklch(92% 0.05 240)", boxShadow: "0 1px 1px rgb(20 30 60 / .1), 0 12px 18px -14px rgb(20 30 60 / .5)" }}>
+                <span className="absolute -top-2 left-8 h-4 w-14 rotate-[-4deg] bg-[oklch(92%_0.03_90/0.85)] shadow-[0_1px_2px_rgb(0_0_0/.12)]" aria-hidden />
+                <p className="flex items-center gap-1.5 font-bold text-[oklch(38%_0.13_255)]"><Briefcase className="h-4 w-4" /> Company login - 2 steps</p>
+                <ol className="mt-1.5 list-decimal space-y-1 pl-5 text-[13px] leading-snug">
                   <li>Sign in below with your normal account (same as jobseekers).</li>
                   <li>Continue to prove your work inbox with a 6-digit OTP code, then Studio unlocks. Typing a domain alone never verifies.</li>
                 </ol>
@@ -253,7 +260,8 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl border border-brick bg-paper-2 p-4 text-sm font-medium text-brick dark:border-brick dark:bg-paper-2 dark:text-brick"
+                className="rounded-[10px] border-[1.5px] border-dashed border-[var(--color-brick)] px-4 py-3 text-sm font-medium text-[var(--color-brick)]"
+                style={{ background: "color-mix(in oklch, var(--color-brick) 7%, transparent)" }}
                 role="alert"
               >
                 {shownError}
@@ -292,19 +300,19 @@ export default function LoginPage() {
               />
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-rule text-brick focus:ring-rule"
+                    className="h-4 w-4 cursor-pointer rounded-[4px] accent-[var(--color-brick)]"
                   />
-                  <span className="text-sm text-muted-foreground dark:text-muted-foreground">Remember me</span>
+                  <span className="text-sm text-muted-foreground">Remember me</span>
                 </label>
-                <Link href="/forgot-password" className="text-sm font-medium text-brick hover:text-brick">
+                <Link href="/forgot-password" className={`${handFont.className} text-[1.05rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4 hover:text-[var(--color-brick)]`}>
                   Forgot password?
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+              <Button type="submit" className="h-auto min-h-12 w-full whitespace-normal rounded-full py-3 text-[15px] font-semibold transition-transform hover:-translate-y-px" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -324,9 +332,9 @@ export default function LoginPage() {
               </p>
             )}
 
-            <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground">
+            <p className="border-t border-dashed border-[var(--hs-border-strong)] pt-5 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="font-semibold text-brick hover:text-brick transition-colors">
+              <Link href="/register" className={`${handFont.className} text-[1.15rem] text-[var(--color-brick)] underline decoration-wavy decoration-1 underline-offset-4`}>
                 Create one
               </Link>
             </p>

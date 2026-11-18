@@ -2,8 +2,10 @@
 
 import type { ReactNode } from "react"
 import Link from "next/link"
-import { Flag, FileText, ShieldCheck } from "lucide-react"
+import { Flag, FileText } from "lucide-react"
 import { formatDate, cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import { paperShadow } from "@/components/desk/DeskKit"
 import type { DocState } from "@/lib/doc-state"
 import { Button } from "@/components/ui/button"
 import { ShareRow } from "@/components/shared/ShareRow"
@@ -19,31 +21,40 @@ interface Props {
   state: DocState
   /** Kind-specific buttons: tracker / follow / bookmark */
   actions?: ReactNode
+  /** Ink colour of the page this rail sits on (look only). */
+  accent?: string
 }
 
 /** Sticky desktop rail: state -> primary action -> save/follow -> share -> trust. Hidden in print. */
 export function DocumentSideRail(p: Props) {
   const { state } = p
+  const accent = p.accent ?? "var(--color-ink)"
+  const tone = state.tone === "hot" ? "var(--color-brick)" : state.tone === "ok" ? accent : "oklch(50% 0.02 60)"
   return (
-    <aside aria-label="Actions" className="space-y-3 print:hidden lg:sticky lg:top-24 lg:self-start">
-      <div className="border border-rule bg-card shadow-[0_1px_0_var(--color-rule),0_12px_32px_-18px_rgb(0_0_0/0.35)]">
-        <div aria-hidden="true" className={cn("h-1", state.tone === "hot" ? "bg-brick" : state.tone === "ok" ? "bg-ink" : "bg-rule-2")} />
-        <div className="space-y-4 p-5">
-          <div>
-            <p className="agate text-[11px] uppercase tracking-wider text-muted-foreground">Status</p>
-            <p className={cn("mt-1 font-display text-2xl font-bold leading-tight", state.tone === "hot" ? "text-brick" : state.tone === "muted" ? "text-muted-foreground" : "text-foreground")}>
-              {state.headline}
-            </p>
-            {state.progress !== null ? (
-              <div className="mt-3 h-1.5 w-full bg-paper-3" role="progressbar" aria-valuenow={state.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
-                <div className={cn("h-full", state.tone === "hot" ? "bg-brick" : "bg-ink")} style={{ width: `${state.progress}%` }} />
-              </div>
-            ) : null}
-            {state.sub ? <p className="agate mt-2 text-xs text-muted-foreground">{state.sub}</p> : null}
-          </div>
+    <aside aria-label="Actions" className="space-y-6 print:hidden lg:sticky lg:top-24 lg:self-start">
+      <div className="relative rounded-[4px] border border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)]" style={{ boxShadow: paperShadow }}>
+        <div className="px-5 pb-4 pt-5">
+          <p className={cn(typeFont.className, "text-[10.5px] font-bold uppercase text-muted-foreground")}>Status</p>
+          <p className="mt-1 font-display text-[1.5rem] font-black leading-tight" style={{ color: state.tone === "muted" ? "var(--muted-foreground)" : tone }}>
+            {state.headline}
+          </p>
+          {state.progress !== null ? (
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--hs-surface-2)]" role="progressbar" aria-valuenow={state.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Application window elapsed">
+              <div className="h-full rounded-full" style={{ width: `${state.progress}%`, background: tone }} />
+            </div>
+          ) : null}
+          {state.sub ? <p className={cn(handFont.className, "mt-2 text-[1rem] leading-snug text-muted-foreground")}>{state.sub}</p> : null}
+        </div>
 
+        {/* perforation */}
+        <div className="relative border-t-2 border-dashed border-[var(--hs-border-strong)]" aria-hidden>
+          <span className="absolute -left-[9px] -top-[9px] h-4 w-4 rounded-full border border-[var(--hs-border-strong)] bg-background" />
+          <span className="absolute -right-[9px] -top-[9px] h-4 w-4 rounded-full border border-[var(--hs-border-strong)] bg-background" />
+        </div>
+
+        <div className="space-y-3 px-5 pb-5 pt-5">
           {p.downloadUrl ? (
-            <Button className="h-11 w-full text-[15px] font-semibold" asChild>
+            <Button className="h-12 w-full rounded-full text-[15px] font-semibold" asChild>
               {p.viewerHref ? (
                 <Link href={p.viewerHref} target="_blank" rel="noopener noreferrer"><FileText className="mr-2 h-4 w-4" /> {p.downloadLabel}</Link>
               ) : (
@@ -51,33 +62,38 @@ export function DocumentSideRail(p: Props) {
               )}
             </Button>
           ) : (
-            <Button className="h-11 w-full" disabled>
+            <Button className="h-12 w-full rounded-full" disabled>
               <FileText className="mr-2 h-4 w-4" /> {state.tone === "ok" ? "PDF not attached yet" : state.pill === "Closed" ? "No file attached" : "Not released yet"}
             </Button>
           )}
 
-          {p.actions ? <div className="flex flex-wrap items-center gap-2 border-t border-rule pt-4">{p.actions}</div> : null}
+          {p.actions ? <div className="flex flex-wrap items-center gap-2 pt-2">{p.actions}</div> : null}
           <ShareRow title={p.title} />
         </div>
       </div>
 
-      <div className="border border-rule bg-card p-4 text-xs">
-        <p className="flex items-center gap-2 font-semibold text-foreground">
-          <ShieldCheck className="h-4 w-4 text-muted-foreground" /> Checked against the official source
+      <div className="relative rotate-[0.4deg] rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] p-4 text-xs" style={{ boxShadow: paperShadow }}>
+        <p className="flex items-center gap-2.5 font-semibold text-foreground">
+          <svg viewBox="0 0 64 64" className="h-9 w-9 shrink-0 -rotate-[10deg]" aria-hidden>
+            <circle cx="32" cy="32" r="28" fill="none" stroke="oklch(50% 0.1 160)" strokeWidth="2" />
+            <circle cx="32" cy="32" r="22" fill="none" stroke="oklch(50% 0.1 160)" strokeWidth="1" strokeDasharray="2 2" />
+            <path d="M21 33 l7 7 l15 -16" fill="none" stroke="oklch(50% 0.1 160)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Checked against the official source
         </p>
-        <dl className="mt-2.5 space-y-1.5 text-muted-foreground">
+        <dl className={cn(typeFont.className, "mt-3 space-y-1.5 text-[11.5px] text-muted-foreground")}>
           <div className="flex justify-between gap-3">
             <dt>Department</dt>
-            <dd className="text-right font-medium text-foreground">{p.department}</dd>
+            <dd className="text-right font-bold text-foreground">{p.department}</dd>
           </div>
           {p.publishedAt ? (
             <div className="flex justify-between gap-3">
               <dt>Published</dt>
-              <dd className="font-medium tabular-nums text-foreground">{formatDate(p.publishedAt)}</dd>
+              <dd className="font-bold tabular-nums text-foreground">{formatDate(p.publishedAt)}</dd>
             </div>
           ) : null}
         </dl>
-        <p className="mt-3 border-t border-rule pt-2.5 leading-relaxed text-muted-foreground">
+        <p className="mt-3 border-t border-dashed border-[var(--hs-border-strong)] pt-2.5 leading-relaxed text-muted-foreground">
           Not a government website. Confirm dates and details on the official site before acting.{" "}
           <a
             href="#discussion"

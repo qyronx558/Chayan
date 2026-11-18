@@ -10,6 +10,7 @@ import {
  CircleDot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { handFont } from "@/components/home/fonts"
 import { inferSelectionSteps, type SelectionStep } from "@/lib/job-insights"
 import { containsHtml } from "@/lib/blog-prose"
 import { RichTextView } from "@/components/shared/RichTextView"
@@ -40,22 +41,29 @@ export function JobSelectionStepper({ selectionProcess }: { selectionProcess: st
      const Icon = ICONS[s.icon]
      const isLast = i === steps.length - 1
      return (
-      <li key={i} className="relative flex flex-1 gap-3 pb-5 sm:flex-col sm:gap-2 sm:pb-0 sm:pr-4">
+      <li key={i} className="relative flex flex-1 gap-4 pb-6 sm:flex-col sm:items-center sm:gap-2.5 sm:pb-0 sm:text-center">
        {!isLast ? (
-        <div aria-hidden="true" className="absolute bottom-0 left-[19px] top-10 w-px bg-rule sm:left-10 sm:right-[-8px] sm:top-[19px] sm:h-px sm:w-auto" />
+        <>
+         {/* pencil line to the next stage */}
+         <svg aria-hidden="true" viewBox="0 0 100 12" preserveAspectRatio="none" className="absolute left-[calc(50%+26px)] right-[calc(-50%+26px)] top-[18px] hidden h-3 sm:block">
+          <path d={i % 2 ? "M1 6 C 25 2, 55 10, 99 5" : "M1 5 C 30 10, 60 2, 99 6"} fill="none" stroke="var(--hs-border-strong)" strokeWidth="1.6" strokeDasharray="5 4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+         </svg>
+         <span aria-hidden="true" className="absolute bottom-0 left-[21px] top-12 w-0 border-l-[1.6px] border-dashed border-[var(--hs-border-strong)] sm:hidden" />
+        </>
        ) : null}
-       <span className="z-10 flex h-10 w-10 shrink-0 items-center justify-center bg-ink text-paper">
-        <Icon className="h-4.5 w-4.5" />
+       <span className={cn("relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[1.6px] bg-[var(--hs-paper-slip)]", isLast ? "border-[var(--color-brick)] text-[var(--color-brick)]" : "border-foreground/70 text-foreground")}>
+        <Icon className="h-[18px] w-[18px]" />
+        <span className={cn(handFont.className, "absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--hs-paper-slip)] text-[0.95rem] leading-none text-[var(--color-brick)]")}>{i + 1}</span>
        </span>
-       <div className="min-w-0 pt-1 sm:pt-0">
-        <p className="agate text-[11px] text-brick">Stage {i + 1}</p>
-        <p className={cn("text-sm font-semibold leading-snug text-foreground")}>{s.label}</p>
+       <div className="min-w-0 pt-1.5 sm:max-w-[9.5rem] sm:pt-0">
+        <p className={cn("text-[13.5px] font-semibold leading-snug text-foreground")}>{s.label}</p>
+        {isLast ? <p className={cn(handFont.className, "text-[0.98rem] leading-tight text-[var(--color-brick)]")}>the finish line</p> : null}
        </div>
       </li>
      )
     })}
    </ol>
-   <p className="mt-3 agate text-[11px] text-muted-foreground">Stages in listed order - see notification for marks & qualifying rules.</p>
+   <p className={cn(handFont.className, "mt-5 text-[1rem] text-muted-foreground")}>Stages in listed order. See the notification for marks &amp; qualifying rules.</p>
   </div>
  )
 }

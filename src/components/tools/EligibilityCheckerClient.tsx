@@ -3,7 +3,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { EXAM_NORMS, CATEGORIES, calcAge } from "@/lib/tools/exam-age-norms";
 import { StatusPill } from "@/components/tools/ToolShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { handFont, typeFont } from "@/components/home/fonts";
+import { HandTick, PenLoop } from "@/components/desk/DeskKit";
+import { Sheet, chip, fieldBox, fieldLabel } from "@/components/tools/tool-kit";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,47 +41,56 @@ export default function EligibilityCheckerClient() {
  const eligible = result.filter((r) => r.eligible);
 
  return (
-  <div className="grid gap-4 lg:grid-cols-5">
-   <Card className="lg:col-span-2 border-rule dark:border-rule">
-    <CardHeader className="bg-paper-2 dark:bg-ink"><CardTitle className="text-[17px] text-foreground dark:text-paper">About you</CardTitle></CardHeader>
-    <CardContent className="space-y-5 p-5">
-     <div><Label className="text-[15px]">Birth date</Label><Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="mt-1.5 h-12 text-base" /></div>
-     <div><Label className="text-[15px]">Category</Label>
+  <div className="grid items-start gap-6 lg:grid-cols-5">
+   <Sheet label="FORM · ABOUT YOU" aside="three questions" className="lg:col-span-2">
+    <div className="space-y-5 p-5">
+     <div><Label className={fieldLabel}><span className={cn(handFont.className, "mr-1 text-[1rem] normal-case tracking-normal text-[var(--color-brick)]")}>1.</span>Birth date</Label><Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className={fieldBox} /></div>
+     <div><Label className={fieldLabel}><span className={cn(handFont.className, "mr-1 text-[1rem] normal-case tracking-normal text-[var(--color-brick)]")}>2.</span>Category</Label>
       <div className="mt-2 flex flex-wrap gap-2">{CATEGORIES.map((c) => (
-       <button key={c.value} onClick={() => setCategory(c.value)} className={`min-h-[40px] rounded-full border px-4 py-2 text-[13px] font-medium ${category === c.value ? "border-rule bg-ink text-paper" : "border-rule dark:border-ink"}`}>{c.label}</button>
+       <button key={c.value} onClick={() => setCategory(c.value)} aria-pressed={category === c.value} className={chip(category === c.value)}>{c.label}</button>
       ))}</div></div>
-     <div><Label className="text-[15px]">Study</Label>
+     <div><Label className={fieldLabel}><span className={cn(handFont.className, "mr-1 text-[1rem] normal-case tracking-normal text-[var(--color-brick)]")}>3.</span>Study</Label>
       <div className="mt-2 flex flex-wrap gap-2">{QUALS.map((q) => (
-       <button key={q} onClick={() => setQual(q)} className={`min-h-[40px] rounded-lg border px-3.5 py-2 text-[14px] font-medium ${qual === q ? "border-rule bg-paper-2 text-muted-foreground dark:bg-ink dark:text-muted-foreground dark:border-rule" : "border-rule text-muted-foreground dark:border-ink"}`}>{q}</button>
+       <button key={q} onClick={() => setQual(q)} aria-pressed={qual === q} className={chip(qual === q)}>{q}</button>
       ))}</div></div>
-     <div className="rounded-xl bg-paper-2 p-3 text-[13px] text-muted-foreground dark:bg-ink dark:text-muted-foreground">
+     <p className={cn(typeFont.className, "rounded-[6px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-surface)] px-3 py-2 text-[12px] text-muted-foreground")}>
       Age on 1 Aug • {category}
-     </div>
-    </CardContent>
-   </Card>
+     </p>
+    </div>
+   </Sheet>
 
-   <div className="lg:col-span-3 space-y-4">
-    <Card className="overflow-hidden">
-     <div className="bg-paper-2 p-6 dark:bg-ink">
-      <p className="text-[13px] font-medium text-muted-foreground dark:text-muted-foreground">Good news</p>
-      <p className="mt-1 text-3xl font-bold text-foreground sm:text-4xl dark:text-paper">You can apply for {eligible.length} exams</p>
-      <p className="mt-1 text-[13px] text-muted-foreground dark:text-muted-foreground">{qual} • {category}</p>
+   <div className="space-y-5 lg:col-span-3">
+    <Sheet>
+     <div className="border-b border-dashed border-[var(--hs-border-strong)] px-6 pb-5 pt-5">
+      <p className={cn(handFont.className, "text-[1.25rem] text-[oklch(45%_0.11_155)]")}>Good news</p>
+      <p className="mt-1 font-display text-[1.9rem] font-black leading-tight text-foreground sm:text-[2.3rem]">
+       You can apply for{" "}
+       <span className="relative mx-1.5 inline-block px-3">
+        {eligible.length}
+        <PenLoop className="-inset-x-1 -inset-y-1 h-[calc(100%+0.5rem)] w-[calc(100%+0.5rem)]" color="var(--color-brick)" />
+       </span>{" "}
+       exams
+      </p>
+      <p className={cn(typeFont.className, "mt-1 text-[12px] text-muted-foreground")}>{qual} • {category}</p>
      </div>
-     <CardContent className="divide-y divide-rule100 p-0 dark:divide-rule800">
+     <ul>
       {result.map(({ norm, maxEff, eligible: ok }) => (
-       <div key={norm.id} className="flex flex-wrap items-center gap-3 p-4">
+       <li key={norm.id} className={cn("flex flex-wrap items-center gap-3 border-b border-dashed border-[var(--hs-border)] px-6 py-3.5 last:border-b-0", !ok && "opacity-70")}>
+        <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border-[1.5px]", ok ? "border-[oklch(45%_0.11_155)]" : "border-[var(--hs-border-strong)]")} aria-hidden>
+         {ok ? <HandTick className="h-4 w-5 text-[oklch(45%_0.11_155)]" /> : null}
+        </span>
         <div className="min-w-0 flex-1">
-         <p className="text-[15px] font-bold">{norm.label}</p>
-         <p className="mt-0.5 text-[13px] text-muted-foreground">Age {norm.minAge}–{maxEff}</p>
+         <p className="text-[15.5px] font-bold text-foreground">{norm.label}</p>
+         <p className={cn(typeFont.className, "mt-0.5 text-[12px] text-muted-foreground")}>Age {norm.minAge}–{maxEff}</p>
         </div>
         {ok ? <StatusPill tone="ok">✓ Yes</StatusPill> : <StatusPill tone="warn">Not now</StatusPill>}
-       </div>
+       </li>
       ))}
-     </CardContent>
-    </Card>
-    <div className="flex flex-wrap gap-2">
-     <Button asChild className="h-12 bg-paper-2 px-5 text-base hover:bg-paper-3"><Link href="/tools/age-calculator">Check exact age</Link></Button>
-     <Button asChild variant="outline" className="h-12 px-5 text-base"><Link href="/jobs">See jobs</Link></Button>
+     </ul>
+    </Sheet>
+    <div className="flex flex-wrap gap-3">
+     <Button asChild className="h-12 rounded-full px-6 text-base font-semibold"><Link href="/tools/age-calculator">Check exact age</Link></Button>
+     <Button asChild variant="outline" className="h-12 rounded-full px-6 text-base"><Link href="/jobs">See jobs</Link></Button>
     </div>
    </div>
   </div>

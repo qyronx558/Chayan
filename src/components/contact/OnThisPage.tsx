@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { isSupportOnline } from "@/lib/channels"
+import { cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
 
 const SECTIONS = [
  { id: "message", label: "Send us a message" },
@@ -39,8 +41,8 @@ export function OnThisPage() {
 
  return (
   <div className="lg:sticky lg:top-24 lg:self-start">
-   <p className="text-[13px] font-semibold text-[var(--cp-ink)]">On this page</p>
-   <nav aria-label="On this page" className="mt-2 border-l border-[var(--cp-border)]">
+   <p className={cn(typeFont.className, "text-[10.5px] font-bold tracking-[0.25em] text-[var(--cp-muted)]")}>ON THIS PAGE</p>
+   <nav aria-label="On this page" className="mt-3 border-l-2 border-dashed border-[var(--cp-border)]">
     <ul>
      {SECTIONS.map((section) => {
       const isActive = active === section.id
@@ -49,9 +51,9 @@ export function OnThisPage() {
         <a
          href={`#${section.id}`}
          aria-current={isActive ? "true" : undefined}
-         className={`-ml-px block border-l-2 py-1.5 pl-4 text-[14px] transition-colors ${
+         className={`-ml-[2px] block border-l-[3px] py-2 pl-4 text-[14px] transition-colors ${
           isActive
-           ? "border-[var(--cp-ink)] font-medium text-[var(--cp-ink)]"
+           ? "border-[var(--color-brick)] font-semibold text-[var(--cp-ink)]"
            : "border-transparent text-[var(--cp-muted)] hover:text-[var(--cp-ink)]"
          }`}
         >
@@ -62,11 +64,11 @@ export function OnThisPage() {
      })}
     </ul>
    </nav>
-   <p className="mt-6 flex items-center gap-2 text-[13px] text-[var(--cp-muted)]">
+   <p className={cn(handFont.className, "mt-6 flex items-center gap-2 text-[1.02rem] text-[var(--cp-muted)]")}>
     <span
      aria-hidden
      className="cp-status-dot"
-     style={{ background: online ? "var(--color-brick)" : "var(--cp-faint)" }}
+     style={{ background: online ? "oklch(55% 0.13 155)" : "var(--cp-faint)", boxShadow: online ? "0 0 0 3px oklch(55% 0.13 155 / .2)" : undefined }}
     />
     {online === null ? "Checking support hours" : online ? "Within support hours" : "Outside support hours"}
    </p>

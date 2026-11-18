@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, RotateCcw } from "lucide-react"
+import { RotateCcw } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { handFont } from "@/components/home/fonts"
+import { HandTick } from "@/components/desk/DeskKit"
 import { stepify } from "@/lib/job-insights"
 import { containsHtml, stripHtmlToText } from "@/lib/blog-prose"
 import { RichTextView } from "@/components/shared/RichTextView"
@@ -72,18 +74,18 @@ export function JobDocumentsChecklist({ jobId, documentsRequired }: Props) {
 
  return (
   <div>
-   <div className="mb-3 flex items-center gap-3">
-    <div className="h-2 flex-1 overflow-hidden bg-paper-3" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Documents ready">
-     <div className="h-full bg-ink transition-all" style={{ width: `${pct}%` }} />
+   <div className="mb-4 flex items-center gap-3">
+    <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--hs-surface-2)]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Documents ready">
+     <div className="h-full rounded-full bg-[oklch(52%_0.1_160)] transition-all" style={{ width: `${pct}%` }} />
     </div>
-    <span className="agate text-xs tabular-nums text-muted-foreground">{done}/{docs.length} ready</span>
+    <span className={cn(handFont.className, "text-[1.05rem] tabular-nums text-foreground/80")}>{done === docs.length ? "all ready!" : `${done} of ${docs.length} ready`}</span>
     {done > 0 ? (
      <button type="button" onClick={reset} className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground">
       <RotateCcw className="h-3 w-3" /> Reset
      </button>
     ) : null}
    </div>
-   <ul className="space-y-2">
+   <ul className="grid gap-x-8 sm:grid-cols-2">
     {docs.map((doc, i) => {
      const on = safe[i] === true
      return (
@@ -92,28 +94,18 @@ export function JobDocumentsChecklist({ jobId, documentsRequired }: Props) {
         type="button"
         onClick={() => toggle(i)}
         aria-pressed={on}
-        className={cn(
-         "flex w-full items-start gap-2.5 border p-3 text-left text-sm transition-colors",
-         on
-          ? "border-ink bg-paper-2 text-foreground"
-          : "border-rule bg-background text-muted-foreground hover:border-brick",
-        )}
+        className="group flex w-full items-start gap-3 border-b border-dashed border-[var(--hs-border)] py-2.5 text-left text-[14px] transition-colors"
        >
-        <span
-         className={cn(
-          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2",
-          on ? "border-ink bg-ink text-paper" : "border-rule bg-background",
-         )}
-        >
-         {on ? <Check className="h-3.5 w-3.5" /> : null}
+        <span className={cn("relative mt-0.5 h-5 w-5 shrink-0 rounded-[3px] border-[1.6px] transition-colors", on ? "border-[oklch(52%_0.1_160)]" : "border-foreground/40 group-hover:border-[var(--color-brick)]")}>
+         {on ? <HandTick className="absolute -left-0.5 -top-2 h-6 w-7 text-[oklch(50%_0.12_160)]" /> : null}
         </span>
-        <span className={cn(on && "line-through opacity-80")}>{doc}</span>
+        <span className={cn("leading-snug", on ? "text-muted-foreground line-through decoration-[oklch(52%_0.1_160)] decoration-[1.5px]" : "text-foreground")}>{doc}</span>
        </button>
       </li>
      )
     })}
    </ul>
-   <p className="mt-2 agate text-[11px] text-muted-foreground">Tick what you have ready - saved on this device only.</p>
+   <p className={cn(handFont.className, "mt-3 text-[1rem] text-muted-foreground")}>Tick what you have ready. Saved on this device only.</p>
   </div>
  )
 }

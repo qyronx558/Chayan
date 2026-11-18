@@ -37,7 +37,7 @@ function Marked({ children, style }: { children: ReactNode; style: MarkStyle }) 
   }
   if (style === "circle") {
     return (
-      <span className="relative mx-1.5 inline-block whitespace-nowrap px-1.5">
+      <span className="relative ml-1.5 inline-block whitespace-nowrap px-1">
         <svg className="pointer-events-none absolute -inset-x-2 -inset-y-1.5 h-[calc(100%+0.75rem)] w-[calc(100%+1rem)] overflow-visible" viewBox="0 0 120 50" preserveAspectRatio="none" aria-hidden>
           <path
             className="hs-draw"

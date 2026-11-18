@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
 import { Suspense, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { handFont } from "@/components/home/fonts"
 import { AuthLayout, GoogleButton, Divider, InputWithIcon, PasswordInput, StrengthMeter } from "@/components/auth/AuthComponents"
 import { captureReferralFromUrl } from "@/lib/referral-attribution"
 
@@ -44,6 +45,8 @@ export default function RegisterPage() {
 
   const password = watch("password", "")
   const confirmPassword = watch("confirmPassword", "")
+  // display only: the desk nameplate beside the form spells the name as it is typed
+  const typedName = watch("name", "")
 
   async function onSubmit(data: RegisterInput) {
     if (!acceptedTerms) {
@@ -98,11 +101,13 @@ export default function RegisterPage() {
       sideTitle="Your Career Gateway"
       sideDescription="Create your free account and join thousands discovering opportunities across government & private sectors."
       benefits={benefits}
+      variant="register"
+      nameplate={typedName}
     >
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground dark:text-paper">Create Account</h1>
-          <p className="mt-2 text-muted-foreground dark:text-muted-foreground">Takes less than a minute</p>
+          <h1 className="font-display text-[2.1rem] font-black leading-none text-foreground">Create Account</h1>
+          <p className="mt-2 text-[14.5px] text-muted-foreground">Takes less than a minute</p>
         </div>
 
         <GoogleButton onClick={handleGoogleSignIn} disabled={isGoogleLoading} loading={isGoogleLoading} />
@@ -163,26 +168,26 @@ export default function RegisterPage() {
             autoComplete="new-password"
           />
 
-          <div className="flex items-start space-x-2">
+          <div className="flex items-start gap-2.5 rounded-[10px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-surface)] px-3.5 py-3">
             <Checkbox
               id="terms"
               checked={acceptedTerms}
               onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
               className="mt-0.5"
             />
-            <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">
+            <Label htmlFor="terms" className="text-sm font-normal leading-snug text-muted-foreground">
               I accept the{" "}
-              <Link href="/terms" className="text-brick hover:text-brick font-medium underline underline-offset-2">
+              <Link href="/terms" className="font-medium text-foreground underline decoration-dotted underline-offset-4 hover:text-[var(--color-brick)]">
                 Terms and Conditions
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-brick hover:text-brick font-medium underline underline-offset-2">
+              <Link href="/privacy" className="font-medium text-foreground underline decoration-dotted underline-offset-4 hover:text-[var(--color-brick)]">
                 Privacy Policy
               </Link>
             </Label>
           </div>
 
-          <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+          <Button type="submit" className="h-12 w-full rounded-full text-[15px] font-semibold transition-transform hover:-translate-y-px" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -194,9 +199,9 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground">
+        <p className="border-t border-dashed border-[var(--hs-border-strong)] pt-5 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-brick hover:text-brick transition-colors">
+          <Link href="/login" className={`${handFont.className} text-[1.15rem] text-[var(--color-brick)] underline decoration-wavy decoration-1 underline-offset-4`}>
             Sign in
           </Link>
         </p>
