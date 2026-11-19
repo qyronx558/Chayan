@@ -146,6 +146,15 @@ model User {
   dateOfBirth            DateTime?
   preferredStates        String[]                @default([])
   interestedCategories   String[]                @default([])
+  govInterest            String?
+  privateInterest        String?
+  headline               String?
+  experienceYears        Int?
+  expectedSalary         Int?
+  skills                 String[]                @default([])
+  preferredCities        String[]                @default([])
+  workModes              String[]                @default([])
+  jobTypes               String[]                @default([])
   twoFactorEnabled       Boolean                 @default(false)
   twoFactorSecret        String?
   passwordChangedAt      DateTime?

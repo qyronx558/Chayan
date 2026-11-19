@@ -17,6 +17,15 @@ export interface ProfileRecord {
   dateOfBirth: string | null
   preferredStates: string[]
   interestedCategories: string[]
+  govInterest: CareerInterest | null
+  privateInterest: CareerInterest | null
+  headline: string | null
+  experienceYears: number | null
+  expectedSalary: number | null
+  skills: string[]
+  preferredCities: string[]
+  workModes: string[]
+  jobTypes: string[]
   role: ProfileRole
   signInMethod: "Password" | "Google"
   memberSince: string
@@ -24,6 +33,16 @@ export interface ProfileRecord {
   twoFactorEnabled: boolean
   editableSections: string[]
   preferences: Record<string, boolean | string>
+}
+
+export type CareerInterest = "active" | "open" | "paused"
+
+export interface ProfileCounts {
+  applications: number
+  privateApplications: number
+  bookmarks: number
+  savedJobs: number
+  comments: number
 }
 
 export interface ProfileStats {
@@ -82,6 +101,96 @@ export const PROFILE_CATEGORIES = [
   "Court",
 ] as const
 
+export const CAREER_INTERESTS: { value: CareerInterest; label: string }[] = [
+  { value: "active", label: "All in" },
+  { value: "open", label: "Keeping an eye" },
+  { value: "paused", label: "Not now" },
+]
+
+export const WORK_MODES = [
+  { value: "REMOTE", label: "Remote" },
+  { value: "HYBRID", label: "Hybrid" },
+  { value: "ONSITE", label: "Office" },
+] as const
+
+export const JOB_TYPES = [
+  { value: "FULL_TIME", label: "Full-time" },
+  { value: "PART_TIME", label: "Part-time" },
+  { value: "INTERNSHIP", label: "Internship" },
+  { value: "CONTRACT", label: "Contract" },
+] as const
+
+export const SKILL_SUGGESTIONS = [
+  "Excel",
+  "Tally",
+  "Communication",
+  "Customer support",
+  "Sales",
+  "Data entry",
+  "Accounting",
+  "Python",
+  "SQL",
+  "Java",
+  "React",
+  "Digital marketing",
+  "Graphic design",
+  "Teaching",
+  "Nursing",
+  "Driving",
+] as const
+
+export const CITY_SUGGESTIONS = [
+  "Anywhere",
+  "Bengaluru",
+  "Hyderabad",
+  "Pune",
+  "Mumbai",
+  "Delhi NCR",
+  "Chennai",
+  "Kolkata",
+  "Ahmedabad",
+  "Jaipur",
+  "Lucknow",
+  "Kochi",
+] as const
+
+const INTEREST_RANK: Record<CareerInterest, number> = { active: 2, open: 1, paused: 0 }
+
+export function interestRank(v: CareerInterest | null | undefined): number {
+  return v ? INTEREST_RANK[v] : 1
+}
+
+export function ageOn(dateOfBirth: string | null | undefined, on: Date): { years: number; months: number } | null {
+  if (!dateOfBirth) return null
+  const dob = new Date(dateOfBirth)
+  if (isNaN(dob.getTime()) || dob > on) return null
+  let months = (on.getFullYear() - dob.getFullYear()) * 12 + (on.getMonth() - dob.getMonth())
+  if (on.getDate() < dob.getDate()) months -= 1
+  return { years: Math.floor(months / 12), months: months % 12 }
+}
+
+export function lakhsFromRupees(v: number | null | undefined): string {
+  if (v == null) return ""
+  return String(Math.round((v / 100000) * 10) / 10)
+}
+
+export function rupeesFromLakhs(v: string): number | null {
+  const n = parseFloat(v)
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100000) : null
+}
+
+export function journeySentence(gov: CareerInterest | null, priv: CareerInterest | null): string {
+  const g = gov ?? "open"
+  const p = priv ?? "open"
+  if (g === "paused" && p === "paused") return "Taking a breather for now. Everything here will wait for you."
+  if (g === "active" && p === "active") return "Preparing for government exams and chasing company offers, both at once."
+  if (g === "active") return p === "paused" ? "Focused on the government road." : "Preparing for government exams, with an eye on company jobs."
+  if (p === "active") return g === "paused" ? "Focused on company jobs." : "Chasing company offers, with an eye on government exams."
+  if (g === "paused") return "Looking around company jobs, no rush."
+  if (p === "paused") return "Looking around government jobs, no rush."
+  return "Keeping both roads open. Tell us which way you lean, any time."
+}
+
 export const PROFILE_DIGESTS = [
   { value: "INSTANT", label: "Instant" },
   { value: "DAILY", label: "Daily at 8:00" },
@@ -112,14 +221,17 @@ export function initialsFor(name: string | null | undefined, email: string | nul
   return "U"
 }
 
-export function buildStrengthSteps(profile: ProfileRecord | null, counts: { applications: number; bookmarks: number; comments: number }): StrengthStep[] {
+type CountsLike = { applications: number; privateApplications?: number; bookmarks: number; comments: number }
+
+export function buildStrengthSteps(profile: ProfileRecord | null, counts: CountsLike): StrengthStep[] {
   if (!profile) return []
   const hasName = !!profile.name && profile.name.trim().length >= 2
   const emailVerified = !!profile.emailVerifiedAt
   const phoneVerified = !!profile.phoneVerifiedAt
   const hasAvatar = !!profile.avatarUrl
   const hasResume = !!profile.resumeUrl || !!profile.resumeFileName
-  const hasPrefs = profile.preferredStates.length > 0 || profile.interestedCategories.length > 0
+  const hasGovPath = !!profile.qualification && (profile.preferredStates.length > 0 || profile.interestedCategories.length > 0)
+  const hasPrivatePath = profile.experienceYears !== null && profile.skills.length > 0
   const steps: StrengthStep[] = [
     { key: "name", label: "Add your full name", done: hasName, actionLabel: "Edit", targetTab: "profile", targetAnchor: "profile-name" },
     { key: "email", label: "Verify your email", done: emailVerified, actionLabel: "Verify", targetTab: "profile", targetAnchor: "profile-email" },
@@ -128,9 +240,10 @@ export function buildStrengthSteps(profile: ProfileRecord | null, counts: { appl
     { key: "resume", label: "Upload your resume", done: hasResume, actionLabel: "Upload", targetTab: "resume", targetAnchor: "resume-card" },
   ]
   if (!isAdminRole(profile.role)) {
-    steps.push({ key: "prefs", label: "Set job preferences", done: hasPrefs, actionLabel: "Set up", targetTab: "profile", targetAnchor: "job-preferences" })
+    steps.push({ key: "gov-path", label: "Sketch your government road", done: hasGovPath, actionLabel: "Fill in", targetTab: "profile", targetAnchor: "path-gov" })
+    steps.push({ key: "private-path", label: "Sketch your company road", done: hasPrivatePath, actionLabel: "Fill in", targetTab: "profile", targetAnchor: "path-private" })
   }
-  steps.push({ key: "tracker", label: "Track one application", done: counts.applications >= 1, actionLabel: "View jobs", targetTab: "profile", targetAnchor: "profile-strength" })
+  steps.push({ key: "tracker", label: "Track one application", done: counts.applications + (counts.privateApplications ?? 0) >= 1, actionLabel: "View jobs", targetTab: "profile", targetAnchor: "profile-strength" })
   return steps
 }
 
@@ -140,9 +253,9 @@ export function strengthFromSteps(steps: StrengthStep[]): { pct: number; done: n
   return { pct: total === 0 ? 0 : Math.round((done / total) * 100), done, total }
 }
 
-export function buildMilestones(profile: ProfileRecord | null, counts: { applications: number; bookmarks: number; comments: number }): Milestone[] {
+export function buildMilestones(profile: ProfileRecord | null, counts: CountsLike): Milestone[] {
   const emailDone = !!profile?.emailVerifiedAt
-  const trackerDone = counts.applications >= 1
+  const trackerDone = counts.applications + (counts.privateApplications ?? 0) >= 1
   const bookmarkerDone = counts.bookmarks >= 1
   const resumeDone = !!profile?.resumeUrl || !!profile?.resumeFileName
   const voiceDone = counts.comments >= 1
@@ -160,6 +273,8 @@ export function normalizeProfileResponse(raw: Record<string, unknown>): ProfileR
   const get = (k: string): unknown => (raw as Record<string, unknown>)[k]
   const str = (v: unknown): string | null => (typeof v === "string" && v.length > 0 ? v : null)
   const strArr = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [])
+  const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null)
+  const interest = (v: unknown): CareerInterest | null => (v === "active" || v === "open" || v === "paused" ? v : null)
   const email = typeof get("email") === "string" ? (get("email") as string) : ""
   if (!email) return null
   const emailVerifiedAt = str(get("emailVerifiedAt")) ?? str(get("emailVerified"))
@@ -184,6 +299,15 @@ export function normalizeProfileResponse(raw: Record<string, unknown>): ProfileR
     dateOfBirth: str(get("dateOfBirth")),
     preferredStates: strArr(get("preferredStates")),
     interestedCategories: strArr(get("interestedCategories")),
+    govInterest: interest(get("govInterest")),
+    privateInterest: interest(get("privateInterest")),
+    headline: str(get("headline")),
+    experienceYears: num(get("experienceYears")),
+    expectedSalary: num(get("expectedSalary")),
+    skills: strArr(get("skills")),
+    preferredCities: strArr(get("preferredCities")),
+    workModes: strArr(get("workModes")),
+    jobTypes: strArr(get("jobTypes")),
     role: get("role") === "ADMIN" || get("role") === "SUPER_ADMIN" ? (get("role") as ProfileRole) : "USER",
     signInMethod: get("signInMethod") === "Google" ? "Google" : "Password",
     memberSince: typeof get("memberSince") === "string" ? (get("memberSince") as string) : typeof get("createdAt") === "string" ? (get("createdAt") as string) : new Date().toISOString(),

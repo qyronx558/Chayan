@@ -1,57 +1,48 @@
 "use client"
 
-import { Award, CheckCircle2, Lock } from "lucide-react"
-import { DataCard } from "@/components/admin/dashboard/DataCard"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import { paperShadow, seeded } from "@/components/desk/DeskKit"
 import type { Milestone } from "@/lib/profile"
 
-interface MilestonesCardProps {
-  milestones: Milestone[]
-}
+const INKS = ["oklch(50% 0.12 150)", "var(--hs-pvt)", "var(--hs-gov)", "oklch(50% 0.11 300)", "var(--hs-trust)"]
 
-export function MilestonesCard({ milestones }: MilestonesCardProps) {
-  const unlocked = milestones.filter((m) => m.unlocked).length
+export function MilestonesCard({ milestones }: { milestones: Milestone[] }) {
+  const earned = milestones.filter((m) => m.unlocked).length
   return (
-    <DataCard
-      title="Milestones"
-      subtitle={`${unlocked} of ${milestones.length} unlocked`}
-      action={<Award className="h-4 w-4 text-brick dark:text-brick" aria-hidden="true" />}
-    >
-      <TooltipProvider>
-        <ul className="space-y-2">
-          {milestones.map((m) => (
-            <li
-              key={m.key}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm",
-                m.unlocked
-                  ? "border-rule bg-paper-3/[0.04] dark:border-rule dark:bg-paper-3/[0.06]"
-                  : "border-rule bg-paper-2/60 opacity-80  dark:bg-background/[0.03]"
-              )}
-            >
+    <section aria-label="Stamps earned" className="rounded-[4px] bg-[var(--hs-paper-slip)] px-5 pb-5 pt-4" style={{ boxShadow: paperShadow }}>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className={cn(typeFont.className, "text-[11px] font-bold tracking-[0.16em] text-muted-foreground")}>STAMPS EARNED</h2>
+        <span className={cn(handFont.className, "text-[15px] text-muted-foreground")}>
+          {earned} of {milestones.length}
+        </span>
+      </div>
+      <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-4">
+        {milestones.map((m, i) => {
+          const angle = Math.round((seeded(m.key) - 0.5) * 16)
+          const ink = INKS[i % INKS.length]
+          return (
+            <li key={m.key} className="flex min-h-[3.25rem] items-center justify-center text-center">
               {m.unlocked ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-brick dark:text-brick" aria-label={`${m.label} unlocked`} />
+                <span
+                  className={cn(typeFont.className, "inline-block rounded-[5px] border-[2.5px] px-2 py-1 text-[11px] font-bold leading-tight opacity-85")}
+                  style={{ color: ink, borderColor: ink, transform: `rotate(${angle}deg)` }}
+                >
+                  {m.label.toUpperCase()}
+                </span>
               ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="flex shrink-0 items-center gap-1.5">
-                      <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-label={`${m.label} locked`} />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-52 text-xs">{m.unlockHint}</p>
-                  </TooltipContent>
-                </Tooltip>
+                <span
+                  className="inline-flex flex-col items-center rounded-[5px] border-[1.5px] border-dashed border-[var(--hs-border-strong)] px-2 py-1"
+                  title={m.unlockHint}
+                >
+                  <span className={cn(typeFont.className, "text-[10.5px] font-bold leading-tight text-muted-foreground/70")}>{m.label.toUpperCase()}</span>
+                  <span className={cn(handFont.className, "mt-0.5 text-[12.5px] leading-tight text-muted-foreground")}>{m.unlockHint.replace(/ to unlock\.$/, "")}</span>
+                </span>
               )}
-              <span className={cn("font-medium", m.unlocked ? "text-foreground dark:text-paper" : "text-muted-foreground dark:text-muted-foreground")}>
-                {m.label}
-              </span>
-              {!m.unlocked ? <span className="ml-auto text-[11px] text-muted-foreground">Locked</span> : null}
             </li>
-          ))}
-        </ul>
-      </TooltipProvider>
-    </DataCard>
+          )
+        })}
+      </ul>
+    </section>
   )
 }

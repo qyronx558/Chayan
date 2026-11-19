@@ -122,6 +122,15 @@ export async function PUT(request: NextRequest) {
       qualification: data.qualification || null,
       preferredStates: data.preferredStates ?? [],
       interestedCategories: data.interestedCategories ?? [],
+      govInterest: data.govInterest ?? null,
+      privateInterest: data.privateInterest ?? null,
+      headline: data.headline || null,
+      experienceYears: data.experienceYears ?? null,
+      expectedSalary: data.expectedSalary ?? null,
+      skills: data.skills ?? [],
+      preferredCities: data.preferredCities ?? [],
+      workModes: data.workModes ?? [],
+      jobTypes: data.jobTypes ?? [],
     }
     if (data.dateOfBirth) {
       const dob = new Date(data.dateOfBirth)
