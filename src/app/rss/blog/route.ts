@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
+export const revalidate = 21600
+
 export async function GET() {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "")
 

@@ -5,6 +5,7 @@ import { admitCardSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { staffAudit } from "@/lib/moderation"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { requireAction } from "@/lib/admin/access"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
@@ -23,7 +24,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Admit card not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: admitCard })
+    return publicApiResponse({ success: true, data: admitCard }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch admit card" },
@@ -105,6 +106,8 @@ export async function PUT(
       note: `Updated "${admitCard.title}"`,
     })
 
+    revalidatePublicContent("admit-card", admitCard.slug)
+    if (existing.slug !== admitCard.slug) revalidatePublicContent("admit-card", existing.slug)
     return NextResponse.json({ success: true, data: admitCard })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)
@@ -154,6 +157,7 @@ export async function DELETE(
       note: `Deleted "${existing.title}"`,
     })
 
+    revalidatePublicContent("admit-card", existing.slug)
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

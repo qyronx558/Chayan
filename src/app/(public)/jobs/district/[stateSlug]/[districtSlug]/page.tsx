@@ -7,8 +7,14 @@ import { districtPagePath, statePagePath } from "@/lib/locations"
 import { getDistrictBySlugs } from "@/lib/location-pages"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { JobsClient } from "../../../jobs-client"
+import { DataVersionProvider } from "@/components/providers/DataVersion"
+import { renderVersion } from "@/lib/data-version"
 
-export const revalidate = 300
+export const revalidate = 21600
+
+export function generateStaticParams(): Record<string, string>[] {
+  return []
+}
 
 type Props = { params: Promise<{ stateSlug: string; districtSlug: string }> }
 
@@ -60,16 +66,18 @@ export default async function DistrictJobsPage({ params }: Props) {
         />
       </div>
 
-      <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading jobs…</div>}>
-        <JobsClient
-          preset={{
-            eligibleState: state.slug,
-            eligibleDistrict: district.slug,
-            heading: `Government Jobs in ${district.name}, ${state.name}`,
-            intro: `Jobs open to candidates from ${district.name}: district-level vacancies, ${state.name} state jobs, and central government jobs open to all of India.`,
-          }}
-        />
-      </Suspense>
+      <DataVersionProvider version={renderVersion()}>
+        <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading jobs…</div>}>
+          <JobsClient
+            preset={{
+              eligibleState: state.slug,
+              eligibleDistrict: district.slug,
+              heading: `Government Jobs in ${district.name}, ${state.name}`,
+              intro: `Jobs open to candidates from ${district.name}: district-level vacancies, ${state.name} state jobs, and central government jobs open to all of India.`,
+            }}
+          />
+        </Suspense>
+      </DataVersionProvider>
 
       <div className="container mx-auto max-w-7xl px-4 pb-12">
         <Link href={statePagePath(state.slug)} className="text-sm text-brick underline-offset-2 hover:underline">

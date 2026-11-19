@@ -7,6 +7,7 @@ import { isAdmin } from "@/lib/roles"
 import { applyContentScope, scopeErrorStatus } from "@/lib/admin-content"
 import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
+import { noStoreResponse, publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
@@ -93,12 +94,12 @@ export async function GET(request: NextRequest) {
         prisma.blogPost.count({ where }),
       ])
       const { ranked, fallback, windowDays } = await rankCandidateList("blog", pool as unknown as AnyItem[])
-      return NextResponse.json({
+      return publicApiResponse({
         success: true,
         data: ranked.slice(skip, skip + limit).map((r) => r.item),
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
         trending: { fallback, windowDays },
-      })
+      }, "blog")
     }
 
     const [posts, total] = await Promise.all([
@@ -124,12 +125,13 @@ export async function GET(request: NextRequest) {
       counts = { all, published: publishedCount, needsReview, draft, rejected }
     }
 
-    return NextResponse.json({
+    const body = {
       success: true,
       data: posts,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       ...(counts ? { counts } : {}),
-    })
+    }
+    return isOwnerScope ? noStoreResponse(body) : publicApiResponse(body, "blog")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch blog posts" },
@@ -196,6 +198,7 @@ export async function POST(request: NextRequest) {
       sendNotificationSMS("BLOG", post.title, post.slug, `New blog post published: ${post.title}`).catch(console.error)
     }
 
+    if (post.moderation === "APPROVED") revalidatePublicContent("blog", post.slug)
     return NextResponse.json({ success: true, data: post }, { status: 201 })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)

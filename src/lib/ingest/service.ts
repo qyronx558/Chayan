@@ -5,6 +5,7 @@
  */
 import { prisma } from "@/lib/prisma"
 import { revalidatePublicContent } from "@/lib/cache"
+import { revalidateJobsByIds } from "@/lib/revalidate-content"
 import { writeAuditLog } from "@/lib/moderation"
 import { importContent, REVALIDATE_KIND, type ContentModule, type RowOutcome } from "@/lib/bulk-upload/import"
 import type { IngestPost } from "./schema"
@@ -259,6 +260,7 @@ export async function ingestBatch(posts: IngestPost[], now: Date = new Date()): 
   const byKind = new Map<IngestKind, Prepared[]>()
   for (const x of prepared) byKind.set(x.kind, [...(byKind.get(x.kind) ?? []), x])
   const touched = new Set<IngestKind>()
+  const approvedJobIds: string[] = []
 
   for (const [kind, group] of byKind) {
     const decisions = group.map((x) => {
@@ -275,7 +277,10 @@ export async function ingestBatch(posts: IngestPost[], now: Date = new Date()): 
           results[x.index] = { sourceUrl: x.post.sourceUrl, status: "POSTED", entityId: outcome.id, moderation: decisions[i], quality: x.quality.score }
           meta[x.index].entityId = outcome.id
           meta[x.index].auto = decisions[i] === "APPROVED"
-          if (decisions[i] === "APPROVED") touched.add(kind)
+          if (decisions[i] === "APPROVED") {
+            touched.add(kind)
+            if (kind === "jobs") approvedJobIds.push(outcome.id)
+          }
         } else if (outcome.status === "duplicate") {
           results[x.index] = { sourceUrl: x.post.sourceUrl, status: "DUPLICATE", reason: "same title or slug already exists" }
         } else {
@@ -312,10 +317,9 @@ export async function ingestBatch(posts: IngestPost[], now: Date = new Date()): 
 
   for (const kind of touched) {
     try {
-      revalidatePublicContent(REVALIDATE_KIND[kind as ContentModule])
-    } catch {
-      // best-effort outside a request scope
-    }
+      if (kind === "jobs") await revalidateJobsByIds(approvedJobIds)
+      else revalidatePublicContent(REVALIDATE_KIND[kind as ContentModule])
+    } catch {}
   }
 
   const count = (s: ItemStatus) => results.filter((r) => r.status === s).length

@@ -9,7 +9,11 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { Badge } from "@/components/ui/badge"
 import { Tag, Eye, Clock3, Calendar } from "lucide-react"
 
-export const revalidate = 1800
+export const revalidate = 86400
+
+export function generateStaticParams(): Record<string, string>[] {
+  return []
+}
 
 interface PageProps {
   params: Promise<{ tag: string }>

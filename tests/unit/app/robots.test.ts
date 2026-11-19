@@ -19,7 +19,10 @@ describe("robots.txt", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://site.test/")
     count.mockResolvedValue(85_000)
     const r = await robots()
-    expect(r.rules).toMatchObject({ userAgent: "*", allow: "/" })
+    expect(r.rules).toEqual([
+      expect.objectContaining({ userAgent: "*", allow: "/", disallow: expect.arrayContaining(["/api/", "/browse", "/search"]) }),
+      expect.objectContaining({ userAgent: expect.arrayContaining(["AhrefsBot", "SemrushBot"]), disallow: "/" }),
+    ])
     expect(r.sitemap).toEqual([
       "https://site.test/sitemap.xml",
       "https://site.test/sitemaps/private-jobs/sitemap/0.xml",

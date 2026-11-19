@@ -3,6 +3,8 @@ import { DOCS_UPDATED, allDocs } from "@/components/docs/registry"
 import { districtPagePath, statePagePath } from "@/lib/locations"
 import { isThinJob } from "@/lib/ingest/quality"
 
+export const revalidate = 86400
+
 export default async function sitemap() {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "")
 

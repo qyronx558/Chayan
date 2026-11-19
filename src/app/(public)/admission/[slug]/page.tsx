@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,26 @@ import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+
+export const revalidate = 86400
+
+const getAdmission = cache((slug: string) => prisma.admission.findUnique({ where: { slug }, include: { department: true, category: true } }))
+
+export async function generateStaticParams() {
+  try {
+    const rows = await prisma.admission.findMany({ where: { moderation: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 100, select: { slug: true } })
+    return rows.map((r) => ({ slug: r.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const admission = await prisma.admission.findUnique({
-    where: { slug },
-    include: { department: true },
-  })
+  const admission = await getAdmission(slug)
 
-  if (!admission) return { title: "Admission Not Found" }
+  if (!admission || !isPubliclyVisible(admission.moderation)) return { title: "Admission Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -30,12 +41,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function AdmissionDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const admission = await prisma.admission.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const admission = await getAdmission(slug)
 
-  if (!admission || !(await canViewContent(admission.moderation))) notFound()
+  if (!admission || !isPubliclyVisible(admission.moderation)) notFound()
 
   const relatedAdmissions = await prisma.admission.findMany({
     where: {

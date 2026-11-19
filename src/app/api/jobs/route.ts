@@ -9,12 +9,14 @@ import { isAdmin } from "@/lib/roles"
 import { applyContentScope, CREATED_BY_SELECT, scopeErrorStatus } from "@/lib/admin-content"
 import { defaultModerationForRole, staffAudit } from "@/lib/moderation"
 import { isListTab } from "@/lib/admin/access"
-import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { publicApiResponse } from "@/lib/cache"
+import { revalidateJobById } from "@/lib/revalidate-content"
 import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { buildJobLocationWhere, findDistrictIdByName, validateJobLocation } from "@/lib/locations-server"
 import { buildDateRange, dateInDays, parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
+import { decodeCursor, keysetAfter, KEYSET_ORDER, pageWithCursor } from "@/lib/keyset"
 
 export async function GET(request: NextRequest) {
   try {
@@ -146,7 +148,35 @@ export async function GET(request: NextRequest) {
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
         trending: { fallback, windowDays },
       }
-      return publicApiResponse(payload)
+      return publicApiResponse(payload, "gov")
+    }
+
+    const cursor = decodeCursor(searchParams.get("cursor"))
+    if (!isAdminScope && (sort === "latest" || sort === "newest")) {
+      const keysetWhere = cursor ? { AND: [where, keysetAfter(cursor)] } : where
+      const [rows, total] = await Promise.all([
+        prisma.job.findMany({
+          where: keysetWhere,
+          include: { department: true, category: true, state: true, district: { select: { id: true, name: true, slug: true } } },
+          orderBy: KEYSET_ORDER,
+          take: limit + 1,
+        }),
+        cursor ? Promise.resolve(undefined) : prisma.job.count({ where }),
+      ])
+      const { items, nextCursor } = pageWithCursor(rows, limit)
+      return publicApiResponse(
+        {
+          success: true,
+          data: items,
+          pagination: {
+            page,
+            limit,
+            ...(total !== undefined ? { total, totalPages: Math.ceil(total / limit) } : {}),
+            nextCursor,
+          },
+        },
+        "gov"
+      )
     }
 
     const [jobs, total] = await Promise.all([
@@ -190,7 +220,7 @@ export async function GET(request: NextRequest) {
       },
       ...(counts ? { counts } : {}),
     }
-    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
+    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload, "gov")
   } catch (error) {
     console.error("[jobs] Failed to fetch jobs:", error)
     return NextResponse.json(
@@ -321,7 +351,7 @@ export async function POST(request: NextRequest) {
       user: session.user,
       note: `Created "${job.title}" moderation=${job.moderation}`,
     })
-    revalidatePublicContent("job", job.slug)
+    await revalidateJobById(job.id)
 
     // Notify subscribers only for approved (live) content; pending items notify on approval.
     if (job.moderation === "APPROVED") {

@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,24 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
-import { canViewContent } from "@/lib/public-visibility"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getAdmission = cache((slug: string) => prisma.admission.findUnique({ where: { slug }, include: { department: true, category: true } }))
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const admission = await prisma.admission.findUnique({ where: { slug } })
-  if (!admission) return { title: "View Admission | ChayanJobs" }
+  const admission = await getAdmission(slug)
+  if (!admission || !isPubliclyVisible(admission.moderation)) return { title: "View Admission | ChayanJobs" }
   return {
     title: `Admission: ${admission.title} | ChayanJobs`,
     description: `View ${admission.title} in fullscreen on the original official document.`,
@@ -28,12 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function AdmissionViewPage({ params }: Props) {
   const { slug } = await params
-  const admission = await prisma.admission.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const admission = await getAdmission(slug)
 
-  if (!admission || !(await canViewContent(admission.moderation))) notFound()
+  if (!admission || !isPubliclyVisible(admission.moderation)) notFound()
 
   const targetUrl = normalizeExternalUrl(admission.pdfUrl)
   if (!targetUrl) notFound()

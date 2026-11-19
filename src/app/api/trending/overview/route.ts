@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limitPerModule = Math.min(12, Math.max(1, parseInt(searchParams.get("limitPerModule") || "6")))
     const result = await getTrendingOverview(limitPerModule)
-    return publicApiResponse({ success: true, data: result }, 300)
+    return publicApiResponse({ success: true, data: result }, "search")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to load trending overview" },

@@ -37,6 +37,21 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         ],
       },
+      ...[
+        "/api/admin/:path*",
+        "/api/auth/:path*",
+        "/api/users/:path*",
+        "/api/user/:path*",
+        "/api/employer/:path*",
+        "/api/applications/:path*",
+        "/api/private-applications/:path*",
+        "/api/bookmarks/:path*",
+        "/api/stats",
+        "/api/comments/:path*",
+        "/api/private-jobs/recommendations",
+        "/api/cron/:path*",
+        "/api/track/:path*",
+      ].map((source) => ({ source, headers: [{ key: "Cache-Control", value: "private, no-store" }] })),
       // Listed after the site-wide rule so this value wins on these routes.
       ...browserShellRoutes.map((source) => ({ source, headers: [browserShellPolicy] })),
       // Local and dev copies: tell search engines not to index anything.

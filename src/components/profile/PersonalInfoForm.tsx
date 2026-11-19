@@ -102,7 +102,7 @@ export function PersonalInfoForm({
   }
 
   return (
-    <DataCard title="Personal information" subtitle="Keep your contact details up to date">
+    <DataCard title="About you" subtitle="How we reach you when something you care about changes. Only you see this." className="rounded-[4px] border-[var(--hs-border)] bg-[var(--hs-paper-slip)] shadow-[0_1px_2px_rgb(60_40_10/.08),0_16px_28px_-22px_rgb(60_40_10/.55)]">
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="profile-name">Full name</Label>

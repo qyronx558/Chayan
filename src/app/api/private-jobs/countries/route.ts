@@ -17,7 +17,7 @@ export async function GET() {
     const iso = allCountries().map((c) => ({ ...c, count: counts.get(c.code) ?? 0 }))
     const custom = used.filter((u) => !iso.some((c) => c.code === u.v)).map((u) => ({ code: u.v, name: countryName(u.v), count: Number(u.n) }))
     const data = [...iso, ...custom].sort((a, b) => Number(b.count > 0) - Number(a.count > 0) || a.name.localeCompare(b.name))
-    return publicApiResponse({ success: true, data }, 300)
+    return publicApiResponse({ success: true, data }, "private")
   } catch (error) {
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to fetch countries" }, { status: 500 })
   }

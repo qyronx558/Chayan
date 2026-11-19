@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Bell, Database, FileText, ListChecks, Settings, Shield, User } from "lucide-react"
+import "@/app/home.css"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
 import {
@@ -14,6 +15,7 @@ import {
   isAdminRole,
   normalizeProfileResponse,
   strengthFromSteps,
+  type ProfileCounts,
   type ProfileRecord,
   type ProfileStats,
 } from "@/lib/profile"
@@ -23,7 +25,8 @@ import { StatsStrip } from "@/components/profile/StatsStrip"
 import { QuickActions } from "@/components/profile/QuickActions"
 import { ProfileSidebar, ProfileMobileTabs, type SidebarItem } from "@/components/profile/ProfileSidebar"
 import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm"
-import { JobPreferences } from "@/components/profile/JobPreferences"
+import { CareerPaths } from "@/components/profile/CareerPaths"
+import { TrackerShelf } from "@/components/profile/TrackerShelf"
 import { RoleAccessCard } from "@/components/profile/RoleAccessCard"
 import { ProfileStrengthCard } from "@/components/profile/ProfileStrengthCard"
 import { AccountDetailsCard } from "@/components/profile/AccountDetailsCard"
@@ -39,6 +42,29 @@ import { ActivityList, type ActivityEvent } from "@/components/profile/ActivityL
 import { DataPrivacyTab } from "@/components/profile/DataPrivacyTab"
 import { SettingsTab } from "@/components/profile/SettingsTab"
 
+const EMPTY_COUNTS: ProfileCounts = { applications: 0, privateApplications: 0, bookmarks: 0, savedJobs: 0, comments: 0 }
+
+function toFormValues(p: ProfileRecord): ProfileUpdateInput {
+  return {
+    name: p.name ?? "",
+    language: (p.language as ProfileUpdateInput["language"]) ?? "English",
+    phone: p.phone ?? "",
+    qualification: p.qualification ?? "",
+    dateOfBirth: p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "",
+    preferredStates: p.preferredStates,
+    interestedCategories: p.interestedCategories,
+    govInterest: p.govInterest,
+    privateInterest: p.privateInterest,
+    headline: p.headline ?? "",
+    experienceYears: p.experienceYears,
+    expectedSalary: p.expectedSalary,
+    skills: p.skills,
+    preferredCities: p.preferredCities,
+    workModes: p.workModes as ProfileUpdateInput["workModes"],
+    jobTypes: p.jobTypes as ProfileUpdateInput["jobTypes"],
+  }
+}
+
 type TabKey = "profile" | "resume" | "security" | "notifications" | "settings" | "data" | "activity"
 
 const VALID_TABS: TabKey[] = ["profile", "resume", "security", "notifications", "settings", "data", "activity"]
@@ -53,7 +79,7 @@ function ProfilePageInner() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<ProfileRecord | null>(null)
-  const [counts, setCounts] = useState({ applications: 0, bookmarks: 0, savedJobs: 0, comments: 0 })
+  const [counts, setCounts] = useState<ProfileCounts>(EMPTY_COUNTS)
   const [adminStats, setAdminStats] = useState({ uploads: 0, approved: 0, pendingReview: 0 })
   const [resume, setResume] = useState<ResumeState | null>(null)
   const [resumeLoading, setResumeLoading] = useState(true)
@@ -69,7 +95,24 @@ function ProfilePageInner() {
   const form = useForm<ProfileUpdateInput>({
     resolver: zodResolver(profileUpdateSchema),
     mode: "onChange",
-    defaultValues: { name: "", language: "English", phone: "", qualification: "", dateOfBirth: "", preferredStates: [], interestedCategories: [] },
+    defaultValues: {
+      name: "",
+      language: "English",
+      phone: "",
+      qualification: "",
+      dateOfBirth: "",
+      preferredStates: [],
+      interestedCategories: [],
+      govInterest: null,
+      privateInterest: null,
+      headline: "",
+      experienceYears: null,
+      expectedSalary: null,
+      skills: [],
+      preferredCities: [],
+      workModes: [],
+      jobTypes: [],
+    },
   })
   const { reset, handleSubmit, formState } = form
   const dirty = formState.isDirty
@@ -100,21 +143,10 @@ function ProfilePageInner() {
     router.replace(`/profile?${params.toString()}`, { scroll: false })
   }
 
-  function applyProfile(p: ProfileRecord, c: { applications: number; bookmarks: number; savedJobs: number; comments: number }) {
+  function applyProfile(p: ProfileRecord, c: ProfileCounts) {
     setProfile(p)
     setCounts(c)
-    reset(
-      {
-        name: p.name ?? "",
-        language: (p.language as ProfileUpdateInput["language"]) ?? "English",
-        phone: p.phone ?? "",
-        qualification: p.qualification ?? "",
-        dateOfBirth: p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "",
-        preferredStates: p.preferredStates ?? [],
-        interestedCategories: p.interestedCategories ?? [],
-      },
-      { keepDirty: false }
-    )
+    reset(toFormValues(p), { keepDirty: false })
   }
 
   const fetchMe = useCallback(async () => {
@@ -123,10 +155,11 @@ function ProfilePageInner() {
     if (!res.ok || !json.success) throw new Error(json.error || "Failed to load profile")
     const p = normalizeProfileResponse(json.data as Record<string, unknown>)
     if (!p) throw new Error("Invalid profile response")
-    const c = (json.data as { counts?: { applications?: number; bookmarks?: number; savedJobs?: number; comments?: number } }).counts
+    const c = (json.data as { counts?: Partial<ProfileCounts> }).counts
     const a = (json.data as { adminStats?: { uploads?: number; approved?: number; pendingReview?: number } }).adminStats
-    const nextCounts = {
+    const nextCounts: ProfileCounts = {
       applications: c?.applications ?? 0,
+      privateApplications: c?.privateApplications ?? 0,
       bookmarks: c?.bookmarks ?? 0,
       savedJobs: c?.savedJobs ?? 0,
       comments: c?.comments ?? 0,
@@ -256,18 +289,7 @@ function ProfilePageInner() {
 
   function onDiscard() {
     if (!profile) return
-    reset(
-      {
-        name: profile.name ?? "",
-        language: (profile.language as ProfileUpdateInput["language"]) ?? "English",
-        phone: profile.phone ?? "",
-        qualification: profile.qualification ?? "",
-        dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.slice(0, 10) : "",
-        preferredStates: profile.preferredStates ?? [],
-        interestedCategories: profile.interestedCategories ?? [],
-      },
-      { keepDirty: false }
-    )
+    reset(toFormValues(profile), { keepDirty: false })
   }
 
   const pendingJump = useRef<{ tab: TabKey; anchor: string } | null>(null)
@@ -410,24 +432,27 @@ function ProfilePageInner() {
     switch (activeTab) {
       case "profile":
         return (
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="min-w-0 space-y-4">
-              <PersonalInfoForm
-                form={form}
-                email={p.email}
-                emailVerified={!!p.emailVerifiedAt}
-                phoneVerified={!!p.phoneVerifiedAt}
-                onRequestEmailVerify={handleEmailVerify}
-                onSendPhoneCode={handleSendPhoneCode}
-                onConfirmPhoneCode={handleConfirmPhoneCode}
-                onChangeEmail={handleChangeEmail}
-              />
-              {!admin ? <JobPreferences form={form} /> : <RoleAccessCard role={p.role} sections={p.editableSections} />}
-            </div>
-            <div className="min-w-0 space-y-4">
-              <ProfileStrengthCard pct={strength.pct} done={strength.done} total={strength.total} steps={steps} onJump={onJump} />
-              <AccountDetailsCard accountType={p.role} signInMethod={p.signInMethod} emailVerified={!!p.emailVerifiedAt} memberSince={p.memberSince} />
-              {!admin ? <MilestonesCard milestones={milestones} /> : null}
+          <div className="min-w-0 space-y-8">
+            {!admin ? <CareerPaths form={form} /> : null}
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="min-w-0 space-y-6">
+                <PersonalInfoForm
+                  form={form}
+                  email={p.email}
+                  emailVerified={!!p.emailVerifiedAt}
+                  phoneVerified={!!p.phoneVerifiedAt}
+                  onRequestEmailVerify={handleEmailVerify}
+                  onSendPhoneCode={handleSendPhoneCode}
+                  onConfirmPhoneCode={handleConfirmPhoneCode}
+                  onChangeEmail={handleChangeEmail}
+                />
+                {admin ? <RoleAccessCard role={p.role} sections={p.editableSections} /> : null}
+              </div>
+              <div className="min-w-0 space-y-6">
+                <ProfileStrengthCard pct={strength.pct} done={strength.done} total={strength.total} steps={steps} onJump={onJump} />
+                <AccountDetailsCard accountType={p.role} signInMethod={p.signInMethod} emailVerified={!!p.emailVerifiedAt} memberSince={p.memberSince} />
+                {!admin ? <MilestonesCard milestones={milestones} /> : null}
+              </div>
             </div>
           </div>
         )
@@ -477,22 +502,25 @@ function ProfilePageInner() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 pb-24">
+    <div className="home-saas mx-auto w-full max-w-6xl min-w-0 px-4 py-6 pb-24">
       <ProfileHeader profile={profile} strengthPct={strength.pct} onAvatarChange={onAvatarChange} />
 
-      <div className="mt-4">
-        <StatsStrip admin={admin} stats={stats} />
+      <div className="mt-6">
+        {admin ? (
+          <div className="space-y-3">
+            <StatsStrip admin stats={stats} />
+            <QuickActions admin counts={counts} />
+          </div>
+        ) : (
+          <TrackerShelf counts={counts} />
+        )}
       </div>
 
-      <div className="mt-3">
-        <QuickActions admin={admin} counts={counts} />
-      </div>
-
-      <div className="mt-4">
+      <div className="mt-8">
         <ProfileMobileTabs items={sidebarItems} active={activeTab} onSelect={(k) => setTab(k as TabKey)} />
       </div>
 
-      <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
+      <div className="mt-4 grid min-w-0 gap-6 lg:mt-8 lg:grid-cols-[190px_minmax(0,1fr)] lg:gap-8">
         <ProfileSidebar items={sidebarItems} active={activeTab} onSelect={(k) => setTab(k as TabKey)} />
         <div className="min-w-0">{renderContent()}</div>
       </div>

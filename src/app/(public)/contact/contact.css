@@ -1,30 +1,18 @@
+/* Same paper as the rest of the site, so the post office sits in the same town. */
 .contact-scope {
- --cp-bg: #ffffff;
- --cp-ink: #0d1117;
- --cp-muted: #656d76;
- --cp-faint: #8b949e;
- --cp-border: #e4e7eb;
- --cp-soft: #f6f8fa;
- --cp-field: #ffffff;
- --cp-link: #0f766e;
- --cp-btn: #0d1117;
- --cp-btn-ink: #ffffff;
+ --cp-bg: var(--color-background);
+ --cp-ink: var(--color-foreground);
+ --cp-muted: var(--color-muted-foreground);
+ --cp-faint: color-mix(in oklch, var(--color-muted-foreground) 70%, transparent);
+ --cp-border: var(--hs-border-strong);
+ --cp-soft: var(--hs-surface);
+ --cp-field: var(--hs-surface);
+ --cp-link: var(--hs-trust);
+ --cp-btn: var(--color-foreground);
+ --cp-btn-ink: var(--color-background);
  background: var(--cp-bg);
  color: var(--cp-ink);
  scroll-behavior: smooth;
-}
-
-.dark .contact-scope {
- --cp-bg: #0d1117;
- --cp-ink: #e6edf3;
- --cp-muted: #8b949e;
- --cp-faint: #6e7681;
- --cp-border: #30363d;
- --cp-soft: #161b22;
- --cp-field: #0d1117;
- --cp-link: #2dd4bf;
- --cp-btn: #e6edf3;
- --cp-btn-ink: #0d1117;
 }
 
 .contact-scope :focus-visible {

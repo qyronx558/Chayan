@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { urlHash } from "@/lib/ingest/normalize"
 import { NOTICE_TEXT, extraction } from "../../../unit/lib/ingest/fixtures"
 
-const { prismaMock, importContent, revalidatePublicContent, writeAuditLog } = vi.hoisted(() => ({
+const { prismaMock, importContent, revalidatePublicContent, revalidateJobsByIds, writeAuditLog } = vi.hoisted(() => ({
   prismaMock: {
     user: { upsert: vi.fn() },
     category: { findMany: vi.fn() },
@@ -17,10 +17,12 @@ const { prismaMock, importContent, revalidatePublicContent, writeAuditLog } = vi
   },
   importContent: vi.fn(),
   revalidatePublicContent: vi.fn(),
+  revalidateJobsByIds: vi.fn(),
   writeAuditLog: vi.fn(),
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/cache", () => ({ revalidatePublicContent }))
+vi.mock("@/lib/revalidate-content", () => ({ revalidateJobsByIds }))
 vi.mock("@/lib/moderation", () => ({ writeAuditLog }))
 vi.mock("@/lib/bulk-upload/import", () => ({
   importContent,
@@ -170,7 +172,7 @@ describe("POST /api/cron/ingest", () => {
     const items = [post({ sourceUrl: "https://a.gov.in/1.pdf" }), post({ sourceUrl: "https://a.gov.in/2.pdf" }, extraction({ title: "District Health Society Patna ANM Recruitment 2026", advertisementNo: null }))]
     const { results } = await (await INGEST(req("/api/cron/ingest", { items }))).json()
     expect(results.map((r: { moderation: string }) => r.moderation)).toEqual(["APPROVED", "PENDING"])
-    expect(revalidatePublicContent).toHaveBeenCalledWith("job")
+    expect(revalidateJobsByIds).toHaveBeenCalledTimes(1)
     expect(prismaMock.ingestItem.upsert.mock.calls[0][0].create.autoApproved).toBe(true)
   })
 

@@ -2,7 +2,9 @@
 import { useMemo, useState } from "react";
 import { PAY_MATRIX_7, calcSalary, inr } from "@/lib/tools/pay-matrix";
 import { StatusPill } from "@/components/tools/ToolShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { handFont, typeFont } from "@/components/home/fonts";
+import { Sheet, chip, fieldBox, fieldLabel, tile } from "@/components/tools/tool-kit";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -34,73 +36,111 @@ export default function SalaryCalculatorClient() {
   ["Tax (approx)", -s.incomeTaxMonthly],
  ];
 
+ // display only: the same rows, laid out the way a pay slip prints them
+ // a cut that comes to zero arrives as -0: still a deduction, shown as "− ₹0"
+ const isCut = (v: number) => v < 0 || Object.is(v, -0);
+ const earnings = rows.filter(([k, v]) => !isCut(v) && k !== "Total salary");
+ const deductions = rows.filter(([, v]) => isCut(v));
+ const gross = rows.find(([k]) => k === "Total salary");
+
  return (
-  <div className="grid gap-4 lg:grid-cols-5">
-   <Card className="lg:col-span-2 border-rule dark:border-rule">
-    <CardHeader className="bg-paper-2 dark:bg-ink">
-     <CardTitle className="text-[17px] text-foreground dark:text-paper">Your pay</CardTitle>
-     <div className="mt-2 flex gap-2">
+  <div className="grid items-start gap-6 lg:grid-cols-5">
+   <Sheet label="FORM · YOUR PAY" className="lg:col-span-2">
+    <div className="space-y-5 p-5">
+     <div className="flex gap-2" role="group" aria-label="Pay commission">
       {(["7th", "8th"] as const).map((m) => (
-       <button key={m} onClick={() => setMode(m)} className={`min-h-[40px] rounded-full px-4 py-2 text-[13px] font-medium transition ${mode === m ? "bg-ink text-paper" : "bg-background border border-rule text-muted-foreground dark:bg-ink dark:text-muted-foreground dark:border-ink"}`}>{m === "7th" ? "Current" : "8th Pay idea"}</button>
+       <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m} className={chip(mode === m)}>{m === "7th" ? "Current" : "8th Pay idea"}</button>
       ))}
      </div>
-    </CardHeader>
-    <CardContent className="space-y-5 p-5">
      <div>
-      <Label className="text-[15px]">Pay level</Label>
-      <select value={level} onChange={(e) => setLevel(+e.target.value)} className="mt-1.5 h-12 w-full rounded-md border border-rule bg-background px-3 text-base dark:border-ink dark:bg-ink">
+      <Label className={fieldLabel}>Pay level</Label>
+      <select value={level} onChange={(e) => setLevel(+e.target.value)} className="mt-1.5 h-12 w-full rounded-[10px] border-[1.5px] border-[var(--hs-border-strong)] bg-[var(--hs-surface)] px-3 text-base text-foreground focus:border-foreground/60 focus:outline-none focus:ring-4 focus:ring-[color-mix(in_oklch,var(--color-brick)_14%,transparent)]">
        {PAY_MATRIX_7.map((p) => (
         <option key={p.level} value={p.level}>Level {p.level} - {inr(p.basic7)}</option>
        ))}
       </select>
-      <p className="mt-1.5 text-[13px] text-muted-foreground">Most CGL, SI posts are Level 6–7.</p>
+      <p className={cn(handFont.className, "mt-1.5 text-[1.02rem] text-muted-foreground")}>Most CGL, SI posts are Level 6–7.</p>
      </div>
-     <div><Label className="text-[15px]">City</Label>
+     <div><Label className={fieldLabel}>City</Label>
       <div className="mt-2 grid grid-cols-3 gap-2">
        {(["X", "Y", "Z"] as const).map((c) => (
-        <button key={c} onClick={() => setCity(c)} className={`min-h-[64px] rounded-xl border p-2.5 text-left transition ${city === c ? "border-rule bg-paper-2 dark:bg-ink dark:border-rule" : "border-rule dark:border-ink"}`}>
-         <p className="text-[15px] font-bold">{CITY_LABEL[c].title}</p>
-         <p className="mt-0.5 text-[13px] text-muted-foreground">{CITY_LABEL[c].sub}</p>
+        <button key={c} onClick={() => setCity(c)} aria-pressed={city === c} className={cn(tile(city === c), "min-h-[72px] p-2.5")}>
+         <span className={cn(typeFont.className, "absolute right-2 top-1.5 text-[10px] font-bold opacity-50")}>{c}</span>
+         <p className="text-[14.5px] font-bold text-foreground">{CITY_LABEL[c].title}</p>
+         <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{CITY_LABEL[c].sub}</p>
         </button>
        ))}
       </div></div>
      {mode === "7th" ? (
-      <div><Label className="text-[15px]">DA %</Label><Input type="number" value={daPct} onChange={(e) => setDaPct(+e.target.value)} className="mt-1.5 h-12 text-base" /></div>
+      <div><Label className={fieldLabel}>DA %</Label><Input type="number" value={daPct} onChange={(e) => setDaPct(+e.target.value)} className={fieldBox} /></div>
      ) : (
-      <div><Label className="text-[15px]">Expected hike: {fitment.toFixed(2)}x</Label>
-       <input type="range" min={1.5} max={2.5} step={0.01} value={fitment} onChange={(e) => setFitment(+e.target.value)} className="mt-2 w-full accent-[var(--color-brick)]" />
-       <p className="mt-1 text-[13px] text-muted-foreground dark:text-muted-foreground">Estimate only - not official yet.</p></div>
+      <div><Label className={fieldLabel}>Expected hike: {fitment.toFixed(2)}x</Label>
+       <input type="range" min={1.5} max={2.5} step={0.01} value={fitment} onChange={(e) => setFitment(+e.target.value)} className="mt-3 w-full accent-[var(--color-brick)]" />
+       <p className={cn(handFont.className, "mt-1 text-[1.02rem] text-[var(--color-brick)]")}>Estimate only - not official yet.</p></div>
      )}
-    </CardContent>
-   </Card>
+    </div>
+   </Sheet>
 
-   <div className="lg:col-span-3 space-y-4">
-    <Card className="overflow-hidden">
-     <div className="bg-paper-2 p-6 dark:bg-ink">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+   <div className="space-y-5 lg:col-span-3">
+    {/* ── the pay slip ── */}
+    <div className="relative">
+     <div className="rounded-t-[4px] px-6 pb-8 pt-5 text-[oklch(27%_0.03_60)] sm:px-8" style={{ background: "oklch(98% 0.008 90)", boxShadow: "0 1px 2px rgb(60 40 10 / .1), 0 22px 34px -24px rgb(60 40 10 / .6)" }}>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-double border-[oklch(27%_0.03_60/0.4)] pb-3">
        <div>
-        <p className="text-[13px] font-medium text-muted-foreground dark:text-muted-foreground">Take-home per month</p>
-        <p className="mt-1 text-4xl font-bold tabular-nums text-foreground sm:text-[44px] sm:leading-[1.1] dark:text-paper">{inr(s.net)}<span className="text-base font-medium text-muted-foreground">/mo</span></p>
-        <p className="mt-1 text-[13px] text-muted-foreground dark:text-muted-foreground">Yearly take-home about {inr(s.net * 12)}</p>
+        <p className={cn(typeFont.className, "text-[12px] font-bold tracking-[0.3em]")}>PAY SLIP</p>
+        <p className={cn(typeFont.className, "mt-0.5 text-[11px] opacity-70")}>LEVEL {level} · {CITY_LABEL[city].title.toUpperCase()} · {mode === "7th" ? "7TH CPC" : `8TH CPC × ${fitment.toFixed(2)}`}</p>
        </div>
        <StatusPill tone={mode === "7th" ? "ok" : "warn"}>{mode === "7th" ? "Actual" : "Estimate"}</StatusPill>
       </div>
+
+      <div className="grid gap-x-8 sm:grid-cols-2">
+       <div>
+        <p className={cn(typeFont.className, "mt-4 text-[10.5px] font-bold tracking-[0.2em] opacity-60")}>EARNINGS</p>
+        <table className="mt-1 w-full text-[14.5px]">
+         <tbody>
+          {earnings.map(([k, v]) => (
+           <tr key={k} className="border-b border-dotted border-[oklch(27%_0.03_60/0.25)]">
+            <td className="py-2">{k}</td>
+            <td className={cn(typeFont.className, "py-2 text-right font-bold tabular-nums")}>{inr(v)}</td>
+           </tr>
+          ))}
+          {gross ? (
+           <tr>
+            <td className="pt-2.5 font-semibold">{gross[0]}</td>
+            <td className={cn(typeFont.className, "pt-2.5 text-right font-bold tabular-nums")}>{inr(gross[1])}</td>
+           </tr>
+          ) : null}
+         </tbody>
+        </table>
+       </div>
+       <div>
+        <p className={cn(typeFont.className, "mt-4 text-[10.5px] font-bold tracking-[0.2em] opacity-60")}>DEDUCTIONS</p>
+        <table className="mt-1 w-full text-[14.5px]">
+         <tbody>
+          {deductions.map(([k, v]) => (
+           <tr key={k} className="border-b border-dotted border-[oklch(27%_0.03_60/0.25)]">
+            <td className="py-2">{k}</td>
+            <td className={cn(typeFont.className, "py-2 text-right font-bold tabular-nums text-[oklch(48%_0.17_28)]")}>− {inr(-v)}</td>
+           </tr>
+          ))}
+         </tbody>
+        </table>
+       </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-3 rounded-[4px] border-2 border-[oklch(27%_0.03_60)] px-4 py-3">
+       <div>
+        <p className={cn(typeFont.className, "text-[10.5px] font-bold tracking-[0.25em]")}>NET PAY · TAKE-HOME PER MONTH</p>
+        <p className="mt-1 font-display text-[2.2rem] font-black leading-none tabular-nums sm:text-[2.6rem]">{inr(s.net)}<span className="text-base font-medium opacity-60">/mo</span></p>
+       </div>
+       <p className={cn(handFont.className, "text-[1.1rem]")}>Yearly take-home about {inr(s.net * 12)}</p>
+      </div>
      </div>
-     <CardContent className="p-0">
-      <table className="w-full text-[15px]">
-       <tbody>
-        {rows.map(([k, v]) => (
-         <tr key={k} className="border-b border-rule last:border-0 dark:border-ink">
-          <td className="px-4 py-3 text-muted-foreground dark:text-muted-foreground">{k}</td>
-          <td className="px-4 py-3 text-right font-semibold tabular-nums">{v < 0 ? "− " + inr(-v) : inr(v)}</td>
-         </tr>
-        ))}
-       </tbody>
-      </table>
-     </CardContent>
-    </Card>
-    <details className="rounded-xl border border-rule bg-paper-2 p-4 text-[13px] leading-relaxed text-muted-foreground dark:border-ink dark:bg-ink dark:text-muted-foreground">
-     <summary className="cursor-pointer font-semibold">What is cut from salary?</summary>
+     {/* torn bottom edge */}
+     <div className="h-3" style={{ background: "linear-gradient(-45deg, transparent 6px, oklch(98% 0.008 90) 0) 0 0 / 12px 12px repeat-x, linear-gradient(45deg, transparent 6px, oklch(98% 0.008 90) 0) 0 0 / 12px 12px repeat-x" }} aria-hidden />
+    </div>
+    <details className="rounded-[4px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-surface)] px-4 py-3 text-[13.5px] leading-relaxed text-muted-foreground">
+     <summary className={cn(handFont.className, "cursor-pointer text-[1.1rem] text-foreground")}>What is cut from salary?</summary>
      <p className="mt-2">Retirement, medical and tax are already cut above. Overtime and special allowances are extra.</p>
     </details>
    </div>

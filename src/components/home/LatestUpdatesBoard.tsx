@@ -14,6 +14,7 @@ import { HomeSectionHeader } from "@/components/home/ui/HomeSectionHeader"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import { cn, formatDate } from "@/lib/utils"
 import { handFont, typeFont } from "@/components/home/fonts"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 /*
  * "Recently published" as the notice board outside a college office: a
@@ -118,11 +119,12 @@ const COLUMNS: ColumnConfig[] = [
 ]
 
 function IndexColumn({ config, index }: { config: ColumnConfig; index: number }) {
+  const dataVersion = useDataVersion()
   const [items, setItems] = useState<IndexItem[] | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    fetch(config.endpoint)
+    fetch(withDataVersion(config.endpoint, dataVersion))
       .then((res) => res.json())
       .then((json) => {
         if (cancelled) return
@@ -137,7 +139,7 @@ function IndexColumn({ config, index }: { config: ColumnConfig; index: number })
     return () => {
       cancelled = true
     }
-  }, [config])
+  }, [config, dataVersion])
 
   const Icon = config.icon
 

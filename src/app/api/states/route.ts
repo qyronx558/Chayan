@@ -64,7 +64,7 @@ export async function GET(request?: NextRequest) {
       ...(withJobCounts ? { activeJobCount: jobCounts.get(s.id) ?? 0 } : {}),
     }))
     const body = { success: true, data }
-    return wantAll ? NextResponse.json(body) : publicApiResponse(body, 300)
+    return wantAll ? NextResponse.json(body) : publicApiResponse(body, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch states" },

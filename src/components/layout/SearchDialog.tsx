@@ -107,7 +107,7 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
  }
 
  const performSearch = React.useCallback(async (q: string, category?: string) => {
-  if (!q.trim()) {
+  if (q.trim().length < 2) {
    setResults([])
    setError("")
    return
@@ -175,7 +175,7 @@ function SearchContent({ onNavigate }: { onNavigate: () => void }) {
  const handleChange = (value: string) => {
   setQuery(value)
   if (debounceRef.current) clearTimeout(debounceRef.current)
-  debounceRef.current = setTimeout(() => performSearch(value, selectedCategory || undefined), 150)
+  debounceRef.current = setTimeout(() => performSearch(value, selectedCategory || undefined), 300)
  }
 
  // Prefill when opened via a visible trigger carrying a query (hero chip,

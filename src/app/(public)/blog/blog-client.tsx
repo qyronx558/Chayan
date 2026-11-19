@@ -1,16 +1,14 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from "react"
 import Link from "next/link"
-import Image from "next/image"
-import { Search, AlertCircle, Calendar, Clock3, ArrowRight, X, Eye, Flame, LayoutGrid, Rows3, Sparkles, Rss, Briefcase } from "lucide-react"
-import { formatCompact, formatDate } from "@/lib/utils"
+import { Search, AlertCircle, ArrowRight, X, LayoutGrid, Rows3, Rss } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import "@/app/home.css"
+import { ClipSkeleton, ContentsPage, CoverStory, LibraryCard, MagazineClip, ReadingDeskArt } from "./reading-desk"
 import { getReadingTimeMinutes } from "@/lib/blog-prose"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { BlogCard } from "@/components/blog/BlogCard"
-import { UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
 import {
  useInfiniteScroll,
@@ -18,6 +16,7 @@ import {
  PUBLIC_INFINITE_LIMIT as LIMIT,
 } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 interface BlogCategory {
  id: string
@@ -47,6 +46,7 @@ interface BlogPost {
 type SortKey = "latest" | "popular" | "quick"
 
 export function BlogClient() {
+ const dataVersion = useDataVersion()
  const [posts, setPosts] = useState<BlogPost[]>([])
  const [popular, setPopular] = useState<BlogPost[]>([])
  const [categories, setCategories] = useState<BlogCategory[]>([])
@@ -70,11 +70,11 @@ export function BlogClient() {
  }, [input])
 
  useEffect(() => {
-  fetch("/api/blog-categories")
+  fetch(withDataVersion("/api/blog-categories", dataVersion))
    .then((res) => res.json())
    .then((json) => { if (json.success) setCategories(json.data) })
    .catch(() => {})
- }, [])
+ }, [dataVersion])
 
  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
   if (replace) {
@@ -92,7 +92,7 @@ export function BlogClient() {
    params.set("published", "true")
    params.set("page", String(pageNum))
    params.set("limit", String(LIMIT))
-   const res = await fetch(`/api/blog?${params}`, { signal })
+   const res = await fetch(withDataVersion(`/api/blog?${params}`, dataVersion), { signal })
    const json = await res.json()
    if (signal.aborted) return
    if (json.success) {
@@ -119,7 +119,7 @@ export function BlogClient() {
     else setLoadingMore(false)
    }
   }
- }, [search, activeCategory, sort])
+ }, [search, activeCategory, sort, dataVersion])
 
  useEffect(() => {
   abortRef.current?.abort()
@@ -152,11 +152,11 @@ export function BlogClient() {
  })
 
  useEffect(() => {
-  fetch("/api/blog?sort=popular&published=true&limit=5")
+  fetch(withDataVersion("/api/blog?sort=popular&published=true&limit=5", dataVersion))
    .then((res) => res.json())
    .then((json) => { if (json.success) setPopular(json.data) })
    .catch(() => {})
- }, [])
+ }, [dataVersion])
 
  const isFiltered = Boolean(search || activeCategory)
  const featured = useMemo(
@@ -193,64 +193,78 @@ export function BlogClient() {
  const activeCategoryName = categories.find((c) => c.slug === activeCategory)?.name
 
  return (
-  <div className="pb-16">
-   {/* Masthead */}
-   <header className="border-b-2 border-ink bg-background">
-    <div className="container mx-auto max-w-7xl px-4 pb-8 pt-10 sm:pt-14">
-     <div className="flex flex-wrap items-end justify-between gap-8">
-      <div className="min-w-0 max-w-3xl">
-       <div className="mb-4 flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-        <span className="h-0.5 w-8 bg-brick" aria-hidden />
-        The ChayanJobs Journal
-        {total ? <span className="font-medium normal-case tracking-normal">· {total} articles</span> : null}
-       </div>
-       <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl">
-        Guides that get you <span className="text-brick">hired</span>.
-       </h1>
-       <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-        Exam strategy, career playbooks, AI and money skills. Practical, fact-checked and updated every week.
+  <div className="home-saas pb-16 text-foreground">
+   {/* Masthead: the reading desk */}
+   <header>
+    <div className="container mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pt-12">
+     <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
+      <div className="min-w-0">
+       <p className={cn(handFont.className, "text-[1.25rem] text-[var(--color-brick)]")}>
+        the ChayanJobs journal{total ? <span className="text-foreground/50"> · {total} articles</span> : null}
        </p>
-      </div>
-      <div className="w-full max-w-md">
-       <div className="relative">
-        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-         placeholder="Search guides, topics, tags…"
-         value={input}
-         onChange={(e) => setInput(e.target.value)}
-         className="h-12 border-ink bg-background pl-11 pr-10 text-base"
-         aria-label="Search articles"
-        />
-        {input && (
-         <button type="button" onClick={() => setInput("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-brick">
-          <X className="h-4 w-4" />
-         </button>
-        )}
+       <h1 className="mt-1 font-display text-[2.5rem] font-black leading-[1.04] text-foreground sm:text-[3.6rem]">
+        Guides worth{" "}
+        <span className="relative inline-block">
+         underlining.
+         <svg viewBox="0 0 300 16" preserveAspectRatio="none" className="pointer-events-none absolute -bottom-2 left-0 h-3 w-full" aria-hidden>
+          <path className="hs-draw" style={{ ["--len" as string]: 320 } as CSSProperties} d="M3 10 C 60 4, 140 14, 200 7 S 280 6, 297 9" fill="none" stroke="var(--color-brick)" strokeWidth="3" strokeLinecap="round" />
+         </svg>
+        </span>
+       </h1>
+       <p className="mt-5 max-w-xl text-[16px] leading-7 text-muted-foreground sm:text-[17px]">
+        Exam strategy, career playbooks, AI and money skills. Practical, fact-checked and updated every week. Read
+        slowly, keep a pencil close.
+       </p>
+       <div className="mt-6 max-w-md">
+        <div className="group relative flex h-12 items-center rounded-full border border-[var(--hs-border-strong)] bg-[var(--hs-surface)] pl-4 pr-1.5 transition-[border-color,box-shadow] focus-within:border-[var(--hs-trust)] focus-within:shadow-[0_0_0_4px_var(--hs-trust-soft)]">
+         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+         <input
+          placeholder="Search guides, topics, tags…"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="min-w-0 flex-1 bg-transparent px-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
+          aria-label="Search articles"
+         />
+         {input && (
+          <button type="button" onClick={() => setInput("")} aria-label="Clear search" className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-paper-2 hover:text-brick">
+           <X className="h-4 w-4" />
+          </button>
+         )}
+        </div>
+        <Link href="/rss/blog" className={cn(handFont.className, "mt-3 inline-flex items-center gap-1.5 text-[1.02rem] text-muted-foreground hover:text-[var(--color-brick)]")}>
+         <Rss className="h-3.5 w-3.5" /> get new pieces by RSS
+        </Link>
        </div>
-       <Link href="/rss/blog" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-brick">
-        <Rss className="h-3.5 w-3.5" /> Subscribe via RSS
-       </Link>
       </div>
+      <ReadingDeskArt />
      </div>
     </div>
 
-    {/* Sticky topic tabs */}
+    {/* Topic ribbons, hanging from the top edge like bookmarks */}
     {categories.length > 0 && (
-     <nav aria-label="Topics" className="sticky top-16 z-20 border-t border-rule bg-background/95 backdrop-blur">
+     <nav aria-label="Topics" className="sticky top-16 z-20 border-y border-[var(--hs-border-strong)] bg-[var(--hs-surface)]/95 backdrop-blur">
       <div className="container mx-auto max-w-7xl px-4">
-       <div className="-mx-1 flex gap-1 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+       <div className="-mx-1 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {topicTabs.map((cat) => {
          const active = cat.slug === activeCategory
+         const color = cat.color || (cat.slug ? "var(--color-brick)" : "var(--color-ink)")
          return (
           <button
            key={cat.id}
            type="button"
            aria-pressed={active}
            onClick={() => setActiveCategory(cat.slug && activeCategory === cat.slug ? null : cat.slug)}
-           className={`flex shrink-0 items-center gap-2 border px-4 py-2 text-sm font-bold transition-colors ${active ? "border-ink bg-ink text-paper" : "border-transparent text-muted-foreground hover:border-rule hover:text-foreground"}`}
+           className="group relative shrink-0 px-1 pt-0"
           >
-           {cat.slug && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.color || "var(--color-brick)" }} aria-hidden />}
-           {cat.name}
+           <span
+            className={cn("block px-3.5 pb-3 text-[13px] font-bold transition-all", active ? cn("pt-3", cat.slug ? "text-[oklch(98%_0.01_90)]" : "text-background") : "pt-1.5 text-foreground/80 group-hover:pt-2.5")}
+            style={{
+             background: active ? color : `color-mix(in oklch, ${color} 14%, transparent)`,
+             clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%)",
+            }}
+           >
+            {cat.name}
+           </span>
           </button>
          )
         })}
@@ -260,127 +274,102 @@ export function BlogClient() {
     )}
    </header>
 
-   <div className="container mx-auto max-w-7xl px-4 pt-10">
-    {/* Featured + top stories */}
+   <div className="container mx-auto max-w-7xl px-4 pt-12">
+    {/* Cover story + contents */}
     {featured && (
-     <section className="mb-12 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" aria-label="Featured article">
-      <Link href={`/blog/${featured.slug}`} className="group block">
-       <div className="relative aspect-[16/9] w-full overflow-hidden bg-ink">
-        {featured.image ? (
-         <Image src={featured.image} alt="" fill priority sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
-        ) : (
-         <div className="flex h-full items-end p-8"><span className="h-0.5 w-16 bg-brick" aria-hidden /></div>
-        )}
-        <span className="absolute left-0 top-0 bg-brick px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brick-ink">Featured</span>
-       </div>
-       <div className="pt-5">
-        {featured.category && <span className="text-xs font-bold uppercase tracking-wide text-brick">{featured.category.name}</span>}
-        <h2 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight text-foreground group-hover:text-brick sm:text-4xl">{featured.title}</h2>
-        {featured.excerpt && <p className="mt-3 line-clamp-3 text-base leading-7 text-muted-foreground">{featured.excerpt}</p>}
-        <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-         <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{formatDate(featured.createdAt)}</span>
-         <span className="flex items-center gap-1.5"><Clock3 className="h-4 w-4" />{getReadingTimeMinutes(featured.content)} min read</span>
-         <span className="ml-auto flex items-center gap-1 font-bold text-foreground group-hover:text-brick">Read the story <ArrowRight className="h-4 w-4" /></span>
-        </p>
-       </div>
-      </Link>
-
-      <div className="lg:border-l lg:border-rule lg:pl-8">
-       <h2 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-        <Sparkles className="h-4 w-4 text-brick" /> Top stories
-       </h2>
-       <ol className="divide-y divide-rule">
-        {posts.slice(1, 5).map((post, i) => (
-         <li key={post.id}>
-          <Link href={`/blog/${post.slug}`} className="group flex gap-4 py-4">
-           <span className="font-display text-3xl font-bold leading-none text-rule group-hover:text-brick">{i + 1}</span>
-           <span className="min-w-0">
-            {post.category && <span className="text-[11px] font-bold uppercase tracking-wide text-brick">{post.category.name}</span>}
-            <span className="line-clamp-2 block font-display text-lg font-bold leading-snug text-foreground group-hover:text-brick">{cleanTitle(post.title)}</span>
-            <span className="mt-1 block text-xs text-muted-foreground">{formatDate(post.createdAt)} · {getReadingTimeMinutes(post.content)} min read</span>
-           </span>
-          </Link>
-         </li>
-        ))}
-       </ol>
+     <section className="mb-14 grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" aria-label="Featured article">
+      <CoverStory post={{ ...toCard(featured), title: featured.title }} excerpt={featured.excerpt} />
+      <div>
+       <p className={cn(handFont.className, "mb-3 text-[1.15rem] text-foreground/70")}>also in this issue</p>
+       <ContentsPage posts={posts.slice(1, 5).map(toCard)} />
       </div>
      </section>
     )}
 
     {/* Toolbar */}
-    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-4">
-     <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
-      {activeCategoryName ?? (search ? `Results for "${search}"` : "Latest articles")}
-     </h2>
-     <div className="flex items-center gap-3">
-      <p className="hidden text-sm text-muted-foreground sm:block" role="status">
-       {loading ? "Loading…" : <><b className="text-foreground">{posts.length}</b> of <b className="text-foreground">{total}</b></>}
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-dashed border-[var(--hs-border-strong)] pb-4">
+     <div>
+      <p className={cn(handFont.className, "text-[1.1rem] text-[var(--color-brick)]")}>{search ? "you looked for" : activeCategoryName ? "filed under" : "on the desk"}</p>
+      <h2 className="font-display text-[1.8rem] font-black leading-tight text-foreground">
+       {activeCategoryName ?? (search ? `"${search}"` : "Latest articles")}
+      </h2>
+     </div>
+     <div className="flex flex-wrap items-center gap-3">
+      <p className={cn(typeFont.className, "hidden text-[11.5px] text-muted-foreground sm:block")} role="status">
+       {loading ? "loading…" : <>{posts.length} of {total}</>}
       </p>
-      <div className="flex border border-rule text-xs font-bold" role="tablist" aria-label="Sort articles">
-       {(["latest", "popular", "quick"] as SortKey[]).map((k) => (
+      <div className="flex items-center gap-1" role="tablist" aria-label="Sort articles">
+       {(["latest", "popular", "quick"] as SortKey[]).map((k, i) => (
         <button
          key={k}
          type="button"
          role="tab"
          aria-selected={sort === k}
          onClick={() => setSort(k)}
-         className={`px-3 py-2 transition-colors ${sort === k ? "bg-ink text-paper" : "text-muted-foreground hover:text-foreground"}`}
+         className={cn("relative px-3 py-1.5 text-[13.5px] transition-colors", sort === k ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground")}
         >
+         {sort === k && (
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+           <path className="hs-draw" d={i % 2 ? "M55 3 C 84 2, 98 10, 97 20 C 96 31, 74 37, 50 37 C 24 37, 3 31, 3 20 C 3 9, 22 3, 46 3 C 58 3, 68 4, 76 7" : "M45 3 C 16 3, 2 10, 3 20 C 4 31, 26 37, 50 37 C 76 37, 97 30, 97 19 C 97 9, 78 3, 54 3 C 42 3, 32 4, 24 7"} fill="none" stroke="var(--color-brick)" strokeWidth="1.8" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ ["--len" as string]: 280, animationDuration: ".5s" } as CSSProperties} />
+          </svg>
+         )}
          {k === "latest" ? "Latest" : k === "popular" ? "Most read" : "Quick reads"}
         </button>
        ))}
       </div>
-      <div className="hidden border border-rule sm:flex" aria-label="Change view">
-       <button type="button" onClick={() => setView("grid")} aria-label="Grid view" aria-pressed={view === "grid"} className={`p-2 ${view === "grid" ? "bg-ink text-paper" : "text-muted-foreground"}`}>
+      <div className="hidden items-center gap-1 sm:flex" aria-label="Change view">
+       <button type="button" onClick={() => setView("grid")} aria-label="Grid view" aria-pressed={view === "grid"} className={cn("flex h-9 w-9 items-center justify-center rounded-full border", view === "grid" ? "border-foreground bg-foreground text-background" : "border-[var(--hs-border-strong)] text-muted-foreground hover:text-foreground")}>
         <LayoutGrid className="h-4 w-4" />
        </button>
-       <button type="button" onClick={() => setView("list")} aria-label="List view" aria-pressed={view === "list"} className={`p-2 ${view === "list" ? "bg-ink text-paper" : "text-muted-foreground"}`}>
+       <button type="button" onClick={() => setView("list")} aria-label="List view" aria-pressed={view === "list"} className={cn("flex h-9 w-9 items-center justify-center rounded-full border", view === "list" ? "border-foreground bg-foreground text-background" : "border-[var(--hs-border-strong)] text-muted-foreground hover:text-foreground")}>
         <Rows3 className="h-4 w-4" />
        </button>
       </div>
      </div>
     </div>
 
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px]">
      <div className="min-w-0">
       {loading ? (
-       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+       <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-         <UniversalCardSkeleton key={i} />
+         <ClipSkeleton key={i} />
         ))}
        </div>
       ) : error ? (
-       <Card><CardContent className="flex flex-col items-center py-16">
-        <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-        <h3 className="mb-2 text-lg font-semibold">Something went wrong</h3>
-        <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-        <Button onClick={retryInitial}>Try Again</Button>
-       </CardContent></Card>
+       <div className="flex flex-col items-center rounded-[3px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] px-6 py-14 text-center">
+        <AlertCircle className="mb-3 h-9 w-9 text-brick" />
+        <p className={cn(handFont.className, "text-[1.5rem] text-foreground")}>The pages got shuffled for a second.</p>
+        <p className="mb-5 mt-1 text-sm text-muted-foreground">{error}</p>
+        <Button onClick={retryInitial}>Try again</Button>
+       </div>
       ) : gridPosts.length === 0 ? (
-       <UniversalCardEmpty
-        title="No articles found"
-        hint="Try a different search or topic."
-        action={<Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>}
-       />
+       <div className="flex flex-col items-center rounded-[3px] border border-dashed border-[var(--hs-border-strong)] bg-[var(--hs-paper-slip)] px-6 py-14 text-center">
+        <p className={cn(handFont.className, "text-[1.5rem] text-foreground")}>Nothing on the desk for that.</p>
+        <p className="mb-5 mt-1 max-w-sm text-sm text-muted-foreground">Try a different word, or another topic ribbon.</p>
+        <Button variant="outline" onClick={() => { setInput(""); setActiveCategory(null) }}>Clear filters</Button>
+       </div>
       ) : view === "grid" ? (
-       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {gridPosts.map((post) => (
-         <BlogCard key={post.id} post={toCard(post)} />
+       <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
+        {gridPosts.map((post, i) => (
+         <div key={post.id} className="hs-fade-up" style={{ animationDelay: `${(i % 6) * 60}ms` }}>
+          <MagazineClip post={toCard(post)} index={i} />
+         </div>
         ))}
        </div>
       ) : (
        <div>
-        {gridPosts.map((post) => (
-         <BlogCard key={post.id} post={toCard(post)} variant="wide" />
+        {gridPosts.map((post, i) => (
+         <MagazineClip key={post.id} post={toCard(post)} index={i} wide />
         ))}
        </div>
       )}
       {!loading && !error && gridPosts.length > 0 && (
        <>
         {loadingMore && (
-         <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+         <div className="mt-7 grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 2 }).map((_, i) => (
-           <UniversalCardSkeleton key={i} />
+           <ClipSkeleton key={i} />
           ))}
          </div>
         )}
@@ -399,37 +388,26 @@ export function BlogClient() {
       )}
      </div>
 
-     <aside className="space-y-6 lg:sticky lg:top-36 lg:self-start">
-      <Link href="/jobs" className="group block border-t-4 border-brick bg-ink p-6 text-paper">
-       <p className="flex items-center gap-2 font-display text-xl font-bold"><Briefcase className="h-5 w-5" /> Done reading? Start applying.</p>
+     <aside className="space-y-9 lg:sticky lg:top-36 lg:self-start">
+      {/* a bookmark slipped out of the book */}
+      <Link href="/jobs" className="group relative block -rotate-[1deg] overflow-hidden rounded-[2px] bg-[var(--color-ink)] px-6 pb-7 pt-6 text-[var(--color-paper)] transition-transform hover:rotate-0" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 14px), 0 100%)" }}>
+       <span className="absolute left-1/2 top-3 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-[var(--color-paper)]/60" aria-hidden />
+       <p className={cn(handFont.className, "mt-3 text-[1.1rem] text-[var(--hs-marigold)]")}>done reading?</p>
+       <p className="font-display text-[1.35rem] font-bold leading-tight">Close the book. Start applying.</p>
        <p className="mt-2 text-sm leading-6 opacity-80">Fresh government and private jobs, updated daily, matched to these guides.</p>
-       <span className="mt-4 inline-flex items-center gap-1.5 bg-brick px-4 py-2 text-sm font-bold text-brick-ink transition-transform group-hover:translate-x-0.5">
+       <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brick)] px-4 py-2 text-sm font-bold text-brick-ink transition-transform group-hover:translate-x-0.5">
         Browse jobs <ArrowRight className="h-4 w-4" />
        </span>
       </Link>
 
-      <div className="border border-rule p-5">
-       <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground"><Flame className="h-4 w-4 text-brick" /> Most read</h3>
-       <div className="divide-y divide-rule">
-        {popular.slice(0, 5).map((p, i) => (
-         <Link key={p.id} href={`/blog/${p.slug}`} className="group flex gap-3 py-3 first:pt-0 last:pb-0" title={`${p.views.toLocaleString("en-IN")} views`}>
-          <span className="font-display text-2xl font-bold leading-none text-rule group-hover:text-brick">{i + 1}</span>
-          <span className="min-w-0">
-           <span className="line-clamp-2 block text-sm font-bold leading-snug text-foreground group-hover:text-brick">{cleanTitle(p.title)}</span>
-           <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" />{formatCompact(p.views)} views</span>
-          </span>
-         </Link>
-        ))}
-        {popular.length === 0 && <p className="text-sm text-muted-foreground">Fresh reads dropping soon.</p>}
-       </div>
-      </div>
+      <LibraryCard posts={popular.slice(0, 5).map((p) => ({ id: p.id, slug: p.slug, title: cleanTitle(p.title), views: p.views }))} />
 
       {tagCloud.length > 0 && (
-       <div className="border border-rule p-5">
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Explore tags</h3>
-        <div className="flex flex-wrap gap-1.5">
-         {tagCloud.map(([tag]) => (
-          <Link key={tag} href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, "-")}`} className="border border-rule px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">
+       <div>
+        <p className={cn(handFont.className, "mb-2 text-[1.2rem] text-foreground/75")}>written in the margins:</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+         {tagCloud.map(([tag], i) => (
+          <Link key={tag} href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, "-")}`} className={cn(handFont.className, "text-[1.05rem] text-[var(--hs-trust)] hover:text-[var(--color-brick)] hover:underline", i % 2 ? "rotate-[2deg]" : "-rotate-[2deg]")}>
            #{tag}
           </Link>
          ))}

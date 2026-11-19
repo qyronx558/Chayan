@@ -6,6 +6,7 @@ import { ArrowRight, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 interface JobItem {
  id: string
@@ -33,6 +34,7 @@ function formatCount(count: number): string {
 }
 
 export function JobsByDepartment({ className }: { className?: string }) {
+ const dataVersion = useDataVersion()
  const [departments, setDepartments] = useState<DepartmentItem[]>([])
  const [jobs, setJobs] = useState<JobItem[]>([])
  const [loading, setLoading] = useState(true)
@@ -45,7 +47,7 @@ export function JobsByDepartment({ className }: { className?: string }) {
     setError("")
     const [deptRes, jobsRes] = await Promise.all([
      fetch("/api/departments"),
-     fetch("/api/jobs?limit=100"),
+     fetch(withDataVersion("/api/jobs?limit=100", dataVersion)),
     ])
     const deptJson = await deptRes.json()
     const jobsJson = await jobsRes.json()
@@ -73,7 +75,7 @@ export function JobsByDepartment({ className }: { className?: string }) {
    }
   }
   fetchData()
- }, [])
+ }, [dataVersion])
 
  const deptJobMap = useMemo(() => {
   const map = new Map<string, JobItem[]>()

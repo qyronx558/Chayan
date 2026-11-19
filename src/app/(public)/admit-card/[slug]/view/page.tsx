@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,24 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
-import { canViewContent } from "@/lib/public-visibility"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getAdmitCard = cache((slug: string) => prisma.admitCard.findUnique({ where: { slug }, include: { department: true, category: true } }))
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const admitCard = await prisma.admitCard.findUnique({ where: { slug } })
-  if (!admitCard) return { title: "View Admit Card | ChayanJobs" }
+  const admitCard = await getAdmitCard(slug)
+  if (!admitCard || !isPubliclyVisible(admitCard.moderation)) return { title: "View Admit Card | ChayanJobs" }
   return {
     title: `Admit Card: ${admitCard.title} | ChayanJobs`,
     description: `View ${admitCard.title} in fullscreen on the original official document.`,
@@ -28,12 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function AdmitCardViewPage({ params }: Props) {
   const { slug } = await params
-  const admitCard = await prisma.admitCard.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const admitCard = await getAdmitCard(slug)
 
-  if (!admitCard || !(await canViewContent(admitCard.moderation))) notFound()
+  if (!admitCard || !isPubliclyVisible(admitCard.moderation)) notFound()
 
   const targetUrl = normalizeExternalUrl(admitCard.downloadUrl)
   if (!targetUrl) notFound()

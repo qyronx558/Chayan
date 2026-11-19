@@ -39,6 +39,32 @@ import { SearchDialog, useSearchDialog } from "@/components/layout/SearchDialog"
 import { SearchTrigger } from "@/components/search/SearchTrigger"
 import { LogoSmall } from "@/components/layout/LogoSmall"
 import { NotificationBell } from "./NotificationBell"
+import { handFont } from "@/components/home/fonts"
+
+/* Active page: a marigold pen stroke under the word, the way you'd mark
+ * where you are on a printed contents page. Hover gets a faint pencil line. */
+function PenUnderline({ active }: { active: boolean }) {
+ return (
+  <svg
+   className={cn(
+    "pointer-events-none absolute -bottom-0.5 left-1.5 right-1.5 h-[7px] w-[calc(100%-0.75rem)] overflow-visible transition-opacity duration-200",
+    active ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+   )}
+   viewBox="0 0 100 8"
+   preserveAspectRatio="none"
+   aria-hidden
+  >
+   <path
+    d="M2 5 C 22 2, 45 7, 65 4 S 92 3, 98 5"
+    fill="none"
+    stroke={active ? "oklch(78% 0.14 78)" : "currentColor"}
+    strokeWidth={active ? 3.2 : 1.4}
+    strokeLinecap="round"
+    vectorEffect="non-scaling-stroke"
+   />
+  </svg>
+ )
+}
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
  const pathname = usePathname()
@@ -47,13 +73,12 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   <Link
    href={href}
    className={cn(
-    "relative whitespace-nowrap border-b-2 px-2 py-2 text-sm font-medium transition-colors duration-200",
-    isActive
-     ? "border-brick text-foreground"
-     : "border-transparent text-muted-foreground hover:border-rule-2 hover:text-foreground"
+    "group relative whitespace-nowrap px-2 py-2 text-sm font-medium transition-colors duration-200",
+    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
    )}
   >
    {children}
+   <PenUnderline active={isActive} />
   </Link>
  )
 }
@@ -77,12 +102,11 @@ function NavDropdown({
   >
    <button
     className={cn(
-     "relative inline-flex items-center gap-1 whitespace-nowrap border-b-2 px-2 py-2 text-sm font-medium transition-colors duration-200",
-     isActive
-      ? "border-brick text-foreground"
-      : "border-transparent text-muted-foreground hover:border-rule-2 hover:text-foreground"
+     "group relative inline-flex items-center gap-1 whitespace-nowrap px-2 py-2 text-sm font-medium transition-colors duration-200",
+     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
     )}
    >
+    <PenUnderline active={isActive} />
     {label}
     <ChevronDown
      className={cn(
@@ -92,8 +116,19 @@ function NavDropdown({
     />
    </button>
    {open && (
-    <div className="absolute left-0 top-full z-50 mt-0 w-52 border border-rule bg-background py-1 animate-in fade-in slide-in-from-top-1 duration-150">
-     {children}
+    <div className="absolute left-0 top-full z-50 pt-2">
+     <div
+      className="relative w-64 -rotate-[0.6deg] rounded-[3px] border border-rule bg-background py-2 animate-in fade-in slide-in-from-top-1 duration-150"
+      style={{ boxShadow: "0 1px 2px rgb(60 40 10 / .08), 0 18px 34px -18px rgb(60 40 10 / .45)" }}
+     >
+      {/* a strip of tape holding the slip up */}
+      <span
+       className="absolute -top-2.5 left-1/2 h-5 w-16 -translate-x-1/2 rotate-[3deg]"
+       style={{ background: "oklch(82% 0.14 78 / .5)", clipPath: "polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%)" }}
+       aria-hidden
+      />
+      {children}
+     </div>
     </div>
    )}
   </div>
@@ -105,11 +140,11 @@ function DropdownItem({ href, icon: Icon, label, newTab }: { href: string; icon:
   <Link
    href={href}
    {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-   className="mx-1 flex items-center gap-2.5 px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-paper-2 hover:text-brick"
+   className="group/item mx-1.5 flex items-center gap-2.5 rounded-[3px] px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-paper-2"
   >
-   <Icon className="h-4 w-4" />
-   {label}
-   {newTab && <span className="agate ml-auto text-[10px] text-muted-foreground">new tab</span>}
+   <Icon className="h-4 w-4 text-muted-foreground transition-colors group-hover/item:text-brick" />
+   <span className="decoration-[oklch(78%_0.14_78)] decoration-2 underline-offset-4 group-hover/item:underline">{label}</span>
+   {newTab && <span className={cn(handFont.className, "ml-auto -rotate-[3deg] text-[0.85rem] text-muted-foreground")}>new tab</span>}
   </Link>
  )
 }
@@ -134,10 +169,12 @@ export function Header() {
   <>
    <header
     className={cn(
-     "sticky top-[env(safe-area-inset-top)] z-50 w-full max-w-[100vw] overflow-x-clip border-b border-rule bg-background/95 transition-colors duration-200",
-     scrolled && "border-rule-2"
+     "sticky top-[env(safe-area-inset-top)] z-50 w-full max-w-[100vw] overflow-x-clip bg-background/95 transition-shadow duration-200",
+     scrolled && "shadow-[0_8px_18px_-14px_rgb(60_40_10/.35)]"
     )}
    >
+    {/* bottom edge: the double rule printed at the top of a notebook page */}
+    <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[4px] border-y border-rule" aria-hidden />
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
      <div className="flex h-16 items-center justify-between gap-2 xl:gap-3 min-w-0">
       <div className="flex min-w-0 shrink-0 items-center gap-1">
@@ -279,9 +316,17 @@ export function Header() {
          <Button variant="outline" size="sm" asChild>
           <Link href="/login">Log in</Link>
          </Button>
-         <Button size="sm" asChild>
-          <Link href="/register">Register</Link>
-         </Button>
+         <span className="relative">
+          <Button size="sm" asChild>
+           <Link href="/register">Register</Link>
+          </Button>
+          <span
+           className={cn(handFont.className, "pointer-events-none absolute -bottom-[1.15rem] right-0 hidden whitespace-nowrap -rotate-[4deg] text-[0.8rem] leading-none text-brick xl:block")}
+           aria-hidden
+          >
+           it&apos;s free ↑
+          </span>
+         </span>
         </div>
         </>
        )}

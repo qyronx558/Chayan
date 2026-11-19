@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
         trending: { fallback, windowDays },
       }
-      return publicApiResponse(payload)
+      return publicApiResponse(payload, "gov")
     }
 
     const [answerKeys, total] = await Promise.all([
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       ...(counts ? { counts } : {}),
     }
-    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
+    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch answer keys" },

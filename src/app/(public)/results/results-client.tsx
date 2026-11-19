@@ -1,20 +1,12 @@
 "use client"
 
+import { ResultSheetCard, ResultsBoard, RollNumberChit } from "./result-board"
+import { DeskItem, DeskListing } from "@/components/desk/DeskKit"
 import { useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
-import { AlertCircle, Calendar, FileCheck2 } from "lucide-react"
 import { BookmarkButton } from "@/components/layout/BookmarkButton"
-import { SectionHero } from "@/components/layout/SectionHero"
-import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
 import { CardShareButton } from "@/components/ui/card-actions"
-import { listGridWithSidebar } from "@/components/ui/module-theme"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
-import { formatDate } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ListingFilters } from "@/components/listing/ListingFilters"
-import { ListingLayout } from "@/components/listing/ListingLayout"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
 import type { ActiveFilterChip, FilterControl, QuickFilter, SortOption } from "@/components/listing/types"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
@@ -183,109 +175,63 @@ export function ResultsClient() {
   const visibleResults = filterValidItems(results)
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <SectionHero
-          icon={FileCheck2}
-          badge="Results"
-          title="Exam Results"
-          subtitle="Download the latest government exam result PDFs and check your outcome in one place."
-          count={total}
+    <DeskListing
+      hero={<ResultsBoard total={total} />}
+      filters={{
+        search,
+        onSearchChange: setSearch,
+        onSearchSubmit: () => setSearch((value) => value.trim()),
+        searchPlaceholder: "Search results…",
+        filters,
+        quickFilters,
+        onClear: clearFilters,
+        hasActiveFilters,
+        activeCount,
+      }}
+      aside={<RollNumberChit />}
+      toolbar={
+        <ListingToolbar
+          count={visibleResults.length}
+          total={total}
+          label="results"
+          refreshing={refreshing}
+          sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
         />
-
-        <ListingLayout
-          filters={
-            <ListingFilters
-              search={search}
-              onSearchChange={setSearch}
-              onSearchSubmit={() => setSearch((value) => value.trim())}
-              searchPlaceholder="Search results…"
-              filters={filters}
-              quickFilters={quickFilters}
-              onClear={clearFilters}
-              hasActiveFilters={hasActiveFilters}
-              activeCount={activeCount}
-            />
-          }
-        >
-          <ListingToolbar
-            count={visibleResults.length}
-            total={total}
-            label="results"
-            refreshing={refreshing}
-            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
-            activeFilters={activeFilters}
-            onClearAll={clearFilters}
+      }
+      loading={loading && results.length === 0}
+      error={error && results.length === 0 ? error : null}
+      onRetry={retry}
+      errorTitle="The board fell over for a second."
+      empty={visibleResults.length === 0}
+      emptyTitle="No list matches that, yet."
+      emptyHint="Try fewer filters. Results keep going up through the week, so this board fills in fast."
+      loadingMore={loadingMore}
+      footer={
+        <InfiniteListFooter
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+          onRetry={loadMore}
+          loadedCount={visibleResults.length}
+          total={total}
+          label="results"
+        />
+      }
+    >
+      {visibleResults.map((item, index) => (
+        <DeskItem key={item.id} index={index}>
+          <ResultSheetCard
+            item={item}
+            index={index}
+            save={<BookmarkButton resultId={item.id} />}
+            share={<CardShareButton title={cleanTitle(item.title)} url={`/result/${item.slug}`} />}
           />
-
-          {loading && results.length === 0 ? (
-            <div className={listGridWithSidebar}>
-              {Array.from({ length: 9 }).map((_, index) => (
-                <UniversalCardSkeleton key={index} />
-              ))}
-            </div>
-          ) : error && results.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-16">
-                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-                <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
-                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-                <Button onClick={retry}>Try Again</Button>
-              </CardContent>
-            </Card>
-          ) : visibleResults.length === 0 ? (
-            <UniversalCardEmpty
-              title="No results found"
-              hint="Try adjusting your search or filter criteria."
-              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-            />
-          ) : (
-            <>
-              <div className={listGridWithSidebar}>
-                {visibleResults.map((result) => (
-                  <motion.div
-                    key={result.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35 }}
-                    className="h-full"
-                  >
-                    <UniversalCard
-                      module="result"
-                      title={cleanTitle(result.title)}
-                      organization={result.department.name}
-                      description={result.description}
-                      metadata={result.resultDate ? [{ icon: Calendar, text: formatDate(result.resultDate) }] : []}
-                      primaryCtaUrl={`/result/${result.slug}`}
-                      save={<BookmarkButton resultId={result.id} />}
-                      share={<CardShareButton title={cleanTitle(result.title)} url={`/result/${result.slug}`} />}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              {loadingMore ? (
-                <div className={`mt-6 ${listGridWithSidebar}`}>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <UniversalCardSkeleton key={index} />
-                  ))}
-                </div>
-              ) : null}
-              <InfiniteListFooter
-                sentinelRef={sentinelRef}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                loadMoreError={loadMoreError}
-                onLoadMore={loadMore}
-                onRetry={loadMore}
-                loadedCount={visibleResults.length}
-                total={total}
-                label="results"
-              />
-            </>
-          )}
-        </ListingLayout>
-      </motion.div>
-    </div>
+        </DeskItem>
+      ))}
+    </DeskListing>
   )
 }

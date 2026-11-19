@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { CACHE_TAGS, publicApiResponse, revalidateTags } from "@/lib/cache"
 import { categorySchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
 
@@ -21,7 +22,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: category })
+    return publicApiResponse({ success: true, data: category }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch category" },
@@ -63,6 +64,7 @@ export async function PUT(
       data: validation.data,
     })
 
+    revalidateTags([CACHE_TAGS.taxonomy])
     return NextResponse.json({ success: true, data: category })
   } catch (error) {
     return NextResponse.json(
@@ -93,6 +95,7 @@ export async function DELETE(
 
     await prisma.category.delete({ where: { id } })
 
+    revalidateTags([CACHE_TAGS.taxonomy])
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

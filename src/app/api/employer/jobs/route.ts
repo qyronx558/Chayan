@@ -8,6 +8,7 @@ import { privateJobSchema } from "@/lib/validations"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
 import { dedupeHash } from "@/lib/private-jobs/normalize"
 import { slugify } from "@/lib/utils"
+import { revalidatePublicContent } from "@/lib/cache"
 
 async function myVerifiedCompanyIds(userId: string) {
   const members = await prisma.companyMember.findMany({
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
     })
     // Look up the company's real logo once the response is sent (no-op when it already has one).
     scheduleLogoLookup([job.companyId])
+    revalidatePublicContent("private-job", job.slug, { companySlug: job.company.slug })
     return NextResponse.json({ success: true, data: job }, { status: 201 })
   } catch (e) {
     return NextResponse.json({ success: false, error: e instanceof Error ? e.message : "Failed" }, { status: 500 })

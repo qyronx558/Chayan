@@ -516,6 +516,7 @@ export async function runDueFeeds(opts: {
   now?: Date
   budgetMs?: number
   fetchImpl?: FetchLike
+  revalidate?: boolean
 } = {}): Promise<{ ran: FeedRunResult[]; remaining: number; paused: boolean }> {
   const started = Date.now()
   const now = opts.now ?? new Date()
@@ -559,7 +560,7 @@ export async function runDueFeeds(opts: {
     }
   }
   await Promise.all(Array.from({ length: FEED_CONCURRENCY }, worker))
-  if (ran.some((r) => r.stats.created + r.stats.updated + r.stats.reopened + r.stats.closed > 0)) {
+  if (opts.revalidate !== false && ran.some((r) => r.stats.created + r.stats.updated + r.stats.reopened + r.stats.closed > 0)) {
     try {
       revalidatePublicContent("private-job")
     } catch {

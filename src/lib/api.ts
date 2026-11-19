@@ -14,6 +14,13 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
+export function bypassCdnForStaff(url: string): string {
+  if (isServer() || !url.startsWith("/api/")) return url
+  const path = window.location.pathname
+  if (!path.startsWith("/admin") && !path.startsWith("/employer")) return url
+  return `${url}${url.includes("?") ? "&" : "?"}fresh=${Date.now()}`
+}
+
 export class ApiError extends Error {
   status: number
   constructor(message: string, status: number) {
@@ -39,7 +46,7 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(method === "GET" ? bypassCdnForStaff(url) : url, {
     method,
     headers,
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,

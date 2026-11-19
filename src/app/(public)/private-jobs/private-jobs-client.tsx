@@ -1,27 +1,19 @@
 "use client"
 
+import { AirmailHero, AirmailJobRow, AirmailRowSkeleton, OpenedLetter, SafeLetter } from "./airmail"
+import { DeskListing } from "@/components/desk/DeskKit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { AlertCircle, CheckCircle2, Flag, Sparkles, Wifi } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { UniversalCardEmpty } from "@/components/ui/universal-card"
 import { filterValidItems } from "@/lib/card-helpers"
-import { PrivateJobRow, PrivateJobRowSkeleton } from "@/components/private/PrivateJobRow"
 import { PrivateJobPreview, PrivateJobPreviewEmpty } from "@/components/private/PrivateJobPreview"
 import type { ListJob } from "@/components/private/job-list-utils"
 import { PrivateJobsPulse, PrivateJobsTrending, type DiscoverActive, type DiscoverPick } from "@/components/private/PrivateJobsDiscover"
-import { ListingFilters } from "@/components/listing/ListingFilters"
-import { ListingLayout } from "@/components/listing/ListingLayout"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
 import type { ActiveFilterChip, FilterControl, FilterOption, QuickFilter, SortOption } from "@/components/listing/types"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import { useInfiniteListing } from "@/hooks/useInfiniteListing"
 import { useListingQuerySync } from "@/hooks/useListingQuerySync"
 import { countryName } from "@/lib/private-jobs/geo"
-import { useAppliedJobs } from "@/lib/private-jobs/applied-store"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 
 interface Company {
@@ -454,117 +446,79 @@ export function PrivateJobsClient({ preset = {} }: { preset?: PrivateJobsPreset 
     return () => window.removeEventListener("keydown", onKey)
   }, [splitView, visibleJobs, selectedJob?.slug])
 
+  const loadingFirst = loading && jobs.length === 0
+
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="mb-2 flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-3xl font-bold text-foreground">Private jobs</h1>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <Link href="/private-jobs/remote" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Wifi className="mr-1 inline h-3 w-3" />Remote</Link>
-            <Link href="/private-jobs/freshers" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Sparkles className="mr-1 inline h-3 w-3" />Freshers</Link>
-            <Link href="/private-jobs/walkins" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick"><Flag className="mr-1 inline h-3 w-3" />Walk-ins</Link>
-            <Link href="/private-jobs/refer" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">+ Refer a job</Link>
-            <MyApplicationsLink />
-          </div>
-        </div>
-        <p className="mb-8 max-w-2xl text-muted-foreground">
-          Full-time, part-time, internships, and contract positions from top companies - with trust scores, tracking and prep.
-        </p>
-
-        <ListingLayout
-          filters={
-            <ListingFilters
-              search={search}
-              onSearchChange={setSearch}
-              onSearchSubmit={() => setSearch((value) => value.trim())}
-              searchPlaceholder="Search title, company, skill, location…"
-              filters={filters}
-              quickFilters={quickFilters}
-              onClear={clearFilters}
-              hasActiveFilters={hasActiveFilters}
-              activeCount={activeCount}
-              railTop={<PrivateJobsPulse onPick={onDiscoverPick} active={discoverActive} />}
-              railBottom={<PrivateJobsTrending onPick={onDiscoverPick} active={discoverActive} />}
-            />
-          }
-        >
-          <ListingToolbar
-            count={visibleJobs.length}
-            total={total}
-            label="private jobs"
-            refreshing={refreshing}
-            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
-            activeFilters={activeFilters}
-            onClearAll={clearFilters}
-          />
-
-          {loading && jobs.length === 0 ? (
-            <div className="grid gap-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <PrivateJobRowSkeleton key={index} />
+    <DeskListing
+      hero={<AirmailHero total={total} mode={preset.remote === "REMOTE" ? "remote" : preset.fresher === "1" ? "fresher" : preset.walkin === "1" ? "walkin" : "all"} />}
+      filters={{
+        search,
+        onSearchChange: setSearch,
+        onSearchSubmit: () => setSearch((value) => value.trim()),
+        searchPlaceholder: "Search title, company, skill, location…",
+        filters,
+        quickFilters,
+        onClear: clearFilters,
+        hasActiveFilters,
+        activeCount,
+        railTop: <PrivateJobsPulse onPick={onDiscoverPick} active={discoverActive} />,
+        railBottom: <PrivateJobsTrending onPick={onDiscoverPick} active={discoverActive} />,
+      }}
+      aside={<SafeLetter />}
+      toolbar={
+        <ListingToolbar
+          count={visibleJobs.length}
+          total={total}
+          label="private jobs"
+          refreshing={refreshing}
+          sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
+        />
+      }
+      loading={loadingFirst}
+      error={error && jobs.length === 0 ? error : null}
+      onRetry={retry}
+      errorTitle="The post is running late."
+      empty={visibleJobs.length === 0}
+      emptyTitle="No letters in this pile."
+      emptyHint="Try fewer filters, or another country or city. New roles arrive every day."
+      loadingMore={false}
+      skeleton={<AirmailRowSkeleton />}
+      gridClassName="grid gap-4"
+      footer={
+        <InfiniteListFooter
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+          onRetry={loadMore}
+          loadedCount={visibleJobs.length}
+          total={total}
+          label="private jobs"
+        />
+      }
+    >
+      <div className={splitView ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] items-start gap-5" : undefined}>
+        <div>
+          <ul className="grid gap-4" aria-label="Private jobs">
+            {visibleJobs.map((job, index) => (
+              <li key={job.id} id={`pj-${job.id}`} className="scroll-mt-28">
+                <AirmailJobRow job={job} index={index} nowMs={nowMs} selected={selectedJob?.id === job.id} onSelect={selectJob} />
+              </li>
+            ))}
+          </ul>
+          {loadingMore ? (
+            <div className="mt-4 grid gap-4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <AirmailRowSkeleton key={index} />
               ))}
             </div>
-          ) : error && jobs.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-16">
-                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-                <h3 className="mb-2 font-display text-lg font-semibold text-foreground">Something went wrong</h3>
-                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-                <Button onClick={retry}>Try Again</Button>
-              </CardContent>
-            </Card>
-          ) : visibleJobs.length === 0 ? (
-            <UniversalCardEmpty
-              title="No private jobs found"
-              hint="Try adjusting your search or filter criteria."
-              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-            />
-          ) : (
-            <>
-              <div className={splitView ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] items-start gap-4" : undefined}>
-                <div>
-                  <ul className="grid gap-3" aria-label="Private jobs">
-                    {visibleJobs.map((job) => (
-                      <li key={job.id} id={`pj-${job.id}`} className="scroll-mt-28">
-                        <PrivateJobRow job={job} nowMs={nowMs} selected={selectedJob?.id === job.id} onSelect={selectJob} />
-                      </li>
-                    ))}
-                  </ul>
-                  {loadingMore ? (
-                    <div className="mt-3 grid gap-3">
-                      {Array.from({ length: 3 }).map((_, index) => (
-                        <PrivateJobRowSkeleton key={index} />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-                {splitView && (selectedJob ? <PrivateJobPreview key={selectedJob.id} job={selectedJob} nowMs={nowMs} /> : <PrivateJobPreviewEmpty />)}
-              </div>
-              <InfiniteListFooter
-                sentinelRef={sentinelRef}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                loadMoreError={loadMoreError}
-                onLoadMore={loadMore}
-                onRetry={loadMore}
-                loadedCount={visibleJobs.length}
-                total={total}
-                label="private jobs"
-              />
-            </>
-          )}
-        </ListingLayout>
-      </motion.div>
-    </div>
-  )
-}
-
-/** "My applications (3)": jobs this candidate already applied to. */
-function MyApplicationsLink() {
-  const applied = useAppliedJobs()
-  return (
-    <Link href="/private-applications" className="border border-rule px-2.5 py-1 font-medium text-muted-foreground transition-colors hover:border-brick hover:text-brick">
-      <CheckCircle2 className="mr-1 inline h-3 w-3" />My applications{applied.size ? ` (${applied.size})` : ""}
-    </Link>
+          ) : null}
+        </div>
+        {splitView && <OpenedLetter>{selectedJob ? <PrivateJobPreview key={selectedJob.id} job={selectedJob} nowMs={nowMs} /> : <PrivateJobPreviewEmpty />}</OpenedLetter>}
+      </div>
+    </DeskListing>
   )
 }

@@ -1,18 +1,11 @@
 "use client"
 
+import { OmrHero, OmrKeyCard, RoughWork } from "./omr-sheet"
+import { DeskItem, DeskListing } from "@/components/desk/DeskKit"
 import { useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
-import { AlertCircle, KeyRound } from "lucide-react"
-import { SectionHero } from "@/components/layout/SectionHero"
-import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
 import { CardShareButton } from "@/components/ui/card-actions"
-import { listGridWithSidebar } from "@/components/ui/module-theme"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ListingFilters } from "@/components/listing/ListingFilters"
-import { ListingLayout } from "@/components/listing/ListingLayout"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
 import type { ActiveFilterChip, FilterControl, QuickFilter, SortOption } from "@/components/listing/types"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
@@ -165,107 +158,62 @@ export function AnswerKeysClient() {
   const visibleItems = filterValidItems(items)
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <SectionHero
-          icon={KeyRound}
-          badge="Answer Keys"
-          title="Answer Keys"
-          subtitle="Download official answer keys for government exams and verify your answers."
-          count={total}
+    <DeskListing
+      hero={<OmrHero total={total} />}
+      filters={{
+        search,
+        onSearchChange: setSearch,
+        onSearchSubmit: () => setSearch((value) => value.trim()),
+        searchPlaceholder: "Search answer keys…",
+        filters,
+        quickFilters,
+        onClear: clearFilters,
+        hasActiveFilters,
+        activeCount,
+      }}
+      aside={<RoughWork />}
+      toolbar={
+        <ListingToolbar
+          count={visibleItems.length}
+          total={total}
+          label="answer keys"
+          refreshing={refreshing}
+          sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
         />
-
-        <ListingLayout
-          filters={
-            <ListingFilters
-              search={search}
-              onSearchChange={setSearch}
-              onSearchSubmit={() => setSearch((value) => value.trim())}
-              searchPlaceholder="Search answer keys…"
-              filters={filters}
-              quickFilters={quickFilters}
-              onClear={clearFilters}
-              hasActiveFilters={hasActiveFilters}
-              activeCount={activeCount}
-            />
-          }
-        >
-          <ListingToolbar
-            count={visibleItems.length}
-            total={total}
-            label="answer keys"
-            refreshing={refreshing}
-            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
-            activeFilters={activeFilters}
-            onClearAll={clearFilters}
+      }
+      loading={loading && items.length === 0}
+      error={error && items.length === 0 ? error : null}
+      onRetry={retry}
+      errorTitle="The red pen ran dry for a second."
+      empty={visibleItems.length === 0}
+      emptyTitle="No key matches that, yet."
+      emptyHint="Try fewer filters. Keys usually come out a few days after the exam."
+      loadingMore={loadingMore}
+      footer={
+        <InfiniteListFooter
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+          onRetry={loadMore}
+          loadedCount={visibleItems.length}
+          total={total}
+          label="answer keys"
+        />
+      }
+    >
+      {visibleItems.map((item, index) => (
+        <DeskItem key={item.id} index={index}>
+          <OmrKeyCard
+            item={item}
+            index={index}
+            share={<CardShareButton title={cleanTitle(item.title)} url={`/answer-key/${item.slug}`} />}
           />
-
-          {loading && items.length === 0 ? (
-            <div className={listGridWithSidebar}>
-              {Array.from({ length: 9 }).map((_, index) => (
-                <UniversalCardSkeleton key={index} />
-              ))}
-            </div>
-          ) : error && items.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-16">
-                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-                <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
-                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-                <Button onClick={retry}>Try Again</Button>
-              </CardContent>
-            </Card>
-          ) : visibleItems.length === 0 ? (
-            <UniversalCardEmpty
-              title="No answer keys found"
-              hint="Try adjusting your search or filter criteria."
-              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-            />
-          ) : (
-            <>
-              <div className={listGridWithSidebar}>
-                {visibleItems.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35 }}
-                    className="h-full"
-                  >
-                    <UniversalCard
-                      module="answerKey"
-                      title={cleanTitle(item.title)}
-                      organization={item.department.name}
-                      description={item.description}
-                      primaryCtaUrl={`/answer-key/${item.slug}`}
-                      share={<CardShareButton title={cleanTitle(item.title)} url={`/answer-key/${item.slug}`} />}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              {loadingMore ? (
-                <div className={`mt-6 ${listGridWithSidebar}`}>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <UniversalCardSkeleton key={index} />
-                  ))}
-                </div>
-              ) : null}
-              <InfiniteListFooter
-                sentinelRef={sentinelRef}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                loadMoreError={loadMoreError}
-                onLoadMore={loadMore}
-                onRetry={loadMore}
-                loadedCount={visibleItems.length}
-                total={total}
-                label="answer keys"
-              />
-            </>
-          )}
-        </ListingLayout>
-      </motion.div>
-    </div>
+        </DeskItem>
+      ))}
+    </DeskListing>
   )
 }

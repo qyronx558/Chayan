@@ -34,7 +34,8 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
       user: guard.user,
       note: `Updated state "${existing.name}" → "${state.name}" (${state.slug}, ${state.type})`,
     })
-    revalidateLocationPages()
+    revalidateLocationPages(existing.slug)
+    if (state.slug !== existing.slug) revalidateLocationPages(state.slug)
     return NextResponse.json({ success: true, data: state })
   } catch (err) {
     return locationConflictResponse(err, "State") ?? serverError(err, "Failed to update state")
@@ -64,7 +65,7 @@ export async function DELETE(_request: NextRequest, { params }: Ctx) {
 
     await prisma.state.delete({ where: { id: existing.id } })
     await staffAudit({ action: "DELETE", entity: "State", entityId: existing.id, user: guard.user, note: `Deleted state "${existing.name}"` })
-    revalidateLocationPages()
+    revalidateLocationPages(existing.slug)
     return NextResponse.json({ success: true })
   } catch (err) {
     return serverError(err, "Failed to delete state")

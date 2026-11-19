@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
   if (!guard.ok) return guard.response
   try {
     const { id } = await params
-    const existing = await prisma.district.findUnique({ where: { id }, include: { state: { select: { name: true } } } })
+    const existing = await prisma.district.findUnique({ where: { id }, include: { state: { select: { name: true, slug: true } } } })
     if (!existing) return NextResponse.json({ success: false, error: "District not found" }, { status: 404 })
 
     const validation = districtSchema.safeParse(await request.json())
@@ -30,7 +30,7 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
       user: guard.user,
       note: `Updated district "${existing.name}" → "${district.name}" in ${existing.state.name}`,
     })
-    revalidateLocationPages()
+    revalidateLocationPages(existing.state.slug, existing.slug)
     return NextResponse.json({ success: true, data: district })
   } catch (err) {
     return locationConflictResponse(err, "District") ?? serverError(err, "Failed to update district")
@@ -43,7 +43,7 @@ export async function DELETE(_request: NextRequest, { params }: Ctx) {
   if (!guard.ok) return guard.response
   try {
     const { id } = await params
-    const existing = await prisma.district.findUnique({ where: { id }, include: { state: { select: { name: true } } } })
+    const existing = await prisma.district.findUnique({ where: { id }, include: { state: { select: { name: true, slug: true } } } })
     if (!existing) return NextResponse.json({ success: false, error: "District not found" }, { status: 404 })
 
     const jobs = await prisma.job.count({ where: { districtId: id } })
@@ -61,7 +61,7 @@ export async function DELETE(_request: NextRequest, { params }: Ctx) {
       user: guard.user,
       note: `Deleted district "${existing.name}" in ${existing.state.name}`,
     })
-    revalidateLocationPages()
+    revalidateLocationPages(existing.state.slug, existing.slug)
     return NextResponse.json({ success: true })
   } catch (err) {
     return serverError(err, "Failed to delete district")

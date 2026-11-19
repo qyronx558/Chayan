@@ -1,0 +1,173 @@
+/*
+ * The policy text, set like a document on a register page: a red margin
+ * rule, clauses numbered with § by CSS counters, ticks for "you may",
+ * crosses for "you may not", circled numbers for steps.
+ */
+.legal-doc {
+  counter-reset: clause;
+}
+
+.legal-doc .legal-clause {
+  counter-increment: clause;
+  scroll-margin-top: 6rem;
+  padding-block: 1.6rem;
+  border-bottom: 1px dashed var(--hs-border-strong);
+}
+.legal-doc .legal-clause:last-child {
+  border-bottom: 0;
+}
+
+.legal-doc .legal-clause > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-foreground);
+  margin-bottom: 0.8rem;
+}
+.legal-doc .legal-clause > h2::before {
+  content: "§ " counter(clause);
+  flex-shrink: 0;
+  font-family: var(--legal-type, ui-monospace), monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-brick);
+}
+
+.legal-doc p {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: color-mix(in oklch, var(--color-foreground) 88%, transparent);
+}
+.legal-doc p + p,
+.legal-doc ul + p,
+.legal-doc ol + p {
+  margin-top: 0.85rem;
+}
+.legal-doc strong {
+  color: var(--color-foreground);
+}
+.legal-doc a {
+  color: var(--hs-trust);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.legal-doc a:hover {
+  color: var(--color-brick);
+}
+
+/* lists: ticks by default */
+.legal-doc ul,
+.legal-doc ol {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.legal-doc ul > li,
+.legal-doc ol > li {
+  position: relative;
+  padding-left: 2.1rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: color-mix(in oklch, var(--color-foreground) 88%, transparent);
+}
+.legal-doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.2rem;
+  top: 0.45rem;
+  width: 1.15rem;
+  height: 0.9rem;
+  background: oklch(45% 0.11 155);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 18'%3E%3Cpath d='M2 10 C5 12 7 14 9 16 C13 9 17 5 22 2' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 18'%3E%3Cpath d='M2 10 C5 12 7 14 9 16 C13 9 17 5 22 2' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* "you may not": a hand-drawn cross in red */
+.legal-doc ul.legal-no > li::before {
+  background: oklch(50% 0.18 28);
+  width: 0.95rem;
+  height: 0.95rem;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 3 C8 8 12 12 17 17 M17 3 C12 8 8 12 3 17' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 3 C8 8 12 12 17 17 M17 3 C12 8 8 12 3 17' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* steps: numbers circled in pen */
+.legal-doc ol {
+  counter-reset: step;
+}
+.legal-doc ol > li {
+  counter-increment: step;
+}
+.legal-doc ol > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--color-brick);
+  border-radius: 48% 52% 46% 54% / 55% 45% 55% 45%;
+  font-family: var(--legal-hand, cursive), cursive;
+  font-size: 0.95rem;
+  color: var(--color-brick);
+  transform: rotate(-6deg);
+}
+
+/* the margin rule of a register page */
+.legal-sheet {
+  background-image: linear-gradient(90deg, transparent 2.6rem, oklch(62% 0.16 25 / 0.45) 2.6rem, oklch(62% 0.16 25 / 0.45) calc(2.6rem + 1px), transparent calc(2.6rem + 1px));
+}
+@media (max-width: 640px) {
+  .legal-sheet {
+    background-image: none;
+  }
+}
+
+/* a red notice slip pinned inside a clause */
+.legal-doc .legal-warn {
+  margin-top: 1rem;
+  border: 2px solid oklch(50% 0.18 28);
+  border-radius: 4px;
+  padding: 0.8rem 1rem 0.8rem 2.6rem;
+  position: relative;
+  background: color-mix(in oklch, oklch(50% 0.18 28) 7%, transparent);
+  transform: rotate(-0.4deg);
+}
+.legal-doc .legal-warn::before {
+  content: "!";
+  position: absolute;
+  left: 0.8rem;
+  top: 0.75rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: oklch(50% 0.18 28);
+  color: white;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.legal-doc .legal-warn p {
+  font-weight: 600;
+  color: oklch(46% 0.17 28);
+}
+.dark .legal-doc .legal-warn p {
+  color: oklch(75% 0.13 28);
+}
+.dark .legal-doc ul > li::before {
+  background: oklch(70% 0.13 155);
+}
+.dark .legal-doc ul.legal-no > li::before {
+  background: oklch(68% 0.16 28);
+}

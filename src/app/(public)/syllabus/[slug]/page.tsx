@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -6,16 +7,26 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+
+export const revalidate = 86400
+
+const getSyllabus = cache((slug: string) => prisma.syllabus.findUnique({ where: { slug }, include: { department: true, category: true, job: true } }))
+
+export async function generateStaticParams() {
+  try {
+    const rows = await prisma.syllabus.findMany({ where: { moderation: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 100, select: { slug: true } })
+    return rows.map((r) => ({ slug: r.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const syllabus = await prisma.syllabus.findUnique({
-    where: { slug },
-    include: { department: true },
-  })
+  const syllabus = await getSyllabus(slug)
 
-  if (!syllabus) return { title: "Syllabus Not Found" }
+  if (!syllabus || !isPubliclyVisible(syllabus.moderation)) return { title: "Syllabus Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -31,12 +42,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function SyllabusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const syllabus = await prisma.syllabus.findUnique({
-    where: { slug },
-    include: { department: true, category: true, job: true },
-  })
+  const syllabus = await getSyllabus(slug)
 
-  if (!syllabus || !(await canViewContent(syllabus.moderation))) notFound()
+  if (!syllabus || !isPubliclyVisible(syllabus.moderation)) notFound()
 
   const relatedSyllabus = await prisma.syllabus.findMany({
     where: {

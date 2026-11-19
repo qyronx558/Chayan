@@ -7,8 +7,14 @@ import { districtPagePath, statePagePath, STATE_TYPE_LABEL } from "@/lib/locatio
 import { getDistrictJobCounts, getStateBySlug } from "@/lib/location-pages"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { JobsClient } from "../../jobs-client"
+import { DataVersionProvider } from "@/components/providers/DataVersion"
+import { renderVersion } from "@/lib/data-version"
 
-export const revalidate = 300
+export const revalidate = 21600
+
+export function generateStaticParams(): { stateSlug: string }[] {
+  return []
+}
 
 type Props = { params: Promise<{ stateSlug: string }> }
 
@@ -58,15 +64,17 @@ export default async function StateJobsPage({ params }: Props) {
         />
       </div>
 
-      <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading jobs…</div>}>
-        <JobsClient
-          preset={{
-            eligibleState: state.slug,
-            heading: `Government Jobs in ${state.name}`,
-            intro: `Jobs open to candidates from ${state.name}: ${kind}-level recruitment plus central government jobs open to all of India. Pick a district in the filters (or from the list below) for local district-level jobs.`,
-          }}
-        />
-      </Suspense>
+      <DataVersionProvider version={renderVersion()}>
+        <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading jobs…</div>}>
+          <JobsClient
+            preset={{
+              eligibleState: state.slug,
+              heading: `Government Jobs in ${state.name}`,
+              intro: `Jobs open to candidates from ${state.name}: ${kind}-level recruitment plus central government jobs open to all of India. Pick a district in the filters (or from the list below) for local district-level jobs.`,
+            }}
+          />
+        </Suspense>
+      </DataVersionProvider>
 
       {state.districts.length > 0 && (
         <section className="container mx-auto max-w-7xl px-4 pb-12" aria-labelledby="districts-heading">

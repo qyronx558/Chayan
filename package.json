@@ -31,6 +31,7 @@
     "ingest:discover": "tsx scripts/ingest/discover-districts.ts",
     "ingest:check": "tsx scripts/ingest/check-sources.ts",
     "jobs:discover": "tsx scripts/discover-job-boards.ts",
+    "feeds": "tsx scripts/private-feeds.ts",
     "jobs:backfill-geo": "tsx scripts/backfill-job-geo.ts"
   },
   "prisma": {

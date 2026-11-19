@@ -7,6 +7,7 @@ import { cn, formatDate } from "@/lib/utils"
 import { HomeSectionHeader } from "@/components/home/ui/HomeSectionHeader"
 import { daysLeft } from "@/components/home/HomeJobRow"
 import { handFont } from "@/components/home/fonts"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 interface JobItem {
  id: string
@@ -53,6 +54,7 @@ function extractQualifications(education?: string | null): string[] {
 }
 
 export function JobsByQualification({ className }: { className?: string }) {
+ const dataVersion = useDataVersion()
  const [jobs, setJobs] = useState<JobItem[]>([])
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState("")
@@ -63,7 +65,7 @@ export function JobsByQualification({ className }: { className?: string }) {
    try {
     setLoading(true)
     setError("")
-    const res = await fetch("/api/jobs?limit=50")
+    const res = await fetch(withDataVersion("/api/jobs?limit=50", dataVersion))
     const json = await res.json()
     if (!json.success) throw new Error(json.error || "Failed to fetch jobs")
     const mapped: JobItem[] = json.data.map((j: any) => ({
@@ -86,7 +88,7 @@ export function JobsByQualification({ className }: { className?: string }) {
    }
   }
   fetchData()
- }, [])
+ }, [dataVersion])
 
  const qualifications = useMemo(() => {
   const present = new Set<string>()

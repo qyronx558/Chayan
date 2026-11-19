@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { BlogClient } from "./blog-client"
+import { DataVersionProvider } from "@/components/providers/DataVersion"
+import { renderVersion } from "@/lib/data-version"
 
 export const metadata: Metadata = {
   title: "Blog - Career Guides, Exam Tips & Job Updates",
@@ -14,8 +16,12 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Blog | ChayanJobs", description: "Exam tips, preparation guides & job updates." },
 }
 
-export const revalidate = 1800
+export const revalidate = 86400
 
 export default function BlogPage() {
-  return <BlogClient />
+  return (
+    <DataVersionProvider version={renderVersion()}>
+      <BlogClient />
+    </DataVersionProvider>
+  )
 }

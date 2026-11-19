@@ -1,9 +1,8 @@
 "use client"
 
-import { CheckCircle2, Circle } from "lucide-react"
-import { DataCard } from "@/components/admin/dashboard/DataCard"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { handFont } from "@/components/home/fonts"
+import { DrawingPin, HandTick } from "@/components/desk/DeskKit"
 import type { StrengthStep } from "@/lib/profile"
 
 interface ProfileStrengthCardProps {
@@ -14,39 +13,44 @@ interface ProfileStrengthCardProps {
   onJump: (step: StrengthStep) => void
 }
 
-export function ProfileStrengthCard({ pct, done, total, steps, onJump }: ProfileStrengthCardProps) {
+export function ProfileStrengthCard({ done, total, steps, onJump }: ProfileStrengthCardProps) {
+  const left = total - done
+  const ordered = [...steps.filter((s) => !s.done), ...steps.filter((s) => s.done)]
   return (
-    <DataCard title="Profile strength" subtitle={`${done} of ${total} complete`}>
-      <div id="profile-strength" className="space-y-3">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-bold tabular-nums text-foreground dark:text-paper">{pct}%</span>
-          <span className="text-xs text-muted-foreground dark:text-muted-foreground">
-            {done}/{total} steps
-          </span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-paper-3 dark:bg-background/10" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Profile strength">
-          <div className="h-full rounded-full bg-paper-3 transition-all dark:bg-paper-3" style={{ width: `${pct}%` }} />
-        </div>
-        <ul className="space-y-1.5">
-          {steps.map((s) => (
-            <li key={s.key} className="flex items-center gap-2 text-sm">
-              {s.done ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-brick dark:text-brick" aria-label="Done" />
-              ) : (
-                <Circle className="h-4 w-4 shrink-0 text-muted-foreground dark:text-muted-foreground" aria-label="Not done" />
-              )}
-              <span className={cn("min-w-0 flex-1 truncate", s.done ? "text-foreground dark:text-muted-foreground" : "text-muted-foreground dark:text-muted-foreground")}>
+    <section
+      id="profile-strength"
+      aria-label="Still to do"
+      className="relative rotate-[0.6deg] rounded-[2px] px-5 pb-5 pt-7"
+      style={{ background: "color-mix(in oklch, var(--hs-marigold) 30%, var(--hs-paper-slip))", boxShadow: "0 1px 1px rgb(60 40 10 / .1), 0 14px 20px -16px rgb(60 40 10 / .55)" }}
+    >
+      <DrawingPin className="left-1/2 top-2 -translate-x-1/2" hue={150} />
+      <h2 className={cn(handFont.className, "text-2xl text-foreground")}>{left ? "Still to do" : "All done!"}</h2>
+      <p className={cn(handFont.className, "text-[15px] text-foreground/70")}>
+        {left ? `${left} small thing${left > 1 ? "s" : ""}, then your file is complete.` : "Your file is complete. Nice work."}
+      </p>
+      <ul className="mt-3 space-y-1.5">
+        {ordered.map((s) => (
+          <li key={s.key} className="flex items-start gap-2">
+            <span className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px] border-[1.5px] border-current text-foreground/50" aria-hidden>
+              {s.done ? <HandTick className="h-5 w-5 -translate-y-0.5 text-[oklch(48%_0.12_150)]" draw={false} /> : null}
+            </span>
+            {s.done ? (
+              <span className={cn(handFont.className, "text-[16px] text-foreground/55 line-through decoration-foreground/40")}>
                 {s.label}
+                <span className="sr-only"> (done)</span>
               </span>
-              {!s.done && s.actionLabel ? (
-                <Button type="button" variant="ghost" size="sm" className="h-7 shrink-0 px-2 text-xs text-brick hover:text-brick dark:text-brick" onClick={() => onJump(s)}>
-                  {s.actionLabel}
-                </Button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </DataCard>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onJump(s)}
+                className={cn(handFont.className, "text-left text-[16px] text-foreground underline decoration-dotted decoration-foreground/40 underline-offset-4 hover:decoration-solid focus-visible:outline-none focus-visible:decoration-solid")}
+              >
+                {s.label}
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

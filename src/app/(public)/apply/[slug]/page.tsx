@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
@@ -5,24 +6,46 @@ import { prisma } from "@/lib/prisma"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { JobDetailContent } from "@/components/jobs/JobDetailContent"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { JobViewTracker } from "@/components/jobs/JobViewTracker"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { cn, formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { handFont, typeFont } from "@/components/home/fonts"
+import "@/app/home.css"
 import { stripHtmlToText } from "@/lib/blog-prose"
 import { getJourney } from "@/lib/doc-journey"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+import { DaysLeftNote } from "@/components/shared/DaysLeft"
 import { isThinJob } from "@/lib/ingest/quality"
+
+export const revalidate = 86400
+
+const getJob = cache((slug: string) =>
+  prisma.job.findUnique({
+    where: { slug },
+    include: { department: true, category: true, state: true, district: true },
+  })
+)
+
+export async function generateStaticParams() {
+  try {
+    const top = await prisma.jobView.groupBy({
+      by: ["jobId"],
+      where: { job: { moderation: "APPROVED", status: "ACTIVE" } },
+      _sum: { views: true },
+      orderBy: { _sum: { views: "desc" } },
+      take: 100,
+    })
+    const jobs = await prisma.job.findMany({ where: { id: { in: top.map((t) => t.jobId) } }, select: { slug: true } })
+    return jobs.map((j) => ({ slug: j.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job) return { title: "Job Not Found" }
+  if (!job || !isPubliclyVisible(job.moderation)) return { title: "Job Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -45,12 +68,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ApplyJobPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: { department: true, category: true, state: true, district: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job || !(await canViewContent(job.moderation))) notFound()
+  if (!job || !isPubliclyVisible(job.moderation)) notFound()
 
   const relatedJobs = await prisma.job.findMany({
     where: {
@@ -63,15 +83,11 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     include: { department: true },
   })
 
-  const viewsAgg = await prisma.jobView.aggregate({
-    where: { jobId: job.id },
-    _sum: { views: true },
-  })
+  const [viewsAgg, journey] = await Promise.all([
+    prisma.jobView.aggregate({ where: { jobId: job.id }, _sum: { views: true } }),
+    getJourney(job.id, "notification"),
+  ])
   const viewsTotal = viewsAgg._sum.views ?? 0
-  const journey = await getJourney(job.id, "notification")
-  // Single timestamp per request for stable related-job badges (server render).
-  // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
-  const nowMs = Date.now()
 
   const breadCrumbLd = {
     "@context": "https://schema.org",
@@ -105,7 +121,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
+    <div className="home-saas container mx-auto max-w-6xl px-4 pb-8 pt-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
@@ -150,57 +166,51 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         journey={journey}
         summary={job.summary}
       />
-<JobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="JOB" entityId={job.id} />
 
       <div className="mt-12">
         <DiscussionSection postType="JOB" postId={job.id} path={`/apply/${job.slug}`} />
       </div>
       {relatedJobs.length > 0 && (
-        <section className="mt-12">
-          <div className="mb-6 flex items-end justify-between gap-3">
+        <section className="mt-16">
+          <div className="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-dashed border-[var(--hs-border-strong)] pb-3">
             <div>
-              <h2 className="text-xl font-bold text-foreground dark:text-paper">Related Jobs</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">More openings from {job.department.name}</p>
+              <p className={cn(handFont.className, "text-[1.15rem] text-[var(--color-brick)]")}>while you&apos;re here</p>
+              <h2 className="font-display text-[1.6rem] font-black leading-tight text-foreground">More from {job.department.name}</h2>
             </div>
-            <Link href="/jobs" className="shrink-0 text-sm font-semibold text-brick hover:underline dark:text-brick">
-              View all jobs →
+            <Link href="/jobs" className={cn(handFont.className, "shrink-0 text-[1.1rem] text-[var(--hs-trust)] underline decoration-wavy decoration-1 underline-offset-4 hover:text-[var(--color-brick)]")}>
+              see every job →
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {relatedJobs.map((rj) => {
-              const rjLast = rj.lastDate ? new Date(rj.lastDate).getTime() : null
-              const rjDays = rjLast ? Math.floor((rjLast - nowMs) / 86400000) : null
-              const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
+          <div className="grid gap-6 sm:grid-cols-2">
+            {relatedJobs.map((rj, i) => {
               return (
-              <Link key={rj.id} href={`/apply/${rj.slug}`}>
-                <Card className="group h-full border-rule transition-all hover:-translate-y-0.5 hover:border-rule dark:border-ink">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                          <Badge variant="secondary" className="bg-paper-3 text-xs text-brick dark:bg-paper-3 dark:text-brick">{rj.department.name}</Badge>
-                          {rjDays !== null && rjDays >= 0 && rjDays <= 7 ? (
-                            <Badge className="bg-paper-2 text-[11px] text-brick dark:bg-paper-2 dark:text-brick">Only {rjDays}d left</Badge>
-                          ) : rjDays !== null && rjDays > 7 ? (
-                            <Badge variant="outline" className="text-[11px]">{rjDays}d left</Badge>
-                          ) : null}
-                          {rjUrgent ? null : rj.totalVacancies ? (
-                            <Badge variant="outline" className="text-[11px]">{rj.totalVacancies.toLocaleString("en-IN")} posts</Badge>
-                          ) : null}
-                        </div>
-                        <CardTitle className="text-base leading-snug group-hover:text-brick dark:group-hover:text-brick">{rj.title}</CardTitle>
-                      </div>
+              <Link
+                key={rj.id}
+                href={`/apply/${rj.slug}`}
+                className={cn(
+                  "group relative block rounded-[3px] border border-[var(--hs-border)] bg-[var(--hs-paper-slip)] px-5 pb-4 pt-5 transition-transform duration-300 hover:-translate-y-1",
+                  i % 3 === 1 ? "rotate-[0.5deg]" : i % 3 === 2 ? "-rotate-[0.4deg]" : ""
+                )}
+                style={{ boxShadow: "0 1px 2px rgb(60 40 10 / .08), 0 16px 28px -22px rgb(60 40 10 / .55)" }}
+              >
+                <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full shadow-[1px_2px_2px_rgb(0_0_0/.3)]" style={{ background: `radial-gradient(circle at 35% 30%, oklch(75% 0.15 ${[28, 250, 155, 70][i % 4]}), oklch(48% 0.15 ${[28, 250, 155, 70][i % 4]}))` }} aria-hidden />
+                <p className={cn(typeFont.className, "line-clamp-1 text-[10.5px] font-bold uppercase text-muted-foreground")}>{rj.department.name}</p>
+                <h3 className="mt-1.5 line-clamp-2 font-display text-[1.1rem] font-bold leading-snug text-foreground group-hover:underline group-hover:decoration-[var(--color-brick)] group-hover:underline-offset-2">{rj.title}</h3>
+                <dl className={cn(typeFont.className, "mt-3 space-y-1 text-[11.5px]")}>
+                  {rj.location && (
+                    <div className="flex gap-2"><dt className="w-20 shrink-0 text-muted-foreground">Location</dt><dd className="line-clamp-1 text-foreground">{rj.location}</dd></div>
+                  )}
+                  {rj.lastDate && (
+                    <div className="flex gap-2">
+                      <dt className="w-20 shrink-0 text-muted-foreground">Last date</dt>
+                      <DaysLeftNote lastDate={rj.lastDate.toISOString()} />
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-1 text-sm text-muted-foreground dark:text-muted-foreground">
-                      {rj.location && <p>📍 {rj.location}</p>}
-                      {rj.lastDate && <p>🗓 Last Date: <span className={rjUrgent ? "font-bold text-brick" : "font-medium"}>{formatDate(rj.lastDate)}</span></p>}
-                      {rj.totalVacancies && <p>👥 Vacancies: {rj.totalVacancies.toLocaleString("en-IN")}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  {rj.totalVacancies ? (
+                    <div className="flex gap-2"><dt className="w-20 shrink-0 text-muted-foreground">Vacancies</dt><dd className="font-bold text-foreground">{rj.totalVacancies.toLocaleString("en-IN")}</dd></div>
+                  ) : null}
+                </dl>
               </Link>
               )
             })}

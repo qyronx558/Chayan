@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma"
 
+export const revalidate = 21600
+
 export async function GET() {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "")
 
   const jobs = await prisma.job.findMany({
-    where: { status: "ACTIVE" },
+    where: { status: "ACTIVE", moderation: "APPROVED" },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: { department: true, category: true },

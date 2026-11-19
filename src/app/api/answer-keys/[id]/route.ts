@@ -5,6 +5,7 @@ import { answerKeySchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { staffAudit } from "@/lib/moderation"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { requireAction } from "@/lib/admin/access"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
@@ -23,7 +24,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Answer key not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: answerKey })
+    return publicApiResponse({ success: true, data: answerKey }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch answer key" },
@@ -104,6 +105,8 @@ export async function PUT(
       note: `Updated "${answerKey.title}"`,
     })
 
+    revalidatePublicContent("answer-key", answerKey.slug)
+    if (existing.slug !== answerKey.slug) revalidatePublicContent("answer-key", existing.slug)
     return NextResponse.json({ success: true, data: answerKey })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)
@@ -149,6 +152,7 @@ export async function DELETE(
       note: `Deleted "${existing.title}"`,
     })
 
+    revalidatePublicContent("answer-key", existing.slug)
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

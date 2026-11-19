@@ -88,6 +88,7 @@ export function ResetPasswordForm() {
         ? "Your password has been reset successfully. You can now sign in with your new password."
         : "Enter your new password below. Make sure it's strong and unique."}
       benefits={benefits}
+      variant={isSuccess ? "reset-done" : "reset"}
     >
       <div className="space-y-6">
         <div className="text-center">
@@ -95,15 +96,15 @@ export function ResetPasswordForm() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-paper-3 dark:bg-paper-3"
+            className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border-[2.5px] ${isSuccess ? "rotate-[6deg] border-[oklch(45%_0.1_160)] text-[oklch(45%_0.1_160)]" : "-rotate-[6deg] border-[var(--color-brick)] text-[var(--color-brick)]"}`}
           >
             {isSuccess ? (
-              <CheckCircle2 className="h-8 w-8 text-foreground dark:text-foreground" />
+              <CheckCircle2 className="h-8 w-8" />
             ) : (
-              <Lock className="h-8 w-8 text-brick dark:text-brick" />
+              <Lock className="h-8 w-8" />
             )}
           </motion.div>
-          <h1 className="text-2xl font-bold text-foreground dark:text-paper">
+          <h1 className="font-display text-[2rem] font-black leading-tight text-foreground">
             {isSuccess ? "Password Reset" : "Set New Password"}
           </h1>
           <p className="mt-2 text-muted-foreground dark:text-muted-foreground">
@@ -119,7 +120,7 @@ export function ResetPasswordForm() {
               <p className="font-medium">Password updated successfully!</p>
               <p className="mt-1">You will be logged out of other sessions. Please sign in again with your new password.</p>
             </div>
-            <Button className="w-full py-3.5" asChild>
+            <Button className="h-12 w-full rounded-full text-[15px] font-semibold" asChild>
               <Link href="/login">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Go to Login
@@ -132,7 +133,7 @@ export function ResetPasswordForm() {
               <AlertCircle className="mr-2 inline h-5 w-5 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
-            <Button variant="outline" className="w-full py-3.5" asChild>
+            <Button variant="outline" className="h-12 w-full rounded-full text-[15px] font-semibold" asChild>
               <Link href="/forgot-password">Request New Reset Link</Link>
             </Button>
           </div>
@@ -181,7 +182,7 @@ export function ResetPasswordForm() {
               autoComplete="new-password"
             />
 
-            <Button type="submit" className="w-full py-3.5" disabled={isLoading}>
+            <Button type="submit" className="h-12 w-full rounded-full text-[15px] font-semibold" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />

@@ -1,16 +1,14 @@
 name: private-job-feeds
 
-# Syncs company job boards (Admin → Job feeds) by calling /api/cron/private-feeds.
-# Each call runs the feeds that are due (not synced in 6 h) inside a 45 s budget and
-# the next call continues, so any number of boards is covered.
+# Syncs company job boards (Admin → Job feeds) inside GitHub Actions, straight
+# against the database, so the heavy fetch / parse / upsert work never runs on
+# Vercel. One POST to /api/cron/revalidate refreshes the affected pages after.
 #
-# Preferred: point the external cron (cron-job.org) at the site every 30 minutes:
-#   GET /api/cron/private-feeds   (Authorization: Bearer CRON_SECRET)
-# and set INGEST_EXTERNAL_SCHEDULER=true; this hourly GitHub cron is then skipped.
+# Secrets (Production environment): DATABASE_URL, APP_URL, CRON_SECRET, GEMINI_API_KEY (optional).
 
 on:
   schedule:
-    - cron: "20 * * * *"
+    - cron: "20 */3 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -19,20 +17,31 @@ concurrency:
 
 jobs:
   sync:
-    if: github.event_name == 'workflow_dispatch' || vars.INGEST_EXTERNAL_SCHEDULER != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    environment: Production
+    timeout-minutes: 20
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
       - name: Sync due job feeds
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BOT_CONTACT: ${{ vars.BOT_CONTACT }}
         run: |
-          test -n "$APP_URL" && test -n "$CRON_SECRET"
-          # Follow the site's own redirect (e.g. apex -> www) first so the secret is never resent elsewhere.
-          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
-          base=${base%/}
-          echo "Site: $base"
-          curl --fail-with-body --silent --show-error --max-time 90 \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            "$base/api/cron/private-feeds"
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL is not set for the Production environment."
+            exit 1
+          fi
+          npm run feeds

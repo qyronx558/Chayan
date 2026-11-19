@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { notifyUsers, existingNotificationHrefs } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
+import { publicApiResponse } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,11 +38,11 @@ export async function GET(request: NextRequest) {
     const hrefs = await existingNotificationHrefs(notifications)
     const data = notifications.map((n) => ({ ...n, href: hrefs.get(n.slug) || null }))
 
-    return NextResponse.json({
+    return publicApiResponse({
       success: true,
       data,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    })
+    }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch notifications" },

@@ -16,6 +16,7 @@ const db = prisma as unknown as Record<string, never> & {
   bookmark: { count: (a: unknown) => Promise<number> }
   comment: { count: (a: unknown) => Promise<number> }
   application: { count: (a: unknown) => Promise<number> }
+  privateApplication: { count: (a: unknown) => Promise<number> }
   job: { count: (a: unknown) => Promise<number> }
 }
 
@@ -77,11 +78,12 @@ export async function GET() {
     const hasGoogle = accounts.some((a) => a.provider === "google")
     const role = (u["role"] as string) ?? "USER"
     const admin = isAdmin(role)
-    const [bookmarks, comments, applications, savedJobs] = await Promise.all([
+    const [bookmarks, comments, applications, savedJobs, privateApplications] = await Promise.all([
       db.bookmark.count({ where: { userId } }).catch(() => 0),
       db.comment.count({ where: { userId } }).catch(() => 0),
       db.application.count({ where: { userId } }).catch(() => 0),
       db.bookmark.count({ where: { userId, jobId: { not: null } } }).catch(() => 0),
+      db.privateApplication.count({ where: { userId } }).catch(() => 0),
     ])
     let adminStats: { uploads: number; approved: number; pendingReview: number } | null = null
     if (admin) {
@@ -126,6 +128,15 @@ export async function GET() {
       dateOfBirth: (u["dateOfBirth"] as string | null) ?? null,
       preferredStates: Array.isArray(u["preferredStates"]) ? (u["preferredStates"] as string[]) : [],
       interestedCategories: Array.isArray(u["interestedCategories"]) ? (u["interestedCategories"] as string[]) : [],
+      govInterest: (u["govInterest"] as string | null) ?? null,
+      privateInterest: (u["privateInterest"] as string | null) ?? null,
+      headline: (u["headline"] as string | null) ?? null,
+      experienceYears: (u["experienceYears"] as number | null) ?? null,
+      expectedSalary: (u["expectedSalary"] as number | null) ?? null,
+      skills: Array.isArray(u["skills"]) ? (u["skills"] as string[]) : [],
+      preferredCities: Array.isArray(u["preferredCities"]) ? (u["preferredCities"] as string[]) : [],
+      workModes: Array.isArray(u["workModes"]) ? (u["workModes"] as string[]) : [],
+      jobTypes: Array.isArray(u["jobTypes"]) ? (u["jobTypes"] as string[]) : [],
       role,
       signInMethod: hasPassword ? "Password" : hasGoogle ? "Google" : "Password",
       password: hasPassword,
@@ -149,7 +160,7 @@ export async function GET() {
       resumeFileSize: resume ? (resume["fileSize"] as number) : null,
       resumeUpdatedAt: resume ? (resume["updatedAt"] as string) : null,
       preferences: prefs ?? {},
-      counts: { applications, bookmarks, savedJobs, comments },
+      counts: { applications, privateApplications, bookmarks, savedJobs, comments },
       adminStats,
     }
     return NextResponse.json({ success: true, data })

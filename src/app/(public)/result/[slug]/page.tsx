@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -6,16 +7,26 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+
+export const revalidate = 86400
+
+const getResult = cache((slug: string) => prisma.result.findUnique({ where: { slug }, include: { department: true, category: true, job: true } }))
+
+export async function generateStaticParams() {
+  try {
+    const rows = await prisma.result.findMany({ where: { moderation: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 100, select: { slug: true } })
+    return rows.map((r) => ({ slug: r.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const result = await prisma.result.findUnique({
-    where: { slug },
-    include: { department: true },
-  })
+  const result = await getResult(slug)
 
-  if (!result) return { title: "Result Not Found" }
+  if (!result || !isPubliclyVisible(result.moderation)) return { title: "Result Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -31,12 +42,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ResultDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const result = await prisma.result.findUnique({
-    where: { slug },
-    include: { department: true, category: true, job: true },
-  })
+  const result = await getResult(slug)
 
-  if (!result || !(await canViewContent(result.moderation))) notFound()
+  if (!result || !isPubliclyVisible(result.moderation)) notFound()
 
   const relatedResults = await prisma.result.findMany({
     where: {

@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { existingNotificationHrefs } from "@/lib/notifications"
 import { NotificationsClient } from "./notifications-client"
+import { DataVersionProvider } from "@/components/providers/DataVersion"
+import { renderVersion } from "@/lib/data-version"
+import { getCategoryList } from "@/lib/taxonomy"
 
 export const metadata: Metadata = {
   title: "Notifications",
@@ -10,7 +13,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Notifications | ChayanJobs", description: "Latest government job notifications and trending updates." },
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 21600
 
 export default async function NotificationsPage() {
   const [notifications, categories] = await Promise.all([
@@ -19,11 +22,15 @@ export default async function NotificationsPage() {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    getCategoryList(),
   ])
 
   const hrefs = await existingNotificationHrefs(notifications)
   const items = notifications.map((n) => ({ ...n, href: hrefs.get(n.slug) || null }))
 
-  return <NotificationsClient notifications={JSON.parse(JSON.stringify(items))} categories={JSON.parse(JSON.stringify(categories))} />
+  return (
+    <DataVersionProvider version={renderVersion()}>
+      <NotificationsClient notifications={JSON.parse(JSON.stringify(items))} categories={JSON.parse(JSON.stringify(categories))} />
+    </DataVersionProvider>
+  )
 }

@@ -2,19 +2,11 @@
 
 import { useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
-import { AlertCircle, Calendar, GraduationCap, IndianRupee } from "lucide-react"
-import { SectionHero } from "@/components/layout/SectionHero"
-import { formatDate } from "@/lib/utils"
-import { UniversalCard, UniversalCardSkeleton, UniversalCardEmpty } from "@/components/ui/universal-card"
-import { listGridWithSidebar } from "@/components/ui/module-theme"
 import { cleanTitle, filterValidItems } from "@/lib/card-helpers"
+import { AdmissionBanner, AdmissionFormCard, DocumentChecklist } from "./admission-desk"
+import { DeskItem, DeskListing } from "@/components/desk/DeskKit"
 import { CardShareButton } from "@/components/ui/card-actions"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ListingFilters } from "@/components/listing/ListingFilters"
-import { ListingLayout } from "@/components/listing/ListingLayout"
 import { ListingToolbar } from "@/components/listing/ListingToolbar"
 import type { ActiveFilterChip, FilterControl, QuickFilter, SortOption } from "@/components/listing/types"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
@@ -208,113 +200,63 @@ export function AdmissionsClient() {
   const visibleItems = filterValidItems(items)
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <SectionHero
-          icon={GraduationCap}
-          badge="Admissions"
-          title="Admissions"
-          subtitle="Latest government admission notifications for various courses and programs."
-          count={total}
+    <DeskListing
+      hero={<AdmissionBanner total={total} />}
+      filters={{
+        search,
+        onSearchChange: setSearch,
+        onSearchSubmit: () => setSearch((value) => value.trim()),
+        searchPlaceholder: "Search admissions…",
+        filters,
+        quickFilters,
+        onClear: clearFilters,
+        hasActiveFilters,
+        activeCount,
+      }}
+      aside={<DocumentChecklist />}
+      toolbar={
+        <ListingToolbar
+          count={visibleItems.length}
+          total={total}
+          label="admissions"
+          refreshing={refreshing}
+          sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
         />
-
-        <ListingLayout
-          filters={
-            <ListingFilters
-              search={search}
-              onSearchChange={setSearch}
-              onSearchSubmit={() => setSearch((value) => value.trim())}
-              searchPlaceholder="Search admissions…"
-              filters={filters}
-              quickFilters={quickFilters}
-              onClear={clearFilters}
-              hasActiveFilters={hasActiveFilters}
-              activeCount={activeCount}
-            />
-          }
-        >
-          <ListingToolbar
-            count={visibleItems.length}
-            total={total}
-            label="admissions"
-            refreshing={refreshing}
-            sort={{ value: sort, options: SORT_OPTIONS, onChange: setSort }}
-            activeFilters={activeFilters}
-            onClearAll={clearFilters}
+      }
+      loading={loading && items.length === 0}
+      error={error && items.length === 0 ? error : null}
+      onRetry={retry}
+      errorTitle="The counter is closed for a moment."
+      empty={visibleItems.length === 0}
+      emptyTitle="No forms in this pile."
+      emptyHint="Nothing matches these filters right now. Loosen one of them, or check back: new notices arrive through the season."
+      loadingMore={loadingMore}
+      footer={
+        <InfiniteListFooter
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+          onRetry={loadMore}
+          loadedCount={visibleItems.length}
+          total={total}
+          label="admissions"
+        />
+      }
+    >
+      {visibleItems.map((item, index) => (
+        <DeskItem key={item.id} index={index}>
+          <AdmissionFormCard
+            item={item}
+            index={index}
+            track={<ApplicationTracker jobId={item.id} type="admission" />}
+            share={<CardShareButton title={cleanTitle(item.title)} url={`/admission/${item.slug}`} />}
           />
-
-          {loading && items.length === 0 ? (
-            <div className={listGridWithSidebar}>
-              {Array.from({ length: 9 }).map((_, index) => (
-                <UniversalCardSkeleton key={index} />
-              ))}
-            </div>
-          ) : error && items.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-16">
-                <AlertCircle className="mb-4 h-12 w-12 text-brick" />
-                <h3 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h3>
-                <p className="mb-4 text-sm text-muted-foreground">{error}</p>
-                <Button onClick={retry}>Try Again</Button>
-              </CardContent>
-            </Card>
-          ) : visibleItems.length === 0 ? (
-            <UniversalCardEmpty
-              title="No admissions found"
-              hint="Try adjusting your search or filter criteria."
-              action={hasActiveFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
-            />
-          ) : (
-            <>
-              <div className={listGridWithSidebar}>
-                {visibleItems.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35 }}
-                    className="h-full"
-                  >
-                    <UniversalCard
-                      module="admission"
-                      title={cleanTitle(item.title)}
-                      organization={item.department.name}
-                      description={item.description}
-                      metadata={[
-                        ...(item.lastDate ? [{ icon: Calendar, text: `Last: ${formatDate(item.lastDate)}`, highlight: true }] : []),
-                        ...(item.startDate ? [{ icon: Calendar, text: `Start: ${formatDate(item.startDate)}` }] : []),
-                        ...(item.applicationFee ? [{ icon: IndianRupee, text: `Fee: ${item.applicationFee}` }] : []),
-                      ]}
-                      primaryCtaUrl={`/admission/${item.slug}`}
-                      track={<ApplicationTracker jobId={item.id} type="admission" />}
-                      share={<CardShareButton title={cleanTitle(item.title)} url={`/admission/${item.slug}`} />}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              {loadingMore ? (
-                <div className={`mt-6 ${listGridWithSidebar}`}>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <UniversalCardSkeleton key={index} />
-                  ))}
-                </div>
-              ) : null}
-              <InfiniteListFooter
-                sentinelRef={sentinelRef}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-                loadMoreError={loadMoreError}
-                onLoadMore={loadMore}
-                onRetry={loadMore}
-                loadedCount={visibleItems.length}
-                total={total}
-                label="admissions"
-              />
-            </>
-          )}
-        </ListingLayout>
-      </motion.div>
-    </div>
+        </DeskItem>
+      ))}
+    </DeskListing>
   )
 }

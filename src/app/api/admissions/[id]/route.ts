@@ -5,6 +5,7 @@ import { admissionSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { staffAudit } from "@/lib/moderation"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { requireAction } from "@/lib/admin/access"
 import { normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
@@ -23,7 +24,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Admission not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: admission })
+    return publicApiResponse({ success: true, data: admission }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch admission" },
@@ -110,6 +111,8 @@ export async function PUT(
       note: `Updated "${admission.title}"`,
     })
 
+    revalidatePublicContent("admission", admission.slug)
+    if (existing.slug !== admission.slug) revalidatePublicContent("admission", existing.slug)
     return NextResponse.json({ success: true, data: admission })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)
@@ -155,6 +158,7 @@ export async function DELETE(
       note: `Deleted "${existing.title}"`,
     })
 
+    revalidatePublicContent("admission", existing.slug)
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

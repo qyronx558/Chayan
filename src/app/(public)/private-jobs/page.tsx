@@ -1,5 +1,7 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import { DataVersionProvider } from "@/components/providers/DataVersion"
+import { renderVersion } from "@/lib/data-version"
 import { PrivateJobsClient } from "./private-jobs-client"
 
 export const metadata: Metadata = {
@@ -9,12 +11,14 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Private Jobs | ChayanJobs", description: "Browse private job vacancies across top companies." },
 }
 
-export const revalidate = 300
+export const revalidate = 3600
 
 export default function PrivateJobsPage() {
   return (
-    <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading private jobs…</div>}>
-      <PrivateJobsClient />
-    </Suspense>
+    <DataVersionProvider version={renderVersion()}>
+      <Suspense fallback={<div className="container mx-auto max-w-7xl px-4 py-8 text-muted-foreground">Loading private jobs…</div>}>
+        <PrivateJobsClient />
+      </Suspense>
+    </DataVersionProvider>
   )
 }
