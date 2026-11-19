@@ -1,22 +1,27 @@
 name: content-ingest
 
-# Free all-India content pipeline (see docs/content-ingest.md):
-#   scripts/ingest/run.ts → official notices → Gemini extraction → POST /api/cron/ingest
-# Posts land in the admin review queue (moderation PENDING) unless the
-# auto-approve policy (INGEST_AUTO_APPROVE on Vercel) allows them.
+# Free all-India government content pipeline (see docs/content-ingest.md):
+#   scripts/ingest/run.ts → official notices → Gemini extraction → verify, score, store
+# Everything runs here, inside GitHub Actions, straight against the database (DATABASE_URL in the
+# Production environment). Vercel is touched once per run, and only when posts were auto-approved:
+# one POST /api/cron/revalidate per content kind. Pending posts cost Vercel nothing.
+# Posts land in the admin review queue (moderation PENDING) unless the auto-approve policy allows them.
+# Set the repository variable INGEST_TRANSPORT=http to fall back to posting through /api/cron/ingest.
 #
-# Repo secrets (Settings → Secrets and variables → Actions):
-#   APP_URL, INGEST_SECRET, CRON_SECRET, GEMINI_API_KEY, GROQ_API_KEY (optional)
-#   DEV_APP_URL, DEV_INGEST_SECRET  (only for manual runs with target=dev)
-# Optional repo variables: INGEST_EXTERNAL_SCHEDULER, INGEST_DISTRICT_RUNNER, GEMINI_MODEL, GROQ_MODEL
+# Production environment secrets: DATABASE_URL, APP_URL, CRON_SECRET, GEMINI_API_KEY, GROQ_API_KEY (optional)
+# Repo secrets for the http fallback / target=dev: INGEST_SECRET, DEV_APP_URL, DEV_INGEST_SECRET
+# Optional repo variables: INGEST_EXTERNAL_SCHEDULER, INGEST_DISTRICT_RUNNER, INGEST_TRANSPORT, GEMINI_MODEL, GROQ_MODEL
 
-# On-time schedule: GitHub's cron often starts these hours late. For exact times, point a free
-# external cron (cron-job.org) at the site - see docs/content-ingest.md → "On-time schedule":
-#   every 4 h      GET /api/cron/ingest/trigger?slot=frequent   (central + state)
-#   06:00 IST      GET /api/cron/ingest/trigger?slot=district   (all districts)
-#   00:15 IST      GET /api/cron/expire-jobs
+# On-time schedule: GitHub's cron often starts these hours late. For exact times, have a free external
+# cron (cron-job.org) start this workflow through GitHub's API directly, so Vercel is never woken up:
+#   POST https://api.github.com/repos/<owner>/<repo>/actions/workflows/content-ingest.yml/dispatches
+#   Headers: Authorization: Bearer <fine-grained PAT, Actions: read & write>
+#            Accept: application/vnd.github+json
+#   every 4 h   {"ref":"main","inputs":{"target":"production","tier":"frequent","dry_run":"false","scheduled":"true"}}
+#   06:00 IST   {"ref":"main","inputs":{"target":"production","tier":"district","dry_run":"false","scheduled":"true"}}
+#   00:15 IST   {"ref":"main","inputs":{"target":"production","tier":"expire","dry_run":"false","scheduled":"true"}}
 # then set the repository variable INGEST_EXTERNAL_SCHEDULER=true so the GitHub crons below
-# stop (they are only the backup).
+# stop (they are only the backup), and remove the old cron-job.org jobs that call the site.
 
 on:
   schedule:
@@ -33,7 +38,7 @@ on:
       tier:
         description: "Sources to crawl"
         type: choice
-        options: [central, state, frequent, district, all]
+        options: [central, state, frequent, district, all, expire]
         default: central
       source:
         description: "Optional single source id (e.g. nic:bihar/patna) - overrides tier"
@@ -53,14 +58,14 @@ permissions:
 
 # One run per site at a time; a second one waits (no two runs extract the same notice at once).
 concurrency:
-  group: content-ingest-${{ inputs.target || 'production' }}${{ github.event.schedule == '45 18 * * *' && '-expire' || '' }}
+  group: content-ingest-${{ inputs.target || 'production' }}${{ (github.event.schedule == '45 18 * * *' || inputs.tier == 'expire') && '-expire' || '' }}
   cancel-in-progress: false
 
 jobs:
   plan:
     # GitHub's cron is the backup scheduler: skipped once INGEST_EXTERNAL_SCHEDULER=true.
     if: >-
-      github.event.schedule != '45 18 * * *' &&
+      github.event.schedule != '45 18 * * *' && inputs.tier != 'expire' &&
       (github.event_name != 'schedule' || vars.INGEST_EXTERNAL_SCHEDULER != 'true')
     runs-on: ubuntu-latest
     outputs:
@@ -95,6 +100,7 @@ jobs:
     # INGEST_DISTRICT_RUNNER to the label of a self-hosted runner in India (e.g. "india") and
     # district shards run there; everything else stays on GitHub's runners.
     runs-on: ${{ contains(matrix.args, '--tier=district') && vars.INGEST_DISTRICT_RUNNER || 'ubuntu-latest' }}
+    environment: Production
     timeout-minutes: 45
     defaults:
       run:
@@ -115,8 +121,15 @@ jobs:
 
       - run: npm ci
 
+      - run: npx prisma generate
+
       - name: Run ingest
         env:
+          # target=dev never gets the production database: it posts to DEV_APP_URL over http instead.
+          DATABASE_URL: ${{ inputs.target != 'dev' && secrets.DATABASE_URL || '' }}
+          INGEST_TRANSPORT: ${{ vars.INGEST_TRANSPORT }}
+          APP_URL: ${{ inputs.target != 'dev' && secrets.APP_URL || '' }}
+          CRON_SECRET: ${{ inputs.target != 'dev' && secrets.CRON_SECRET || '' }}
           INGEST_API_URL: ${{ inputs.target == 'dev' && secrets.DEV_APP_URL || secrets.APP_URL }}
           INGEST_SECRET: ${{ inputs.target == 'dev' && secrets.DEV_INGEST_SECRET || secrets.INGEST_SECRET }}
           INGEST_PUBLIC_URL: ${{ secrets.APP_URL }}
@@ -130,10 +143,13 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
           ARGS: ${{ matrix.args }}
         run: |
-          if [ -z "$DRY_RUN" ] && { [ -z "$INGEST_API_URL" ] || [ -z "$INGEST_SECRET" ]; }; then
-            echo "::error::APP_URL / INGEST_SECRET secrets are not set (DEV_APP_URL / DEV_INGEST_SECRET for target=dev)."
+          direct=true
+          if [ -z "$DATABASE_URL" ] || [ "$INGEST_TRANSPORT" = "http" ]; then direct=false; fi
+          if [ -z "$DRY_RUN" ] && [ "$direct" = false ] && { [ -z "$INGEST_API_URL" ] || [ -z "$INGEST_SECRET" ]; }; then
+            echo "::error::Set DATABASE_URL in the Production environment (direct mode), or APP_URL / INGEST_SECRET (DEV_APP_URL / DEV_INGEST_SECRET for target=dev)."
             exit 1
           fi
+          if [ "$direct" = true ]; then echo "Mode: direct database (Vercel only refreshes pages for published posts)"; else echo "Mode: http via the site"; fi
           # shellcheck disable=SC2086
           npx tsx scripts/ingest/run.ts $ARGS $DRY_RUN
 
@@ -147,21 +163,33 @@ jobs:
           retention-days: 7
 
   expire-jobs:
-    if: github.event.schedule == '45 18 * * *' && vars.INGEST_EXTERNAL_SCHEDULER != 'true'
+    # Runs here against the database; the site is only asked to refresh listings if something expired.
+    if: >-
+      (github.event.schedule == '45 18 * * *' && vars.INGEST_EXTERNAL_SCHEDULER != 'true') ||
+      (inputs.tier == 'expire' && inputs.target != 'dev' && !inputs.dry_run)
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    environment: Production
+    timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
       - name: Expire closed jobs
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          test -n "$APP_URL" && test -n "$CRON_SECRET"
-          # Follow the site's own redirect (e.g. apex -> www) first: curl would otherwise get a 308
-          # and never reach the endpoint (and must not resend the secret to another host).
-          base=$(curl -s -o /dev/null -L --max-redirs 5 --max-time 30 -w '%{url_effective}' "${APP_URL%/}/")
-          base=${base%/}
-          echo "Site: $base"
-          curl --fail-with-body --silent --show-error --max-time 60 \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            "$base/api/cron/expire-jobs"
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL is not set for the Production environment."
+            exit 1
+          fi
+          npx tsx scripts/ingest/expire.ts

@@ -1,12 +1,18 @@
 /**
- * ChayanJobs ingest bot - finds new official notices and sends verified,
- * structured posts to POST /api/cron/ingest (moderation queue).
+ * ChayanJobs ingest bot - finds new official notices and stores verified,
+ * structured posts in the moderation queue.
+ *
+ * With DATABASE_URL set (GitHub Actions) it writes straight to the database through
+ * the same library code the site uses, and only calls the site once at the end to
+ * refresh pages for auto-approved posts: no Vercel compute per notice. Without it
+ * (or INGEST_TRANSPORT=http) it posts to /api/cron/ingest as before.
  *
  *   npx tsx scripts/ingest/run.ts --tier=central                 # all central sources
  *   npx tsx scripts/ingest/run.ts --tier=district --shard=2/4     # a quarter of the districts
  *   npx tsx scripts/ingest/run.ts --source=nic:bihar/patna --dry-run
  *
- * Env: INGEST_API_URL, INGEST_SECRET, GEMINI_API_KEY (and/or GROQ_API_KEY),
+ * Env: DATABASE_URL + APP_URL + CRON_SECRET (direct) or INGEST_API_URL + INGEST_SECRET (http),
+ *      GEMINI_API_KEY (and/or GROQ_API_KEY),
  *      INGEST_MAX_LLM_CALLS (default 120 per process), INGEST_MAX_PAGES (default 2),
  *      INGEST_MAX_AGE_DAYS (default 45), INGEST_MAX_NEW_PER_SOURCE (default 15).
  * Admin → Content bot settings (read from /api/cron/ingest/config) override the env:
@@ -26,9 +32,11 @@ import { createExtractor, llmConfig, type Extractor } from "../../src/lib/ingest
 import { groundExtraction } from "../../src/lib/ingest/grounding"
 import { isStaleListing, sha256, todayIST } from "../../src/lib/ingest/normalize"
 import type { IngestPost } from "../../src/lib/ingest/schema"
-import type { ListingItem, SourceDef } from "../../src/lib/ingest/types"
+import type { IngestKind, ListingItem, SourceDef } from "../../src/lib/ingest/types"
 import { loadNotice } from "./documents"
 import { politeGet, RobotsDisallowed } from "./http"
+import { directTransport, httpTransport, wantsDirect, type IngestTransport, type Published } from "./transport"
+import { revalidateSite, slugsFor } from "./site"
 import pLimit from "p-limit"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -168,11 +176,26 @@ async function harvest(src: SourceDef, maxPages: number, log: (m: string) => voi
   return [...byUrl.values()]
 }
 
+export function publishedFrom(batch: IngestPost[], results: { status: string; moderation?: string; entityId?: string }[]): Published[] {
+  return results.flatMap((r, i) =>
+    r.status === "POSTED" && r.moderation === "APPROVED" && r.entityId && batch[i] && batch[i].extraction.kind !== "irrelevant"
+      ? [{ kind: batch[i].extraction.kind as IngestKind, entityId: r.entityId }]
+      : [],
+  )
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const startedAt = new Date().toISOString()
-  const today = todayIST()
   const log = (m: string) => console.log(m)
+  if (wantsDirect()) {
+    const transport = await directTransport()
+    try {
+      await pipeline(args, transport, log)
+    } finally {
+      await transport.close()
+    }
+    return
+  }
   if (!args.dryRun && (!API || !SECRET)) {
     throw new Error(
       `Missing ${[!API && "INGEST_API_URL", !SECRET && "INGEST_SECRET"].filter(Boolean).join(" and ")}. ` +
@@ -188,13 +211,19 @@ async function main() {
     if (resolved !== API) log(`Note: ${API} redirects to ${resolved} - using that. Set APP_URL to ${resolved} to skip the redirect.`)
     API = resolved
   }
-  log(`Target: ${args.dryRun ? "(dry run - nothing is sent)" : API} | LLM: ${process.env.GEMINI_API_KEY ? "gemini" : ""}${process.env.GROQ_API_KEY ? " groq" : ""}`)
+  await pipeline(args, API && SECRET ? httpTransport(api) : null, log)
+}
 
-  // Admin → Content bot settings. A real run must have them; a dry run uses them when reachable.
+async function pipeline(args: Args, transport: IngestTransport | null, log: (m: string) => void) {
+  const startedAt = new Date().toISOString()
+  const today = todayIST()
+  const target = args.dryRun ? "(dry run - nothing is sent)" : transport?.mode === "direct" ? "database (direct)" : API
+  log(`Target: ${target} | LLM: ${process.env.GEMINI_API_KEY ? "gemini" : ""}${process.env.GROQ_API_KEY ? " groq" : ""}`)
+
   let config: BotRuntimeConfig | null = null
-  if (API && SECRET) {
+  if (transport) {
     try {
-      config = await api<BotRuntimeConfig>("GET", "/config")
+      config = await transport.config()
     } catch (e) {
       if (!args.dryRun) throw e
       log(`  (admin settings not reachable - using .env defaults: ${e instanceof Error ? e.message : e})`)
@@ -218,9 +247,9 @@ async function main() {
   log(`Ingest ${args.dryRun ? "(dry run) " : ""}- ${sources.length} source(s), LLM budget ${llmBudget}, max ${maxNewPerSource} new per source${model ? `, model ${model} (admin)` : ""}`)
   if (!sources.length) return
 
-  const tax = args.dryRun || !API
+  const tax = args.dryRun || !transport
     ? { categories: ["Central Govt", "State Govt", "Banking", "Railways", "Defence", "Teaching", "Engineering", "Medical", "Police", "Judiciary", "Public Sector", "Research"], departments: [] as string[] }
-    : await api<{ categories: string[]; departments: string[] }>("GET", "/taxonomy")
+    : await transport.taxonomy()
 
   let extractor: Extractor | null = null
   try {
@@ -236,17 +265,20 @@ async function main() {
   const errors: string[] = []
   const outbox: IngestPost[] = []
   const dryOut: unknown[] = []
+  const published: Published[] = []
   let budget = llmBudget
 
   const flush = async () => {
     if (!outbox.length) return
     const batch = outbox.splice(0, outbox.length)
-    if (args.dryRun) {
+    if (args.dryRun || !transport) {
       dryOut.push(...batch)
       return
     }
     for (let i = 0; i < batch.length; i += 20) {
-      const { results } = await api<{ results: { sourceUrl: string; status: string; reason?: string; moderation?: string }[] }>("POST", "", { items: batch.slice(i, i + 20) })
+      const chunk = batch.slice(i, i + 20)
+      const results = await transport.ingest(chunk)
+      published.push(...publishedFrom(chunk, results))
       for (const r of results) {
         const k = r.status.toLowerCase() as "posted" | "duplicate" | "skipped" | "failed"
         stats[k]++
@@ -282,9 +314,8 @@ async function main() {
     if (!relevant.length) continue
 
     let unseen = relevant
-    if (!args.dryRun) {
-      const { unseen: fresh } = await api<{ unseen: string[] }>("POST", "/seen", { urls: relevant.slice(0, 500).map((r) => r.url) })
-      const set = new Set(fresh)
+    if (!args.dryRun && transport) {
+      const set = new Set(await transport.seen(relevant.slice(0, 500).map((r) => r.url)))
       unseen = relevant.filter((r) => set.has(r.url))
     }
     // Listings are newest-first: the cap keeps a big archive's first backfill from eating the budget.
@@ -358,19 +389,25 @@ async function main() {
 
   const label = args.source ?? `${args.tier ?? "all"}${args.shard ? `-${args.shard.k}of${args.shard.n}` : ""}`
   log(`Done ${label}: ${JSON.stringify(stats)}`)
-  if (args.dryRun) {
+  if (args.dryRun || !transport) {
     const file = path.resolve("ingest-dry-run.json")
     writeFileSync(file, JSON.stringify(dryOut, null, 2))
     log(`Dry-run output written to ${file}`)
     return
   }
-  await api("POST", "/run", {
-    source: label,
-    startedAt,
-    imported: stats.posted,
-    errors: stats.errors + stats.failed,
-    detail: `${JSON.stringify(stats)}${errors.length ? `\n${errors.slice(0, 20).join("\n")}` : ""}`.slice(0, 4000),
-  }).catch((e) => log(`  ! could not record run: ${e instanceof Error ? e.message : e}`))
+  await transport
+    .report({
+      source: label,
+      startedAt,
+      imported: stats.posted,
+      errors: stats.errors + stats.failed,
+      detail: `${JSON.stringify(stats)}${errors.length ? `\n${errors.slice(0, 20).join("\n")}` : ""}`.slice(0, 4000),
+    })
+    .catch((e) => log(`  ! could not record run: ${e instanceof Error ? e.message : e}`))
+  if (transport.mode === "direct" && published.length) {
+    log(`Published ${published.length} post(s) - refreshing their pages`)
+    await revalidateSite(await slugsFor(published), log).catch((e) => log(`  ! revalidate: ${e instanceof Error ? e.message : e}`))
+  }
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
