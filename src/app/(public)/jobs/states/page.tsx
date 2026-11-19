@@ -8,7 +8,7 @@ import { getStateJobCounts } from "@/lib/location-pages"
 import { Card, CardContent } from "@/components/ui/card"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 
-export const revalidate = 300
+export const revalidate = 21600
 
 const TITLE = "Government Jobs by State & Union Territory — Chayan Jobs"
 const DESCRIPTION =

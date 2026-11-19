@@ -62,7 +62,7 @@ export async function GET() {
           skills: skills.map((s) => ({ name: s.v, count: n(s.n) })),
         },
       },
-      300
+      "private"
     )
   } catch (error) {
     return NextResponse.json(

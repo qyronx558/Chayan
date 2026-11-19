@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,24 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
-import { canViewContent } from "@/lib/public-visibility"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getAnswerKey = cache((slug: string) => prisma.answerKey.findUnique({ where: { slug }, include: { department: true, category: true } }))
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const answerKey = await prisma.answerKey.findUnique({ where: { slug } })
-  if (!answerKey) return { title: "View Answer Key | ChayanJobs" }
+  const answerKey = await getAnswerKey(slug)
+  if (!answerKey || !isPubliclyVisible(answerKey.moderation)) return { title: "View Answer Key | ChayanJobs" }
   return {
     title: `Answer Key: ${answerKey.title} | ChayanJobs`,
     description: `View ${answerKey.title} in fullscreen on the original official document.`,
@@ -28,12 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function AnswerKeyViewPage({ params }: Props) {
   const { slug } = await params
-  const answerKey = await prisma.answerKey.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const answerKey = await getAnswerKey(slug)
 
-  if (!answerKey || !(await canViewContent(answerKey.moderation))) notFound()
+  if (!answerKey || !isPubliclyVisible(answerKey.moderation)) notFound()
 
   const targetUrl = normalizeExternalUrl(answerKey.pdfUrl)
   if (!targetUrl) notFound()

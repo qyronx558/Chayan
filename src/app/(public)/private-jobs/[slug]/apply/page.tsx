@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -8,18 +9,29 @@ import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
 import { inAppApplyUrl } from "@/lib/private-jobs/apply-url"
 import { ApplyVisitTracker } from "@/components/private/AppliedBadge"
 import { salaryDisplay } from "@/lib/private-jobs/salary"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getJob = cache((slug: string) =>
+  prisma.privateJob.findUnique({
+    where: { slug },
+    include: { company: true, feed: { select: { provider: true, boardToken: true } } },
+  })
+)
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const job = await prisma.privateJob.findUnique({
-    where: { slug },
-    include: { company: true },
-  })
-  if (!job) return { title: "Apply | ChayanJobs" }
+  const job = await getJob(slug)
+  if (!job || !isPubliclyVisible(job.moderation)) return { title: "Apply | ChayanJobs" }
   return {
     title: `Apply: ${job.title} at ${job.company.name} | ChayanJobs`,
     description: `Apply for ${job.title} on the original application page, opened inside ChayanJobs.`,
@@ -27,20 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const dynamic = "force-dynamic"
-
 /**
  * Private jobs - same unified Application Mode as government jobs.
  * URL resolution logic unchanged: the company's original application URL.
  */
 export default async function PrivateJobApplyPage({ params }: Props) {
   const { slug } = await params
-  const job = await prisma.privateJob.findUnique({
-    where: { slug },
-    include: { company: true, feed: { select: { provider: true, boardToken: true } } },
-  })
+  const job = await getJob(slug)
 
-  if (!job) notFound()
+  if (!job || !isPubliclyVisible(job.moderation)) notFound()
 
   const postingUrl = normalizeExternalUrl(job.applicationUrl)
   if (!postingUrl) notFound()

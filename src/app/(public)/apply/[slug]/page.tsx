@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
@@ -5,24 +6,46 @@ import { prisma } from "@/lib/prisma"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { JobDetailContent } from "@/components/jobs/JobDetailContent"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { JobViewTracker } from "@/components/jobs/JobViewTracker"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { cn, formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { handFont, typeFont } from "@/components/home/fonts"
 import "@/app/home.css"
 import { stripHtmlToText } from "@/lib/blog-prose"
 import { getJourney } from "@/lib/doc-journey"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+import { DaysLeftNote } from "@/components/shared/DaysLeft"
 import { isThinJob } from "@/lib/ingest/quality"
+
+export const revalidate = 86400
+
+const getJob = cache((slug: string) =>
+  prisma.job.findUnique({
+    where: { slug },
+    include: { department: true, category: true, state: true, district: true },
+  })
+)
+
+export async function generateStaticParams() {
+  try {
+    const top = await prisma.jobView.groupBy({
+      by: ["jobId"],
+      where: { job: { moderation: "APPROVED", status: "ACTIVE" } },
+      _sum: { views: true },
+      orderBy: { _sum: { views: "desc" } },
+      take: 100,
+    })
+    const jobs = await prisma.job.findMany({ where: { id: { in: top.map((t) => t.jobId) } }, select: { slug: true } })
+    return jobs.map((j) => ({ slug: j.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job) return { title: "Job Not Found" }
+  if (!job || !isPubliclyVisible(job.moderation)) return { title: "Job Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -45,12 +68,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ApplyJobPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: { department: true, category: true, state: true, district: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job || !(await canViewContent(job.moderation))) notFound()
+  if (!job || !isPubliclyVisible(job.moderation)) notFound()
 
   const relatedJobs = await prisma.job.findMany({
     where: {
@@ -63,15 +83,11 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
     include: { department: true },
   })
 
-  const viewsAgg = await prisma.jobView.aggregate({
-    where: { jobId: job.id },
-    _sum: { views: true },
-  })
+  const [viewsAgg, journey] = await Promise.all([
+    prisma.jobView.aggregate({ where: { jobId: job.id }, _sum: { views: true } }),
+    getJourney(job.id, "notification"),
+  ])
   const viewsTotal = viewsAgg._sum.views ?? 0
-  const journey = await getJourney(job.id, "notification")
-  // Single timestamp per request for stable related-job badges (server render).
-  // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
-  const nowMs = Date.now()
 
   const breadCrumbLd = {
     "@context": "https://schema.org",
@@ -150,7 +166,6 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
         journey={journey}
         summary={job.summary}
       />
-<JobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="JOB" entityId={job.id} />
 
       <div className="mt-12">
@@ -169,9 +184,6 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
             {relatedJobs.map((rj, i) => {
-              const rjLast = rj.lastDate ? new Date(rj.lastDate).getTime() : null
-              const rjDays = rjLast ? Math.floor((rjLast - nowMs) / 86400000) : null
-              const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
               return (
               <Link
                 key={rj.id}
@@ -192,14 +204,7 @@ export default async function ApplyJobPage({ params }: { params: Promise<{ slug:
                   {rj.lastDate && (
                     <div className="flex gap-2">
                       <dt className="w-20 shrink-0 text-muted-foreground">Last date</dt>
-                      <dd className={rjUrgent ? "font-bold text-[var(--color-brick)]" : "text-foreground"}>
-                        {formatDate(rj.lastDate)}
-                        {rjDays !== null && rjDays >= 0 ? (
-                          <span className={cn(handFont.className, "ml-2 text-[0.98rem] font-normal", rjUrgent ? "text-[var(--color-brick)]" : "text-muted-foreground")}>
-                            {rjUrgent ? `only ${rjDays}d left` : `${rjDays}d left`}
-                          </span>
-                        ) : null}
-                      </dd>
+                      <DaysLeftNote lastDate={rj.lastDate.toISOString()} />
                     </div>
                   )}
                   {rj.totalVacancies ? (

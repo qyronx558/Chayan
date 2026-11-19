@@ -10,6 +10,7 @@ const { prismaMock, revalidatePublicContent } = vi.hoisted(() => ({
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/cache", () => ({ revalidatePublicContent }))
+vi.mock("@/lib/revalidate-content", () => ({ getScopeFor: async () => ({}) }))
 
 import {
   defaultModerationForRole,
@@ -72,7 +73,7 @@ describe("reviewContent", () => {
     const data = prismaMock.job.update.mock.calls[0][0].data
     expect(data).toMatchObject({ moderation: "APPROVED", reviewedById: "r1", reviewNote: "ok" })
     expect(prismaMock.log.create.mock.calls[0][0].data.details).toBe("APPROVED by r1 (SUPER_ADMIN): ok")
-    expect(revalidatePublicContent).toHaveBeenCalledWith("job", "ssc-cgl")
+    expect(revalidatePublicContent).toHaveBeenCalledWith("job", "ssc-cgl", {})
   })
 
   it("rejects without a note and revalidates the listing", async () => {

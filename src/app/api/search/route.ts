@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cacheControl } from "@/lib/cache"
 import { prisma } from "@/lib/prisma"
 import { runSearch } from "@/lib/search-engine"
 import type { SearchHit, SearchKind } from "@/lib/search-types"
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
         )
         return NextResponse.json(
           { success: true, data },
-          { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } }
+          { headers: { "Cache-Control": cacheControl("search") } }
         )
       } catch {
         // fall back to legacy query below
@@ -144,7 +145,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control": cacheControl("search"),
         },
       }
     )

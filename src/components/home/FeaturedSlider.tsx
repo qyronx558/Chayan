@@ -5,8 +5,10 @@ import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { FeaturedSlideView, type FeaturedSlideItem } from "@/components/featured/FeaturedSlideView"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 export function FeaturedSlider() {
+ const dataVersion = useDataVersion()
  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" })
  const [items, setItems] = useState<FeaturedSlideItem[]>([])
  const [selected, setSelected] = useState(0)
@@ -15,12 +17,12 @@ export function FeaturedSlider() {
  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
  useEffect(() => {
-  fetch("/api/featured")
+  fetch(withDataVersion("/api/featured", dataVersion))
    .then((r) => r.json())
    .then((d) => setItems(d.success ? d.data : []))
    .catch(() => setItems([]))
    .finally(() => setLoading(false))
- }, [])
+ }, [dataVersion])
 
  useEffect(() => {
   if (!emblaApi) return

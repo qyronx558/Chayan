@@ -14,13 +14,15 @@ import { isListTab } from "@/lib/admin/access"
 import { findOrCreateCompany } from "@/lib/companies"
 import { notifyUsers } from "@/lib/notifications"
 import { sendNotificationSMS } from "@/lib/sms"
-import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
+import { publicApiResponse } from "@/lib/cache"
+import { revalidatePrivateJobById } from "@/lib/revalidate-content"
 import { CANDIDATE_POOL_SIZE } from "@/lib/trending/config"
 import { rankCandidateList, type AnyItem } from "@/lib/trending/rank"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
 import { dedupeHash } from "@/lib/private-jobs/normalize"
 import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 import { parseNumber, parsePostedWithin, postedSince } from "@/lib/listing-filters"
+import { decodeCursor, keysetAfter, KEYSET_ORDER, pageWithCursor } from "@/lib/keyset"
 
 export async function GET(request: NextRequest) {
   try {
@@ -137,7 +139,35 @@ export async function GET(request: NextRequest) {
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
         trending: { fallback, windowDays },
       }
-      return publicApiResponse(payload)
+      return publicApiResponse(payload, "private")
+    }
+
+    const cursor = decodeCursor(searchParams.get("cursor"))
+    if (!isAdminScope && sort !== "salary" && sort !== "trust") {
+      const keysetWhere = cursor ? { AND: [where, keysetAfter(cursor)] } : where
+      const [rows, total] = await Promise.all([
+        prisma.privateJob.findMany({
+          where: keysetWhere,
+          include: { company: true },
+          orderBy: KEYSET_ORDER,
+          take: limit + 1,
+        }),
+        cursor ? Promise.resolve(undefined) : prisma.privateJob.count({ where }),
+      ])
+      const { items, nextCursor } = pageWithCursor(rows, limit)
+      return publicApiResponse(
+        {
+          success: true,
+          data: items,
+          pagination: {
+            page,
+            limit,
+            ...(total !== undefined ? { total, totalPages: Math.ceil(total / limit) } : {}),
+            nextCursor,
+          },
+        },
+        "private"
+      )
     }
 
     const [items, total] = await Promise.all([
@@ -170,7 +200,7 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       ...(counts ? { counts } : {}),
     }
-    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload)
+    return isAdminScope ? NextResponse.json(payload) : publicApiResponse(payload, "private")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch private jobs" },
@@ -241,7 +271,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       details: `Created by ${session.user.email} (${session.user.id}) moderation=${job.moderation}`,
     })
-    revalidatePublicContent("private-job", job.slug)
+    await revalidatePrivateJobById(job.id)
 
     // Notify subscribers only for approved (live) content; pending items notify on approval.
     if (job.moderation === "APPROVED") {

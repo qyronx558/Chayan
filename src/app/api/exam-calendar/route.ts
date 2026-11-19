@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cacheControl } from "@/lib/cache"
 import { prisma } from "@/lib/prisma"
 import { parseFlexibleDate, monthRange, toMonthKey, humanizeKey } from "@/lib/dates"
 
-export const revalidate = 300
+
 
 export interface CalendarEvent {
   date: string
@@ -159,13 +160,13 @@ export async function GET(request: NextRequest) {
       const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "6", 10)))
       return NextResponse.json(
         { success: true, month, type: typeFilter, data: upcoming.slice(0, limit) },
-        { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+        { headers: { "Cache-Control": cacheControl("gov") } }
       )
     }
 
     return NextResponse.json(
       { success: true, month, type: typeFilter, data: filtered },
-      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+      { headers: { "Cache-Control": cacheControl("gov") } }
     )
   } catch (error) {
     return NextResponse.json(

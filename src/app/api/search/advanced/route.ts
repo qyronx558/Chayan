@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cacheControl } from "@/lib/cache"
 import { runSearch } from "@/lib/search-engine"
 import { SEARCH_KINDS, type SearchKind, type SearchSort } from "@/lib/search-types"
 
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
       pageSize: Number(p.get("limit") || 12) || 12,
     })
     return NextResponse.json(data, {
-      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=90" },
+      headers: { "Cache-Control": cacheControl("search") },
     })
   } catch (error) {
     return NextResponse.json(

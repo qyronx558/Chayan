@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { handFont } from "@/components/home/fonts"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 /*
  * Popular exams on a coaching-centre blackboard: green slate in a wooden
@@ -36,6 +37,7 @@ type DisplayItem =
  | { kind: "category"; category: CategoryItem }
 
 export function PopularExams({ className }: { className?: string }) {
+ const dataVersion = useDataVersion()
  const [items, setItems] = useState<DisplayItem[]>([])
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState("")
@@ -46,7 +48,7 @@ export function PopularExams({ className }: { className?: string }) {
     setLoading(true)
     setError("")
 
-    const examRes = await fetch("/api/exams?sort=trending")
+    const examRes = await fetch(withDataVersion("/api/exams?sort=trending", dataVersion))
     const examJson = await examRes.json()
 
     if (examJson.success && examJson.data.length > 0) {
@@ -70,7 +72,7 @@ export function PopularExams({ className }: { className?: string }) {
    }
   }
   fetchData()
- }, [])
+ }, [dataVersion])
 
  const rows = items.slice(0, 8).map((item) =>
   item.kind === "exam"

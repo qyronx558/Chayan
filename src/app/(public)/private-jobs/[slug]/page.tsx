@@ -5,13 +5,13 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { PrivateJobDetail } from "./private-job-detail"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
-import { PrivateJobViewTracker } from "@/components/private/PrivateJobViewTracker"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
-import { cn, formatDate, getBaseUrl, safeJsonLd } from "@/lib/utils"
+import { cn, getBaseUrl, safeJsonLd } from "@/lib/utils"
 import { handFont, typeFont } from "@/components/home/fonts"
 import "@/app/home.css"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+import { DaysLeftStamp, UrgentDate } from "@/components/shared/DaysLeft"
 import { buildPrivateJobPostingLd } from "@/lib/private-jobs/seo"
 import { cleanJobDescription } from "@/lib/private-jobs/description"
 
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const job = await getJob(slug)
 
-  if (!job) return { title: "Not Found" }
+  if (!job || !isPubliclyVisible(job.moderation)) return { title: "Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -52,13 +52,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 86400
+
+export async function generateStaticParams() {
+  try {
+    const rows = await prisma.privateJob.findMany({
+      where: { status: "ACTIVE", moderation: "APPROVED" },
+      orderBy: { views: "desc" },
+      take: 100,
+      select: { slug: true },
+    })
+    return rows.map((r) => ({ slug: r.slug }))
+  } catch {
+    return []
+  }
+}
 
 export default async function PrivateJobPage({ params }: Props) {
   const { slug } = await params
   const job = await getJob(slug)
 
-  if (!job || !(await canViewContent(job.moderation))) notFound()
+  if (!job || !isPubliclyVisible(job.moderation)) notFound()
 
   const relatedJobs = await prisma.privateJob.findMany({
     where: {
@@ -83,8 +97,6 @@ export default async function PrivateJobPage({ params }: Props) {
         })
 
   const related = relatedJobs.length > 0 ? relatedJobs : fallbackRelated
-  // eslint-disable-next-line react-hooks/purity -- server component, runs once per request
-  const nowMs = Date.now()
 
   const jsonLd = job.status === "ACTIVE" && job.moderation === "APPROVED" ? buildPrivateJobPostingLd(job, getBaseUrl()) : null
 
@@ -101,7 +113,6 @@ export default async function PrivateJobPage({ params }: Props) {
 
       {/* Description cleaned on the server: pasted HTML source / <style> designs never reach the browser. */}
       <PrivateJobDetail job={JSON.parse(JSON.stringify({ ...job, description: cleanJobDescription(job.description) }))} />
-      <PrivateJobViewTracker jobId={job.id} />
       <EntityViewTracker entityType="PRIVATE_JOB" entityId={job.id} />
 
       <DiscussionSection postType="PRIVATE_JOB" postId={job.id} path={`/private-jobs/${job.slug}`} />
@@ -121,28 +132,18 @@ export default async function PrivateJobPage({ params }: Props) {
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
             {related.map((rj, i) => {
-              const rjLast = rj.lastDate ? new Date(rj.lastDate).getTime() : null
-              const rjDays = rjLast ? Math.floor((rjLast - nowMs) / 86400000) : null
-              const rjUrgent = rjDays !== null && rjDays >= 0 && rjDays <= 7
               return (
                 <Link key={rj.id} href={`/private-jobs/${rj.slug}`} className={cn("group block transition-transform duration-300 hover:-translate-y-1", i % 2 ? "rotate-[0.5deg]" : "-rotate-[0.5deg]")}>
                   <article className="h-full p-[5px]" style={{ background: AIRMAIL, boxShadow: "0 16px 26px -20px rgb(30 30 60 / .55)" }}>
                     <div className="relative h-full bg-[var(--hs-paper-slip)] px-5 pb-4 pt-4">
                       <div className="flex items-start justify-between gap-3">
                         <p className={cn(typeFont.className, "min-w-0 truncate text-[11px] font-bold uppercase text-muted-foreground")}>{rj.company.name}</p>
-                        {rjDays !== null && rjDays >= 0 ? (
-                          <span
-                            className={cn(typeFont.className, "shrink-0 rotate-[6deg] rounded-[3px] border-2 px-1.5 text-[10px] font-bold")}
-                            style={{ color: rjUrgent ? "oklch(52% 0.19 27)" : "oklch(45% 0.13 255)", borderColor: "currentColor" }}
-                          >
-                            {rjUrgent ? `ONLY ${rjDays}D LEFT` : `${rjDays}D LEFT`}
-                          </span>
-                        ) : null}
+                        <DaysLeftStamp lastDate={rj.lastDate ? rj.lastDate.toISOString() : null} />
                       </div>
                       <h3 className="mt-2 font-display text-[1.12rem] font-bold leading-snug text-foreground decoration-[var(--color-brick)] decoration-2 underline-offset-[3px] group-hover:underline">{rj.title}</h3>
                       <div className={cn(typeFont.className, "mt-3 space-y-1 text-[11.5px] text-muted-foreground")}>
                         {rj.location && <p>To: <span className="text-foreground">{rj.location}</span></p>}
-                        {rj.lastDate && <p>Last date: <span className={rjUrgent ? "font-bold text-[var(--color-brick)]" : "text-foreground"}>{formatDate(rj.lastDate)}</span></p>}
+                        {rj.lastDate && <p>Last date: <UrgentDate lastDate={rj.lastDate.toISOString()} /></p>}
                         {rj.vacancies && <p>Openings: <span className="text-foreground">{rj.vacancies}</span></p>}
                       </div>
                       <p className={cn(handFont.className, "mt-3 text-[1.05rem] text-[var(--hs-trust)]")}>open the letter →</p>

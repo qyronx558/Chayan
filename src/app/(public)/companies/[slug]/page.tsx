@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -10,24 +11,32 @@ import { formatDate } from "@/lib/utils"
 import { TrustBadge } from "@/components/private/TrustBadge"
 import { formatSalaryRange } from "@/lib/private-jobs-trust"
 
+export const revalidate = 3600
+
+const getCompany = cache((slug: string) =>
+  prisma.company.findUnique({
+    where: { slug },
+    include: {
+      privateJob: { where: { status: "ACTIVE", moderation: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 50 },
+      members: { where: { verified: true }, take: 1 },
+    },
+  })
+)
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const c = await prisma.company.findUnique({ where: { slug } })
+  const c = await getCompany(slug)
   if (!c) return { title: "Company not found" }
   return { title: `${c.name} Jobs & Careers`, description: `All active private jobs at ${c.name}. Verified openings with trust scores.` }
 }
 
-export const dynamic = "force-dynamic"
-
 export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const company = await prisma.company.findUnique({
-    where: { slug },
-    include: {
-      privateJob: { where: { status: "ACTIVE" }, orderBy: { createdAt: "desc" }, take: 50 },
-      members: { where: { verified: true }, take: 1 },
-    },
-  })
+  const company = await getCompany(slug)
   if (!company) notFound()
   const verified = company.verifiedStatus === "VERIFIED"
 

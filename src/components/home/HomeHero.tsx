@@ -22,6 +22,7 @@ import type { FeaturedSlideItem } from "@/components/featured/FeaturedSlideView"
 import { FEATURED_TYPE_BADGES } from "@/lib/featured"
 import { cn, formatCompact } from "@/lib/utils"
 import { handFont } from "@/components/home/fonts"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 const WORDS = ["government job", "private job", "result", "admit card"]
 
@@ -308,20 +309,21 @@ function StatsStrip({ stats }: { stats: SiteStats | null }) {
 }
 
 export function HomeHero() {
+  const dataVersion = useDataVersion()
   const [featured, setFeatured] = useState<FeaturedSlideItem[]>([])
   const stats = useSiteStats()
   const [wordIdx, setWordIdx] = useState(0)
 
   useEffect(() => {
     let cancelled = false
-    fetch("/api/featured")
+    fetch(withDataVersion("/api/featured", dataVersion))
       .then((r) => r.json())
       .then((d) => !cancelled && setFeatured(d.success ? d.data : []))
       .catch(() => {})
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [dataVersion])
 
   useEffect(() => {
     const id = setInterval(() => setWordIdx((i) => (i + 1) % WORDS.length), 2400)

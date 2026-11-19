@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { cn } from "@/lib/utils"
 import { handFont, typeFont } from "@/components/home/fonts"
 import "@/app/home.css"
+import { getCategoryList } from "@/lib/taxonomy"
 
 const paperShadow = "0 1px 2px rgb(60 40 10 / .08), 0 16px 28px -22px rgb(60 40 10 / .55)"
 
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   description: "Complete sitemap of ChayanJobs - Browse all pages, job listings, results, admit cards and more.",
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 86400
 
 export default async function SitemapPage() {
   const [jobs, results, admitCards, answerKeys, syllabus, admissions, categories] = await Promise.all([
@@ -22,7 +23,7 @@ export default async function SitemapPage() {
     prisma.answerKey.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
     prisma.syllabus.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
     prisma.admission.findMany({ where: { moderation: "APPROVED" }, select: { title: true, slug: true }, orderBy: { title: "asc" }, take: 100 }),
-    prisma.category.findMany({ select: { name: true, slug: true }, orderBy: { name: "asc" } }),
+    getCategoryList(),
   ])
 
   /*

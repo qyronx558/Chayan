@@ -1,4 +1,6 @@
 import { cache } from "react"
+import { unstable_cache } from "next/cache"
+import { CACHE_TAGS } from "@/lib/cache"
 import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 
@@ -25,20 +27,29 @@ export const getDistrictBySlugs = cache((stateSlug: string, districtSlug: string
   })
 )
 
+const loadStateJobCounts = unstable_cache(
+  async () => {
+    const [byState, central] = await Promise.all([
+      prisma.job.groupBy({
+        by: ["stateId"],
+        where: { ...LIVE_JOB_WHERE, jobLevel: { in: ["STATE", "DISTRICT"] } },
+        _count: { _all: true },
+      }),
+      prisma.job.count({ where: { ...LIVE_JOB_WHERE, jobLevel: "CENTRAL" } }),
+    ])
+    return {
+      byState: byState.filter((r) => r.stateId).map((r) => [r.stateId as string, r._count._all] as const),
+      central,
+    }
+  },
+  ["state-job-counts"],
+  { tags: [CACHE_TAGS.govCounts], revalidate: 21600 }
+)
+
 /** Live state- and district-level job counts per state + the all-India central count. */
 export async function getStateJobCounts() {
-  const [byState, central] = await Promise.all([
-    prisma.job.groupBy({
-      by: ["stateId"],
-      where: { ...LIVE_JOB_WHERE, jobLevel: { in: ["STATE", "DISTRICT"] } },
-      _count: { _all: true },
-    }),
-    prisma.job.count({ where: { ...LIVE_JOB_WHERE, jobLevel: "CENTRAL" } }),
-  ])
-  return {
-    byState: new Map(byState.filter((r) => r.stateId).map((r) => [r.stateId as string, r._count._all])),
-    central,
-  }
+  const { byState, central } = await loadStateJobCounts()
+  return { byState: new Map(byState), central }
 }
 
 /** Live district-level job counts per district of one state. */

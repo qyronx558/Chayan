@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma"
 import { jobSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
-import { revalidatePublicContent } from "@/lib/cache"
+import { getJobScope, revalidateJobById, revalidateScoped } from "@/lib/revalidate-content"
 import { staffAudit } from "@/lib/moderation"
 import { requireAction } from "@/lib/admin/access"
 import { validateJobLocation } from "@/lib/locations-server"
 import { normalizeOptionalId, normalizeRequiredId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
+import { publicApiResponse } from "@/lib/cache"
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +26,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Job not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: job })
+    return publicApiResponse({ success: true, data: job }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch job" },
@@ -153,8 +154,9 @@ export async function PUT(
       Object.assign(data, { moderation: "PENDING", reviewedById: null, reviewedAt: null, reviewNote: null })
     }
 
+    const previous = await getJobScope(id)
     const job = await prisma.job.update({ where: { id }, data })
-    revalidatePublicContent("job", job.slug)
+    await revalidateJobById(id, previous)
     await staffAudit({
       action: "UPDATE",
       entity: "Job",
@@ -198,6 +200,7 @@ export async function DELETE(
     if (!existing) {
       return NextResponse.json({ success: false, error: "Job not found" }, { status: 404 })
     }
+    const previous = await getJobScope(id)
 
     // Clear dependents first: Job has no onDelete cascade, so linked
     // views/bookmarks and optional job links would otherwise block the
@@ -211,7 +214,7 @@ export async function DELETE(
       prisma.syllabus.updateMany({ where: { jobId: id }, data: { jobId: null } }),
       prisma.job.delete({ where: { id } }),
     ])
-    revalidatePublicContent("job", existing.slug)
+    revalidateScoped("job", null, previous)
     await staffAudit({
       action: "DELETE",
       entity: "Job",

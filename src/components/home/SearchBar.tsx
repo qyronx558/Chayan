@@ -83,7 +83,7 @@ export function SearchBar({
 
   const fetchLive = React.useCallback(async (q: string) => {
     const query = q.trim()
-    if (!query) {
+    if (query.length < 2) {
       setLiveItems([])
       setLiveLoading(false)
       return
@@ -111,7 +111,7 @@ export function SearchBar({
   const handleChange = (value: string) => {
     setSearchQuery(value)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => fetchLive(value), 200)
+    debounceRef.current = setTimeout(() => fetchLive(value), 300)
   }
 
   React.useEffect(() => {

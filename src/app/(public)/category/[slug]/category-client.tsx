@@ -15,6 +15,7 @@ import {
 } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 import { jobLocationLabel } from "@/lib/locations"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 interface CategoryInfo {
  id: string
@@ -40,6 +41,7 @@ interface JobData {
 }
 
 export function CategoryClient({ category }: { category: CategoryInfo }) {
+ const dataVersion = useDataVersion()
  const [jobs, setJobs] = useState<JobData[]>([])
  const [total, setTotal] = useState(0)
  const [hasMore, setHasMore] = useState(false)
@@ -72,7 +74,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
    params.set("page", String(pageNum))
    params.set("limit", String(LIMIT))
 
-   const res = await fetch(`/api/jobs?${params}`, { signal })
+   const res = await fetch(withDataVersion(`/api/jobs?${params}`, dataVersion), { signal })
    const json = await res.json()
    if (signal.aborted) return
    if (json.success) {
@@ -95,7 +97,7 @@ export function CategoryClient({ category }: { category: CategoryInfo }) {
     else setLoadingMore(false)
    }
   }
- }, [debouncedSearch, category.id])
+ }, [debouncedSearch, category.id, dataVersion])
 
  useEffect(() => {
   abortRef.current?.abort()

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { publicApiResponse } from "@/lib/cache"
 
 export async function GET() {
   try {
@@ -7,7 +8,7 @@ export async function GET() {
       orderBy: { name: "asc" },
     })
 
-    return NextResponse.json({ success: true, data: categories })
+    return publicApiResponse({ success: true, data: categories }, "blog")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch blog categories" },

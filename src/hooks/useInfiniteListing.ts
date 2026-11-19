@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { appendUnique, PUBLIC_INFINITE_LIMIT, useInfiniteScroll } from "@/hooks/useInfiniteScroll"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 type FilterValue = string | number | boolean | null | undefined
 
@@ -16,7 +17,7 @@ interface ListingResponse<T> {
   success?: boolean
   data?: T[]
   error?: string
-  pagination?: { page?: number; limit?: number; total?: number; totalPages?: number }
+  pagination?: { page?: number; limit?: number; total?: number; totalPages?: number; nextCursor?: string | null }
 }
 
 /**
@@ -32,6 +33,7 @@ export function useInfiniteListing<T extends { id: string }>({
   enabled = true,
 }: UseInfiniteListingOptions) {
   const paramsKey = JSON.stringify(params)
+  const version = useDataVersion()
 
   const [items, setItems] = useState<T[]>([])
   const [total, setTotal] = useState(0)
@@ -43,6 +45,7 @@ export function useInfiniteListing<T extends { id: string }>({
   const [loadMoreError, setLoadMoreError] = useState("")
 
   const pageRef = useRef(1)
+  const cursorRef = useRef<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const loadedOnceRef = useRef(false)
 
@@ -64,18 +67,21 @@ export function useInfiniteListing<T extends { id: string }>({
           if (value === undefined || value === null || value === "" || value === false) continue
           query.set(key, String(value))
         }
-        query.set("page", String(pageNum))
+        if (!replace && cursorRef.current) query.set("cursor", cursorRef.current)
+        else query.set("page", String(pageNum))
         query.set("limit", String(limit))
 
-        const res = await fetch(`${endpoint}?${query.toString()}`, { signal })
+        const res = await fetch(withDataVersion(`${endpoint}?${query.toString()}`, version), { signal })
         const json = (await res.json()) as ListingResponse<T>
         if (signal.aborted) return
 
         if (json.success) {
           const pageItems = json.data ?? []
           setItems((prev) => (replace ? pageItems : appendUnique(prev, pageItems)))
-          setTotal(json.pagination?.total ?? 0)
-          setHasMore(pageNum < (json.pagination?.totalPages ?? 1))
+          if (replace || json.pagination?.total !== undefined) setTotal(json.pagination?.total ?? 0)
+          const nextCursor = json.pagination?.nextCursor
+          cursorRef.current = nextCursor ?? null
+          setHasMore(nextCursor !== undefined ? nextCursor !== null : pageNum < (json.pagination?.totalPages ?? 1))
           pageRef.current = pageNum
           loadedOnceRef.current = true
         } else if (replace) {
@@ -95,7 +101,7 @@ export function useInfiniteListing<T extends { id: string }>({
         }
       }
     },
-    [endpoint, paramsKey, limit]
+    [endpoint, paramsKey, limit, version]
   )
 
   useEffect(() => {

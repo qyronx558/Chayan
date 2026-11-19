@@ -10,6 +10,7 @@ import "@/app/home.css"
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 function recordView(id: string) {
  fetch(`/api/notifications/${id}/view`, { method: "POST" }).catch(() => {})
@@ -43,6 +44,7 @@ interface NotificationsClientProps {
 type FilterType = "all" | "trending" | "category"
 
 export function NotificationsClient({ notifications: initialNotifications, categories }: NotificationsClientProps) {
+ const dataVersion = useDataVersion()
  const [notifications, setNotifications] = useState(initialNotifications)
  const [search, setSearch] = useState("")
  const [filter, setFilter] = useState<FilterType>("all")
@@ -92,7 +94,7 @@ export function NotificationsClient({ notifications: initialNotifications, categ
   setLoadMoreError("")
   try {
    const serverPage = Math.floor(notifications.length / 10) + 1
-   const res = await fetch(`/api/notifications?page=${serverPage}&limit=10`)
+   const res = await fetch(withDataVersion(`/api/notifications?page=${serverPage}&limit=10`, dataVersion))
    if (res.ok) {
     const json = await res.json()
     if (json.success && json.data.length > 0) {
@@ -114,7 +116,7 @@ export function NotificationsClient({ notifications: initialNotifications, categ
   } finally {
    setIsLoadingMore(false)
   }
- }, [isLoadingMore, hasMoreFiltered, hasMore, notifications.length])
+ }, [isLoadingMore, hasMoreFiltered, hasMore, notifications.length, dataVersion])
 
  // Amazon-style: auto-reveal next batch on scroll, button stays as fallback.
  const sentinelRef = useInfiniteScroll({

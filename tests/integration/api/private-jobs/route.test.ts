@@ -18,6 +18,7 @@ vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/moderation", () => ({ writeAuditLog, defaultModerationForRole: () => "APPROVED" }))
 vi.mock("@/lib/cache", () => ({
   publicApiResponse: (body: unknown) => Response.json(body),
+  noStoreResponse: (body: unknown) => Response.json(body),
   revalidatePublicContent: vi.fn(),
 }))
 vi.mock("@/lib/private-jobs/logo", () => ({ scheduleLogoLookup: vi.fn(), fillMissingLogos: async () => ({ checked: 0, found: 0, results: [] }) }))

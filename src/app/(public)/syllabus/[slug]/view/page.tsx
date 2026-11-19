@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,24 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
-import { canViewContent } from "@/lib/public-visibility"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getSyllabus = cache((slug: string) => prisma.syllabus.findUnique({ where: { slug }, include: { department: true, category: true } }))
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const syllabus = await prisma.syllabus.findUnique({ where: { slug } })
-  if (!syllabus) return { title: "View Syllabus | ChayanJobs" }
+  const syllabus = await getSyllabus(slug)
+  if (!syllabus || !isPubliclyVisible(syllabus.moderation)) return { title: "View Syllabus | ChayanJobs" }
   return {
     title: `Syllabus: ${syllabus.title} | ChayanJobs`,
     description: `View ${syllabus.title} in fullscreen on the original official document.`,
@@ -28,12 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function SyllabusViewPage({ params }: Props) {
   const { slug } = await params
-  const syllabus = await prisma.syllabus.findUnique({
-    where: { slug },
-    include: { department: true, category: true },
-  })
+  const syllabus = await getSyllabus(slug)
 
-  if (!syllabus || !(await canViewContent(syllabus.moderation))) notFound()
+  if (!syllabus || !isPubliclyVisible(syllabus.moderation)) notFound()
 
   const targetUrl = normalizeExternalUrl(syllabus.pdfUrl)
   if (!targetUrl) notFound()

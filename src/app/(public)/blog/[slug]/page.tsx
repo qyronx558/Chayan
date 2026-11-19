@@ -13,7 +13,6 @@ import { Calendar, Eye, Clock3, Tag, FileText, ChevronLeft, ChevronRight, BadgeC
 import { PrintButton } from "@/components/blog/PrintButton"
 import { ShareButtons } from "@/components/blog/ShareButtons"
 import { ShareRail } from "@/components/blog/ShareRail"
-import { ViewTracker } from "@/components/blog/ViewTracker"
 import { EntityViewTracker } from "@/components/analytics/EntityViewTracker"
 import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { TableOfContents } from "@/components/blog/TableOfContents"
@@ -26,7 +25,7 @@ import { SaveButton } from "@/components/blog/SaveButton"
 import { RelatedJobs } from "@/components/blog/RelatedJobs"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
 
-export const revalidate = 3600
+export const revalidate = 86400
 
 // Generate articles on their first request, then use the one-hour ISR cache.
 // Builds must not enumerate and render live database records.
@@ -146,7 +145,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     <div className="home-saas bg-background text-foreground print:bg-background">
       <div className="container mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <ReadingProgress />
-        <ViewTracker slug={post.slug} />
         <EntityViewTracker entityType="BLOG" entityId={post.id} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadCrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleLd) }} />

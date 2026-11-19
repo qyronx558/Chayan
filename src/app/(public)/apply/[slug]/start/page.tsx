@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -5,16 +6,24 @@ import { ApplicationShell } from "@/components/apply/ApplicationShell"
 import type { ApplicationInfoRow } from "@/components/apply/application-types"
 import { formatDate } from "@/lib/utils"
 import { normalizeExternalUrl, getExternalHostname } from "@/lib/apply-room"
-import { canViewContent } from "@/lib/public-visibility"
+import { isPubliclyVisible } from "@/lib/public-visibility"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400
+
+const getJob = cache((slug: string) => prisma.job.findUnique({ where: { slug }, include: { department: true } }))
+
+export function generateStaticParams(): { slug: string }[] {
+  return []
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const job = await prisma.job.findUnique({ where: { slug } })
-  if (!job) return { title: "Apply | ChayanJobs" }
+  const job = await getJob(slug)
+  if (!job || !isPubliclyVisible(job.moderation)) return { title: "Apply | ChayanJobs" }
   return {
     title: `Apply: ${job.title} | ChayanJobs`,
     description: `Apply for ${job.title} on the original official website, opened inside ChayanJobs.`,
@@ -28,12 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function ApplyStartPage({ params }: Props) {
   const { slug } = await params
-  const job = await prisma.job.findUnique({
-    where: { slug },
-    include: { department: true },
-  })
+  const job = await getJob(slug)
 
-  if (!job || !(await canViewContent(job.moderation))) notFound()
+  if (!job || !isPubliclyVisible(job.moderation)) notFound()
 
   const targetUrl = normalizeExternalUrl(job.applyLink || job.officialWebsite)
   if (!targetUrl) notFound()

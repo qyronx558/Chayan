@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { ENTITY_TYPE, FALLBACK_WINDOW_DAYS, TRENDING_WINDOW_DAYS } from "@/lib/trending/config"
 import { jobViewSums, pageViewCounts, windowStart } from "@/lib/trending/queries"
 import { viewTerm } from "@/lib/trending/score"
+import { publicApiResponse } from "@/lib/cache"
 
 /**
  * GET /api/exams[?sort=trending]
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (sort !== "trending") {
-      return NextResponse.json({ success: true, data: exams })
+      return publicApiResponse({ success: true, data: exams }, "gov")
     }
 
     const since7 = windowStart(TRENDING_WINDOW_DAYS)
@@ -83,11 +84,11 @@ export async function GET(request: NextRequest) {
         return b.exam.createdAt.getTime() - a.exam.createdAt.getTime()
       })
     }
-    return NextResponse.json({
+    return publicApiResponse({
       success: true,
       data: scored.map((s) => s.exam),
       trending: { fallback, windowDays },
-    })
+    }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch exams" },

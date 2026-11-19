@@ -9,10 +9,12 @@ import { findOrCreateCompany } from "@/lib/companies"
 import { isAdmin } from "@/lib/roles"
 import { Prisma } from "@prisma/client"
 import { writeAuditLog } from "@/lib/moderation"
+import { getPrivateJobScope, revalidatePrivateJobById, revalidateScoped } from "@/lib/revalidate-content"
 import { computeTrustScore } from "@/lib/private-jobs-trust"
 import { dedupeHash } from "@/lib/private-jobs/normalize"
 import { canViewContent } from "@/lib/public-visibility"
 import { normalizeOptionalId, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
+import { noStoreResponse, publicApiResponse } from "@/lib/cache"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!(await canViewContent(job.moderation))) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 })
     }
-    return NextResponse.json({ success: true, data: job })
+    return job.moderation === "APPROVED" ? publicApiResponse({ success: true, data: job }, "private") : noStoreResponse({ success: true, data: job })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch private job" },
@@ -108,10 +110,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.reviewNote = null
     }
 
+    const previous = await getPrivateJobScope(id)
     const job = await prisma.privateJob.update({
       where: { id },
       data,
     })
+    await revalidatePrivateJobById(id, previous)
 
     await writeAuditLog({
       action: "UPDATE",
@@ -148,6 +152,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
     }
 
+    const previous = await getPrivateJobScope(id)
     // Clear dependent rows (bookmarks have no cascade; new tables cascade but be explicit).
     await prisma.$transaction([
       prisma.bookmark.deleteMany({ where: { privateJobId: id } }),
@@ -156,6 +161,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       prisma.jobReport.deleteMany({ where: { privateJobId: id } }),
       prisma.privateJob.delete({ where: { id } }),
     ])
+    revalidateScoped("private-job", null, previous)
 
     return NextResponse.json({ success: true, data: null })
   } catch (error) {

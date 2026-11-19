@@ -57,7 +57,7 @@ export async function GET() {
             .sort((a, b) => a.name.localeCompare(b.name)),
         },
       },
-      300
+      "private"
     )
   } catch (error) {
     return NextResponse.json(

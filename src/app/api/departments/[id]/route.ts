@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { CACHE_TAGS, publicApiResponse, revalidateTags } from "@/lib/cache"
 import { departmentSchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
 
@@ -22,7 +23,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Department not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: department })
+    return publicApiResponse({ success: true, data: department }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch department" },
@@ -69,6 +70,7 @@ export async function PUT(
       data: validation.data,
     })
 
+    revalidateTags([CACHE_TAGS.taxonomy])
     return NextResponse.json({ success: true, data: department })
   } catch (error) {
     if (error instanceof Error && (error as Error & { code?: string }).code === "P2002") {
@@ -128,6 +130,7 @@ export async function DELETE(
 
     await prisma.department.delete({ where: { id } })
 
+    revalidateTags([CACHE_TAGS.taxonomy])
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

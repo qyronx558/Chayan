@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getTrending(moduleParam, limit)
-    return publicApiResponse({ success: true, module: moduleParam, ...result }, 300)
+    return publicApiResponse({ success: true, module: moduleParam, ...result }, "search")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to load trending" },

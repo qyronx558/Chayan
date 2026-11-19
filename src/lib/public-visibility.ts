@@ -16,6 +16,10 @@ export async function canViewContent(moderation: string | null | undefined): Pro
   }
 }
 
+export function isPubliclyVisible(moderation: string | null | undefined): boolean {
+  return moderation === "APPROVED" || moderation === null || moderation === undefined
+}
+
 /** robots meta for detail pages: anything not approved stays out of search indexes. */
 export function robotsFor(moderation: string | null | undefined, thin = false) {
   return moderation === "APPROVED" && !thin ? undefined : { index: false, follow: true }

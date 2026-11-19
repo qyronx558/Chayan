@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { companySchema } from "@/lib/validations"
 import { isAdmin } from "@/lib/roles"
+import { publicApiResponse } from "@/lib/cache"
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
       orderBy: { name: "asc" },
       include: withStats ? { _count: { select: { privateJob: true } } } : undefined,
     })
-    return NextResponse.json({ success: true, data: companies })
+    return publicApiResponse({ success: true, data: companies }, "private")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch companies" },

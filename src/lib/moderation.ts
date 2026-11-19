@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePublicContent } from "@/lib/cache"
+import { getScopeFor } from "@/lib/revalidate-content"
 
 export const MODERATION_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const
 export type ModerationStatus = (typeof MODERATION_STATUSES)[number]
@@ -148,7 +149,7 @@ export async function reviewContent(args: {
 
   try {
     const slug = (updated as { slug?: string })?.slug
-    if (slug) revalidatePublicContent(meta.revalidateKey, slug)
+    if (slug) revalidatePublicContent(meta.revalidateKey, slug, await getScopeFor(meta.revalidateKey, args.id))
     else revalidatePublicContent(meta.revalidateKey)
   } catch {
     // revalidation is best-effort

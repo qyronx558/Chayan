@@ -12,6 +12,33 @@ function clientIp(req: NextRequest): string | null {
   return null;
 }
 
+function startOfDay(d = new Date()) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+async function bumpEntityCounter(entityType: string | undefined, entityId: string | undefined) {
+  if (!entityType || !entityId) return;
+  const date = startOfDay();
+  if (entityType === "JOB") {
+    await prisma.jobView.upsert({
+      where: { jobId_date: { jobId: entityId, date } },
+      update: { views: { increment: 1 } },
+      create: { jobId: entityId, date, views: 1 },
+    });
+  } else if (entityType === "PRIVATE_JOB") {
+    await prisma.$transaction([
+      prisma.privateJob.update({ where: { id: entityId }, data: { views: { increment: 1 } } }),
+      prisma.privateJobView.upsert({
+        where: { privateJobId_date: { privateJobId: entityId, date } },
+        update: { views: { increment: 1 } },
+        create: { privateJobId: entityId, date, views: 1 },
+      }),
+    ]);
+  } else if (entityType === "BLOG") {
+    await prisma.blogPost.update({ where: { id: entityId }, data: { views: { increment: 1 } } });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     if (req.headers.get("dnt") === "1") return new NextResponse(null, { status: 204 });
@@ -35,7 +62,8 @@ export async function POST(req: NextRequest) {
     const url = new URL(req.url);
     const get = (k: string) => url.searchParams.get(k) ?? undefined;
     const store = prisma as unknown as { pageViewEvent: { create: (a: unknown) => Promise<unknown> } };
-    await store.pageViewEvent.create({
+    const counter = agentClass === "human" ? bumpEntityCounter(body.entityType, body.entityId?.slice(0, 80)).catch(() => null) : null;
+    const event = store.pageViewEvent.create({
       data: {
         path,
         entityType: body.entityType?.slice(0, 40) ?? null,
@@ -54,6 +82,7 @@ export async function POST(req: NextRequest) {
         durationMs: typeof body.durationMs === "number" ? Math.min(3600000, Math.max(0, Math.round(body.durationMs))) : null,
       },
     }).catch(() => null);
+    await Promise.all([event, counter]);
     return new NextResponse(null, { status: 204 });
   } catch {
     return new NextResponse(null, { status: 204 });

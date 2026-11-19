@@ -16,6 +16,7 @@ import {
  PUBLIC_INFINITE_LIMIT as LIMIT,
 } from "@/hooks/useInfiniteScroll"
 import { InfiniteListFooter } from "@/components/ui/infinite-list-footer"
+import { useDataVersion, withDataVersion } from "@/components/providers/DataVersion"
 
 interface BlogCategory {
  id: string
@@ -45,6 +46,7 @@ interface BlogPost {
 type SortKey = "latest" | "popular" | "quick"
 
 export function BlogClient() {
+ const dataVersion = useDataVersion()
  const [posts, setPosts] = useState<BlogPost[]>([])
  const [popular, setPopular] = useState<BlogPost[]>([])
  const [categories, setCategories] = useState<BlogCategory[]>([])
@@ -68,11 +70,11 @@ export function BlogClient() {
  }, [input])
 
  useEffect(() => {
-  fetch("/api/blog-categories")
+  fetch(withDataVersion("/api/blog-categories", dataVersion))
    .then((res) => res.json())
    .then((json) => { if (json.success) setCategories(json.data) })
    .catch(() => {})
- }, [])
+ }, [dataVersion])
 
  const fetchPage = useCallback(async (pageNum: number, replace: boolean, signal: AbortSignal) => {
   if (replace) {
@@ -90,7 +92,7 @@ export function BlogClient() {
    params.set("published", "true")
    params.set("page", String(pageNum))
    params.set("limit", String(LIMIT))
-   const res = await fetch(`/api/blog?${params}`, { signal })
+   const res = await fetch(withDataVersion(`/api/blog?${params}`, dataVersion), { signal })
    const json = await res.json()
    if (signal.aborted) return
    if (json.success) {
@@ -117,7 +119,7 @@ export function BlogClient() {
     else setLoadingMore(false)
    }
   }
- }, [search, activeCategory, sort])
+ }, [search, activeCategory, sort, dataVersion])
 
  useEffect(() => {
   abortRef.current?.abort()
@@ -150,11 +152,11 @@ export function BlogClient() {
  })
 
  useEffect(() => {
-  fetch("/api/blog?sort=popular&published=true&limit=5")
+  fetch(withDataVersion("/api/blog?sort=popular&published=true&limit=5", dataVersion))
    .then((res) => res.json())
    .then((json) => { if (json.success) setPopular(json.data) })
    .catch(() => {})
- }, [])
+ }, [dataVersion])
 
  const isFiltered = Boolean(search || activeCategory)
  const featured = useMemo(

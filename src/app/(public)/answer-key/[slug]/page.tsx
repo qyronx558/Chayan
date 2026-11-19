@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
@@ -6,16 +7,26 @@ import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav"
 import { getJourney } from "@/lib/doc-journey"
 import { DocumentDetail } from "@/components/documents/DocumentDetail"
 import { DiscussionSection } from "@/components/discussion/DiscussionSection"
-import { canViewContent, robotsFor } from "@/lib/public-visibility"
+import { isPubliclyVisible, robotsFor } from "@/lib/public-visibility"
+
+export const revalidate = 86400
+
+const getAnswerKey = cache((slug: string) => prisma.answerKey.findUnique({ where: { slug }, include: { department: true, category: true, job: true } }))
+
+export async function generateStaticParams() {
+  try {
+    const rows = await prisma.answerKey.findMany({ where: { moderation: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 100, select: { slug: true } })
+    return rows.map((r) => ({ slug: r.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const answerKey = await prisma.answerKey.findUnique({
-    where: { slug },
-    include: { department: true },
-  })
+  const answerKey = await getAnswerKey(slug)
 
-  if (!answerKey) return { title: "Answer Key Not Found" }
+  if (!answerKey || !isPubliclyVisible(answerKey.moderation)) return { title: "Answer Key Not Found" }
 
   const baseUrl = getBaseUrl()
 
@@ -31,12 +42,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function AnswerKeyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const answerKey = await prisma.answerKey.findUnique({
-    where: { slug },
-    include: { department: true, category: true, job: true },
-  })
+  const answerKey = await getAnswerKey(slug)
 
-  if (!answerKey || !(await canViewContent(answerKey.moderation))) notFound()
+  if (!answerKey || !isPubliclyVisible(answerKey.moderation)) notFound()
 
   const relatedKeys = await prisma.answerKey.findMany({
     where: {

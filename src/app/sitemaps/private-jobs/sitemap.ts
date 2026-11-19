@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Served at /sitemaps/private-jobs/sitemap/<id>.xml and listed in robots.txt.
  */
 const PER_SITEMAP = 40_000
-export const revalidate = 3600
+export const revalidate = 86400
 
 const LIVE = { status: "ACTIVE", moderation: "APPROVED" as const }
 

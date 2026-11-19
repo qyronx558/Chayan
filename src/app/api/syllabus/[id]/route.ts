@@ -5,6 +5,7 @@ import { syllabusSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { staffAudit } from "@/lib/moderation"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { requireAction } from "@/lib/admin/access"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
@@ -23,7 +24,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Syllabus not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: syllabus })
+    return publicApiResponse({ success: true, data: syllabus }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch syllabus" },
@@ -109,6 +110,8 @@ export async function PUT(
       note: `Updated "${updatedSyllabus.title}"`,
     })
 
+    revalidatePublicContent("syllabus", updatedSyllabus.slug)
+    if (existing.slug !== updatedSyllabus.slug) revalidatePublicContent("syllabus", existing.slug)
     return NextResponse.json({ success: true, data: updatedSyllabus })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)
@@ -158,6 +161,7 @@ export async function DELETE(
       note: `Deleted "${existing.title}"`,
     })
 
+    revalidatePublicContent("syllabus", existing.slug)
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

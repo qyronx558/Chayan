@@ -5,6 +5,7 @@ import { resultSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { isAdmin } from "@/lib/roles"
 import { staffAudit } from "@/lib/moderation"
+import { publicApiResponse, revalidatePublicContent } from "@/lib/cache"
 import { requireAction } from "@/lib/admin/access"
 import { normalizeOptionalId, normalizeRequiredId, normalizeOptionalText, findMissingRelation, missingRelationResponse, prismaRelationErrorResponse } from "@/lib/relations"
 
@@ -23,7 +24,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Result not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: result })
+    return publicApiResponse({ success: true, data: result }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch result" },
@@ -105,6 +106,8 @@ export async function PUT(
       note: `Updated "${result.title}"`,
     })
 
+    revalidatePublicContent("result", result.slug)
+    if (existing.slug !== result.slug) revalidatePublicContent("result", existing.slug)
     return NextResponse.json({ success: true, data: result })
   } catch (error) {
     const friendly = prismaRelationErrorResponse(error)
@@ -154,6 +157,7 @@ export async function DELETE(
       note: `Deleted "${existing.title}"`,
     })
 
+    revalidatePublicContent("result", existing.slug)
     return NextResponse.json({ success: true, data: null })
   } catch (error) {
     return NextResponse.json(

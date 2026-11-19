@@ -18,7 +18,7 @@ export async function GET() {
       },
       orderBy: [{ isPinned: "desc" }, { sortOrder: "asc" }],
     })
-    return publicApiResponse({ success: true, data: items }, 60)
+    return publicApiResponse({ success: true, data: items }, "gov")
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Failed to fetch featured items" },

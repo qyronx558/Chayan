@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: Ctx) {
     const data = districts.map(({ _count, ...d }) => ({ ...d, ...(_count ? { jobCount: _count.jobs } : {}) }))
     const body = { success: true, state, data }
     // Admin view (job counts) must be fresh; the public list can sit on the CDN.
-    return withJobCounts ? NextResponse.json(body) : publicApiResponse(body, 300)
+    return withJobCounts ? NextResponse.json(body) : publicApiResponse(body, "gov")
   } catch (err) {
     return serverError(err, "Failed to fetch districts")
   }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest, { params }: Ctx) {
       user: guard.user,
       note: `Created district "${district.name}" in ${state.name}`,
     })
-    revalidateLocationPages()
+    revalidateLocationPages(state.slug, district.slug)
     return NextResponse.json({ success: true, data: district }, { status: 201 })
   } catch (err) {
     return locationConflictResponse(err, "District") ?? serverError(err, "Failed to create district")

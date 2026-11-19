@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       SELECT "city" AS v, COUNT(*) AS n FROM "PrivateJob"
       WHERE "country" = ${country} AND "city" IS NOT NULL AND "city" <> '' ${live}
       GROUP BY "city" ORDER BY COUNT(*) DESC, "city" ASC LIMIT 500`
-    return publicApiResponse({ success: true, data: rows.map((r) => ({ name: r.v, count: Number(r.n) })) }, 300)
+    return publicApiResponse({ success: true, data: rows.map((r) => ({ name: r.v, count: Number(r.n) })) }, "private")
   } catch (error) {
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to fetch cities" }, { status: 500 })
   }
