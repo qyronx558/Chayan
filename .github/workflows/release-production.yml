@@ -139,6 +139,12 @@ jobs:
               sed -i -E '/\[SENSITIVE\]/d; /^[A-Z0-9_]+=("")?$/d; /^(DATABASE_URL|NEXT_PUBLIC_APP_ENV)=/d' "$f"
             done
             vercel build --prod --yes --token="$VERCEL_TOKEN"
+            # Vercel functions run on Amazon Linux: without the RHEL Prisma engine in the
+            # bundle every database page fails at runtime. Never deploy such a build.
+            if ! find .vercel/output/functions -name 'libquery_engine-rhel-openssl-3.0.x.so.node' -print -quit | grep -q .; then
+              echo "::error::Prisma's rhel-openssl-3.0.x engine is missing from the build. Keep binaryTargets in prisma/schema.prisma."
+              exit 1
+            fi
             url=$(vercel deploy --prod --prebuilt --yes --archive=tgz --token="$VERCEL_TOKEN")
           fi
           echo "### Released ${{ needs.verify.outputs.tag }} to production" >> "$GITHUB_STEP_SUMMARY"
@@ -147,11 +153,15 @@ jobs:
       - name: Smoke test the live site
         if: env.PRODUCTION_URL != ''
         run: |
+          # The home page is pre-rendered, so it answers 200 even when the database layer is
+          # broken. /api/stats/public queries the database at request time, so check both.
+          base=${PRODUCTION_URL%/}
           for i in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$PRODUCTION_URL")
-            [ "$code" = "200" ] && { echo "Live site answered 200"; exit 0; }
-            echo "Attempt $i: HTTP $code, retrying..."
+            home=$(curl -s -o /dev/null -L -w '%{http_code}' --max-time 30 "$base/")
+            db=$(curl -s -o /dev/null -L -w '%{http_code}' --max-time 30 "$base/api/stats/public?smoke=$(date +%s)")
+            if [ "$home" = "200" ] && [ "$db" = "200" ]; then echo "Live site and database answered 200"; exit 0; fi
+            echo "Attempt $i: home HTTP $home, database check HTTP $db, retrying..."
             sleep 10
           done
-          echo "::error::The live site did not answer 200 after the release. Roll back by re-running this workflow with the previous tag."
+          echo "::error::The live site failed its smoke test after the release. Roll back by re-running this workflow with the previous tag."
           exit 1

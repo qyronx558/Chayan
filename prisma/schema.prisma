@@ -1,6 +1,10 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
+  // "native" = the machine that builds (Ubuntu runner, Windows/macOS laptops).
+  // Vercel functions run on Amazon Linux, which needs the RHEL engine; it must
+  // be listed because deploys are built on GitHub's Ubuntu runner (--prebuilt).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

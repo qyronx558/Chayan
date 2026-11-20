@@ -91,6 +91,12 @@ jobs:
               sed -i -E '/\[SENSITIVE\]/d; /^[A-Z0-9_]+=("")?$/d; /^(DATABASE_URL|NEXT_PUBLIC_APP_ENV)=/d' "$f"
             done
             vercel build --yes --token="$VERCEL_TOKEN"
+            # Vercel functions run on Amazon Linux: without the RHEL Prisma engine in the
+            # bundle every database page fails at runtime. Never deploy such a build.
+            if ! find .vercel/output/functions -name 'libquery_engine-rhel-openssl-3.0.x.so.node' -print -quit | grep -q .; then
+              echo "::error::Prisma's rhel-openssl-3.0.x engine is missing from the build. Keep binaryTargets in prisma/schema.prisma."
+              exit 1
+            fi
             url=$(vercel deploy --prebuilt --yes --archive=tgz --token="$VERCEL_TOKEN")
           fi
           if [ -n "${{ vars.DEV_DOMAIN }}" ]; then
