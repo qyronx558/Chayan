@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   description: "Remote and hybrid private jobs with trust scores, salary ranges and one-click tracking.",
 }
 
-export const revalidate = 3600
+// Backstop only: the feed sync (every 3h) revalidates these on demand when data changes.
+export const revalidate = 21600
 
 export default function RemoteJobsPage() {
   return (

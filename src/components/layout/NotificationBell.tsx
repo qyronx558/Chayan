@@ -35,15 +35,18 @@ const typeLabel: Record<string, string> = {
  GENERAL: "Announcement",
 }
 
+const NOTIFICATION_POLL_MS = 5 * 60_000
+
 export function NotificationBell() {
  const { data: session } = useSession()
+ const userId = session?.user?.id
  const [open, setOpen] = React.useState(false)
  const [notifications, setNotifications] = React.useState<UserNotification[]>([])
  const [unreadCount, setUnreadCount] = React.useState(0)
  const [loading, setLoading] = React.useState(false)
 
  const fetchNotifications = React.useCallback(async () => {
-  if (!session?.user?.id) return
+  if (!userId) return
   setLoading(true)
   try {
    const res = await fetch("/api/user/notifications?limit=10")
@@ -52,61 +55,67 @@ export function NotificationBell() {
     if (json.success) {
      setNotifications(json.data)
      setUnreadCount(json.unreadCount)
+     try {
+      sessionStorage.setItem(`cj_notif:${userId}`, JSON.stringify({ at: Date.now(), data: json.data, unread: json.unreadCount }))
+     } catch {}
     }
    }
   } catch {
   } finally {
    setLoading(false)
   }
- }, [session?.user?.id])
+ }, [userId])
 
  React.useEffect(() => {
   if (open) fetchNotifications()
  }, [open, fetchNotifications])
 
  React.useEffect(() => {
-  if (!session?.user?.id) return
+  if (!userId) return
 
-  const pushNotification = (n: UserNotification) => {
-   setNotifications((prev) => {
-    if (prev.some((x) => x.id === n.id)) return prev
-    return [n, ...prev].slice(0, 10)
-   })
-   setUnreadCount((prev) => prev + 1)
+  // No held-open stream (it kept a server function running for every open
+  // tab). Poll slowly, only while the tab is visible, and share the last
+  // answer across page loads in this tab so navigating costs no request.
+  const key = `cj_notif:${userId}`
+  const apply = (data: UserNotification[], unread: number) => {
+   setNotifications(data)
+   setUnreadCount(unread)
   }
-
-  let source: EventSource | null = null
-  try {
-   source = new EventSource("/api/notifications/stream")
-   source.onmessage = (event) => {
-    try {
-     const data = JSON.parse(event.data)
-     if (data && data.type && data.title) pushNotification(data)
-    } catch {
-     /* ignore malformed events */
-    }
+  const readCache = (): { at: number; data: UserNotification[]; unread: number } | null => {
+   try {
+    return JSON.parse(sessionStorage.getItem(key) || "null")
+   } catch {
+    return null
    }
-  } catch {
-   source = null
   }
-
-  const poll = setInterval(() => {
+  const poll = () => {
+   if (document.visibilityState !== "visible") return
+   const cached = readCache()
+   if (cached && Date.now() - cached.at < NOTIFICATION_POLL_MS) {
+    apply(cached.data, cached.unread)
+    return
+   }
    fetch("/api/user/notifications?limit=10")
     .then((res) => (res.ok ? res.json() : null))
     .then((json) => {
      if (json && json.success) {
-      setNotifications(json.data)
-      setUnreadCount(json.unreadCount)
+      apply(json.data, json.unreadCount)
+      try {
+       sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), data: json.data, unread: json.unreadCount }))
+      } catch {}
      }
     })
     .catch(() => {})
-  }, 45000)
-
-  return () => {
-   source?.close()
-   clearInterval(poll)
   }
- }, [session?.user?.id])
+
+  poll()
+  const timer = setInterval(poll, NOTIFICATION_POLL_MS)
+  document.addEventListener("visibilitychange", poll)
+  return () => {
+   clearInterval(timer)
+   document.removeEventListener("visibilitychange", poll)
+  }
+ }, [userId])
 
  const markRead = async (id: string) => {
   try {
@@ -119,6 +128,9 @@ export function NotificationBell() {
     prev.map((n) => (n.id === id ? { ...n, read: true } : n))
    )
    setUnreadCount((prev) => Math.max(0, prev - 1))
+   try {
+    if (userId) sessionStorage.removeItem(`cj_notif:${userId}`)
+   } catch {}
   } catch {
   }
  }

@@ -175,20 +175,21 @@ function AuditPageInner() {
     enabled: status === "authenticated" && superView && tab === "alerts",
   });
 
+  // Live mode refreshes the lists on a timer while the tab is visible,
+  // instead of a stream that keeps a server function running.
   useEffect(() => {
     if (!live || status !== "authenticated") return;
-    const src = new EventSource("/api/admin/audit/stream");
-    src.onmessage = (ev) => {
-      try {
-        const payload = JSON.parse(ev.data) as { count?: number };
-        if (payload.count && payload.count > 0) {
-          queryClient.invalidateQueries({ queryKey: ["audit-events"] });
-          queryClient.invalidateQueries({ queryKey: ["audit-kpis"] });
-        }
-      } catch {
-      }
+    const refresh = () => {
+      if (document.visibilityState !== "visible") return;
+      queryClient.invalidateQueries({ queryKey: ["audit-events"] });
+      queryClient.invalidateQueries({ queryKey: ["audit-kpis"] });
     };
-    return () => src.close();
+    const timer = setInterval(refresh, 30000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, [live, status, queryClient]);
 
   useEffect(() => {

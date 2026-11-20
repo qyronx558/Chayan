@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma"
-import { broadcastNotification } from "@/lib/notification-stream"
 import { Prisma } from "@prisma/client"
 
 export type NotificationType =
@@ -156,25 +155,9 @@ export async function notifyUsers(
 
     const text = message || `${notificationTypeLabel(type)} - ${title}`
 
-    let broadcast: {
-      id?: string
-      type: NotificationType
-      title: string
-      slug: string
-      message: string | null
-      read: boolean
-      createdAt: string
-    } = {
-      type,
-      title,
-      slug,
-      message: text,
-      read: false,
-      createdAt: new Date().toISOString(),
-    }
-
+    // Readers pick these up on their next poll of /api/user/notifications.
     if (users.length > 0) {
-      const created = await prisma.userNotification.createManyAndReturn({
+      await prisma.userNotification.createMany({
         data: users.map((u) => ({
           userId: u.userId,
           type,
@@ -182,22 +165,8 @@ export async function notifyUsers(
           slug,
           message: text,
         })),
-        select: { id: true, type: true, title: true, slug: true, message: true, read: true, createdAt: true },
       })
-      if (created[0]) {
-        broadcast = {
-          id: created[0].id,
-          type: created[0].type as NotificationType,
-          title: created[0].title,
-          slug: created[0].slug,
-          message: created[0].message,
-          read: created[0].read,
-          createdAt: created[0].createdAt.toISOString(),
-        }
-      }
     }
-
-    broadcastNotification(broadcast)
   } catch (error) {
     console.error("Failed to send notifications:", error)
   }

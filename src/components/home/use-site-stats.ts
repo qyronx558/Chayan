@@ -17,7 +17,7 @@ let cache: Promise<SiteStats | null> | null = null
 
 function loadStats(): Promise<SiteStats | null> {
   if (!cache) {
-    cache = fetch("/api/stats")
+    cache = fetch("/api/stats/public")
       .then((r) => r.json())
       .then((d) => (d.success ? (d.data as SiteStats) : null))
       .catch(() => {
@@ -28,7 +28,7 @@ function loadStats(): Promise<SiteStats | null> {
   return cache
 }
 
-/** `/api/stats` shared by every home section, fetched once per page load. */
+/** `/api/stats/public` (CDN-cached) shared by every home section, fetched once per page load. */
 export function useSiteStats(): SiteStats | null {
   const [stats, setStats] = useState<SiteStats | null>(null)
   useEffect(() => {
