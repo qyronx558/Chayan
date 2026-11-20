@@ -61,6 +61,8 @@ interface DiscussionProps {
  path?: string
 }
 
+const REFRESH_MS = 2 * 60_000
+
 export function Discussion({ postId, postType, path }: DiscussionProps) {
  const { data: session } = useSession()
  const currentUserId = session?.user?.id
@@ -80,10 +82,13 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  const [search, setSearch] = useState("")
  const [searchInput, setSearchInput] = useState("")
  const [searchOpen, setSearchOpen] = useState(false)
- const [connected, setConnected] = useState(false)
- const [reconnecting, setReconnecting] = useState(false)
+ // True once the section has come near the screen: comments are not fetched
+ // for readers who never scroll down to them.
+ const [inView, setInView] = useState(false)
+ const [onScreen, setOnScreen] = useState(false)
  const [sortDropdown, setSortDropdown] = useState(false)
- const eventSourceRef = useRef<EventSource | null>(null)
+ const sectionRef = useRef<HTMLElement>(null)
+ const lastFetchRef = useRef(0)
  const sortRef = useRef<HTMLDivElement>(null)
 
  const [content, setContent] = useState("")
@@ -107,10 +112,6 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
   return () => document.removeEventListener("mousedown", handleClick)
  }, [sortDropdown])
 
- const handleSSEEvent = useCallback((data: any) => {
-  console.debug("SSE event:", data.type)
- }, [])
-
  async function loadReplies(parentId: string, cursor?: string) {
   const params = new URLSearchParams({ postType, postId, parentId })
   if (cursor) params.set("cursor", cursor)
@@ -122,6 +123,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  const fetchComments = useCallback(
   async (opts?: { cursor?: string; append?: boolean }) => {
    setLoading(true)
+   lastFetchRef.current = Date.now()
    try {
     const params = new URLSearchParams({ postType, postId, sort, filter })
     if (search) params.set("q", search)
@@ -144,55 +146,55 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
 
  const fetchCommentsRef = useRef(fetchComments)
  useEffect(() => { fetchCommentsRef.current = fetchComments }, [fetchComments])
+ // Watch the section: `inView` latches on first approach (lazy load),
+ // `onScreen` tracks whether it is visible right now (refresh gate).
  useEffect(() => {
+  const el = sectionRef.current
+  if (!el || typeof IntersectionObserver === "undefined") {
+   setInView(true)
+   setOnScreen(true)
+   return
+  }
+  const io = new IntersectionObserver(
+   ([entry]) => {
+    setOnScreen(entry.isIntersecting)
+    if (entry.isIntersecting) setInView(true)
+   },
+   { rootMargin: "600px 0px" }
+  )
+  io.observe(el)
+  return () => io.disconnect()
+ }, [])
+
+ useEffect(() => {
+  if (!inView) return
   const t = setTimeout(fetchComments, 0)
   return () => clearTimeout(t)
- }, [fetchComments])
+ }, [fetchComments, inView])
 
  useEffect(() => {
   const t = setTimeout(() => setSearch(searchInput), 300)
   return () => clearTimeout(t)
  }, [searchInput])
 
- // SSE
+ // Refresh instead of a held-open stream: a stream keeps a server function
+ // running for as long as the tab is open. Refresh only while the thread is on
+ // screen in a visible tab, at most every REFRESH_MS, and when the reader
+ // comes back to the tab.
  useEffect(() => {
-  let disposed = false
-  let reconnectTimer: ReturnType<typeof setTimeout> | undefined
-
-  const connect = () => {
-   if (disposed) return
-   if (eventSourceRef.current) eventSourceRef.current.close()
-
-   const es = new EventSource(`/api/comments/stream?postType=${postType}&postId=${postId}`)
-   eventSourceRef.current = es
-
-   es.onopen = () => { setConnected(true); setReconnecting(false) }
-   es.onmessage = (event) => {
-    try { handleSSEEvent(JSON.parse(event.data)) } catch {}
-   }
-   es.addEventListener("thread-update", (event) => {
-    try {
-     const data = JSON.parse(event.data)
-     setMeta((m) => ({ ...m, total: data.commentCount }))
-     fetchCommentsRef.current()
-    } catch {}
-   })
-   es.onerror = () => {
-    if (disposed) return
-    setConnected(false)
-    setReconnecting(true)
-    es.close()
-    reconnectTimer = setTimeout(connect, 5000)
-   }
+  if (!onScreen) return
+  const refreshIfStale = () => {
+   if (document.visibilityState !== "visible") return
+   if (Date.now() - lastFetchRef.current < REFRESH_MS) return
+   fetchCommentsRef.current()
   }
-
-  connect()
+  const timer = setInterval(refreshIfStale, REFRESH_MS)
+  document.addEventListener("visibilitychange", refreshIfStale)
   return () => {
-   disposed = true
-   if (reconnectTimer) clearTimeout(reconnectTimer)
-   if (eventSourceRef.current) eventSourceRef.current.close()
+   clearInterval(timer)
+   document.removeEventListener("visibilitychange", refreshIfStale)
   }
- }, [postType, postId, handleSSEEvent])
+ }, [onScreen])
 
  async function uploadImage(file: File) {
   setUploading(true)
@@ -422,7 +424,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
  const currentSort = SORTS.find((s) => s.key === sort) || SORTS[0]
 
  return (
-  <section className="mt-8">
+  <section ref={sectionRef} className="mt-8">
    <div className="overflow-hidden border border-rule bg-background dark:border-ink dark:bg-ink">
     {/* ─── Header ─── */}
     <div className="border-b border-rule bg-ink px-4 py-3 dark:border-ink dark:bg-paper-2">
@@ -435,16 +437,14 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
        </span>
       </h2>
       <div className="flex items-center gap-2">
-       {/* Live indicator */}
+       {/* Auto-refresh indicator */}
        <span className="flex items-center gap-1.5 border border-paper/20 px-2 py-0.5 dark:border-rule">
         <span className={cn(
          "h-2 w-2",
-         connected
-          ? "bg-brick-ink dark:bg-brick animate-pulse"
-          : "bg-brick dark:bg-brick"
-        )} style={connected ? { boxShadow: "0 0 4px var(--color-brick)" } : undefined} />
+         onScreen ? "bg-brick-ink dark:bg-brick animate-pulse" : "bg-brick dark:bg-brick"
+        )} style={onScreen ? { boxShadow: "0 0 4px var(--color-brick)" } : undefined} />
         <span className="text-[11px] font-semibold text-paper/90 dark:text-muted-foreground">
-         {connected ? "Live" : reconnecting ? "Reconnecting…" : "Offline"}
+         Auto-refresh
         </span>
        </span>
        {/* Follow */}
@@ -790,7 +790,7 @@ export function Discussion({ postId, postType, path }: DiscussionProps) {
       <span>·</span>
       <span className="flex items-center gap-1">
        <Zap className="h-3 w-3" />
-       Real-time {connected ? "active" : "paused"}
+       Refreshes every {REFRESH_MS / 60000} min
       </span>
      </div>
      <span className="text-[11px] text-muted-foreground">

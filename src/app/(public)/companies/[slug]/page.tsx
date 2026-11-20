@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/utils"
 import { TrustBadge } from "@/components/private/TrustBadge"
 import { formatSalaryRange } from "@/lib/private-jobs-trust"
 
-export const revalidate = 3600
+export const revalidate = 21600
 
 const getCompany = cache((slug: string) =>
   prisma.company.findUnique({

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
-import { beacon, sessionId, takeEntity } from "./page-view-store"
+import { onBeforeFlush, queueView, queueVitals, sessionId, takeEntity } from "./page-view-store"
 
 const VITALS_SAMPLE_RATE = 0.25
 
@@ -15,7 +15,7 @@ export function Tracker() {
     const started = Date.now()
     const sid = sessionId()
     const utm = search ?? new URLSearchParams()
-    beacon("/api/track/view", {
+    queueView({
       path,
       ...takeEntity(path),
       referrer: document.referrer || undefined,
@@ -37,14 +37,19 @@ export function Tracker() {
     try {
       po?.observe({ type: "largest-contentful-paint", buffered: true })
     } catch {}
+    // Recorded once, when the tab is first hidden or closed.
+    let sent = false
     const sendVitals = () => {
+      if (sent) return
+      sent = true
       const metrics = [{ metric: "time-on-page", value: Math.round((Date.now() - started) / 1000) }]
       if (lcp > 0) metrics.push({ metric: "LCP", value: Math.round(lcp) })
-      beacon("/api/track/vitals", { metrics, path, sessionId: sid })
+      queueVitals({ metrics, path, sessionId: sid })
       po?.disconnect()
+      off()
     }
-    window.addEventListener("pagehide", sendVitals, { once: true })
-    return () => window.removeEventListener("pagehide", sendVitals)
+    const off = onBeforeFlush(sendVitals)
+    return off
   }, [pathname, search])
   return null
 }

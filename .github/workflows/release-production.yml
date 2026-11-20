@@ -120,10 +120,27 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Build and deploy to production
-      # Vercel builds it on its own servers. Building here with `vercel pull` does not work:
-      # values marked "Sensitive" in Vercel cannot be downloaded (they arrive as "[SENSITIVE]").
+        id: deploy
+        # Built HERE (free GitHub runner) and uploaded with --prebuilt, so Vercel spends no
+        # build minutes. Values marked "Sensitive" in Vercel cannot be downloaded (they arrive
+        # as "[SENSITIVE]" or empty): those lines are dropped and the real ones come from this
+        # job's env (DATABASE_URL). Runtime secrets are still injected by Vercel at request time.
+        # Set the repository variable VERCEL_REMOTE_BUILD=true to build on Vercel again.
+        env:
+          REMOTE_BUILD: ${{ vars.VERCEL_REMOTE_BUILD }}
         run: |
-          url=$(vercel deploy --prod --yes --archive=tgz --build-env NEXT_PUBLIC_APP_ENV=production --token="$VERCEL_TOKEN")
+          if [ "$REMOTE_BUILD" = "true" ]; then
+            url=$(vercel deploy --prod --yes --archive=tgz --build-env NEXT_PUBLIC_APP_ENV=production --token="$VERCEL_TOKEN")
+          else
+            vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+            for f in .vercel/.env.*.local; do
+              [ -f "$f" ] || continue
+              # Drop undownloadable values and anything this job sets itself.
+              sed -i -E '/\[SENSITIVE\]/d; /^[A-Z0-9_]+=("")?$/d; /^(DATABASE_URL|NEXT_PUBLIC_APP_ENV)=/d' "$f"
+            done
+            vercel build --prod --yes --token="$VERCEL_TOKEN"
+            url=$(vercel deploy --prod --prebuilt --yes --archive=tgz --token="$VERCEL_TOKEN")
+          fi
           echo "### Released ${{ needs.verify.outputs.tag }} to production" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
 

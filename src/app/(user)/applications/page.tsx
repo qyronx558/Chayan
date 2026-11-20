@@ -82,7 +82,8 @@ export default function ApplicationsPage() {
       if (document.visibilityState === "visible") {
         fetchApplications(true)
       }
-    }, 5000)
+      // Focus and tab-return already refresh; this is only a slow backstop.
+    }, 60000)
     const onVisible = () => {
       if (document.visibilityState === "visible") fetchApplications(true)
     }

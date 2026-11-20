@@ -22,8 +22,8 @@ describe("cache headers", () => {
 
   it("maps named policies", () => {
     expect(cacheControl("gov")).toBe("public, s-maxage=21600, stale-while-revalidate=86400")
-    expect(cacheControl("private")).toBe("public, s-maxage=3600, stale-while-revalidate=86400")
-    expect(cacheControl("search")).toBe("public, s-maxage=300, stale-while-revalidate=3600")
+    expect(cacheControl("private")).toBe("public, s-maxage=10800, stale-while-revalidate=86400")
+    expect(cacheControl("search")).toBe("public, s-maxage=900, stale-while-revalidate=3600")
   })
 
   it("never caches personal responses", () => {

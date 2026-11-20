@@ -11,7 +11,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Private Jobs | ChayanJobs", description: "Browse private job vacancies across top companies." },
 }
 
-export const revalidate = 3600
+// Backstop only: the feed sync (every 3h) revalidates these on demand when data changes.
+export const revalidate = 21600
 
 export default function PrivateJobsPage() {
   return (

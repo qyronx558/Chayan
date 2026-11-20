@@ -20,7 +20,7 @@ let lastViewPath: string | null = null
 export function declareEntity(entity: PendingEntity) {
   if (lastViewPath === entity.path) {
     lastViewPath = null
-    beacon("/api/track/view", { ...entity, sessionId: sessionId() })
+    queueView({ ...entity, sessionId: sessionId() })
     return
   }
   pending = entity
@@ -50,7 +50,56 @@ export function sessionId(): string {
   }
 }
 
-export function beacon(url: string, payload: unknown) {
+// Views and vitals are queued and sent as ONE request when the tab is hidden
+// or closed (or the queue fills), instead of one request per page: every
+// request starts a server function, so batching cuts invocations by the
+// number of pages a visitor opens.
+const MAX_QUEUE = 20
+let views: unknown[] = []
+let vitals: unknown[] = []
+const beforeFlush = new Set<() => void>()
+let listening = false
+
+function listen() {
+  if (listening || typeof window === "undefined") return
+  listening = true
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushTracking()
+  })
+  window.addEventListener("pagehide", flushTracking)
+}
+
+export function queueView(payload: unknown) {
+  listen()
+  views.push(payload)
+  if (views.length >= MAX_QUEUE) flushTracking()
+}
+
+export function queueVitals(payload: unknown) {
+  listen()
+  vitals.push(payload)
+}
+
+/** Runs `fn` right before the next flush (e.g. to record time on page). */
+export function onBeforeFlush(fn: () => void): () => void {
+  beforeFlush.add(fn)
+  return () => beforeFlush.delete(fn)
+}
+
+export function flushTracking() {
+  for (const fn of [...beforeFlush]) {
+    try {
+      fn()
+    } catch {}
+  }
+  if (views.length === 0 && vitals.length === 0) return
+  const body = { views, vitals }
+  views = []
+  vitals = []
+  beacon("/api/track/view", body)
+}
+
+function beacon(url: string, payload: unknown) {
   const body = JSON.stringify(payload)
   try {
     if (navigator.sendBeacon?.(url, new Blob([body], { type: "application/json" }))) return

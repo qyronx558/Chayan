@@ -1,5 +1,16 @@
 name: contact-delivery
 
+# Retries contact notifications that failed at submit time.
+#
+# The site is only woken up when a ticket is actually waiting: the check runs
+# here, straight against the database with psql (preinstalled on the runner,
+# no npm install). A wake-up every 15 minutes kept a Vercel function instance
+# alive around the clock even though there is almost never anything to send.
+#
+# Needs: Production environment secret DATABASE_URL (same one content-ingest
+# uses), plus APP_URL and CRON_SECRET. Without DATABASE_URL, or if the query
+# fails, it falls back to calling the site every time (the old behaviour).
+
 on:
   schedule:
     - cron: "*/15 * * * *"
@@ -11,9 +22,56 @@ permissions:
 jobs:
   retry:
     runs-on: ubuntu-latest
+    environment: Production
     timeout-minutes: 3
     steps:
+      - name: Look for pending contact notifications
+        id: check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || ! command -v psql > /dev/null; then
+            echo "No database access here: calling the site."
+            echo "pending=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # psql rejects Prisma-only URL options (schema, pgbouncer, connection_limit...):
+          # keep only the ones libpq understands.
+          base=${DATABASE_URL%%\?*}
+          query=""
+          schema=public
+          if [ "$base" != "$DATABASE_URL" ]; then
+            IFS='&' read -ra parts <<< "${DATABASE_URL#*\?}"
+            for p in "${parts[@]}"; do
+              case "$p" in
+                sslmode=*|channel_binding=*|sslrootcert=*|options=*) query="$query&$p" ;;
+                schema=*) schema=${p#schema=} ;;
+              esac
+            done
+          fi
+          url="$base${query:+?${query#&}}"
+          export PGOPTIONS="-c search_path=$schema"
+          # Same filter as /api/cron/contact. Prisma stores DateTime as UTC without a time zone.
+          # Expired rate-limit rows are cleared here too, so the site never has to wake up for that.
+          if ! pending=$(psql "$url" -X -q -t -A -v ON_ERROR_STOP=1 <<'SQL'
+          DELETE FROM "ContactRateLimit" WHERE "expiresAt" < (now() AT TIME ZONE 'utc');
+          SELECT count(*) FROM "ContactTicket"
+           WHERE "nextAttemptAt" <= (now() AT TIME ZONE 'utc')
+             AND "deliveryAttempts" < 10
+             AND "createdAt" > (now() AT TIME ZONE 'utc') - interval '23 hours'
+             AND ("notifiedAt" IS NULL OR "autoRepliedAt" IS NULL);
+          SQL
+          ); then
+            echo "::warning::Database check failed: calling the site."
+            echo "pending=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pending=$(echo "$pending" | tail -n 1 | tr -d '[:space:]')
+          echo "Pending tickets: $pending"
+          echo "pending=$pending" >> "$GITHUB_OUTPUT"
+
       - name: Retry pending contact notifications
+        if: steps.check.outputs.pending != '0'
         env:
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}

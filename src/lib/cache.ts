@@ -3,9 +3,11 @@ import { NextResponse } from "next/server"
 
 export const CACHE_POLICY = {
   gov: { sMaxAge: 21600, swr: 86400 },
-  private: { sMaxAge: 3600, swr: 86400 },
+  // Private data changes with the 3-hourly feed sync, which also bumps the
+  // data version that busts these URLs from regenerated pages.
+  private: { sMaxAge: 10800, swr: 86400 },
   blog: { sMaxAge: 86400, swr: 86400 },
-  search: { sMaxAge: 300, swr: 3600 },
+  search: { sMaxAge: 900, swr: 3600 },
   static: { sMaxAge: 86400, swr: 604800 },
 } as const
 

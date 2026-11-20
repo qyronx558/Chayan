@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   description: "Walk-in private jobs with venue and date, trust-checked.",
 }
 
-export const revalidate = 3600
+// Backstop only: the feed sync (every 3h) revalidates these on demand when data changes.
+export const revalidate = 21600
 
 export default function WalkinJobsPage() {
   return (

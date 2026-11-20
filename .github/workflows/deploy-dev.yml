@@ -73,10 +73,26 @@ jobs:
 
       - name: Build and deploy to dev
         id: deploy
-      # Vercel builds it on its own servers. Building here with `vercel pull` does not work:
-      # values marked "Sensitive" in Vercel cannot be downloaded (they arrive as "[SENSITIVE]").
+        # Built HERE (free GitHub runner) and uploaded with --prebuilt, so Vercel spends no
+        # build minutes. Values marked "Sensitive" in Vercel cannot be downloaded (they arrive
+        # as "[SENSITIVE]" or empty): those lines are dropped and the real ones come from this
+        # job's env (DATABASE_URL). Runtime secrets are still injected by Vercel at request time.
+        # Set the repository variable VERCEL_REMOTE_BUILD=true to build on Vercel again.
+        env:
+          REMOTE_BUILD: ${{ vars.VERCEL_REMOTE_BUILD }}
         run: |
-          url=$(vercel deploy --yes --archive=tgz --build-env NEXT_PUBLIC_APP_ENV=dev --token="$VERCEL_TOKEN")
+          if [ "$REMOTE_BUILD" = "true" ]; then
+            url=$(vercel deploy --yes --archive=tgz --build-env NEXT_PUBLIC_APP_ENV=dev --token="$VERCEL_TOKEN")
+          else
+            vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+            for f in .vercel/.env.*.local; do
+              [ -f "$f" ] || continue
+              # Drop undownloadable values and anything this job sets itself.
+              sed -i -E '/\[SENSITIVE\]/d; /^[A-Z0-9_]+=("")?$/d; /^(DATABASE_URL|NEXT_PUBLIC_APP_ENV)=/d' "$f"
+            done
+            vercel build --yes --token="$VERCEL_TOKEN"
+            url=$(vercel deploy --prebuilt --yes --archive=tgz --token="$VERCEL_TOKEN")
+          fi
           if [ -n "${{ vars.DEV_DOMAIN }}" ]; then
             vercel alias set "$url" "${{ vars.DEV_DOMAIN }}" --token="$VERCEL_TOKEN"
             url="https://${{ vars.DEV_DOMAIN }}"
