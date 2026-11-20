@@ -169,7 +169,7 @@ The script uses Node built-ins and imports the actual matching functions. It wri
 | Contact email rate limit | 5 per 1h window | [Limiter](../src/lib/contact-server.ts); additional IP cap 5, or fallback global cap 100 when trusted IP unavailable |
 | Contact delivery attempt cap | 10 | [Delivery logic](../src/lib/contact-delivery.ts); eligible only while ticket age is under 23h |
 | Delivery claim / retry delay | 5min / 15min | Database claim prevents overlapping delivery attempts within its lease; retry delay is fixed |
-| Retry batch and schedule | Up to 10 / every 15min | [Cron route](../src/app/api/cron/contact/route.ts), [workflow](../.github/workflows/contact-delivery.yml); scheduling is configuration, not an execution SLA |
+| Retry batch and schedule | Up to 10 / hourly | [Cron route](../src/app/api/cron/contact/route.ts), Vercel cron in [vercel.json](../vercel.json), manual [workflow](../.github/workflows/contact-delivery.yml); scheduling is configuration, not an execution SLA |
 | SSE reconnect / heartbeat | 5s / 25s | [SSE route](../src/app/api/notifications/stream/route.ts); no measured concurrent-client capacity |
 
 The declared framework version in `package.json` is **Next.js 16.2.10**; the README still says Next.js 15. Use the package declaration when discussing this checkout. Installed/runtime versions were not independently verified.

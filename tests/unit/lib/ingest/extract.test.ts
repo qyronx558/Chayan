@@ -119,3 +119,33 @@ describe("retired models", () => {
     expect(fetchFn.mock.calls[1][0]).toContain("/models/gemini-flash-lite-latest:")
   })
 })
+
+describe("failing fast", () => {
+  it("drops a provider whose key is rejected for the rest of the run", async () => {
+    const fetchFn = vi.fn(async (url: string) =>
+      url.includes("groq") ? new Response("invalid key", { status: 401 }) : gemini(null, 503)
+    )
+    const ex = createExtractor(cfg, fetchFn, noSleep)
+    await expect(ex.extract(input)).rejects.toThrow(/groq key rejected \(HTTP 401\)/)
+    fetchFn.mockClear()
+    await expect(ex.extract(input)).rejects.toThrow(/extraction failed/)
+    expect(fetchFn.mock.calls.every(([url]) => !String(url).includes("groq"))).toBe(true)
+  })
+
+  it("rests a provider that stays overloaded, then reports that none is available", async () => {
+    const fetchFn = vi.fn().mockImplementation(async () => gemini(null, 503))
+    const ex = createExtractor({ ...cfg, groqKey: undefined }, fetchFn, noSleep)
+    await expect(ex.extract(input)).rejects.toThrow(/extraction failed/)
+    await expect(ex.extract(input)).rejects.toThrow(/extraction failed/)
+    const calls = fetchFn.mock.calls.length
+    const { LlmUnavailableError } = await import("@/lib/ingest/extract")
+    await expect(ex.extract(input)).rejects.toBeInstanceOf(LlmUnavailableError)
+    expect(fetchFn.mock.calls.length).toBe(calls) // no request while resting
+  })
+
+  it("puts a timeout on every request", async () => {
+    const fetchFn = vi.fn().mockResolvedValue(gemini(extraction()))
+    await createExtractor(cfg, fetchFn, noSleep).extract(input)
+    expect(fetchFn.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal)
+  })
+})

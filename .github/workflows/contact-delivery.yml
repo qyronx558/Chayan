@@ -1,19 +1,21 @@
 name: contact-delivery
 
-# Retries contact notifications that failed at submit time.
+# Manual retry of contact notifications that failed at submit time.
 #
-# The site is only woken up when a ticket is actually waiting: the check runs
+# The hourly retry runs as a Vercel Cron Job (vercel.json "crons"), so it keeps
+# working when GitHub Actions minutes run out (a GitHub billing block once
+# stopped this workflow from starting at all). Use "Run workflow" here for an
+# immediate retry.
+#
+# The site is only called when a ticket is actually waiting: the check runs
 # here, straight against the database with psql (preinstalled on the runner,
-# no npm install). A wake-up every 15 minutes kept a Vercel function instance
-# alive around the clock even though there is almost never anything to send.
+# no npm install).
 #
 # Needs: Production environment secret DATABASE_URL (same one content-ingest
 # uses), plus APP_URL and CRON_SECRET. Without DATABASE_URL, or if the query
-# fails, it falls back to calling the site every time (the old behaviour).
+# fails, it calls the site anyway.
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:

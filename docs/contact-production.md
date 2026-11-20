@@ -71,10 +71,12 @@ npx vercel deploy --prod --yes
 
 In GitHub **Settings → Secrets and variables → Actions**, verify `APP_URL` is
 `https://www.chayanjobs.com` and `CRON_SECRET` matches Vercel. Both secret names
-already exist. The workflow must be pushed to `main` to enable its schedule.
-Open **Actions → contact-delivery → Run workflow** and confirm success. The
-schedule is every 15 minutes; GitHub schedules can be delayed. This uses GitHub
-Actions because Vercel Hobby cron only supports daily runs.
+already exist. The hourly retry is a Vercel Cron Job (`crons` in `vercel.json`, Pro plan); Vercel
+sends `Authorization: Bearer $CRON_SECRET` itself, so `CRON_SECRET` must be set in
+the Vercel project. It no longer depends on GitHub Actions minutes: a GitHub billing
+block once stopped the old 15-minute workflow from starting. For an immediate retry,
+open **Actions → contact-delivery → Run workflow** (manual only); it checks the
+database first and calls the site only when a ticket is waiting.
 
 To trigger retries manually after deployment:
 
@@ -107,9 +109,9 @@ the team receives the notification, and the sender receives an acknowledgment.
 2. Run `npm run db:generate` and `npm run db:migrate:deploy` against the target
    database before serving the new version. Both contact migrations are required.
 3. Set `CRON_SECRET` in the hosting environment. Set GitHub Actions secrets
-   `APP_URL` and the same `CRON_SECRET`, then enable `contact-delivery.yml`.
-   Alternatively schedule authenticated `GET /api/cron/contact` every 15 minutes.
-   Confirm the workflow succeeds before launch.
+   `APP_URL` and the same `CRON_SECRET` for the manual `contact-delivery.yml`.
+   The hourly retry runs from the Vercel cron in `vercel.json`; check it under
+   Vercel **Settings → Cron Jobs** after the first production deploy.
 4. On Vercel, the endpoint uses `x-vercel-forwarded-for`. On another host, set
    `CONTACT_IP_HEADER` only to a header your ingress overwrites with the real
    client IP. Do not allow direct access bypassing that ingress. No trusted IP
