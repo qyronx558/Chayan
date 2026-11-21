@@ -28,7 +28,7 @@ import { fileURLToPath } from "node:url"
 import { parseListing } from "../../src/lib/ingest/adapters"
 import { triageNotice } from "../../src/lib/ingest/classify"
 import { applySourceOverrides, tierEnabled, type BotRuntimeConfig } from "../../src/lib/ingest/control"
-import { createExtractor, llmConfig, type Extractor } from "../../src/lib/ingest/extract"
+import { createExtractor, llmConfig, LlmUnavailableError, type Extractor } from "../../src/lib/ingest/extract"
 import { groundExtraction } from "../../src/lib/ingest/grounding"
 import { isStaleListing, sha256, todayIST } from "../../src/lib/ingest/normalize"
 import type { IngestPost } from "../../src/lib/ingest/schema"
@@ -267,6 +267,11 @@ async function pipeline(args: Args, transport: IngestTransport | null, log: (m: 
   const dryOut: unknown[] = []
   const published: Published[] = []
   let budget = llmBudget
+  // Stop extracting before the CI job's timeout (45 min) kills the process:
+  // a killed run loses every extracted post still waiting in the outbox.
+  // Whatever is left stays unseen and is picked up by the next run.
+  const deadline = Date.now() + (Number(process.env.INGEST_TIME_BUDGET_MS) || 30 * 60_000)
+  let stopReason: string | null = null
 
   const flush = async () => {
     if (!outbox.length) return
@@ -328,7 +333,11 @@ async function pipeline(args: Args, transport: IngestTransport | null, log: (m: 
     }
 
     for (const item of unseen) {
-      if (budget <= 0) break
+      if (budget <= 0 || stopReason) break
+      if (Date.now() > deadline) {
+        stopReason = "time budget used up"
+        break
+      }
       try {
         const t0 = Date.now()
         const doc = await loadNotice(item.url)
@@ -362,6 +371,11 @@ async function pipeline(args: Args, transport: IngestTransport | null, log: (m: 
         })
         if (outbox.length >= 20) await flush()
       } catch (e) {
+        if (e instanceof LlmUnavailableError) {
+          // Every remaining notice would fail the same way: end the run now.
+          stopReason = e.message
+          break
+        }
         if (e instanceof RobotsDisallowed) {
           const host = new URL(item.url).host
           stats.blocked++
@@ -376,6 +390,12 @@ async function pipeline(args: Args, transport: IngestTransport | null, log: (m: 
     }
     if (budget <= 0) {
       log(`  LLM budget used up - remaining notices are picked up next run`)
+      break
+    }
+    if (stopReason) {
+      stats.errors++
+      errors.push(`stopped early: ${stopReason}`)
+      log(`  Stopped early (${stopReason}) - remaining notices are picked up next run`)
       break
     }
   }

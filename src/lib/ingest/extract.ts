@@ -96,6 +96,21 @@ export function buildUserPrompt(input: ExtractInput): string {
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>
 
 export class RateLimitError extends Error {}
+/** The key was rejected (HTTP 401/403): no point calling this provider again this run. */
+export class AuthError extends Error {}
+/** Every provider is unusable right now (rejected key, or cooling down after repeated overload). */
+export class LlmUnavailableError extends Error {}
+
+/** One request may not hang the run: a stuck call once held a job for 5 minutes. */
+const LLM_TIMEOUT_MS = 90_000
+/** Documents in a row a provider failed with 429/503 (after its wait) before it is rested. */
+const OVERLOAD_STRIKES = 2
+/** How long an overloaded provider is skipped. Its notices stay unseen and are retried next run. */
+const OVERLOAD_COOLDOWN_MS = 10 * 60_000
+
+function timeoutSignal(): AbortSignal | undefined {
+  return typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(LLM_TIMEOUT_MS) : undefined
+}
 /** The configured model was retired / is unknown (HTTP 404). */
 export class ModelNotFoundError extends Error {}
 
@@ -114,6 +129,7 @@ async function callGemini(cfg: LlmConfig, input: ExtractInput, extra: string, fe
   const res = await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.geminiModel)}:generateContent`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": cfg.geminiKey! },
+    signal: timeoutSignal(),
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents: [{ role: "user", parts }],
@@ -122,6 +138,7 @@ async function callGemini(cfg: LlmConfig, input: ExtractInput, extra: string, fe
   })
   // 429 = per-minute quota, 503 = model overloaded: both are temporary.
   if (res.status === 429 || res.status === 503) throw new RateLimitError(`gemini ${res.status === 429 ? "rate limited" : "overloaded (503)"}`)
+  if (res.status === 401 || res.status === 403) throw new AuthError(`gemini key rejected (HTTP ${res.status})`)
   if (res.status === 404) throw new ModelNotFoundError(`gemini model "${cfg.geminiModel}" not available: ${(await res.text()).slice(0, 200)}`)
   if (!res.ok) throw new Error(`gemini HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const json = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
@@ -134,6 +151,7 @@ async function callGroq(cfg: LlmConfig, input: ExtractInput, extra: string, fetc
   const res = await fetchFn("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${cfg.groqKey}` },
+    signal: timeoutSignal(),
     body: JSON.stringify({
       model: cfg.groqModel,
       temperature: 0,
@@ -145,6 +163,7 @@ async function callGroq(cfg: LlmConfig, input: ExtractInput, extra: string, fetc
     }),
   })
   if (res.status === 429 || res.status === 503) throw new RateLimitError(`groq ${res.status === 429 ? "rate limited" : "overloaded (503)"}`)
+  if (res.status === 401 || res.status === 403) throw new AuthError(`groq key rejected (HTTP ${res.status})`)
   if (!res.ok) throw new Error(`groq HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] }
   const text = json.choices?.[0]?.message?.content ?? ""
@@ -159,6 +178,11 @@ export interface Extractor {
 /**
  * Builds an extractor with a provider chain, client-side pacing (free tiers
  * are per-minute limited) and one schema-repair retry per provider.
+ *
+ * Fails fast instead of burning the run's time: a provider whose key is
+ * rejected is dropped for the run, and one that stays overloaded for
+ * OVERLOAD_STRIKES documents in a row is skipped for OVERLOAD_COOLDOWN_MS.
+ * When no provider is usable, extract() throws LlmUnavailableError.
  */
 export function createExtractor(initial: LlmConfig = llmConfig(), fetchFn: FetchLike = fetch, sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))): Extractor {
   let cfg = initial
@@ -168,37 +192,64 @@ export function createExtractor(initial: LlmConfig = llmConfig(), fetchFn: Fetch
     if (wait > 0) await sleep(wait)
     last = Date.now()
   }
-  const providers: { name: string; call: typeof callGemini; usable: (i: ExtractInput) => boolean }[] = []
-  if (cfg.geminiKey) providers.push({ name: "gemini", call: callGemini, usable: () => true })
-  if (cfg.groqKey) providers.push({ name: "groq", call: callGroq, usable: (i) => Boolean(i.text) })
+  type Provider = {
+    name: string
+    call: typeof callGemini
+    usable: (i: ExtractInput) => boolean
+    disabled?: string
+    strikes: number
+    restUntil: number
+  }
+  const providers: Provider[] = []
+  if (cfg.geminiKey) providers.push({ name: "gemini", call: callGemini, usable: () => true, strikes: 0, restUntil: 0 })
+  if (cfg.groqKey) providers.push({ name: "groq", call: callGroq, usable: (i) => Boolean(i.text), strikes: 0, restUntil: 0 })
   if (!providers.length) throw new Error("Set GEMINI_API_KEY (or GROQ_API_KEY) to run extraction")
 
   return {
     async extract(input) {
       const errors: string[] = []
-      for (const p of providers) {
+      const available = providers.filter((p) => !p.disabled && p.restUntil <= Date.now())
+      if (!available.length) {
+        const why = providers.map((p) => `${p.name}: ${p.disabled ?? `overloaded, resting until ${new Date(p.restUntil).toISOString().slice(11, 16)} UTC`}`)
+        throw new LlmUnavailableError(`no LLM provider available (${why.join("; ")})`)
+      }
+      for (const p of available) {
         if (!p.usable(input)) continue
         let extra = ""
         for (let attempt = 0; attempt < 2; attempt++) {
           try {
             await pace()
             const raw = await p.call(cfg, input, extra, fetchFn)
+            p.strikes = 0
             const parsed = llmExtractionSchema.safeParse(parseJsonReply(raw))
             if (parsed.success) return { extraction: parsed.data, provider: p.name }
             const issue = parsed.error.issues[0]
             extra = `\n\nYOUR PREVIOUS REPLY WAS INVALID (${issue.path.join(".")}: ${issue.message}). Return valid JSON in the exact shape.`
             errors.push(`${p.name}: schema ${issue.path.join(".")}`)
           } catch (e) {
-            errors.push(`${p.name}: ${e instanceof Error ? e.message : String(e)}`)
+            const message = e instanceof Error && e.name === "TimeoutError" ? `no answer in ${LLM_TIMEOUT_MS / 1000} s` : e instanceof Error ? e.message : String(e)
+            errors.push(`${p.name}: ${message}`)
+            if (e instanceof AuthError) {
+              p.disabled = e.message
+              console.warn(`[ingest] ${e.message} - not calling ${p.name} again this run (check its API key)`)
+              break
+            }
             if (e instanceof ModelNotFoundError && p.name === "gemini" && cfg.geminiModel !== GEMINI_DEFAULT_MODEL) {
               console.warn(`[ingest] ${e.message} - switching to ${GEMINI_DEFAULT_MODEL}`)
               cfg = { ...cfg, geminiModel: GEMINI_DEFAULT_MODEL }
               if (attempt === 0) continue
             }
             if (e instanceof RateLimitError) {
-              console.warn(`[ingest] ${e.message} - waiting 30 s`)
-              await sleep(30_000)
-              if (attempt === 0) continue
+              if (attempt === 0) {
+                console.warn(`[ingest] ${e.message} - waiting 30 s`)
+                await sleep(30_000)
+                continue
+              }
+              if (++p.strikes >= OVERLOAD_STRIKES) {
+                p.strikes = 0
+                p.restUntil = Date.now() + OVERLOAD_COOLDOWN_MS
+                console.warn(`[ingest] ${p.name} still overloaded - skipping it for ${OVERLOAD_COOLDOWN_MS / 60_000} min`)
+              }
             }
             break
           }
