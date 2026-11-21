@@ -64,7 +64,9 @@ concurrency:
 jobs:
   plan:
     # GitHub's cron is the backup scheduler: skipped once INGEST_EXTERNAL_SCHEDULER=true.
+    # The repository check keeps forks' scheduled copies of this workflow from running.
     if: >-
+      github.repository == 'qyronx558/Chayan' &&
       github.event.schedule != '45 18 * * *' && inputs.tier != 'expire' &&
       (github.event_name != 'schedule' || vars.INGEST_EXTERNAL_SCHEDULER != 'true')
     runs-on: ubuntu-latest
@@ -76,29 +78,41 @@ jobs:
           SCHEDULE: ${{ github.event.schedule }}
           TIER: ${{ inputs.tier }}
           SOURCE: ${{ inputs.source }}
+          DISTRICT_RUNNER: ${{ vars.INGEST_DISTRICT_RUNNER }}
         run: |
           if [ -n "$SOURCE" ]; then
-            echo "matrix=[\"--source=$SOURCE\"]" >> "$GITHUB_OUTPUT"
+            m="[\"--source=$SOURCE\"]"
           elif [ "$SCHEDULE" = "30 0 * * *" ] || [ "$TIER" = "district" ]; then
-            echo 'matrix=["--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]'
           elif [ "$TIER" = "all" ]; then
-            echo 'matrix=["--tier=central","--tier=state","--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=central","--tier=state","--tier=district --shard=1/4","--tier=district --shard=2/4","--tier=district --shard=3/4","--tier=district --shard=4/4"]'
           elif [ "$TIER" = "frequent" ]; then
-            echo 'matrix=["--tier=central","--tier=state"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=central","--tier=state"]'
           elif [ "$TIER" = "state" ]; then
-            echo 'matrix=["--tier=state"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=state"]'
           elif [ -z "$SCHEDULE" ]; then
-            echo 'matrix=["--tier=central"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=central"]'
           else
-            echo 'matrix=["--tier=central","--tier=state"]' >> "$GITHUB_OUTPUT"
+            m='["--tier=central","--tier=state"]'
           fi
+          # District PDFs are blocked outside India: without an India runner, district shards
+          # would only spend time and LLM quota for nothing, so they are left out.
+          if [ -z "$DISTRICT_RUNNER" ] && [ -z "$SOURCE" ] && echo "$m" | grep -q -- '--tier=district'; then
+            m=$(echo "$m" | jq -c '[.[] | select(test("--tier=district") | not)]')
+            echo "::notice::District shards skipped: set the INGEST_DISTRICT_RUNNER variable to a self-hosted runner in India to crawl them."
+          fi
+          echo "matrix=$m" >> "$GITHUB_OUTPUT"
 
   ingest:
     needs: plan
+    # An empty matrix (only district shards, no India runner) has nothing to run.
+    if: needs.plan.outputs.matrix != '[]'
     # District notice PDFs sit on cdn.s3waas.gov.in, whose robots.txt blocks every visitor
     # outside India (GitHub's hosted runners are in the US). Set the repository variable
     # INGEST_DISTRICT_RUNNER to the label of a self-hosted runner in India (e.g. "india") and
     # district shards run there; everything else stays on GitHub's runners.
+    # The repo is public: a self-hosted runner is only safe because this workflow never runs
+    # on pull requests (schedule / workflow_dispatch only). Keep it that way.
     runs-on: ${{ contains(matrix.args, '--tier=district') && vars.INGEST_DISTRICT_RUNNER || 'ubuntu-latest' }}
     environment: Production
     timeout-minutes: 45
@@ -165,8 +179,9 @@ jobs:
   expire-jobs:
     # Runs here against the database; the site is only asked to refresh listings if something expired.
     if: >-
+      github.repository == 'qyronx558/Chayan' && (
       (github.event.schedule == '45 18 * * *' && vars.INGEST_EXTERNAL_SCHEDULER != 'true') ||
-      (inputs.tier == 'expire' && inputs.target != 'dev' && !inputs.dry_run)
+      (inputs.tier == 'expire' && inputs.target != 'dev' && !inputs.dry_run))
     runs-on: ubuntu-latest
     environment: Production
     timeout-minutes: 10

@@ -71,10 +71,11 @@ npx vercel deploy --prod --yes
 
 In GitHub **Settings → Secrets and variables → Actions**, verify `APP_URL` is
 `https://www.chayanjobs.com` and `CRON_SECRET` matches Vercel. Both secret names
-already exist. The workflow must be pushed to `main` to enable its schedule.
-Open **Actions → contact-delivery → Run workflow** and confirm success. The
-schedule is every 15 minutes; GitHub schedules can be delayed. This uses GitHub
-Actions because Vercel Hobby cron only supports daily runs.
+already exist. Scheduled retries run as the first steps of
+`private-job-feeds.yml` (every 3 hours; GitHub schedules can be delayed), so no
+separate cron spends runner minutes and Vercel is only called when a ticket is
+waiting. `contact-delivery.yml` is manual-only: open **Actions →
+contact-delivery → Run workflow** for an immediate retry and confirm success.
 
 To trigger retries manually after deployment:
 
@@ -107,8 +108,8 @@ the team receives the notification, and the sender receives an acknowledgment.
 2. Run `npm run db:generate` and `npm run db:migrate:deploy` against the target
    database before serving the new version. Both contact migrations are required.
 3. Set `CRON_SECRET` in the hosting environment. Set GitHub Actions secrets
-   `APP_URL` and the same `CRON_SECRET`, then enable `contact-delivery.yml`.
-   Alternatively schedule authenticated `GET /api/cron/contact` every 15 minutes.
+   `APP_URL` and the same `CRON_SECRET`; `private-job-feeds.yml` then retries
+   every 3 hours. Alternatively schedule authenticated `GET /api/cron/contact`.
    Confirm the workflow succeeds before launch.
 4. On Vercel, the endpoint uses `x-vercel-forwarded-for`. On another host, set
    `CONTACT_IP_HEADER` only to a header your ingress overwrites with the real

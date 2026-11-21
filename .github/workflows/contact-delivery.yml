@@ -1,6 +1,10 @@
 name: contact-delivery
 
-# Retries contact notifications that failed at submit time.
+# Manual retry of contact notifications that failed at submit time.
+#
+# The scheduled retry runs inside private-job-feeds.yml (every 3 hours), which
+# runs anyway: a separate 15-minute cron cost a full billed runner minute per
+# run. Use "Run workflow" here for an immediate retry.
 #
 # The site is only woken up when a ticket is actually waiting: the check runs
 # here, straight against the database with psql (preinstalled on the runner,
@@ -12,8 +16,6 @@ name: contact-delivery
 # fails, it falls back to calling the site every time (the old behaviour).
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
