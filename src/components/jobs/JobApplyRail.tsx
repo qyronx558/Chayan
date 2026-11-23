@@ -19,6 +19,7 @@ import { BookmarkButton } from "@/components/layout/BookmarkButton"
 import { ApplicationTracker } from "@/components/jobs/ApplicationTracker"
 import { SmartExternalLink } from "@/components/shared/SmartExternalLink"
 import { ShareRow } from "@/components/shared/ShareRow"
+import { CommunityLinks } from "@/components/shared/CommunityLinks"
 
 interface Props {
  jobId: string
@@ -153,6 +154,7 @@ export function JobApplyRail(p: Props) {
      </div>
 
      <ShareRow title={p.title} />
+     <CommunityLinks variant="rail" />
     </div>
 
     {hasProof ? (

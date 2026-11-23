@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 import { MobileBottomNav } from "./MobileBottomNav"
+import { JoinCommunityFab } from "./JoinCommunityFab"
 
 /**
  * Returns true for fullscreen viewer routes, which render their own
@@ -91,6 +92,7 @@ export function ConditionalChrome({
       <main className="w-full min-w-0 flex-1 overflow-x-clip">{children}</main>
       {footer}
       <MobileBottomNav />
+      <JoinCommunityFab />
     </div>
   )
 }

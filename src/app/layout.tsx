@@ -88,7 +88,7 @@ const organizationJsonLd = {
   name: siteConfig.name,
   url: siteConfig.url,
   logo: `${siteConfig.url}/og.png`,
-  sameAs: [siteConfig.links.twitter, siteConfig.links.facebook, siteConfig.links.youtube],
+  sameAs: [siteConfig.links.twitter, siteConfig.links.facebook, siteConfig.links.instagram, siteConfig.links.youtube],
   description: siteConfig.description,
 }
 

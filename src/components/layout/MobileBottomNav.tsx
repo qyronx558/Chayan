@@ -38,7 +38,7 @@ const ITEMS = [
  * Official site) to the bottom of the screen, plus pages with their own
  * fixed bottom bar. The bottom nav steps aside there so the two never stack.
  */
-function hasOwnBottomBar(pathname: string): boolean {
+export function hasOwnBottomBar(pathname: string): boolean {
  if (pathname === "/profile") return true
  if (/^\/(apply|result|admit-card|answer-key|admission)\/[^/]+$/.test(pathname)) return true
  // /syllabus/[slug] is a document page; /syllabus itself is a list
