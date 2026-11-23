@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Mail, MapPin } from "lucide-react"
 import { Newsletter } from "@/components/layout/Newsletter"
 import { BackToTop } from "@/components/layout/BackToTop"
+import { CommunityLinks } from "@/components/shared/CommunityLinks"
 import { TourReplayButton } from "@/components/onboarding/TourReplayButton"
 import { siteConfig, footerLinks, trendingTags, exploreFooterLinks } from "@/lib/constants"
 import { cn } from "@/lib/utils"
@@ -110,6 +111,7 @@ export function Footer({ className }: { className?: string }) {
         <span className="min-w-0 break-all">contact@chayanjobs.com</span>
        </div>
       </div>
+      <CommunityLinks variant="footer" className="mt-5" />
       <Newsletter className="mt-4" variant="footer" />
       <div className="mt-3">
        <TourReplayButton />

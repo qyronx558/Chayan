@@ -4,11 +4,25 @@ export const siteConfig = {
   url: (process.env.NEXT_PUBLIC_APP_URL || "https://ChayanJobs.in").replace(/\/+$/, ""),
   ogImage: `${(process.env.NEXT_PUBLIC_APP_URL || "https://ChayanJobs.in").replace(/\/+$/, "")}/og.png`,
   links: {
-    twitter: "https://twitter.com/ChayanJobs",
-    facebook: "https://facebook.com/ChayanJobs",
+    twitter: "https://x.com/chayanjobs",
+    facebook: "https://www.facebook.com/profile.php?id=61596871797110",
+    instagram: "https://www.instagram.com/chayanjobs/",
+    whatsapp: "https://chat.whatsapp.com/IskxNyBIF7f2XWSrXQ4UPc",
+    telegram: "https://t.me/+lSRpgi47uztlN2Zl",
     youtube: "https://youtube.com/@ChayanJobs",
   },
 }
+
+/** Official ChayanJobs community / social channels, in display order. */
+export const communityLinks = [
+  { key: "whatsapp", label: "WhatsApp Community", href: siteConfig.links.whatsapp },
+  { key: "telegram", label: "Telegram", href: siteConfig.links.telegram },
+  { key: "instagram", label: "Instagram", href: siteConfig.links.instagram },
+  { key: "x", label: "X (Twitter)", href: siteConfig.links.twitter },
+  { key: "facebook", label: "Facebook", href: siteConfig.links.facebook },
+] as const
+
+export type CommunityKey = (typeof communityLinks)[number]["key"]
 
 export const mainNav = [
   { title: "Home", href: "/" },

@@ -9,6 +9,7 @@ import { paperShadow } from "@/components/desk/DeskKit"
 import type { DocState } from "@/lib/doc-state"
 import { Button } from "@/components/ui/button"
 import { ShareRow } from "@/components/shared/ShareRow"
+import { CommunityLinks } from "@/components/shared/CommunityLinks"
 
 interface Props {
   title: string
@@ -69,6 +70,7 @@ export function DocumentSideRail(p: Props) {
 
           {p.actions ? <div className="flex flex-wrap items-center gap-2 pt-2">{p.actions}</div> : null}
           <ShareRow title={p.title} />
+          <CommunityLinks variant="rail" />
         </div>
       </div>
 

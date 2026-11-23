@@ -19,6 +19,7 @@ import { CheckCircle2 } from "lucide-react"
 import { appliedOn } from "@/components/private/AppliedBadge"
 import { unmarkApplied, useAppliedAt } from "@/lib/private-jobs/applied-store"
 import { ShareRow } from "@/components/shared/ShareRow"
+import { CommunityLinks } from "@/components/shared/CommunityLinks"
 
 interface Props {
  privateJobId: string
@@ -163,6 +164,7 @@ export function PrivateApplyRail(p: Props) {
      </div>
      <EmployerMonitorButton privateJobId={p.privateJobId} />
      <ShareRow title={`${p.title} at ${p.company}`} />
+     <CommunityLinks variant="rail" />
      <div className={cn(typeFont.className, "flex items-center justify-between gap-3 pt-1 text-[10px] text-muted-foreground")}>
       {/* barcode, purely decorative */}
       <span className="flex h-6 items-stretch gap-[2px]" aria-hidden>
